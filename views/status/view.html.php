@@ -61,6 +61,12 @@ class BioDivViewStatus extends JViewLegacy
     $db->setQuery($query);
     $this->status['Total photos in system'] = $db->loadResult();
 
+    $query = $db->getQuery(true);
+    $query->select("COUNT(DISTINCT person_id)");
+    $query->from("Animal");
+    $db->setQuery($query);
+    $this->status['Total spotters in system'] = $db->loadResult();
+
     // Display the view
     parent::display($tpl);
   }
