@@ -125,7 +125,7 @@ function canEdit($id, $struc){
   case 'photo':
   case 'site':
   case 'animal':
-    return $details['person_id'] = userID();
+    return $details['person_id'] == userID();
   break;
     
   case 'sequence':

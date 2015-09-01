@@ -28,6 +28,8 @@ showMessages();
 
 ?>
 
+  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id;?>'>List photos already uploaded</a></p>
+
 <h1>Start new upload</h1>
 
 <form role='form' action='<?php print $this->root . "&task=add_upload";?>&site_id=<?php print $this->site_id;?>'
@@ -121,8 +123,9 @@ foreach(array("Deployment", "Collection") as $field){
 
   <div><button type='submit' id='add_upload' class='btn btn-primary'><?php print biodiv_label("upload");?></button></div>
 
-</div? <!-- /.container -->  
+</div> <!-- /.container -->  
 </form>
+
 <?php
 JHTML::script("com_biodiv/upload.js", true, true);
 JHTML::script("bootstrap-datepicker-master/bootstrap-datepicker.js", true, true);

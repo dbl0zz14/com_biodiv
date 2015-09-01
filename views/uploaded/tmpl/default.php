@@ -17,14 +17,22 @@ $action = $this->root . "&view=uploadm";
 <thead>
 <tr>
 <th>File name</th>
+<th>Date</th>
 </tr> 
 </thead>
 <tbody>
-
-</tbody>
 <?php
-
+  foreach($this->photos as $photoLine){
+  print "<tr>";
+  print "<td>" . $photoLine['upload_filename'] . "</td>";
+  print "<td>" . $photoLine['taken'] . "</td>";
+  print "</tr>\n";
+}
 
 ?>
 
+</tbody>
+</table>
+
+  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=upload&site_id=". $this->site_id;?>'>Upload more photos</a></p>
 

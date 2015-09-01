@@ -34,6 +34,9 @@ class BioDivViewUploaded extends JViewLegacy
 	  $this->start_date = "";
 	  $this->end_date = "";
 
+	  if(!canEdit($this->site_id, "site")){
+	    die("No permission for site " . $this->site_id);
+	  }
 	  $db = JDatabase::getInstance(dbOptions());
 	  $query = $db->getQuery(true);
 	  $query->select("upload_filename, taken")
