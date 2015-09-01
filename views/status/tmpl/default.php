@@ -14,11 +14,11 @@ foreach($this->status as $msg => $count){
   print "<p><b>$msg <span class='badge'>$count</span></b></p>\n";
  }
 ?>
-<form action = "<?php print BIODIV_ROOT?>" method = 'GET'>
+<form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='view' value='classify'/>
-    <input type='hidden' name='option' value='com_biodiv'/>
+    <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <button  class='btn btn-primary' type='submit'><i class='fa fa-search'></i> Get Spotting</a></button>
-<!--    <input type='checkbox' name = 'self'/>Classify my images first</input> -->
+    <input type='checkbox' name = 'classify_self' value='1'/> Classify my images first</input>
 </form>
 
 

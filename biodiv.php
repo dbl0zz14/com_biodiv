@@ -12,8 +12,6 @@ include "local.php";
 
 define('BIODIV_MAX_FILE_SIZE', 4000000);
 
-
-
 // link to javascript stuff
 $document = JFactory::getDocument();
 $document->addScriptDeclaration('
@@ -239,6 +237,7 @@ function isFavourite($photo_id){
 }
 
 function nextPhoto($prev_photo_id){
+  $db = JDatabase::getInstance(dbOptions());
 
   $pdetails = codes_getDetails($prev_photo_id, 'photo');
   $next_photo = $pdetails['next_photo'];
@@ -247,7 +246,6 @@ function nextPhoto($prev_photo_id){
     $photo_id = $next_photo;
     if(!$nextDetails['contains_human'] and !haveClassified($next_photo)){
       // copy across classification
-      $db = JDatabase::getInstance(dbOptions());
       $query = $db->getQuery(true);
       $query->select("person_id, species, gender, age, number")
 	->from("Animal")
@@ -267,36 +265,52 @@ function nextPhoto($prev_photo_id){
   }
   if($prev_photo_id && !$photo_id){
     // find next photo sequence on same trap usually
-      $site_id = $pdetails['site_id'];
-      $taken = $pdetails['taken'];
-      
-      $db = JDatabase::getInstance(dbOptions());
-      $query = $db->getQuery(true);
-      $query->select("P.photo_id")
-	->from("Photo P")
-	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-	->where("A.photo_id IS NULL")
-	->where("P.contains_human = 0")
-	->where("P.site_id = " . (int)$site_id)
-	->where("taken > '$taken'")
-	->order("taken");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo_id = $db->loadResult();
-  }
-  if(!$photo_id){
-    // choose random picture
-    $db = JDatabase::getInstance(dbOptions());
-    $query = $db->getQuery(true);
+    if(rand(0,10)>7){
+      continue;
+    }
+    $site_id = $pdetails['site_id'];
+    $taken = $pdetails['taken'];
     
-    $query->select("P.photo_id, P.sequence_id")
+    $query = $db->getQuery(true);
+    $query->select("P.photo_id")
       ->from("Photo P")
       ->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
       ->where("A.photo_id IS NULL")
-      ->where("P.contains_human =0")
-      ->order("rand()");
+      ->where("P.contains_human = 0")
+      ->where("P.site_id = " . (int)$site_id)
+      ->where("taken > '$taken'")
+      ->order("taken");
     $db->setQuery($query, 0, 1); // LIMIT 1
-    $photo = $db->loadObject();
-    $photo_id = $photo->photo_id;
+    $photo_id = $db->loadResult();
+  }
+  if(!$photo_id){
+    // choose random picture
+    $app = JFactory::getApplication();
+    if($app->getUserState("com_biodiv.classify_self")){
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+	->from("Photo P")
+	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+	->where("A.photo_id IS NULL")
+	->where("P.contains_human =0")
+	->where("P.person_id = " . (int)userID())
+	->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+      $photo_id = $photo->photo_id;
+    }
+    if(!$photo_id){
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+	->from("Photo P")
+	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+	->where("A.photo_id IS NULL")
+	->where("P.contains_human =0")
+      ->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+      $photo_id = $photo->photo_id;
+    }
 
     // find first unclassified picture in this sequence
     $sequence_id = $photo->sequence_id;
