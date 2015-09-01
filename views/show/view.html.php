@@ -35,6 +35,26 @@ class BioDivViewShow extends JViewLegacy
 	    die("No photo_id specified");
 	  }
 
+	  $db = JDatabase::getInstance(dbOptions());
+
+	  // make sure it has been looked at by somebody
+
+	  $query = $db->getQuery(true);
+	  $query->select("COUNT(*)");
+	  $query->from("Animal");
+	  $query->where("photo_id = " . (int)$this->photo_id);
+	  $db->setQuery($query);
+	  $classified = $db->loadResult();
+
+	  if(!$classified){
+	    die("Photo has not been looked at before");
+	  }
+
+	  $photoDetails = codes_getDetails($this->photo_id, "photo");
+	  if($photoDetails['contains_human']){
+	    die("Photo contains a human");
+	  }
+
 	  $this->photoDetails = codes_getDetails($this->photo_id, 'photo');
 
 	  // Display the view

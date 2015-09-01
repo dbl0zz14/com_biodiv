@@ -449,6 +449,36 @@ function showMessages(){
   $app->setUserState("com_biodiv.msgs", noMsgs());
 }
 
+
+function fbInit(){
+?>
+<div id="fb-root"></div>
+<script>
+    window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '1612663612328391',
+	  xfbml      : true,
+	  version    : 'v2.4'
+	  });
+  };
+
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+<?php
+}
+
+function fbLikePhoto($photo_id){
+?>
+<div class="fb-like" data-href="<?php print BIODIV_ROOT;?>&amp;view=show&amp;photo_id=<?php print $photo_id;?>" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+<?php
+}
+
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');
  

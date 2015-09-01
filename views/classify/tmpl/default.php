@@ -8,6 +8,8 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
+fbInit();
+
 $document = JFactory::getDocument();
 $document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
 
@@ -104,6 +106,7 @@ print JHTML::image(photoURL($this->photo_id), 'Photo ' . $this->photo_id, array(
 <div id='classify_tags'></div>
 </div>
 
+
 <?php
   if(isFavourite($this->photo_id)){
     $favDisp = 'block';
@@ -120,7 +123,8 @@ print JHTML::image(photoURL($this->photo_id), 'Photo ' . $this->photo_id, array(
   <?php print "style='display:$favDisp'";?>><span class='fa fa-thumbs-up fa-2x'></span></button>
   <button id='not-favourite' type='button' class='btn btn-warning pull-right'
   <?php print "style='display:$nonFavDisp'";?>><span class='fa fa-thumbs-o-up fa-2x'></span></button>
-</div> <!-- /.col-md-2 -->
+</div> <!-- /.col-md-4 -->
+<div class='pull-right col-md-4'><?php fbLikePhoto($this->photo_id); ?> </div>
 
 </div> <!-- /.row -->
 </div> <!-- /.col-md-9 -->
