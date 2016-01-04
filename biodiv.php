@@ -164,7 +164,8 @@ function canCreate($struc, $fields){
 }
 
 function uploadRoot(){
-  return JPATH_COMPONENT . "/uploads";
+//  return JPATH_COMPONENT . "/uploads";
+    return "/var/www/html/biodivimages";
 }
 
 // get dir of where images from a given site are stored
@@ -187,7 +188,7 @@ function siteURL($site_id){
   $person_id = (int)$details['person_id'];
   $person_id or die("Cannot find person for siteDir");
   
-  return JURI::root()."/components/com_biodiv/uploads/person_${person_id}/site_${site_id}";
+  return JURI::root()."/biodivimages/person_${person_id}/site_${site_id}";
 }
 
 function photoURL($photo_id){
