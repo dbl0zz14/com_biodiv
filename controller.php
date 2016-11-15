@@ -234,7 +234,15 @@ class BioDivController extends JControllerLegacy
 	// check exif headers for camera type?
 	// check dates defined and photos in range
 
-	JFile::upload($tmpName, $newFullName);
+	$exists = JFile::exists($tmpName);
+	$success=	JFile::upload($tmpName, $newFullName);
+	if(!$success){
+		addMsg("error","File upload unsuccessful for $clientName");
+		return;
+	}	
+		if(userID()==179){
+	  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
+	}
 	$photoFields = new stdClass();
 	$photoFields->filename = $newName;
 	$photoFields->upload_filename = $clientName;
