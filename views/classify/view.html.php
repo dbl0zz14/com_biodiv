@@ -63,11 +63,19 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->sequenceDetails = codes_getDetails($this->sequence_id, "sequence");
 	  $this->sequenceLength = $this->sequenceDetails['sequence_length'];
 	  $this->sequencePosition = $this->photoDetails['sequence_num'];
+	  $this->sequenceStartPhoto = photoSequenceStart($this->photo_id);
 	  if($this->sequenceLength>0){
 	    $this->sequenceProgress = round($this->sequencePosition*100.0/$this->sequenceLength);
 	  }
 	  else{
 	    $this->sequenceProgress = 0;
+	  }
+
+	  if($this->photo_id == $this->sequenceStartPhoto){
+	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left disabled'></span> Start";
+	  }
+	  else{
+	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left'></span> Start";
 	  }
 
 	  if($this->photoDetails['prev_photo']>0){

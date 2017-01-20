@@ -90,6 +90,10 @@ class BioDivController extends JControllerLegacy
 	$photo_id = prevPhoto($photo_id);
 	break;
 
+      case "startseq":
+	$photo_id = photoSequenceStart($photo_id);
+	break;
+
       case "nextseq":
 	$photo_id = nextPhoto(0);
 	break;

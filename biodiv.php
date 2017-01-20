@@ -332,6 +332,15 @@ function prevPhoto($last_photo_id){
   return $photo_id;
 }
 
+function photoSequenceStart($last_photo_id){
+  $photoDetails = codes_getDetails($last_photo_id, 'photo');
+  $sequence_id = $photoDetails['sequence_id'];
+  $sequenceDetails = codes_getDetails($sequence_id, 'sequence');
+  $photo_id = $sequenceDetails['start_photo_id'];
+  return $photo_id;
+}
+
+
 function sequencePhotos($upload_id){
   if(!$upload_id = (int)$upload_id){
     return false;
