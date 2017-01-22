@@ -70,6 +70,7 @@ class BioDivViewTrapper extends JViewLegacy
 	  parent::display($tpl);
 
 	  // make sure sequences are up-to-date
+/*
 	  $query = $db->getQuery(true);
 	  $query->select("distinct upload_id");
 	  $query->from("Photo");
@@ -80,6 +81,7 @@ class BioDivViewTrapper extends JViewLegacy
 	  foreach($upload_ids as $upload_id){
 	    sequencePhotos($upload_id);
 	  }
+*/
         }
 }
 

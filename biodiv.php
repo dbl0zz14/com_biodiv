@@ -54,6 +54,7 @@ codes_parameters_addTable("StructureMeta", $dbOptions['database']);
 
 function codes_insertObject($fields, $struc){
   if(!canCreate($struc, $fields)){
+  print "Cannot create $struc";
     return false;
   }
   $table = codes_getTable($struc);
@@ -64,6 +65,9 @@ function codes_insertObject($fields, $struc){
     $id = $db->insertid();
     return $id;
   }
+else{
+  print "Insert failed";
+}
   return $success;
 }
 
@@ -71,6 +75,7 @@ function codes_updateObject($fields, $struc){
   $codeField = codes_getCodeField($struc);
   $code = $fields->$codeField;
   if(!canEdit($code, $struc)){
+    print "Cannot update $code $struc";
     return false;
   }
   $table = codes_getTable($struc);
@@ -115,7 +120,18 @@ function biodiv_label($type, $what=""){
   }
 }
 
-function canEdit($id, $struc){
+function canEdit($id, $struc, $allow = 0){
+  static $allows;
+  if($allow){
+   $allows[$struc][$id] = 1;
+  }
+  if($allows[$struc][$id]){
+    return true;
+  }
+
+  if($struc == "sequence"){
+  	    return true;
+  }
   $details = codes_getDetails($id, $struc);
   if(!userID()){
     return false;
@@ -139,6 +155,9 @@ function canEdit($id, $struc){
 
 
 function canCreate($struc, $fields){
+	 if($struc=="sequence"){
+	 return true;
+}
   if(!userID()){
     return false;
   }
@@ -340,13 +359,13 @@ function sequencePhotos($upload_id){
   $query = $db->getQuery(true);
   $query->select("photo_id, taken")
     ->from("Photo")
-    ->where("upload_id = " . $upload_id)
+    ->where("upload_id = " . (int)$upload_id)
     ->order("taken");
   
   $db->setQuery($query);
   $res = $db->loadAssocList();
 
-  //  print "<br/>Got " . count($res) . " results<br/>\n";
+  print "<br/>Got " . count($res) . " results<br/>\n";
 
   $prev_photo_id = 0;
   $prev_dateTime = null;
@@ -356,15 +375,16 @@ function sequencePhotos($upload_id){
 
   foreach($res as $line){
     extract($line);
-    //    print "<br/>sequencing photoid_id $photo_id<br/>";
+    print "<br/>sequencing photoid_id $photo_id<br/>";
     $dateTime = new DateTime($taken);
-    //    print "photo_id $photo_id ";
+    print "photo_id $photo_id ";
     if($prev_dateTime !== null){
       $diff = $dateTime->diff($prev_dateTime);
-      //      print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
+      print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
       if((abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
-	//	print "<br/> photos are close<br/>\n";
+	print "<br/> photos are close<br/>\n";
 	if($sequence_id>0){
+	print "Existing sequence $sequence_id";	
 	  $seq_num++;
 	  $fields = new StdClass();
 	  $fields->end_photo_id = $photo_id;
@@ -377,15 +397,22 @@ function sequencePhotos($upload_id){
 	  $fields->start_photo_id = $prev_photo_id;
 	  $fields->upload_id = $upload_id;
 	  $sequence_id = codes_insertObject($fields, 'sequence');
+	  print "new sequence $sequence_id";
 	  $prev_seq_num = 1;
 	  $seq_num = 2;
 	}
 
+        canEdit( $prev_photo_id, 'photo', 1);
+        canEdit( $photo_id, 'photo' , 1);
+//	print "canEdit photo $prev_photo_id ".canEdit('photo' , $prev_photo_id); 
+//	print "canEdit photo $photo_id ".canEdit('photo' , $photo_id); 
 	$fields = new StdClass();
 	$fields->sequence_id = $sequence_id;
 	$fields->prev_photo = $prev_photo_id;
 	$fields->sequence_num = $seq_num;
 	$fields->photo_id = $photo_id;
+	print "updating";
+	print_r($fields);
 	codes_updateObject($fields, 'photo');
 
 	$fields = new StdClass();
@@ -393,6 +420,8 @@ function sequencePhotos($upload_id){
 	$fields->next_photo = $photo_id;
 	$fields->sequence_num = $prev_seq_num;
 	$fields->photo_id = $prev_photo_id;
+	print "updating";
+	print_r($fields);
 	codes_updateObject($fields, 'photo');
 	
       }
@@ -405,6 +434,15 @@ function sequencePhotos($upload_id){
     $prev_dateTime = $dateTime;
     $prev_seq_num = $seq_num;
   }
+  $query = $db->getQuery(true);
+  $fields = array('sequence_id = -1','uploaded=uploaded');
+  $conditions = array('upload_id = '.(int)$upload_id, 'sequence_id = 0');
+  $query->update("Photo")
+    ->set($fields)
+    ->where($conditions);
+  
+  $db->setQuery($query);
+  $db->execute();
   
 }
 
