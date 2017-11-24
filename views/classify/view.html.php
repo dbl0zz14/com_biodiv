@@ -32,6 +32,9 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->photo_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
 
+	  $this->self = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
+	  
 	  if(!$this->photo_id){
 	    
 	    $this->photo_id = nextPhoto(0);
@@ -40,9 +43,6 @@ class BioDivViewClassify extends JViewLegacy
 
 	  $this->photoDetails = codes_getDetails($this->photo_id, 'photo');
 
-	  $this->self = 
-	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
-	  
 	  $this->species = array();
 	  foreach(codes_getList("species") as $stuff){
 	    list($id, $name) = $stuff;

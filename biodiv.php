@@ -258,6 +258,9 @@ function isFavourite($photo_id){
 
 function nextPhoto($prev_photo_id){
   $db = JDatabase::getInstance(dbOptions());
+  
+  // Initialise photo_id to null
+  $photo_id = null;
 
   $pdetails = codes_getDetails($prev_photo_id, 'photo');
   $next_photo = $pdetails['next_photo'];

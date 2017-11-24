@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="3.2.0" method="upgrade">
  
-  <name>Biodiversity mapping: mammalweb</name>
+  <name>biodiv</name>
   <!-- The following elements are optional and free of formatting constraints -->
   <creationDate>January 2015</creationDate>
   <author>Steven Bradley</author>
@@ -23,7 +23,13 @@
   <!-- Note the folder attribute: This attribute describes the folder
   to copy FROM in the package to install therefore files copied
   in this section are copied from /site/ in the package -->
-  <files folder="site">
+  <files>
+    <filename>index.html</filename>
+	<filename>biodiv.php</filename>
+	<filename>codes.php</filename>
+	<filename>local.php</filename>
+	<filename>controller.php</filename>
+	<folder>views</folder>
 <!--
     <filename>index.html</filename>
     <filename>helloworld.php</filename>
@@ -32,7 +38,7 @@
  
   <administration>
     <!-- Administration Menu Section -->
-    <menu link='index.php?option=com_helloworld'>Mammalweb</menu>
+    <menu link='index.php?option=com_biodiv'>Mammalweb</menu>
     <!-- Administration Main File Copy Section -->
     <!-- Note the folder attribute: This attribute describes the folder
     to copy FROM in the package to install therefore files copied
