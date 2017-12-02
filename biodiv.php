@@ -122,16 +122,24 @@ function biodiv_label($type, $what=""){
 
 function canEdit($id, $struc, $allow = 0){
   static $allows;
+  
+  if($struc == "sequence"){
+  	    return true;
+  }
+  
   if($allow){
    $allows[$struc][$id] = 1;
   }
   if($allows[$struc][$id]){
     return true;
   }
-
-  if($struc == "sequence"){
-  	    return true;
-  }
+  
+  // Moving from here to top - allows not used for sequencing...
+  //if($struc == "sequence"){
+  //	    return true;
+  //}
+  // End move
+  
   $details = codes_getDetails($id, $struc);
   if(!userID()){
     return false;
@@ -336,9 +344,23 @@ function nextPhoto($prev_photo_id){
     }
 
     // find first unclassified picture in this sequence
-    $sequence_id = $photo->sequence_id;
-    $sequence = codes_getDetails($sequence_id, 'sequence');
-    $photo_id = $sequence['start_photo_id'];
+	$sequence_id = $photo->sequence_id;
+	$sequence = codes_getDetails($sequence_id, 'sequence');
+	$photo_id = $sequence['start_photo_id'];
+	
+	//echo "sequence_id = ".$sequence_id;
+	//echo "photo_id = ".$photo_id;
+	//echo "photo->photo_id = ".$photo->photo_id;
+	//if ( $sequence_id != -1 ) {
+	  //$sequence = codes_getDetails($sequence_id, 'sequence');
+	  //echo "sequence = ".$sequence;
+    
+      //$photo_id = $sequence['start_photo_id'];
+	  //echo "photo_id = ".$photo_id;
+	//}
+	
+	//echo "photo_id = ".$photo_id;
+	
     while($photo_id && haveClassified($photo_id)){
       $photoDetails = codes_getDetails($photo_id, 'photo');
       $photo_id = $photoDetails['next_photo'];
@@ -384,61 +406,124 @@ function sequencePhotos($upload_id){
   $prev_seq_num = 0;
   $sequence_id = 0;
   $seq_num = 0;
+  $this_row = 0;
+  $num_results = count($res);
 
   foreach($res as $line){
     extract($line);
+	$this_row++;
     print "<br/>sequencing photoid_id $photo_id<br/>";
+	//print "<br/>Just read next row: seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
     $dateTime = new DateTime($taken);
-    print "photo_id $photo_id ";
-    if($prev_dateTime !== null){
+    //print "photo_id $photo_id ";
+	
+	if($prev_dateTime !== null){
       $diff = $dateTime->diff($prev_dateTime);
       print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
       if((abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
-	print "<br/> photos are close<br/>\n";
-	if($sequence_id>0){
-	print "Existing sequence $sequence_id";	
-	  $seq_num++;
-	  $fields = new StdClass();
-	  $fields->end_photo_id = $photo_id;
-	  $fields->sequence_length = $seq_num;
-	  $fields->sequence_id = $sequence_id;
-	  codes_updateObject($fields, 'sequence');
-	}
-	else{ // start new sequence
-	  $fields = new StdClass();
-	  $fields->start_photo_id = $prev_photo_id;
-	  $fields->upload_id = $upload_id;
-	  $sequence_id = codes_insertObject($fields, 'sequence');
-	  print "new sequence $sequence_id";
-	  $prev_seq_num = 1;
-	  $seq_num = 2;
-	}
+	    print "<br/> photos are close<br/>\n";
+		if($sequence_id>0){
+	      print "Existing sequence $sequence_id<br/>";	
+	      $seq_num++;
+	      $fields = new StdClass();
+	      $fields->end_photo_id = $photo_id;
+	      $fields->sequence_length = $seq_num;
+	      $fields->sequence_id = $sequence_id;
+	      codes_updateObject($fields, 'sequence');
+		  //print "<br/>end of existing sequence seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+	    }
+	    else{ // start new sequence
+	      $fields = new StdClass();
+	      $fields->start_photo_id = $prev_photo_id;
+	      $fields->upload_id = $upload_id;
+	      $sequence_id = codes_insertObject($fields, 'sequence');
+	      print "New sequence $sequence_id<br/>";
+	      $prev_seq_num = 1;
+	      $seq_num = 2;
+		  //print "<br/>end of start new sequence seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+	    }
 
         canEdit( $prev_photo_id, 'photo', 1);
         canEdit( $photo_id, 'photo' , 1);
 //	print "canEdit photo $prev_photo_id ".canEdit('photo' , $prev_photo_id); 
 //	print "canEdit photo $photo_id ".canEdit('photo' , $photo_id); 
-	$fields = new StdClass();
-	$fields->sequence_id = $sequence_id;
-	$fields->prev_photo = $prev_photo_id;
-	$fields->sequence_num = $seq_num;
-	$fields->photo_id = $photo_id;
-	print "updating";
-	print_r($fields);
-	codes_updateObject($fields, 'photo');
+	    $fields = new StdClass();
+	    $fields->sequence_id = $sequence_id;
+	    $fields->prev_photo = $prev_photo_id;
+	    $fields->sequence_num = $seq_num;
+	    $fields->photo_id = $photo_id;
+	    print "updating ";
+	    print_r($fields);
+	    codes_updateObject($fields, 'photo');
+		//print "<br/>after updating photo_id $photo_id seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
 
-	$fields = new StdClass();
-	$fields->sequence_id = $sequence_id;
-	$fields->next_photo = $photo_id;
-	$fields->sequence_num = $prev_seq_num;
-	$fields->photo_id = $prev_photo_id;
-	print "updating";
-	print_r($fields);
-	codes_updateObject($fields, 'photo');
+	    $fields = new StdClass();
+	    $fields->sequence_id = $sequence_id;
+	    $fields->next_photo = $photo_id;
+	    $fields->sequence_num = $prev_seq_num;
+	    $fields->photo_id = $prev_photo_id;
+	    print "updating ";
+	    print_r($fields);
+	    codes_updateObject($fields, 'photo');
+		//print "<br/>after updating prev photo id $prev_photo_id seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
 	
       }
       else{  // end current sequence
-	$sequence_id = 0;
+	    // at this point we want to check whether the previous photo was sequenced.  If no, then it is a single photo, not 
+		// part of a burst.  So we want to give it a sequence_id but no prev or next photo.
+		print "<br/><br/>Photos are not close so now on next sequence<br/>";
+		$seq_num = 1; // as we're just starting a new sequence??
+	    // Previous one was a loner if it was first in a sequence and this is not close enough
+		// to be in same sequence OR if it was the first one and this is not close enough..
+		if ( $prev_seq_num == 1 or $this_row == 2 ){  
+		  print "<br/>Lone photo found: $prev_photo_id<br/>";
+		  $fields = new StdClass();
+	      $fields->start_photo_id = $prev_photo_id;
+		  $fields->end_photo_id = $prev_photo_id;
+		  $fields->sequence_length = 1;
+	      $fields->upload_id = $upload_id;
+	      $sequence_id = codes_insertObject($fields, 'sequence');
+	      print "new sequence $sequence_id<br/>";
+	      $seq_num = 1; // as we're just starting a new sequence
+	      //print "<br/>end of adding lone photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+		  
+		  canEdit( $prev_photo_id, 'photo', 1);
+          //canEdit( $photo_id, 'photo' , 1);		
+		  $fields = new StdClass();
+	      $fields->sequence_id = $sequence_id;
+	      $fields->sequence_num = 1;
+	      $fields->photo_id = $prev_photo_id;
+	      print "updating ";
+	      print_r($fields);
+	      codes_updateObject($fields, 'photo');
+		  //print "<br/>end of updating lone photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+		  
+		  // Finally, if this is the last photo of the upload and the previous one was a loner, then this one must be too!
+		  if ($this_row == $num_results) {
+			print "<br/>Final one in upload - lone photo found: $photo_id<br/>";
+			$fields = new StdClass();
+	        $fields->start_photo_id = $photo_id;
+	        $fields->end_photo_id = $photo_id;
+		    $fields->sequence_length = 1;
+	        $fields->upload_id = $upload_id;
+	        $sequence_id = codes_insertObject($fields, 'sequence');
+	        print "new sequence $sequence_id<br/>";
+	        //$prev_seq_num = 1;
+	      
+		    //canEdit( $prev_photo_id, 'photo', 1);
+            canEdit( $photo_id, 'photo' , 1);
+		
+		    $fields = new StdClass();
+	        $fields->sequence_id = $sequence_id;
+	        $fields->sequence_num = 1;
+	        $fields->photo_id = $photo_id;
+	        print "updating ";
+	        print_r($fields);
+	        codes_updateObject($fields, 'photo'); 
+		  }
+	    }
+		
+	    $sequence_id = 0;
       }
     }
     
@@ -446,6 +531,8 @@ function sequencePhotos($upload_id){
     $prev_dateTime = $dateTime;
     $prev_seq_num = $seq_num;
   }
+  
+  // This is the catch all for the ones that have not been sequenced.  
   $query = $db->getQuery(true);
   $fields = array('sequence_id = -1','uploaded=uploaded');
   $conditions = array('upload_id = '.(int)$upload_id, 'sequence_id = 0');
