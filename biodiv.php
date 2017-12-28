@@ -296,23 +296,27 @@ function nextPhoto($prev_photo_id){
   }
   if($prev_photo_id && !$photo_id){
     // find next photo sequence on same trap usually
+	/* continue causes error when used in included file so avoid this..
     if(rand(0,10)>7){
       continue;
     }
-    $site_id = $pdetails['site_id'];
-    $taken = $pdetails['taken'];
+	*/
+	if(rand(0,10)<=7){
+      $site_id = $pdetails['site_id'];
+      $taken = $pdetails['taken'];
     
-    $query = $db->getQuery(true);
-    $query->select("P.photo_id")
-      ->from("Photo P")
-      ->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-      ->where("A.photo_id IS NULL")
-      ->where("P.contains_human = 0")
-      ->where("P.site_id = " . (int)$site_id)
-      ->where("taken > '$taken'")
-      ->order("taken");
-    $db->setQuery($query, 0, 1); // LIMIT 1
-    $photo_id = $db->loadResult();
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id")
+        ->from("Photo P")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human = 0")
+        ->where("P.site_id = " . (int)$site_id)
+        ->where("taken > '$taken'")
+        ->order("taken");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo_id = $db->loadResult();
+	}
   }
   if(!$photo_id){
     // choose random picture
