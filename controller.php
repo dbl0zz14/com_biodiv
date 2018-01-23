@@ -123,6 +123,24 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
 
+  // update the projects for this site according to the checklist of values
+  function ajax_update_site_projects(){
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $site_id = JRequest::getInt('pk');
+    $field = JRequest::getString('name');
+    $value = JRequest::getString('value');
+	
+    $fields = new stdClass();
+    $fields->site_id = $site_id;
+    $fields->$field = $value;
+	codes_updateSiteProjects($fields, 'site');
+
+    $this->input->set('view', 'Ajax');
+    $this->message = "Updated";
+
+    parent::display();
+  }
+
   function set_site_grid_reference(){
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $site_id = JRequest::getInt('site_id');

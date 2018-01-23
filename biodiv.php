@@ -99,6 +99,89 @@ function codes_deleteObject($code, $struc){
   return $success;
 }
 
+// NB this is all done in this function for now.  May want to move to biodiv.php and codes.php
+// but for now treating as a special case.
+function codes_updateSiteProjects($fields, $struc) {
+	
+	print "codes_updateSiteProjects called ";
+	if ( $struc != 'site' ) {
+		return false;
+	}
+	$codeField = codes_getCodeField($struc); // "site_id"
+	$code = $fields->$codeField; // the actual site_id
+	print "codes_updateSiteProjects site_id = " . $code;
+	
+	if(!canEdit($code, $struc)){
+		return false;
+	}
+	
+	$name = 'projects';
+	//$value = $fields->$name; // the new list of values from checklist as a JSON string.
+	//$valuesArray = json_decode($value); // The values from JSON string decoded back to array
+	//$valuesArray = $fields->$name;
+	$valuesArray=explode(",", $fields->$name);
+	print "<br>Got the following projects for site_id " . $code . ":  ";
+	print_r($valuesArray);
+	
+	//$valuesArray = explode(",", $val);
+	
+	
+	if ( $valuesArray == null ) $valuesArray = array(1);
+	
+	$testArray = array(7);
+		
+	$success = false;
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	// Use a transaction as we want to delete all previous entries then add the new ones, but need 
+	// both these operations to succeed or fail.
+	try
+	{
+		$db->transactionStart();
+	
+		$query = $db->getQuery(true);
+    
+		//$values = array($db->quote('TEST_CONSTANT'), $db->quote('Custom'), $db->quote('/path/to/translation.ini'));
+    
+		//$query->insert($db->quoteName('#__overrider'));
+		//$query->columns($db->quoteName(array('constant', 'string', 'file')));
+		//$query->values(implode(',',$values));
+
+		//$db->setQuery($query);
+		//$result = $db->execute();
+		
+		$table = "ProjectSiteMap";
+
+		$query->delete($db->quoteName($table));
+		$query->where("site_id = " . $code);
+		$db->setQuery($query);
+		$result = $db->execute();
+		
+		// Need to loop through the values inserting each in turn for this site_id.
+		foreach ( $valuesArray as $thisValue ) {
+			$query2 = $db->getQuery(true);
+			$query2->insert($db->quoteName($table));
+			$query2->columns($db->quoteName(array('project_id', 'site_id')));
+			$query2->values("" . $thisValue . ", " . $code);
+			$db->setQuery($query2);
+			$result = $db->execute();
+		}
+		
+		$db->transactionCommit();
+		
+		$success = true;
+	}
+	catch (Exception $e)
+	{
+		// catch any database errors.
+		$db->transactionRollback();
+	}
+	
+    return $success;
+}
+  
+
 function biodiv_label($type, $what=""){
   switch($type){
   case "add":
@@ -220,6 +303,9 @@ function siteURL($site_id){
 
 function photoURL($photo_id){
   $details = codes_getDetails($photo_id, 'photo');
+  // debug
+  // echo siteURL($details['site_id']) . "/". $details['filename'];
+  // debug end
   return siteURL($details['site_id']) . "/". $details['filename'];
 }
 
@@ -255,6 +341,87 @@ function haveClassified($photo_id){
   return count(myClassifications($photo_id));
 }
 
+// Helper function to recursively add child projects.
+//function addSubProjects (&$projects, &$pairs) {
+function addSubProjects (&$projects, &$pairs) {
+
+  //echo "addSubProjects called<br>";
+  //print "<br/>Got " . count($projects) . " projects.<br/>";
+  foreach ($projects as $proj_id=>$proj_prettyname){
+	
+	//echo "proj_id, proj_prettyname = " . $proj_id . ", " . $proj_prettyname . "<br>";
+	$project_id = null;
+	$parent_project_id = null;
+	$project_prettyname = null;
+	$addedNew = False;
+	foreach ($pairs as $allpairsline){
+	  extract($allpairsline);
+	  //echo "all pairs: parent_project_id, project_id = " . $parent_project_id . ", " . $project_id . "<br>";
+      if ( $parent_project_id == $proj_id and $project_id != null ) {
+	    // add this child as a project I have access to - in fact is this all I need to do...? It's children
+	    // will then be checked in the outer loop if it works similarly to Python...
+	    // Only add if not already there...
+	    //echo "Adding if not there... " . $parent_project_id . ", " . $project_id;
+	    if ( !array_key_exists($project_id, $projects) ) {
+		  //print "<br/>Not there yet so adding " . $project_id . "=>" . $project_prettyname . " to projects<br/>\n";
+		  // need to watch this - new project must be added at the end...
+		  $projects += [ $project_id => $project_prettyname ];
+			
+		  // Added new subproject so flag we will need to call recursively
+		  $addedNew = True;
+	    }
+	  }
+	} // foreach $pairs
+	if ($addedNew) {
+	  //echo "Calling addSubProjects recursively as added more.<br>";
+	  addSubProjects ( $projects, $pairs );
+    }
+  }
+}
+
+function myProjects(){
+  // what user am I?
+  $person_id = (int)userID();
+  
+  // first select all project/parent pairs into memory
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
+  $db->setQuery($query);
+  $allpairs = $db->loadAssocList();
+  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
+  
+  // SQL to get all my protected projects plus all public ones:
+  // select DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname
+  // from Project P
+  // left Join ProjectUserMap PUM ON P.project_id = PUM.project_id
+  // where PUM.person_id = 972
+  // or P.access_level = 0
+  // order by P.project_id
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
+  $query->where("PUM.person_id = " . $person_id . " or P.access_level = 0");
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $myprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
+
+  // add to project list by working through $allpairs to find the children, repeatedly
+  //$proj_id = null;
+  //$proj_prettyname = null;
+  //print "<br/>Calling addSubProjects<br/>";
+  addSubProjects( $myprojects, $allpairs );
+  
+  //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
+  //print implode(",", $myprojects);
+  
+  return $myprojects;
+}
+
+
+
 function isFavourite($photo_id){
   foreach(myClassifications($photo_id) as $details){
     if($details->species == 97){
@@ -265,7 +432,9 @@ function isFavourite($photo_id){
 }
 
 function nextPhoto($prev_photo_id){
+	
   $db = JDatabase::getInstance(dbOptions());
+  $app = JFactory::getApplication();
   
   // Initialise photo_id to null
   $photo_id = null;
@@ -318,9 +487,45 @@ function nextPhoto($prev_photo_id){
       $photo_id = $db->loadResult();
 	}
   }
+  if (!$photo_id) {
+    if($app->getUserState("com_biodiv.classify_only_project")){
+      //echo "classifying current project only";
+      $my_project = $app->getUserState("com_biodiv.my_project");
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Site S ON P.site_id = S.site_id")
+        ->innerJoin("Project PROJ ON PROJ.project_prettyname = '".$my_project."'")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0")
+		->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+	  if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+	  }
+	  // Classifying my project only so return here even if no photo_id.
+	  // find first unclassified picture in this sequence
+	  // Copied from end of function as need to return for my project ONLY
+	  // Really need to do this more neatly
+	  if ( $photo_id ) {
+        //echo "photo = ".$photo->photo_id;
+	    $sequence_id = $photo->sequence_id;
+        $sequence = codes_getDetails($sequence_id, 'sequence');
+        $photo_id = $sequence['start_photo_id'];
+        while($photo_id && haveClassified($photo_id)){
+          $photoDetails = codes_getDetails($photo_id, 'photo');
+          $photo_id = $photoDetails['next_photo'];
+        }
+	  }
+	  return $photo_id;
+    }
+  }
   if(!$photo_id){
     // choose random picture
-    $app = JFactory::getApplication();
+    //$app = JFactory::getApplication();
     if($app->getUserState("com_biodiv.classify_self")){
       $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
@@ -334,6 +539,27 @@ function nextPhoto($prev_photo_id){
       $photo = $db->loadObject();
       $photo_id = $photo->photo_id;
     }
+    if ( !$photo_id ) {
+	if($app->getUserState("com_biodiv.classify_project")){
+      //echo "classifying current project";
+      $my_project = $app->getUserState("com_biodiv.my_project");
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Site S ON P.site_id = S.site_id")
+        ->innerJoin("Project PROJ ON PROJ.project_prettyname = '".$my_project."'")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0")
+		->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+	  if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+	  }
+    }
+	}
     if(!$photo_id){
       $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
@@ -612,6 +838,7 @@ function fbInit(){
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 </script>
+
 <?php
 }
 

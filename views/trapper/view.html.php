@@ -65,6 +65,47 @@ class BioDivViewTrapper extends JViewLegacy
 	    $numPhotos = $db->loadResult();
 	    $this->siteCount[$site_id] = $numPhotos;
 	  }
+	  
+	  // Projects additions.
+	  $this->projecthelp = "All projects which this site and this user are members of.";
+	  $this->projects = array();
+	  
+	  //$myprojects = myProjects();
+	  $this->userprojects = myProjects();
+	  
+	  //print "<br/>Got " . count($this->userprojects) . " all projects user has access to<br/>They are:<br>";
+      //print implode(",", $this->userprojects);
+	  //print_r($this->userprojects);
+	  //print_r(array_keys($this->userprojects));
+	  //$userproj = json_encode($this->userprojects);
+	  //print "<br>userprojects = " . $userproj . "<br>";
+  
+	  
+	  foreach($this->sites as $site_id => $site){
+		// Get list of projects this site is part of and which this user is a user of
+		$query = $db->getQuery(true);
+	    $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname");
+	    $query->from("Project P");
+	    $query->innerJoin("ProjectSiteMap PSM ON P.project_id = PSM.project_id");
+		$query->where("PSM.site_id = " . $site_id);
+	    $db->setQuery($query);
+	    $siteprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+		
+		//print "<br/>Got " . count($siteprojects) . " site projects for site ". $site_id . "<br/>They are:<br>";
+        //print implode(",", $siteprojects);
+		
+		//print_r(array_keys($siteprojects));
+  
+		// Remove any siteprojects where this user is not a member of the project.
+		$intersectprojects = array_intersect_key($this->userprojects, $siteprojects);
+		
+		//print "<br/>Got " . count($intersectprojects) . " intersect projects for site ". $site_id . "<br/>They are:<br>";
+        //print implode(",", $intersectprojects);
+        
+		//$this->projects[$site_id] = array_values($intersectprojects);
+		$this->projects[$site_id] = array_keys($intersectprojects);
+		
+	  }
 
 	  // Display the view
 	  parent::display($tpl);

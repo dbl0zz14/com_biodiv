@@ -35,6 +35,21 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->self = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
 	  
+	  $this->classify_project = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.classify_project', 'classify_project', 0);
+		
+	  //echo "BioDivViewClassify, this->classify_project = ", $this->classify_project;
+	  
+	  $this->classify_only_project = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.classify_only_project', 'classify_only_project', 0);
+		
+	  //echo "BioDivViewClassify, this->classify_only_project = ", $this->classify_only_project;
+	  
+	  $this->my_project = 
+	    $app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
+		
+	  //echo "BioDivViewClassify, this->my_project = ", $this->my_project;
+	  
 	  if(!$this->photo_id){
 	    
 	    $this->photo_id = nextPhoto(0);

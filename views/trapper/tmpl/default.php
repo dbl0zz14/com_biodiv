@@ -20,6 +20,7 @@ if(count($this->sites) == 0){
      print "<th data-toggle='tooltip' data-placement='top' title='".$this->help[$field]."'>$fieldTitle</th>\n";
    }
    print "<th>Photos uploaded</th>\n";
+   print "<th data-toggle='tooltip' data-placement='top' title='".$this->projecthelp."'>Projects</th>\n";
    print "<th>Upload</th>\n";
    print "<th>Edit</th>\n";
    print "</tr></thead>\n";
@@ -83,6 +84,19 @@ if(count($this->sites) == 0){
 
      }
      print "<td>" . $this->siteCount[$site_id] . "</td>\n";
+	 
+	 // Projects additions
+	 $userProjects = addCSlashes(json_encode($this->userprojects),"'");
+     $siteProjects = json_encode($this->projects[$site_id]);
+     $editLink = "<a href='#'";
+	 $editLink .= " data-url='" . BIODIV_ROOT . "&task=ajax_update_site_projects&format=raw'";
+	 $editLink .= " data-pk='" . (int)$site_id . "'";
+	 $editLink .= " data-name='projects'";
+	 $editLink .= " data-source='" . $userProjects . "'";
+	 $editLink .= " data-value='" . $siteProjects . "'";
+	 $editLink .= " class='biodiv_editable_checklist biodiv_edit_site_${site_id}'";
+	 $editLink .= " data-type='checklist'></a>";
+	 print "<td>" . $editLink . "</td>\n";
      print "<td><a href='". BIODIV_ROOT . "&view=upload&site_id=$site_id'>" . biodiv_label("upload") . "</a></td>\n";
      print "<td><a class='biodiv_edit_enable' id='biodiv_edit_site_${site_id}'>" . biodiv_label("edit") . "</a></td>\n";
      print "</tr>";
@@ -103,5 +117,6 @@ print JHtml::_('form.token');
 JHTML::script("com_biodiv/trapper.js", true, true);
 
 ?>
+
 
 

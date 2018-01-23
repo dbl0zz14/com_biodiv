@@ -66,6 +66,9 @@ class BioDivViewStatus extends JViewLegacy
     $query->from("Animal");
     $db->setQuery($query);
     $this->status['Total spotters in system'] = $db->loadResult();
+	
+	// call new biodiv.php function myProjects()
+	$this->projects = myProjects();
 
     // Display the view
     parent::display($tpl);
