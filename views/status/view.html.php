@@ -31,6 +31,14 @@ class BioDivViewStatus extends JViewLegacy
 
     $this->root = 
     $this->status = array();
+	
+	// Set the photo to zero on load and the classify option back to default 0
+	$app = JFactory::getApplication();
+    $app->setUserState('com_biodiv.photo_id', 0);
+	$app->setUserState('com_biodiv.classify_only_project', 0);
+    $app->setUserState('com_biodiv.classify_project', 0);
+    $app->setUserState('com_biodiv.classify_self', 0);
+    
 
     $db = JDatabase::getInstance(dbOptions());
 

@@ -380,6 +380,7 @@ function addSubProjects (&$projects, &$pairs) {
 }
 
 function myProjects(){
+  //print "<br/>myProjects called<br/>";
   // what user am I?
   $person_id = (int)userID();
   
@@ -420,6 +421,59 @@ function myProjects(){
   return $myprojects;
 }
 
+// Return a list of this project and all its children.
+// Called with proj prettyname for now.  Refactor later if necessary.
+function getSubProjects($project_prettyname){
+  //print "<br/>getSubProjects called<br/>";
+  // first select all project/parent pairs into memory
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
+  $db->setQuery($query);
+  $allpairs = $db->loadAssocList();
+  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
+  
+  // Need to get the proj id and name of the top level project
+  $query = $db->getQuery(true);
+  $query->select("project_id AS proj_id, project_prettyname AS proj_prettyname")->from("Project");
+  $query->where("project_prettyname = '" . $project_prettyname . "'");
+  $db->setQuery($query);
+  $subprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  
+  // add to project list by working through $allpairs to find the children, repeatedly
+  //$proj_id = null;
+  //$proj_prettyname = null;
+  //print "<br/>Calling addSubProjects<br/>";
+  addSubProjects( $subprojects, $allpairs );
+  
+  //print "<br/>Got " . count($subprojects) . " sub projects.<br/>They are:<br>";
+  //print implode(",", $subprojects);
+  
+  return $subprojects;
+  //return implode(",", array_keys($subprojects));
+  //return array(2,4,6);
+}
+
+// return all projects that are/should be listed on the website
+function listedProjects(){
+  // what user am I?
+  $person_id = (int)userID();
+  
+  // For now we'll load all projects
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description")->from("Project P");
+  $query->where("P.access_level < 2");
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $listedprojects = $db->loadObjectList();
+  
+  //print "<br/>Got " . count($listedprojects) . " non-private projects<br/>They are:<br>";
+  //print_r($listedprojects);
+  
+  return $listedprojects;
+}
 
 
 function isFavourite($photo_id){
@@ -433,6 +487,8 @@ function isFavourite($photo_id){
 
 function nextPhoto($prev_photo_id){
 	
+  //print "<br/>nextPhoto called<br/>";
+	
   $db = JDatabase::getInstance(dbOptions());
   $app = JFactory::getApplication();
   
@@ -442,6 +498,8 @@ function nextPhoto($prev_photo_id){
   $pdetails = codes_getDetails($prev_photo_id, 'photo');
   $next_photo = $pdetails['next_photo'];
   if($next_photo){
+	//print "<br/>Have a next_photo<br/>";
+	
     $nextDetails = codes_getDetails($next_photo, 'photo');
     $photo_id = $next_photo;
     if(!$nextDetails['contains_human'] and !haveClassified($next_photo)){
@@ -471,6 +529,8 @@ function nextPhoto($prev_photo_id){
     }
 	*/
 	if(rand(0,10)<=7){
+	  //print "<br/>rand < 7<br/>";
+	
       $site_id = $pdetails['site_id'];
       $taken = $pdetails['taken'];
     
@@ -488,14 +548,23 @@ function nextPhoto($prev_photo_id){
 	}
   }
   if (!$photo_id) {
+	//print "<br/>no photo_id, testing for classify own project<br/>";
+  
     if($app->getUserState("com_biodiv.classify_only_project")){
-      //echo "classifying current project only";
+      //print "<br/>classifying current project only<br/>";
+	  // NB need to include all sub projects too
       $my_project = $app->getUserState("com_biodiv.my_project");
-      $query = $db->getQuery(true);
+	  $allsubs = getSubProjects($my_project);
+	  //print "<br/>Got " . count($allsubs) . " sub projects.<br/>They are:<br>";
+	  //print implode(",", $allsubs);
+	  $id_string = implode(',', array_keys($allsubs));
+	  
+	  //print "id_string = ".$id_string;
+	  $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
         ->innerJoin("Site S ON P.site_id = S.site_id")
-        ->innerJoin("Project PROJ ON PROJ.project_prettyname = '".$my_project."'")
+        ->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
         ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
         ->leftJoin("Animal A ON P.photo_id = A.photo_id")
         ->where("A.photo_id IS NULL")
@@ -524,9 +593,13 @@ function nextPhoto($prev_photo_id){
     }
   }
   if(!$photo_id){
+	//print "<br/>no photo_id, testing for classify self first<br/>";
+  
     // choose random picture
     //$app = JFactory::getApplication();
     if($app->getUserState("com_biodiv.classify_self")){
+	  //print "<br/>classifying self<br/>";
+	
       $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
 	->from("Photo P")
@@ -540,10 +613,12 @@ function nextPhoto($prev_photo_id){
       $photo_id = $photo->photo_id;
     }
     if ( !$photo_id ) {
+		//print "<br/>no photo_id, testing for classify project first<br/>";
+  
 	if($app->getUserState("com_biodiv.classify_project")){
-      //echo "classifying current project";
-      $my_project = $app->getUserState("com_biodiv.my_project");
-      $query = $db->getQuery(true);
+      //print "<br/>classifying project first<br/>";
+	  $my_project = $app->getUserState("com_biodiv.my_project");
+	  $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
         ->innerJoin("Site S ON P.site_id = S.site_id")
@@ -559,7 +634,35 @@ function nextPhoto($prev_photo_id){
 		  $photo_id = $photo->photo_id;
 	  }
     }
+	//print "<br/>photo_id = " . $photo_id . " after classify_project check<br/>";
 	}
+		
+	if (!$photo_id) {
+		//print "<br/>No photo so looking at all my projects<br/>";
+		// only display photos from projects the user has access to.
+		$projects = myProjects();
+		//print "<br/>Got " . count($projects) . " all projects user has access to<br/>They are:<br>";
+		//print implode(",", $projects);
+  
+		$id_string = implode(',', array_keys($projects));
+		
+		$query = $db->getQuery(true);
+		$query->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0")
+			->order("rand()");
+		$db->setQuery($query, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+		}
+	}
+	  /*
     if(!$photo_id){
       $query = $db->getQuery(true);
       $query->select("P.photo_id, P.sequence_id")
@@ -572,6 +675,7 @@ function nextPhoto($prev_photo_id){
       $photo = $db->loadObject();
       $photo_id = $photo->photo_id;
     }
+	*/
 
     // find first unclassified picture in this sequence
 	$sequence_id = $photo->sequence_id;
@@ -596,6 +700,8 @@ function nextPhoto($prev_photo_id){
       $photo_id = $photoDetails['next_photo'];
     }
   }
+  
+  //print "<br/> returning at end of nextPhoto, photo_id = " . $photo_id;
 
   return $photo_id;
 }

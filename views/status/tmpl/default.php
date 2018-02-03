@@ -25,7 +25,7 @@ print "</b></p>\n";
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
-    <p>
+	<p>
     <b>My Current Project:</b>
     <select name = 'my_project'>
       <?php
@@ -35,12 +35,15 @@ print "</b></p>\n";
       ?>
     </select>
     </p>
-	<button  class='btn btn-primary' type='submit'><i class='fa fa-search'></i> Get Spotting</a></button>
-    <input type='checkbox' name = 'classify_self' value='1'/> Classify my images first</input>
+
+    <button  class='btn btn-primary' type='submit'><i class='fa fa-search'></i> Get Spotting</a></button>
+	<input type='checkbox' name = 'classify_self' value='1'/> Classify my images first</input>
 	<input type='checkbox' name = 'classify_project' value='1'/> Classify my current project first</input>
 	<input type='checkbox' name = 'classify_only_project' value='1'/> Classify only my current project</input>
 
-</form>
+	
+	
+	</form>
 
 
 
