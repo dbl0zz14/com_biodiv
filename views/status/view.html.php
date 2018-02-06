@@ -77,7 +77,8 @@ class BioDivViewStatus extends JViewLegacy
 	
 	// call new biodiv.php function myProjects()
 	$this->projects = myProjects();
-
+	$this->mylikes = getLikes(3);
+	
     // Display the view
     parent::display($tpl);
   }

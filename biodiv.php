@@ -309,6 +309,17 @@ function photoURL($photo_id){
   return siteURL($details['site_id']) . "/". $details['filename'];
 }
 
+function projectImageURL($proj_id) {
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("dirname, image_file")->from("Project");
+  $query->where("project_id = " . (int)$proj_id); 
+  $db->setQuery($query);
+  $row = $db->loadAssoc();
+
+  return JURI::root().$row['dirname']."/".$row['image_file'];
+}
+
 function classifications($restrictions){
   if(!is_array($restrictions)){
     return array();
@@ -341,6 +352,22 @@ function haveClassified($photo_id){
   return count(myClassifications($photo_id));
 }
 
+function getLikes($max_num){
+	
+	$person_id = (int)userID();
+	
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT photo_id ")->from("Animal");
+	$query->where("person_id = " . $person_id . " and species = 97");
+	$query->order("rand()");
+    $db->setQuery($query, 0, $max_num); // LIMIT $max_num
+    $mylikes = $db->loadColumn();
+
+	return $mylikes;
+	
+}
+
 // Helper function to recursively add child projects.
 //function addSubProjects (&$projects, &$pairs) {
 function addSubProjects (&$projects, &$pairs) {
@@ -358,10 +385,6 @@ function addSubProjects (&$projects, &$pairs) {
 	  extract($allpairsline);
 	  //echo "all pairs: parent_project_id, project_id = " . $parent_project_id . ", " . $project_id . "<br>";
       if ( $parent_project_id == $proj_id and $project_id != null ) {
-	    // add this child as a project I have access to - in fact is this all I need to do...? It's children
-	    // will then be checked in the outer loop if it works similarly to Python...
-	    // Only add if not already there...
-	    //echo "Adding if not there... " . $parent_project_id . ", " . $project_id;
 	    if ( !array_key_exists($project_id, $projects) ) {
 		  //print "<br/>Not there yet so adding " . $project_id . "=>" . $project_prettyname . " to projects<br/>\n";
 		  // need to watch this - new project must be added at the end...
@@ -392,13 +415,6 @@ function myProjects(){
   $allpairs = $db->loadAssocList();
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
   
-  // SQL to get all my protected projects plus all public ones:
-  // select DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname
-  // from Project P
-  // left Join ProjectUserMap PUM ON P.project_id = PUM.project_id
-  // where PUM.person_id = 972
-  // or P.access_level = 0
-  // order by P.project_id
   $query = $db->getQuery(true);
   $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
   $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
@@ -410,8 +426,6 @@ function myProjects(){
   //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
 
   // add to project list by working through $allpairs to find the children, repeatedly
-  //$proj_id = null;
-  //$proj_prettyname = null;
   //print "<br/>Calling addSubProjects<br/>";
   addSubProjects( $myprojects, $allpairs );
   
@@ -421,10 +435,32 @@ function myProjects(){
   return $myprojects;
 }
 
+function myProjectDetails(){
+  // Call myprojects to get the project list, then get details for each.
+  $myprojects = myProjects();
+  
+  $id_string = implode(",", array_keys($myprojects));
+  
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.dirname, P.image_file, P.project_text")->from("Project P");
+  $query->where("P.project_id in (".$id_string.")");
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $projectdetails = $db->loadObjectList();
+  
+  
+  //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+  //print implode(",", $projectdetails);
+  
+  return $projectdetails;
+}
+
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
 function getSubProjects($project_prettyname){
   //print "<br/>getSubProjects called<br/>";
+  
   // first select all project/parent pairs into memory
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
@@ -442,17 +478,13 @@ function getSubProjects($project_prettyname){
   
   
   // add to project list by working through $allpairs to find the children, repeatedly
-  //$proj_id = null;
-  //$proj_prettyname = null;
-  //print "<br/>Calling addSubProjects<br/>";
   addSubProjects( $subprojects, $allpairs );
   
   //print "<br/>Got " . count($subprojects) . " sub projects.<br/>They are:<br>";
   //print implode(",", $subprojects);
   
   return $subprojects;
-  //return implode(",", array_keys($subprojects));
-  //return array(2,4,6);
+  
 }
 
 // return all projects that are/should be listed on the website
