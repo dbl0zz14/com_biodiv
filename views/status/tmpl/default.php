@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 ?>
 <h1>Spotter Status</h1>
 <div class='row'>
-<div class='col-sm-5'>
+<div class='col-md-5'>
 <p>
 <table class="table">
 <?php
@@ -66,7 +66,7 @@ foreach($this->status as $msg => $count){
 // }
 //print "</b></p>\n";
 ?>
-<div class='col-sm-6'>
+<div class='col-md-6'>
 <div id="myCarousel" class="carousel slide" data-ride="carousel"  data-wrap="false">
   <!-- Indicators -->
   <ol class="carousel-indicators">
