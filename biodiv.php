@@ -519,6 +519,218 @@ function isFavourite($photo_id){
   return false;
 }
 
+function nextSequence(){
+  // For now this is a dummy function returning an array of photo ids in a sequence.
+  // Will become a function that does that properly as in nextPhoto
+  //return array(1030,1031,1032,1033);
+
+  //print "<br/>nextSequence called<br/>";
+	
+  $db = JDatabase::getInstance(dbOptions());
+  $app = JFactory::getApplication();
+  
+  // Initialise photo_id and sequence_id to null
+  $photo_id = null;
+  $sequence_id = null;
+  
+  if (!$photo_id) {
+	//print "<br/>no photo_id, testing for classify own project<br/>";
+  
+    if($app->getUserState("com_biodiv.classify_only_project")){
+      //print "<br/>classifying current project only<br/>";
+	  // NB need to include all sub projects too
+      $my_project = $app->getUserState("com_biodiv.my_project");
+	  $allsubs = getSubProjects($my_project);
+	  //print "<br/>Got " . count($allsubs) . " sub projects.<br/>They are:<br/>";
+	  //print implode(",", $allsubs);
+	  $id_string = implode(',', array_keys($allsubs));
+	  
+	  //print "<br/>id_string = ".$id_string."<br/>";
+	  $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Site S ON P.site_id = S.site_id")
+        ->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0")
+	    ->where("P.sequence_id > 0")
+		->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+	  if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+	  }
+	  //print "<br/>After query found photo_id = " . $photo_id . "<br/>";
+	  // Classifying my project only so return here even if no photo_id.
+	  // find first unclassified picture in this sequence
+	  // Copied from end of function as need to return for my project ONLY
+	  // Really need to do this more neatly
+	  if ( $photo_id ) {
+        //print "photo found = ".$photo_id;
+	    $sequence_id = $photo->sequence_id;
+        //print "sequence id = ".$sequence_id;
+	    $sequence = codes_getDetails($sequence_id, 'sequence');
+        $photo_id = $sequence['start_photo_id'];
+        //print "start photo = ".$photo_id;
+	    while($photo_id && haveClassified($photo_id)){
+          $photoDetails = codes_getDetails($photo_id, 'photo');
+          $photo_id = $photoDetails['next_photo'];
+        }
+		//print "after checking classified, photo_id = ".$photo_id;
+		
+	  }
+	  return getSequence($photo_id);
+	}
+  }
+  if(!$photo_id){
+	//print "<br/>no photo_id, testing for classify self first<br/>";
+  
+    if($app->getUserState("com_biodiv.classify_self")){
+	  //print "<br/>classifying self<br/>";
+	
+      $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+	->from("Photo P")
+	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+	->where("A.photo_id IS NULL")
+	->where("P.contains_human =0")
+	->where("P.person_id = " . (int)userID())
+	->where("P.sequence_id > 0")
+	->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+      $photo_id = $photo->photo_id;
+    }
+    if ( !$photo_id ) {
+		//print "<br/>no photo_id, testing for classify project first<br/>";
+  
+	if($app->getUserState("com_biodiv.classify_project")){
+      //print "<br/>classifying project first<br/>";
+	  $my_project = $app->getUserState("com_biodiv.my_project");
+	  $query = $db->getQuery(true);
+      $query->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Site S ON P.site_id = S.site_id")
+        ->innerJoin("Project PROJ ON PROJ.project_prettyname = '".$my_project."'")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0")
+	    ->where("P.sequence_id > 0")
+		->order("rand()");
+      $db->setQuery($query, 0, 1); // LIMIT 1
+      $photo = $db->loadObject();
+	  if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+	  }
+    }
+	//print "<br/>photo_id = " . $photo_id . " after classify_project check<br/>";
+	}
+		
+	if (!$photo_id) {
+		//print "<br/>No photo so looking at all my projects<br/>";
+		// only display photos from projects the user has access to.
+		$projects = myProjects();
+		//print "<br/>Got " . count($projects) . " all projects user has access to<br/>They are:<br>";
+		//print implode(",", $projects);
+  
+		$id_string = implode(',', array_keys($projects));
+		
+		$query = $db->getQuery(true);
+		$query->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0")
+			->where("P.sequence_id > 0")
+			->order("rand()");
+		$db->setQuery($query, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+		  $photo_id = $photo->photo_id;
+		}
+	}
+
+    // find first unclassified picture in this sequence
+	$sequence_id = $photo->sequence_id;
+	$sequence = codes_getDetails($sequence_id, 'sequence');
+	$photo_id = $sequence['start_photo_id'];
+	
+	//echo "photo_id = ".$photo_id;
+	
+    while($photo_id && haveClassified($photo_id)){
+      $photoDetails = codes_getDetails($photo_id, 'photo');
+      $photo_id = $photoDetails['next_photo'];
+    }
+  }
+  
+  //print "<br/> returning at end of nextSequence, sequence_id = " . $sequence_id;
+  /*
+  $sequence = array();
+  
+  $next_photo_id = $photo_id;
+  while ($next_photo_id>0) {
+	$sequence[] = $next_photo_id;
+	$next_photo_details = codes_getDetails($next_photo_id, 'photo');
+	$next_photo_id = $next_photo_details['next_photo'];      
+  }
+  */
+  return getSequence($photo_id);
+}
+
+// Return sequence this photo belongs to from this photo onwards...
+// might need to change this to get whole sequence
+function getSequence($photo_id) {
+  
+  $sequence = array();
+  
+  $next_photo_id = $photo_id;
+  while ($next_photo_id>0) {
+	$sequence[] = $next_photo_id;
+	$next_photo_details = codes_getDetails($next_photo_id, 'photo');
+	$next_photo_id = $next_photo_details['next_photo'];      
+  }
+
+  return $sequence;
+}
+
+function updateSequence($photo_id){
+	// Check this photo is part of the current sequence
+	
+	// Check for existing classifications and copy over if so.
+	$pdetails = codes_getDetails($photo_id, 'photo');
+    $prev_photo_id = $pdetails['prev_photo'];
+    if($prev_photo_id){
+	  //print "<br/>Have a prev_photo_id<br/>";
+	
+      $prevDetails = codes_getDetails($prev_photo_id, 'photo');
+      if(!$pdetails['contains_human'] and !haveClassified($photo_id)){
+        // copy across classification
+        $db = JDatabase::getInstance(dbOptions());
+        $query = $db->getQuery(true);
+        $query->select("person_id, species, gender, age, number")
+	    ->from("Animal")
+	    ->where("photo_id = ".(int)$prev_photo_id)
+	    ->where("person_id = " . (int)userID())
+	    ->order("animal_id");
+        $db->setQuery($query);
+        foreach($db->loadObjectList() as $animal){
+	      $speciesDetails = codes_getDetails($animal->species, 'content');
+		  $speciesGroup = $speciesDetails['struc'];
+		  if(!in_array($speciesGroup, array('noanimal','like'))){
+	        $animal->photo_id = $photo_id;
+	        codes_insertObject($animal, "animal");
+	      }
+        }
+      }
+    }
+	return true;
+}
 
 
 function nextPhoto($prev_photo_id){

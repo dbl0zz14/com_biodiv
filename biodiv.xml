@@ -15,7 +15,9 @@
  
   <update> <!-- Runs on update; New since J2.5 -->
     <schemas>
-      <schemapath type="mysql">sql/updates/mysql</schemapath>
+<!--
+      <schemapath type="mysql">sql/updates/mysql</schemapath >
+-->
     </schemas>
   </update>
  
@@ -27,15 +29,20 @@
     <filename>index.html</filename>
 	<filename>biodiv.php</filename>
 	<filename>codes.php</filename>
-	<filename>local.php</filename>
 	<filename>controller.php</filename>
 	<folder>views</folder>
 <!--
     <filename>index.html</filename>
     <filename>helloworld.php</filename>
 -->
+
   </files>
- 
+
+  <media destination="com_biodiv" folder="media">
+    <folder>css</folder>
+    <folder>js</folder>
+  </media>
+  
   <administration>
     <!-- Administration Menu Section -->
     <menu link='index.php?option=com_biodiv'>Mammalweb</menu>

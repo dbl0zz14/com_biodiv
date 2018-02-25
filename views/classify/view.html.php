@@ -49,15 +49,46 @@ class BioDivViewClassify extends JViewLegacy
 	    $app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
 	  //echo "BioDivViewClassify, this->my_project = ", $this->my_project;
-	  
+	  /*
 	  if(!$this->photo_id){
 	    
 	    $this->photo_id = nextPhoto(0);
 	    $app->setUserState('com_biodiv.photo_id', $this->photo_id);
 	  }
-
+	  
 	  $this->photoDetails = codes_getDetails($this->photo_id, 'photo');
+	  */
+	  $this->sequence = null;
+	  // Need to do a check here so that refresh doesn't load next sequence......
+	  // If there is a photo_id then get the sequence for that photo id.  If not, get a new sequence
+	  if(!$this->photo_id){
+	    $this->sequence = nextSequence();
+	  }
+	  else {
+		$this->sequence = getSequence($this->photo_id);
+	  }
+	
+	  if ($this->sequence) {
+		$this->photo_id = $this->sequence[0];
+	  }
+	  $app->setUserState('com_biodiv.photo_id', $this->photo_id);
+	  
+	  
+	  //print "<br>Got the following sequence:<br>";
+	  //print_r($this->sequence);
+	  
+	  $this->sequence_details = array();
+	  foreach ($this->sequence as $next_photo_id) {
+		  //print "<br>Adding photo " . $next_photo_id->photo_id . "<br>";
+		  $this->sequence_details[] = codes_getDetails($next_photo_id, 'photo');
+	  }
+	  //print "<br>Got the following ". count($this->sequence_details) . " sequence details:<br>";
+	  //print_r($this->sequence_details);
+	  
+	  $this->photoDetails = $this->sequence_details[0];
+	  
 
+	  
 	  $this->species = array();
 	  foreach(codes_getList("species") as $stuff){
 	    list($id, $name) = $stuff;
@@ -85,28 +116,34 @@ class BioDivViewClassify extends JViewLegacy
 	  else{
 	    $this->sequenceProgress = 0;
 	  }
-
+	  /*
 	  if($this->photo_id == $this->sequenceStartPhoto){
 	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left disabled'></span> Start";
 	  }
 	  else{
 	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left'></span> Start";
 	  }
-
+	  */
+/*
 	  if($this->photoDetails['prev_photo']>0){
 	    $this->rcontrols["control_prev"] = "<span class='fa fa-chevron-circle-left'></span> Previous";
 	  }
 	  else{
 	    $this->rcontrols["control_prev"] = "<span class='fa fa-chevron-circle-left disabled'></span> Previous";
 	  }
-
+*/
+/*
 	  if($this->photoDetails['next_photo']>0){
 	    $this->rcontrols["control_next"] = "Next <span class='fa fa-chevron-circle-right'/>";
 	  }
 	  else{
 	    $this->rcontrols["control_next"] = "Next <span class='fa fa-chevron-circle-right disabled'/>";
 	  }
+	  
 	  $this->rcontrols["control_nextseq"] = "Next sequence <span class='fa fa-arrow-circle-right'/>";
+	  */
+	  
+	  $this->nextseq = "Next sequence <span class='fa fa-arrow-circle-right'/>";
 
 	  $this->classifyInputs = array();
 	  foreach(array("gender", "age") as $struc){

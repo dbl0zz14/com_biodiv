@@ -37,6 +37,40 @@ class BioDivController extends JControllerLegacy
 
     parent::display();
   }
+  
+  // User has slid to a different photo - update classification to be same
+  // NB now using carousel so photo_id is on JRequest - update com_biodiv with this.
+  function next_photo(){
+	  
+    $app = JFactory::getApplication();
+    //$photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+
+    $photo_id = JRequest::getString('photo');
+	
+	// Validate here that this photo is on the current sequence.
+	// Check for other classifications and copy them across
+	$res = updateSequence($photo_id);
+          
+	$app->setUserState('com_biodiv.photo_id', $photo_id);
+    $this->input->set('view', 'Ajax');
+
+    parent::display();
+  }
+  /*
+  function next_sequence() {
+	  
+	$app = JFactory::getApplication();
+    
+	$sequence = nextSequence();
+	
+	$app->setUserState('com_biodiv.photo_id', $sequence[0]);
+    $this->input->set('view', 'Ajax');
+	
+	parent::display();
+	
+  }
+  */
+
 
   function get_photo(){
     $app = JFactory::getApplication();
@@ -45,58 +79,69 @@ class BioDivController extends JControllerLegacy
     $action = JRequest::getString('action');
     $actionBits = explode("_", $action);
     $firstBit = array_shift($actionBits);
-    if($firstBit == "control"){
+	
+	if($firstBit == "control"){
+		
       $nextBit = array_shift($actionBits);
+	  
       switch($nextBit){
       case "content":
-	$content_id = array_shift($actionBits);
+		$content_id = array_shift($actionBits);
 
-	// remove any existing classification
-	$db = JDatabase::getInstance(dbOptions());
-	$query = $db->getQuery(true);
-	$query->delete("Animal")
-	  ->where($db->quoteName("photo_id") . " = '$photo_id'")
-	  ->where($db->quoteName("person_id") . " = " . (int)userID());
-	$db->setQuery($query);
-	$success = $db->execute();
+		// remove any existing classification
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->delete("Animal")
+			->where($db->quoteName("photo_id") . " = '$photo_id'")
+			->where($db->quoteName("person_id") . " = " . (int)userID());
+		$db->setQuery($query);
+		$success = $db->execute();
 	
-	// add new control classification (nothing or human)
-	$fields = new stdClass();
-	$fields->person_id = userID();
-	$fields->photo_id = $photo_id;
-	$fields->species = $content_id;
-	codes_insertObject($fields, 'animal');
+		// add new control classification (nothing or human)
+		$fields = new stdClass();
+		$fields->person_id = userID();
+		$fields->photo_id = $photo_id;
+		$fields->species = $content_id;
+		codes_insertObject($fields, 'animal');
 
-	// if human then update the photo to say so
-	if($content_id == 87){
-	  $fields = new stdClass();
-	  $fields->photo_id = $photo_id;
-	  $fields->contains_human = 1;
-	  // we do note own this object so access db directly
-	  $db->updateObject('Photo', $fields, 'photo_id');
-	}
+		// if human then update the photo to say so
+		if($content_id == 87){
+			$fields = new stdClass();
+			$fields->photo_id = $photo_id;
+			$fields->contains_human = 1;
+			// we do note own this object so access db directly
+			$db->updateObject('Photo', $fields, 'photo_id');
+		}
 
-	$photoDetails = codes_getDetails($photo_id, "photo");
-	if($photoDetails['next_photo']){
-	  $photo_id = nextPhoto($photo_id);
-	}
-	break;
+		// no longer want Nothing or Human to move the photo on.  This is now controlled by the user 
+		//$photoDetails = codes_getDetails($photo_id, "photo");
+		//if($photoDetails['next_photo']){
+		//  $photo_id = nextPhoto($photo_id);
+		//}
+		break;
 
       case "next":
-	$photo_id = nextPhoto($photo_id);
-	break;
+		$photo_id = nextPhoto($photo_id);
+		break;
+
+      case "goto":
+	    $new_photo_id = JRequest::getString('photo');
+		$photo_id = $new_photo_id;
+		break;
 
       case "prev":
-	$photo_id = prevPhoto($photo_id);
-	break;
+		$photo_id = prevPhoto($photo_id);
+		break;
 
       case "startseq":
-	$photo_id = photoSequenceStart($photo_id);
-	break;
+	    $photo_id = photoSequenceStart($photo_id);
+	    break;
 
       case "nextseq":
-	$photo_id = nextPhoto(0);
-	break;
+	    //$photo_id = nextPhoto(0);
+	    $sequence = nextSequence();
+	    $photo_id = $sequence[0];
+	    break;
       }
     }
     $app->setUserState('com_biodiv.photo_id', $photo_id);
@@ -161,8 +206,9 @@ class BioDivController extends JControllerLegacy
 
     $fields = new stdClass();
     $fields->person_id = userID();
-    $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
-    $formFields = array("species", "gender", "age", "number");
+	// Now set the photo_id from the form value, but check it is in the same sequence as the "current" one.
+    //$fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+    $formFields = array("photo_id", "species", "gender", "age", "number");
     foreach($formFields as $formField){
       $fields->$formField = JRequest::getInt($formField);
     }

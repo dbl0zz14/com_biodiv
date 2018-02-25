@@ -1,0 +1,12 @@
+#species-indicators.spb {bottom: auto; top: 5px;}
+
+#species-indicators li.active.spb {background-color: #b30000;}
+#species-indicators li.spb {border: 1px solid grey;}
+
+#species-carousel-inner {top:27px}
+
+#sequence-progress {display: none;}
+
+.photo-carousel-control.left, .photo-carousel-control.right {
+    background-image: none
+}
