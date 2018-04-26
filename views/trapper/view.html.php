@@ -30,7 +30,7 @@ class BioDivViewTrapper extends JViewLegacy
 	  $this->fields = array("site_name" => "Site Name",
 				"grid_ref" => "OS grid reference");
 	  $this->help = array("site_name" => "Site name: Something specific that reminds you of where the camera trap is. E.g. \"backyard\" or \"woods next to my house\".",
-				"grid_ref" => "");
+				"grid_ref" => "The location of the site: Please note this cannot be changed once photos are uploaded.");
 	  foreach(array("habitat", "purpose", "camera") as $struc){
 	    $this->fields[$struc . "_id"] = codes_getTitle($struc);
 	    $meta = codes_getMeta($struc);
@@ -88,6 +88,7 @@ class BioDivViewTrapper extends JViewLegacy
 	    $query->from("Project P");
 	    $query->innerJoin("ProjectSiteMap PSM ON P.project_id = PSM.project_id");
 		$query->where("PSM.site_id = " . $site_id);
+	    $query->where("PSM.end_time is NULL" );
 	    $db->setQuery($query);
 	    $siteprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
 		

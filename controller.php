@@ -31,7 +31,13 @@ class BioDivController extends JControllerLegacy
     $fields = new stdClass();
     $fields->person_id = userID();
     $fields->site_name = "[New site]";
-    codes_insertObject($fields, 'site');
+    $site_id = codes_insertObject($fields, 'site');
+	
+	// Initialise to be MammalWeb UK project.
+	$fields2 = new stdClass();
+	$fields2->site_id = $site_id;
+	$fields2->projects = "1";    
+	codes_updateSiteProjects($fields2, 'site');
 
     $this->input->set('view', 'trapper');
 
@@ -56,21 +62,7 @@ class BioDivController extends JControllerLegacy
 
     parent::display();
   }
-  /*
-  function next_sequence() {
-	  
-	$app = JFactory::getApplication();
-    
-	$sequence = nextSequence();
-	
-	$app->setUserState('com_biodiv.photo_id', $sequence[0]);
-    $this->input->set('view', 'Ajax');
-	
-	parent::display();
-	
-  }
-  */
-
+  
 
   function get_photo(){
     $app = JFactory::getApplication();
@@ -89,13 +81,15 @@ class BioDivController extends JControllerLegacy
 		$content_id = array_shift($actionBits);
 
 		// remove any existing classification
-		$db = JDatabase::getInstance(dbOptions());
-		$query = $db->getQuery(true);
-		$query->delete("Animal")
-			->where($db->quoteName("photo_id") . " = '$photo_id'")
-			->where($db->quoteName("person_id") . " = " . (int)userID());
-		$db->setQuery($query);
-		$success = $db->execute();
+		// no longer remove existing classifications, all coexist except
+		// Nothing which is disabled if there's any other classification - in Javascript
+		//$db = JDatabase::getInstance(dbOptions());
+		//$query = $db->getQuery(true);
+		//$query->delete("Animal")
+		//	->where($db->quoteName("photo_id") . " = '$photo_id'")
+		//	->where($db->quoteName("person_id") . " = " . (int)userID());
+		//$db->setQuery($query);
+		//$success = $db->execute();
 	
 		// add new control classification (nothing or human)
 		$fields = new stdClass();
@@ -104,13 +98,16 @@ class BioDivController extends JControllerLegacy
 		$fields->species = $content_id;
 		codes_insertObject($fields, 'animal');
 
-		// if human then update the photo to say so
+		// if human then update the photo to say so and remove any existing Nothing classification
+		$db = JDatabase::getInstance(dbOptions());
 		if($content_id == 87){
 			$fields = new stdClass();
 			$fields->photo_id = $photo_id;
 			$fields->contains_human = 1;
 			// we do note own this object so access db directly
 			$db->updateObject('Photo', $fields, 'photo_id');
+			
+			deleteNothingClassification($photo_id);
 		}
 
 		// no longer want Nothing or Human to move the photo on.  This is now controlled by the user 
@@ -213,6 +210,10 @@ class BioDivController extends JControllerLegacy
       $fields->$formField = JRequest::getInt($formField);
     }
     $animal_id = codes_insertObject($fields, 'animal');
+	
+	// Remove any existing Nothing classification
+	deleteNothingClassification($fields->photo_id);
+	
     $this->input->set('view', 'tags');
     parent::display();
   }
@@ -223,11 +224,22 @@ class BioDivController extends JControllerLegacy
 
     $photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
     $animal_id = JRequest::getInt("animal_id");
+	
+	$db = JDatabase::getInstance(dbOptions());
+    
+	$animal = codes_getDetails($animal_id, "animal");
+	if ( $animal['species'] == 87 ) {
+		$fields = new stdClass();
+		$fields->photo_id = $photo_id;
+		$fields->contains_human = 0;
+		// we do note own this object so access db directly
+		$db->updateObject('Photo', $fields, 'photo_id');
+	}
+	
     $conditions = array('person_id = ' . userID(),
 			 'photo_id = ' . $photo_id,
 			 'animal_id = ' . $animal_id);
 
-    $db = JDatabase::getInstance(dbOptions());
     $query = $db->getQuery(true);
     $query->delete($db->quoteName('Animal'));
     $query->where($conditions);
@@ -236,7 +248,7 @@ class BioDivController extends JControllerLegacy
  
  
     $result = $db->execute();
-
+	
     $this->input->set('view', 'tags');
   
     parent::display();
@@ -410,11 +422,23 @@ class BioDivController extends JControllerLegacy
     parent::display();
 
   }
-
+  
+  function check_like($photo_id = 0){
+	$app = JFactory::getApplication();
+    if(!$photo_id){
+	  $photo_id = JRequest::getInt('photo_id');
+      //$photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+    }
+	$app->setUserState('com_biodiv.like_photo_id', $photo_id);
+    $this->input->set('view', 'like');
+    parent::display();
+  }
+  
   function like_photo($photo_id = 0){
     $app = JFactory::getApplication();
     if(!$photo_id){
-      $photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+	  $photo_id = JRequest::getInt('photo_id');
+      //$photo_id = $app->getUserState('com_biodiv.photo_id', 0);
     }
     $this->unlike_photo($photo_id);
 
@@ -428,16 +452,19 @@ class BioDivController extends JControllerLegacy
     print_r(myClassifications($fields->photo_id));
   }
 
-  function unlike_photo(){
+  function unlike_photo($photo_id = 0){
     $app = JFactory::getApplication();
-    $photo_id = $app->getUserState('com_biodiv.photo_id', 0);
-
+	
+	if(!$photo_id){
+	  $photo_id = JRequest::getInt('photo_id');
+      //$photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+    }
+    
     print "Unliked photo_id $photo_id";
     $restrictions = array('person_id' => (int)userID(),
-			 'photo_id' => $photo_id,
-			 'species' => 97);
+			 'photo_id' => $photo_id);
 
-    foreach(classifications($restrictions) as $animal_id => $details){
+    foreach(likes($restrictions) as $animal_id => $details){
       print "Deleting classification animal_id $animal_id";
       codes_deleteObject($animal_id, "animal");
     }

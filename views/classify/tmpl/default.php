@@ -8,7 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-fbInit();
 
 $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
@@ -16,6 +15,7 @@ $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
 
 if(!$this->photo_id){
   print "<h2>No photos for you to classify</h2>\n";
+  print "<h3>If you have recently uploaded some images, please check back in 10 minutes, by which time they will be available for classification</h3>\n";
   return;
  }
 
@@ -35,14 +35,18 @@ function makeControlButton($control_id, $control){
   }
 
   $extraText = implode(" ", $extras);
-  print "<button type='button' class='btn btn-warning $extraText' id='$control_id'>$control</button>";
+  print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
 }
 ?>
-<h1>What do you see?</h1>
+<div class='add-padding'><h2>What do you see in this sequence?</h2></div>
+    
 <?php
+// h2 was just above here.
+/*
 	      if($this->photoDetails['person_id'] == userID()){
-    print "<div class='alert lead alert-info'>You uploaded this!</div>";
+    print "<div class='lead alert-info'>You uploaded this!</div>";
   }
+*/
 ?>
 
 
@@ -51,10 +55,11 @@ function makeControlButton($control_id, $control){
 ?>
 </div>
 
-<div class="container-fluid">
+<div class="container-fluid" id="photo-container">
+	<div class='col-md-9 cls-xs-12'>
 	
-    <div class='row'>
-     <div class='col-md-3'>
+	<div class='row'>
+     <div class='col-md-4'>
 	<div class='btn-group pull-left' role='group'>
 <?php
 foreach($this->lcontrols as $control_id => $control){
@@ -62,43 +67,50 @@ foreach($this->lcontrols as $control_id => $control){
 }
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-3 -->
-
-
-
-     <div class='col-md-6'>
+     </div> <!-- /.col-md-4 -->
+<?php
+	if($this->photoDetails['person_id'] == userID()){
+		print "<div class='col-md-4'><div id='you-uploaded'>You uploaded this!</div></div>";
+	}
+	else {
+		print "<div class='col-md-4'></div>";
+	}
+?>
+	
+     <div class='col-md-4'>
 	<div class='btn-group pull-right' role='group'>
   <?php
   foreach($this->rcontrols as $control_id => $control){
     makeControlButton($control_id, $control);  
   }
-  print "<button type='button' class='btn btn-warning' id='control_nextseq'>".$this->nextseq."</button>";
+  print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-6 -->
+     </div> <!-- /.col-md-4 -->
 
-     <div class='col-md-3'>
+     <div class='col-md-4'>
   <?php
 ?>
-     </div> <!-- /.col-md-3 -->
+     </div> <!-- /.col-md-4 -->
 
   </div> <!-- /.row -->
 
   <div class='row'>
-  <div class='col-md-9'>
+  <div class='col-md-12'>
 
 
   <div class="row">
     <!-- div id='photo_img' class='col-md-12' -->
 <div class='col-md-12' >
-<div id="photoCarousel" class="carousel slide" data-ride="carousel" data-interval='false' data-wrap="false">
+<div id="photoCarousel" class="carousel slide carousel-fade" data-ride="carousel" data-interval='false' data-wrap="false">
   <!-- Indicators -->
-  <ol class="carousel-indicators">
+  <ol id="photo-indicators" class="carousel-indicators">
   <?php
   $numphotos = count($this->sequence);
   for ($i = 0; $i < $numphotos; $i++) {
 	$class_extras = "";
-	if ($i == 0) $class_extras = ' class="active"';
+	if ($i == 0) $class_extras = ' class="active spb" ';
+	else $class_extras = ' class="spb" id = "sub-photo-'.$i.'"';
     print '<li data-target="#photoCarousel" data-slide-to="'.$i.'"'.$class_extras.'></li>';
   }
   ?>
@@ -107,17 +119,20 @@ foreach($this->lcontrols as $control_id => $control){
   <!-- Wrapper for slides -->
   <div id="photoCarouselInner" class="carousel-inner">
 <?php
-$first = true;
+$numphotos = count($this->sequence);
+$j = 1;
 foreach($this->sequence as $photo_id  ){
-	if ($first) {
-		print '<div class="item active" data-photo-id="'.$photo_id.'">';
-		$first = false;
+	$lastclass = "";
+	if ( $j == $numphotos ) $lastclass .= 'last-photo';
+	if ($j==1) {
+		print '<div class="item active '.$lastclass.'" data-photo-id="'.$photo_id.'">';
 	}
 	else {
-		print '<div class="item" data-photo-id="'.$photo_id.'">';
+		print '<div class="item '.$lastclass.'" data-photo-id="'.$photo_id.'">';
 	}
 	print JHTML::image(photoURL($photo_id), 'Photo ' . $photo_id, array('class' =>'img-responsive'));
 	print '</div>';
+	$j++;
  }
 ?>
 
@@ -132,7 +147,7 @@ foreach($this->sequence as $photo_id  ){
   print '  <span class="sr-only">Previous</span>';
   print '</a>';
   //print '<a class="right carousel-control" href="#photoCarousel" data-slide="next" style="background:none !important">';
-  print '<a class="right carousel-control photo-carousel-control" href="#photoCarousel" data-slide="next">';
+  print '<a id="photo-carousel-control-right" class="right carousel-control photo-carousel-control" href="#photoCarousel" data-slide="next">';
   print '  <span class="glyphicon glyphicon-chevron-right"></span>';
   print '  <span class="sr-only">Next</span>';
   print '</a>';
@@ -143,7 +158,7 @@ foreach($this->sequence as $photo_id  ){
 </div> <!-- /.row -->
 
 <div class='row'>
-<div class='col-md-4 pull-left'>
+<div class='col-md-6 pull-left'>
 
 <div>
 <div id='classify_tags'></div>
@@ -161,18 +176,24 @@ foreach($this->sequence as $photo_id  ){
   }
 
 ?>
-<div id='like_image_container' class='pull-right col-md-4'>
+<div id='like_image_container' class='pull-right col-md-6'>
   <button  id='favourite' type='button' class='btn btn-warning pull-right' 
   <?php print "style='display:$favDisp'";?>><span class='fa fa-thumbs-up fa-2x'></span></button>
   <button id='not-favourite' type='button' class='btn btn-warning pull-right'
   <?php print "style='display:$nonFavDisp'";?>><span class='fa fa-thumbs-o-up fa-2x'></span></button>
-</div> <!-- /.col-md-4 -->
-<div class='pull-right col-md-4'><?php fbLikePhoto($this->photo_id); ?> </div>
+</div> <!-- /.col-md-6 -->
 
 </div> <!-- /.row -->
+</div> <!-- /.col-md-12 -->
+
+</div> 
+
 </div> <!-- /.col-md-9 -->
 
+
     <div class='col-md-3 cls-xs-12'>
+	<!-- only needed if header in column div class='spacer-4em'></div -->
+	
 
 <div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>
 
@@ -194,7 +215,7 @@ foreach($this->species as $species_id => $species){
   $name = $species['name'];
   switch($species['type']){
   case 'mammal':
-    $btnClass = 'btn-primary';
+    $btnClass = 'btn-warning';
     break;
 
   case 'bird':  
@@ -202,7 +223,7 @@ foreach($this->species as $species_id => $species){
     break;
 
   case 'notinlist':
-    $btnClass = 'btn-warning';
+    $btnClass = 'btn-primary';
     break;
 
   }

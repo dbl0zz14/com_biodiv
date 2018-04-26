@@ -24,7 +24,7 @@ foreach($this->status as $msg => $count){
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
-    <button  class='btn btn-primary btn-block' type='submit'><i class='fa fa-search'></i> Classify All</a></button>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> Classify All</a></button>
 </form>
 </p>
 <p>
@@ -32,7 +32,7 @@ foreach($this->status as $msg => $count){
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-primary btn-block' type='submit'><i class='fa fa-search'></i> Classify My Images First</a></button>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> Classify My Images Only</a></button>
     
 </form>
 </p>
@@ -52,7 +52,7 @@ foreach($this->status as $msg => $count){
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-primary' type='submit'><i class='fa fa-search'></i> Classify Selected Project Only</a></button>
+      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> Classify Selected Project Only</a></button>
 	</span>
 	
 </div>
@@ -69,14 +69,7 @@ foreach($this->status as $msg => $count){
 <div class='col-md-6'>
 <div id="myCarousel" class="carousel slide" data-ride="carousel"  data-wrap="false">
   <!-- Indicators -->
-  <ol class="carousel-indicators">
-  <?php
-  $numlikes = count($this->mylikes);
-  for ($i = 0; $i < $numlikes; $i++) {
-    print '<li data-target="#myCarousel" data-slide-to="'.$i.'" class="active"></li>';
-  }
-  ?>
-  </ol>
+  
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner">

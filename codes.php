@@ -499,11 +499,15 @@ function codes_getCheckboxes($input_name, $type, $features=array()){
 function codes_getRadiobuttons($input_name, $type, $features=array()){
 	$width = (isset($features['width']) ? $features['width'] : 50);
 
+	$thiscode=$features[$input_name];
+	
+	$options = "";
+
 	foreach(codes_getList($type,$features) as $listitem){
 		list($lcode,$lname)=$listitem;
 		$options.= "<input name='$input_name' type='radio' value='$lcode'";
 		if($lcode==$thiscode){
-			$options.= " selected='selected'";
+			$options.= " checked='checked'";
 		}
 		$options.= " />".substr($lname,0,$width)."<br />\n";
 	}

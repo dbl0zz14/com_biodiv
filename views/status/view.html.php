@@ -47,12 +47,13 @@ class BioDivViewStatus extends JViewLegacy
     $query->from("Animal");
     $query->where("person_id = " . $person_id);
     $db->setQuery($query);
-    $this->status['Number of photos classifed'] = $db->loadResult();
+    $this->status['Number of classifications'] = $db->loadResult();
 
     $query = $db->getQuery(true);
     $query->select("COUNT(*)");
     $query->from("Animal");
     $query->where("person_id = " . $person_id);
+    $query->where("species not in (86,87,97)");
     $db->setQuery($query);
     $this->status['Number of animals identified'] = $db->loadResult();
 
@@ -60,6 +61,7 @@ class BioDivViewStatus extends JViewLegacy
     $query->select("COUNT(DISTINCT species)");
     $query->from("Animal");
     $query->where("person_id = " . $person_id);
+    $query->where("species not in (86,97)");
     $db->setQuery($query);
     $this->status['Number of species identified'] = $db->loadResult();
 
@@ -77,7 +79,7 @@ class BioDivViewStatus extends JViewLegacy
 	
 	// call new biodiv.php function myProjects()
 	$this->projects = myProjects();
-	$this->mylikes = getLikes(3);
+	$this->mylikes = getLikes(1);
 	
     // Display the view
     parent::display($tpl);

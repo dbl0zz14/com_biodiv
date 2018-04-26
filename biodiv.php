@@ -99,73 +99,112 @@ function codes_deleteObject($code, $struc){
   return $success;
 }
 
+
 // NB this is all done in this function for now.  May want to move to biodiv.php and codes.php
 // but for now treating as a special case.
 function codes_updateSiteProjects($fields, $struc) {
 	
-	print "codes_updateSiteProjects called ";
+	//print "codes_updateSiteProjects called ";
 	if ( $struc != 'site' ) {
 		return false;
 	}
 	$codeField = codes_getCodeField($struc); // "site_id"
 	$code = $fields->$codeField; // the actual site_id
-	print "codes_updateSiteProjects site_id = " . $code;
+	//print "codes_updateSiteProjects site_id = " . $code;
 	
 	if(!canEdit($code, $struc)){
 		return false;
 	}
 	
 	$name = 'projects';
-	//$value = $fields->$name; // the new list of values from checklist as a JSON string.
-	//$valuesArray = json_decode($value); // The values from JSON string decoded back to array
-	//$valuesArray = $fields->$name;
-	$valuesArray=explode(",", $fields->$name);
-	print "<br>Got the following projects for site_id " . $code . ":  ";
-	print_r($valuesArray);
 	
-	//$valuesArray = explode(",", $val);
+	// NB $fields->projects is a comma separated list of project ids.  If it's empty just create an empty array.
+	$projects = $fields->$name;
+	$valuesArray = null;
+	if ( $projects == "" ) $valuesArray = array();
+	else $valuesArray = explode(',',$fields->$name);
 	
-	
-	if ( $valuesArray == null ) $valuesArray = array(1);
-	
-	$testArray = array(7);
-		
 	$success = false;
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
-	// Use a transaction as we want to delete all previous entries then add the new ones, but need 
-	// both these operations to succeed or fail.
+	// So, 
+	// for each project_id in valuesArray:
+	//   if there is no mapping in the psm table with a null end_date, end_photo_id
+	//     add one
+	//   (if there's one already then nothing to do)
+	// for each mapping with no end_date or end_photo_id where the project_id is not on the list:
+	//   update it to have end_ fields as this site has now left this project.
+	
+	// Make a list of all the existing mappings (projects) with no end_ fields that already exist for this site
+	$query = $db->getQuery(true);
+	$query->select("project_id ")->from("ProjectSiteMap");
+	$query->where("site_id = " . $code );
+	$query->where("end_time is NULL" );
+	$db->setQuery($query); 
+    $currentProjects = $db->loadColumn();
+	
+	// Get the project_ids that are on the new list but there is not already a mapping in place for.
+	// ie any new projects for this site.
+	$newProjects = array_diff ( $valuesArray, $currentProjects );
+	
+	//error_log ( "newProjects count: " . count($newProjects)  );
+	
+	// And get all the ones which there is a current mapping for but are not on the new list.  ie projects this
+	// site is leaving.
+	$oldProjects = array_diff ( $currentProjects, $valuesArray );
+	//error_log ( "oldProjects count: " . count($oldProjects)  );
+	
+	// Use a transaction as we want to do various updates, and need 
+	// all these operations to succeed or fail.
 	try
 	{
 		$db->transactionStart();
 	
-		$query = $db->getQuery(true);
-    
-		//$values = array($db->quote('TEST_CONSTANT'), $db->quote('Custom'), $db->quote('/path/to/translation.ini'));
-    
-		//$query->insert($db->quoteName('#__overrider'));
-		//$query->columns($db->quoteName(array('constant', 'string', 'file')));
-		//$query->values(implode(',',$values));
-
-		//$db->setQuery($query);
-		//$result = $db->execute();
-		
 		$table = "ProjectSiteMap";
 
-		$query->delete($db->quoteName($table));
-		$query->where("site_id = " . $code);
-		$db->setQuery($query);
-		$result = $db->execute();
+		// Prepare the current time (start_time) and start_photo_id
+		$query = $db->getQuery(true);
+		$query->select("now(), max(photo_id), max(photo_id) + 1")->from("Photo");
+		$db->setQuery($query); 
+		$currDetails = $db->loadRow();
 		
-		// Need to loop through the values inserting each in turn for this site_id.
-		foreach ( $valuesArray as $thisValue ) {
+		
+		//error_log ( "currDetails: " . $currDetails[0] . ", " . $currDetails[1] );
+	
+		
+		foreach ( $newProjects as $thisValue ) {
+			//error_log ( "adding project: " . $thisValue );
 			$query2 = $db->getQuery(true);
 			$query2->insert($db->quoteName($table));
-			$query2->columns($db->quoteName(array('project_id', 'site_id')));
-			$query2->values("" . $thisValue . ", " . $code);
+			$query2->columns($db->quoteName(array('project_id', 'site_id', 'start_time', 'start_photo_id')));
+			// Plus 1 because the current max photo id is not included in the time this site is a member of this project
+			// but the next photo_id will be.
+			$query2->values("" . $thisValue . ", " . $code . ", '" . $currDetails[0] . "', " . $currDetails[2]);
 			$db->setQuery($query2);
 			$result = $db->execute();
+		}
+		
+		foreach ( $oldProjects as $thisValue ) {
+			//error_log ( "setting end values for project: " . $thisValue );
+			$query3 = $db->getQuery(true);
+			
+			$fields = array(
+				$db->quoteName('end_time') . ' = ' . $db->quote($currDetails[0]),
+				$db->quoteName('end_photo_id') . ' = ' . $currDetails[1]
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('site_id') . ' = ' . $code, 
+				$db->quoteName('project_id') . ' = ' . $thisValue
+			);
+
+			$query3->update($db->quoteName($table))->set($fields)->where($conditions);
+			
+			$db->setQuery($query3);
+			$result = $db->execute();
+
 		}
 		
 		$db->transactionCommit();
@@ -174,6 +213,8 @@ function codes_updateSiteProjects($fields, $struc) {
 	}
 	catch (Exception $e)
 	{
+		error_log("ProjectSiteMap update failed due to " . $e);
+		
 		// catch any database errors.
 		$db->transactionRollback();
 	}
@@ -354,6 +395,36 @@ function haveClassified($photo_id){
   return count(myClassifications($photo_id));
 }
 
+function likes($restrictions){
+  if(!is_array($restrictions)){
+    return array();
+  }
+  $allowed = array('photo_id', 'person_id', 'species', 'gender', 'age', 'number');
+  $restrictions = array_intersect_key($restrictions, array_flip($allowed));
+  if(count($restrictions)<1){
+    return array();
+  }
+
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("animal_id, species, gender, age, number")->from("Animal");
+  foreach($restrictions as $field => $val){
+    $query->where($db->quoteName($field) . " = " . (int)$val);
+  }
+  // Add to include only liked images - these are stored as species = 97!
+  $query->where("species = 97");
+  
+  $db->setQuery($query);
+  return $db->loadObjectList('animal_id');
+
+}
+
+function myLikes($photo_id){
+  $person_id = (int)userID();
+  return likes(array('photo_id' => $photo_id,
+			       'person_id' => $person_id));
+}
+
 function getLikes($max_num){
 	
 	$person_id = (int)userID();
@@ -368,6 +439,19 @@ function getLikes($max_num){
 
 	return $mylikes;
 	
+}
+
+function deleteNothingClassification ( $photo_id ) {
+	
+	// remove any existing classification of 'Nothing'
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->delete("Animal")
+		->where($db->quoteName("photo_id") . " = '$photo_id'")
+		->where($db->quoteName("person_id") . " = " . (int)userID())
+		->where($db->quoteName("species") . " = 86");
+	$db->setQuery($query);
+	$success = $db->execute();
 }
 
 // Helper function to recursively add child projects.
@@ -458,6 +542,24 @@ function myProjectDetails(){
   return $projectdetails;
 }
 
+// Return the details for a single project id
+function projectDetails ( $project_id ) {
+  
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.dirname, P.image_file, P.project_text")->from("Project P");
+  $query->where("P.project_id = " . $project_id );
+  $query->where("P.access_level < 2" );
+  $db->setQuery($query);
+  $projectdetails = $db->loadObject();
+  
+  //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+  //print implode(",", $projectdetails);
+  
+  return $projectdetails;
+}
+
+
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
 function getSubProjects($project_prettyname){
@@ -489,41 +591,197 @@ function getSubProjects($project_prettyname){
   
 }
 
-// return all projects that are/should be listed on the website
+function getSubProjectsById($project_id){
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_prettyname")->from("Project");
+  $query->where("project_id = '" . $project_id . "'");
+  $db->setQuery($query);
+  $prettyname = $db->loadResult();
+  
+  return getSubProjects($prettyname);
+}
+
+// return all projects that are/should be listed on the website Projects page - all non-private top level projects
 function listedProjects(){
+  
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description")->from("Project P");
+  $query->where("P.access_level < 2");
+  $query->where("P.parent_project_id is null" );
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $listedprojects = $db->loadObjectList();
+  
+  //print "<br/>Got " . count($listedprojects) . " non-private top level projects<br/>They are:<br>";
+  //print_r($listedprojects);
+  
+  return $listedprojects;
+}
+
+// return two values: number of classifications and total number of sequences uploaded for this project
+// and all subprojects...
+function projectProgress ( $project_id ) {
+	
+	$thisAndSubs = getSubProjectsById ( $project_id );
+	$classifications = 0;
+	$sequences = 0;
+	foreach ( array_keys($thisAndSubs) as $proj_id ) {
+	
+/* number of classifications:
+SELECT count(*) FROM `animal` A
+inner join Photo P on A.photo_id = P.photo_id
+inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
+where P.sequence_num = 1
+and PSM.project_id = 1
+and A.species not in (86,87)
+and PSM.end_photo_id is NULL
+union
+SELECT count(*) FROM `animal` A
+inner join Photo P on A.photo_id = P.photo_id
+inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
+where P.sequence_num = 1
+and PSM.project_id = 1
+and A.species not in (86,87,97)
+and P.photo_id >= PSM.start_photo_id
+and P.photo_id <= PSM.end_photo_id
+*/
+	$db = JDatabase::getInstance(dbOptions());
+  
+	// First the number of classifications for sites that are currently members of this project
+	$query = $db->getQuery(true);
+	$query->select("count(*)")->from("Animal A");
+	$query->innerJoin("Photo P on A.photo_id = P.photo_id");
+	$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+	$query->where("P.sequence_num = 1");
+	$query->where("PSM.project_id = " . $proj_id );
+	$query->where("P.photo_id >= PSM.start_photo_id" );
+	$query->where("PSM.end_photo_id is NULL" );
+	$query->where("A.species not in (86,87,97)" );
+	$db->setQuery($query);
+	$currentClassCount = $db->loadResult();
+  
+	// Next the number of classifications for sites that have left the project, when they were part of the project!
+	$query2 = $db->getQuery(true);
+	$query2->select("count(*)")->from("Animal A");
+	$query2->innerJoin("Photo P on A.photo_id = P.photo_id");
+	$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+	$query2->where("P.sequence_num = 1");
+	$query2->where("PSM.project_id = " . $proj_id );
+	$query2->where("P.photo_id >= PSM.start_photo_id" );
+	$query2->where("P.photo_id <= PSM.end_photo_id" );
+	$query2->where("A.species not in (86,87,97)" );
+	$db->setQuery($query2);
+	$historyClassCount = $db->loadResult();
+  
+/*
+SELECT count(*) from photo P 
+inner Join ProjectSiteMap PSM on P.site_id = PSM.site_id
+where P.photo_id >= PSM.start_photo_id
+and P.photo_id <= PSM.end_photo_id
+and P.sequence_num = 1
+and PSM.project_id = 1
+UNION
+SELECT count(*) from photo P 
+inner Join ProjectSiteMap PSM2 on P.site_id = PSM2.site_id
+and P.photo_id >= PSM2.start_photo_id 
+and PSM2.end_photo_id is null
+and P.sequence_num = 1
+where PSM2.project_id = 1
+*/
+  
+	// Now the total number of sequences uploaded, for sites that are currently members of this project
+	$query3 = $db->getQuery(true);
+	$query3->select("count(*)")->from("Photo P");
+	$query3->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+	$query3->where("P.sequence_num = 1");
+	$query3->where("PSM.project_id = " . $proj_id );
+	$query3->where("P.photo_id >= PSM.start_photo_id" );
+	$query3->where("PSM.end_photo_id is NULL" );
+	$db->setQuery($query3);
+	$currentSequenceCount = $db->loadResult();
+  
+	// And the total number of sequences uploaded, for sites that are have left the project
+	$query4 = $db->getQuery(true);
+	$query4->select("count(*)")->from("Photo P");
+	$query4->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+	$query4->where("P.sequence_num = 1");
+	$query4->where("PSM.project_id = " . $proj_id );
+	$query4->where("P.photo_id >= PSM.start_photo_id" );
+	$query4->where("P.photo_id <= PSM.end_photo_id" );
+	$db->setQuery($query4);
+	$historySequenceCount = $db->loadResult();
+	
+    // Add to totals
+	$classifications = $classifications + $currentClassCount + $historyClassCount;
+	$sequences = $sequences + $currentSequenceCount + $historySequenceCount;
+  }
+	
+  $percentComplete = 0;
+  if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
+  
+  return array("numClassifications"=>$classifications, "numSequences"=>$sequences, "percentComplete"=>$percentComplete);
+}
+
+// return all sites for this project if user is project admin
+function getSites($project_id){
   // what user am I?
   $person_id = (int)userID();
   
   // For now we'll load all projects
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description")->from("Project P");
-  $query->where("P.access_level < 2");
-  $query->order("P.project_id" );
+  $query->select("DISTINCT S.site_id, S.site_name, S.grid_ref, S.person_id, PSM.start_time, PSM.end_time, PSM.start_photo_id, PSM.end_photo_id")->from("Site S");
+  $query->innerJoin("ProjectSiteMap PSM on PSM.site_id = S.site_id");
+  $query->innerJoin("ProjectUserMap PUM on PUM.project_id = PSM.project_id");
+  $query->where("PUM.project_id = ".$project_id);
+  $query->where("PUM.person_id = ".$person_id);
+  $query->where("PUM.role_id = 1");
+  $query->order("S.site_id" );
   $db->setQuery($query);
-  $listedprojects = $db->loadObjectList();
+  $sites = $db->loadObjectList();
   
   //print "<br/>Got " . count($listedprojects) . " non-private projects<br/>They are:<br>";
   //print_r($listedprojects);
   
-  return $listedprojects;
+  return $sites;
 }
 
-
+// return all users for this project if user is project admin
+function getProjectUsers($project_id){
+  // what user am I?
+  $person_id = (int)userID();
+  
+  // For now we'll load all projects
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT PUM.person_id, U.username, R.role_name")->from("ProjectUserMap PUM");
+  $query->innerJoin("rhombus.cgf6k_users U on PUM.person_id = U.id");
+  $query->innerJoin("ProjectUserMap PUM2 on PUM2.project_id = PUM.project_id");
+  $query->innerJoin("Role R on R.role_id = PUM.role_id");
+  $query->where("PUM.project_id = ".$project_id);
+  $query->where("PUM2.person_id = ".$person_id);
+  $query->where("PUM2.role_id = 1");
+  $db->setQuery($query);
+  $users = $db->loadObjectList();
+  
+  //print "<br/>Got " . count($listedprojects) . " non-private projects<br/>They are:<br>";
+  //print_r($listedprojects);
+  
+  return $users;
+}
 function isFavourite($photo_id){
-  foreach(myClassifications($photo_id) as $details){
-    if($details->species == 97){
-      return true;
-    }
+  if ( count(myLikes($photo_id)) > 0 ) {
+	  return true;
   }
-  return false;
+  else {
+	  return false;
+  }
 }
 
 function nextSequence(){
-  // For now this is a dummy function returning an array of photo ids in a sequence.
-  // Will become a function that does that properly as in nextPhoto
-  //return array(1030,1031,1032,1033);
-
+  
   //print "<br/>nextSequence called<br/>";
 	
   $db = JDatabase::getInstance(dbOptions());
@@ -547,40 +805,48 @@ function nextSequence(){
 	  
 	  //print "<br/>id_string = ".$id_string."<br/>";
 	  $query = $db->getQuery(true);
+	  $q2 = $db->getQuery(true);
+      
       $query->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
         ->innerJoin("Site S ON P.site_id = S.site_id")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
         ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
         ->where("A.photo_id IS NULL")
         ->where("P.contains_human =0")
 	    ->where("P.sequence_id > 0")
-		->order("rand()");
-      $db->setQuery($query, 0, 1); // LIMIT 1
+		->where("P.sequence_num = 1" )
+		->where("P.photo_id >= PSM.start_photo_id")
+		->where("PSM.end_photo_id is null");
+		
+	  $q2->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0")
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id") 
+			->where("P.photo_id <= PSM.end_photo_id");
+			
+	  $q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $query->union($q2) . ') a')
+             ->order("rand()");
+			 
+      $db->setQuery($q3, 0, 1); // LIMIT 1
       $photo = $db->loadObject();
 	  if ( $photo ) {
 		  $photo_id = $photo->photo_id;
 	  }
 	  //print "<br/>After query found photo_id = " . $photo_id . "<br/>";
+	  
 	  // Classifying my project only so return here even if no photo_id.
 	  // find first unclassified picture in this sequence
-	  // Copied from end of function as need to return for my project ONLY
-	  // Really need to do this more neatly
-	  if ( $photo_id ) {
-        //print "photo found = ".$photo_id;
-	    $sequence_id = $photo->sequence_id;
-        //print "sequence id = ".$sequence_id;
-	    $sequence = codes_getDetails($sequence_id, 'sequence');
-        $photo_id = $sequence['start_photo_id'];
-        //print "start photo = ".$photo_id;
-	    while($photo_id && haveClassified($photo_id)){
-          $photoDetails = codes_getDetails($photo_id, 'photo');
-          $photo_id = $photoDetails['next_photo'];
-        }
-		//print "after checking classified, photo_id = ".$photo_id;
-		
-	  }
 	  return getSequence($photo_id);
 	}
   }
@@ -598,11 +864,17 @@ function nextSequence(){
 	->where("P.contains_human =0")
 	->where("P.person_id = " . (int)userID())
 	->where("P.sequence_id > 0")
+	->where("P.sequence_num = 1" )
 	->order("rand()");
       $db->setQuery($query, 0, 1); // LIMIT 1
       $photo = $db->loadObject();
       $photo_id = $photo->photo_id;
+	  
+	  // Classifying my photos ONLY so return here even if no photo_id.
+	  // find first unclassified picture in this sequence
+	  return getSequence($photo_id);
     }
+	/* take this out as no longer an option...
     if ( !$photo_id ) {
 		//print "<br/>no photo_id, testing for classify project first<br/>";
   
@@ -619,6 +891,7 @@ function nextSequence(){
         ->where("A.photo_id IS NULL")
         ->where("P.contains_human =0")
 	    ->where("P.sequence_id > 0")
+		->where("P.sequence_num = 1" )
 		->order("rand()");
       $db->setQuery($query, 0, 1); // LIMIT 1
       $photo = $db->loadObject();
@@ -628,6 +901,7 @@ function nextSequence(){
     }
 	//print "<br/>photo_id = " . $photo_id . " after classify_project check<br/>";
 	}
+	*/
 		
 	if (!$photo_id) {
 		//print "<br/>No photo so looking at all my projects<br/>";
@@ -639,47 +913,50 @@ function nextSequence(){
 		$id_string = implode(',', array_keys($projects));
 		
 		$query = $db->getQuery(true);
+		$q2 = $db->getQuery(true);
+      
 		$query->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Site S ON P.site_id = S.site_id") 
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
 			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
 			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
 			->where("A.photo_id IS NULL")
 			->where("P.contains_human =0")
 			->where("P.sequence_id > 0")
-			->order("rand()");
-		$db->setQuery($query, 0, 1); // LIMIT 1
-		$photo = $db->loadObject();
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("PSM.end_photo_id is null");
+			
+		$q2->select("P.photo_id, P.sequence_id")
+				->from("Photo P")
+				->innerJoin("Site S ON P.site_id = S.site_id")
+				->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
+				->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+				->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+				->where("A.photo_id IS NULL")
+				->where("P.contains_human =0")
+				->where("P.sequence_id > 0")
+				->where("P.sequence_num = 1" )
+				->where("P.photo_id >= PSM.start_photo_id") 
+				->where("P.photo_id <= PSM.end_photo_id");
+				
+		$q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $query->union($q2) . ') a')
+             ->order("rand()");
+			 
+		$db->setQuery($q3, 0, 1); // LIMIT 1
+			
+		$photo = $db->loadObject();		
+		
 		if ( $photo ) {
 		  $photo_id = $photo->photo_id;
 		}
 	}
-
-    // find first unclassified picture in this sequence
-	$sequence_id = $photo->sequence_id;
-	$sequence = codes_getDetails($sequence_id, 'sequence');
-	$photo_id = $sequence['start_photo_id'];
-	
-	//echo "photo_id = ".$photo_id;
-	
-    while($photo_id && haveClassified($photo_id)){
-      $photoDetails = codes_getDetails($photo_id, 'photo');
-      $photo_id = $photoDetails['next_photo'];
-    }
   }
   
   //print "<br/> returning at end of nextSequence, sequence_id = " . $sequence_id;
-  /*
-  $sequence = array();
-  
-  $next_photo_id = $photo_id;
-  while ($next_photo_id>0) {
-	$sequence[] = $next_photo_id;
-	$next_photo_details = codes_getDetails($next_photo_id, 'photo');
-	$next_photo_id = $next_photo_details['next_photo'];      
-  }
-  */
   return getSequence($photo_id);
 }
 
@@ -732,7 +1009,7 @@ function updateSequence($photo_id){
 	return true;
 }
 
-
+/* NO LONGER USED
 function nextPhoto($prev_photo_id){
 	
   //print "<br/>nextPhoto called<br/>";
@@ -771,11 +1048,11 @@ function nextPhoto($prev_photo_id){
   }
   if($prev_photo_id && !$photo_id){
     // find next photo sequence on same trap usually
-	/* continue causes error when used in included file so avoid this..
-    if(rand(0,10)>7){
-      continue;
-    }
-	*/
+	// continue causes error when used in included file so avoid this..
+    //if(rand(0,10)>7){
+    //  continue;
+    //}
+	
 	if(rand(0,10)<=7){
 	  //print "<br/>rand < 7<br/>";
 	
@@ -913,20 +1190,20 @@ function nextPhoto($prev_photo_id){
 		  $photo_id = $photo->photo_id;
 		}
 	}
-	  /*
-    if(!$photo_id){
-      $query = $db->getQuery(true);
-      $query->select("P.photo_id, P.sequence_id")
-	->from("Photo P")
-	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-	->where("A.photo_id IS NULL")
-	->where("P.contains_human =0")
-      ->order("rand()");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo = $db->loadObject();
-      $photo_id = $photo->photo_id;
-    }
-	*/
+	  
+    //if(!$photo_id){
+    //  $query = $db->getQuery(true);
+    //  $query->select("P.photo_id, P.sequence_id")
+	//->from("Photo P")
+	//->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+	//->where("A.photo_id IS NULL")
+	//->where("P.contains_human =0")
+    //  ->order("rand()");
+    //  $db->setQuery($query, 0, 1); // LIMIT 1
+    //  $photo = $db->loadObject();
+    //  $photo_id = $photo->photo_id;
+    //}
+	
 
     // find first unclassified picture in this sequence
 	$sequence_id = $photo->sequence_id;
@@ -956,6 +1233,8 @@ function nextPhoto($prev_photo_id){
 
   return $photo_id;
 }
+
+*/
 
 function prevPhoto($last_photo_id){
   $photoDetails = codes_getDetails($last_photo_id, 'photo');
@@ -1175,35 +1454,7 @@ function showMessages(){
 }
 
 
-function fbInit(){
-?>
-<div id="fb-root"></div>
-<script>
-    window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '1612663612328391',
-	  xfbml      : true,
-	  version    : 'v2.4'
-	  });
-  };
 
-  (function(d, s, id){
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) {return;}
-    js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/sdk.js";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
-</script>
-
-<?php
-}
-
-function fbLikePhoto($photo_id){
-?>
-<div class="fb-like" data-href="<?php print BIODIV_ROOT;?>&amp;view=show&amp;photo_id=<?php print $photo_id;?>" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
-<?php
-}
 
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');

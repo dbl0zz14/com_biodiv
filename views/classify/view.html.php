@@ -94,7 +94,7 @@ class BioDivViewClassify extends JViewLegacy
 	    list($id, $name) = $stuff;
 	    $details = codes_getDetails($id, 'species');
 	    $this->species[$id] = array("name" => $name,
-					"type" => $details['struc'], // mammal or bird
+					"type" => $details['struc'], // mammal or bird or notinlist
 					"page" => $details['seq']);;
 	  }
 
@@ -147,10 +147,13 @@ class BioDivViewClassify extends JViewLegacy
 
 	  $this->classifyInputs = array();
 	  foreach(array("gender", "age") as $struc){
-	    $input = "<label for ='classify_$struc'>" . codes_getTitle($struc) . "</label>\n";
-	    $input .= "<select id='classify_$struc' name='$struc'>\n";
-	    $input .= codes_getOptions(1, $struc);
-	    $input .= "\n</select>\n";
+	    $input = "<label for ='classify_$struc'>" . codes_getTitle($struc) . "</label><br />\n";
+	    //$input .= "<select id='classify_$struc' name='$struc'>\n";
+	    //$input .= codes_getOptions(1, $struc);
+		// set default to be unknown:
+		$features = array("gender"=>84, "age"=>85);
+	    $input .= codes_getRadioButtons($struc, $struc, $features);
+	    //$input .= "\n</select>\n";
 	    $this->classifyInputs[] = $input;	    
 	  }
 	  $number = "<label for ='classify_number'>How many?</label>\n";
