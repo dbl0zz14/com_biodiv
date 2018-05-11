@@ -38,8 +38,9 @@ function makeControlButton($control_id, $control){
   print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
 }
 ?>
-<div class='add-padding'><h2>What do you see in this sequence?</h2></div>
-    
+<h2>What do you see in this sequence?</h2>
+<h5 class='bg-warning clashing add-padding-all'>Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>
+
 <?php
 // h2 was just above here.
 /*
@@ -201,6 +202,8 @@ foreach($this->sequence as $photo_id  ){
     <li data-target="#carousel-species" data-slide-to="0" class="active spb"></li>
     <li data-target="#carousel-species" data-slide-to="1" class="spb"></li>
     <li data-target="#carousel-species" data-slide-to="2" class="spb"></li>
+	<li data-target="#carousel-species" data-slide-to="3" class="spb"></li>
+	<li data-target="#carousel-species" data-slide-to="4" class="spb"></li>
   </ol>
 
 <?php
