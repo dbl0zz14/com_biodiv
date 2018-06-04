@@ -21,6 +21,8 @@
 
 .highlighted { background-color: #b4d0d0; }
 
+.clashing { background-color: #ffff00; }
+
 .add-padding { padding: 0 0 1em 0; }
 
 .add-padding-all { padding: 1em 1em 1em 1em; }

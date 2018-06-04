@@ -62,7 +62,7 @@ class BioDivViewClassify extends JViewLegacy
 	  // Need to do a check here so that refresh doesn't load next sequence......
 	  // If there is a photo_id then get the sequence for that photo id.  If not, get a new sequence
 	  if(!$this->photo_id){
-	    $this->sequence = nextSequence();
+	    $this->sequence = nextSequence(null);
 	  }
 	  else {
 		$this->sequence = getSequence($this->photo_id);

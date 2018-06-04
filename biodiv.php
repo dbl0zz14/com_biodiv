@@ -521,9 +521,56 @@ function myProjects(){
   return $myprojects;
 }
 
-function myProjectDetails(){
+// If project_id is null return for all myProjects.  Option_type is the struc in the Options table.  If null return all.
+function getProjectOptions( $project_name, $option_type ){
   // Call myprojects to get the project list, then get details for each.
-  $myprojects = myProjects();
+  $myprojects = null;
+  if ( $project_name ) {
+	  $myprojects = getSubProjects( $project_name );
+  }
+  else {
+	  $myprojects = myProjects();
+  }
+  
+  //print "<br>getProjectOptions, got projects: <br>" ;
+  //print_r ( $myprojects );
+  
+  
+  $project_details = array();
+  
+  if ( count($myprojects) > 0 ) {
+  
+	$id_string = implode(",", array_keys($myprojects));
+  
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id, P.project_prettyname, O.struc, O.option_name")->from("Project P");
+	$query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
+	$query->innerJoin("Options O on PO.option_id = O.option_id" );
+	$where_str = "P.project_id in (".$id_string.")";
+	if ( $option_type ) $where_str .= " AND O.struc = '" . $option_type . "'";
+	$query->where($where_str);
+	$query->order("P.project_id" );
+	$db->setQuery($query);
+	$projectdetails = $db->loadAssocList("project_id");
+  
+  
+	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+	//print_r($projectdetails);
+  }
+  
+  return $projectdetails;
+}
+
+function myProjectDetails( $project_id ){
+  // Call myprojects to get the project list, then get details for each.
+  $myprojects = null;
+  if ( $project_id ) {
+	  $myprojects = getSubProjectsById( $project_id );
+  }
+  else {
+	  $myprojects = myProjects();
+  }
   
   $id_string = implode(",", array_keys($myprojects));
   
@@ -533,7 +580,7 @@ function myProjectDetails(){
   $query->where("P.project_id in (".$id_string.")");
   $query->order("P.project_id" );
   $db->setQuery($query);
-  $projectdetails = $db->loadObjectList();
+  $projectdetails = $db->loadAssocList("project_id");
   
   
   //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
@@ -542,7 +589,7 @@ function myProjectDetails(){
   return $projectdetails;
 }
 
-// Return the details for a single project id
+// Return the details for a single project id as an object
 function projectDetails ( $project_id ) {
   
   $db = JDatabase::getInstance(dbOptions());
@@ -558,7 +605,6 @@ function projectDetails ( $project_id ) {
   
   return $projectdetails;
 }
-
 
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
@@ -590,6 +636,8 @@ function getSubProjects($project_prettyname){
   return $subprojects;
   
 }
+
+
 
 function getSubProjectsById($project_id){
   $db = JDatabase::getInstance(dbOptions());
@@ -780,7 +828,369 @@ function isFavourite($photo_id){
   }
 }
 
+
+// New version of nextSequence which considers the classify priority mode of each project.
+// At the time of writing this could be:
+// Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
 function nextSequence(){
+  
+  //print "<br/>nextSequence called<br/>";
+	
+  $db = JDatabase::getInstance(dbOptions());
+  $app = JFactory::getApplication();
+  
+  // Initialise photo_id and sequence_id to null
+  $photo_id = null;
+  $sequence_id = null;
+  
+  // First find out which classify button was pressed.
+  $classify_project = $app->getUserState("com_biodiv.classify_only_project");
+  $classify_own = $app->getUserState("com_biodiv.classify_self");
+  $last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+  
+  $my_project = null;
+  
+  if ( $classify_project ) $my_project = $app->getUserState("com_biodiv.my_project");
+  
+  //print "<br>nextSequence, my_project: " . $my_project . "<br>" ;
+  
+  // Get a list of projects over which we are working and their priority mode (an assoc list keyed on project_id)
+  $project_options = getProjectOptions ( $my_project, "priority" );
+  
+  //print "<br>nextSequence, got project options: <br>" ;
+  //print_r ( $project_options );
+  
+  // Get all the priority option names indexed on project_id
+  $priority_array = array_column ( $project_options, "option_name", "project_id" );
+  
+  //print "<br>nextSequence, got priority_array: <br>" ;
+  //print_r ( $priority_array );
+  
+  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered");
+  
+  // which priorities do we have projects for?
+  $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
+  
+  //print "<br>nextSequence, got distinct_priorities: <br>" ;
+  //print_r ( $distinct_priorities );
+  
+  //error_log ( "distinct priorities: " . implode ( ',', $distinct_priorities ) );
+  
+  $photo_id_candidates = array();
+  
+  if ( in_array("Single", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Single" );
+	  $ph_id = chooseSingle ( $project_ids, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Single"] = $ph_id;
+  }
+  if ( in_array("Multiple", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Multiple" );
+	  $ph_id = chooseMultiple ( $project_ids, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Multiple"] = $ph_id;
+  }
+  if ( in_array("Single to multiple", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Single to multiple" );
+	  $ph_id = chooseSingle ( $project_ids, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
+	  else {
+		  $ph_id = chooseMultiple ( $project_ids, $classify_own );
+		  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
+	  }
+  }
+  if ( in_array("Site time ordered", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Site time ordered" );
+	  $ph_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Site time ordered"] = $ph_id;
+  }
+  
+  $num_candidates = count($photo_id_candidates);
+  $chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
+  
+  // If only one priority type we are done, but if more than one we have to pick.
+  if ( $num_candidates > 1 ) {
+	
+	// Determine which priority type we're using.  Take a weighted choice from each priority type that this user has 
+	// access to.  For now use these hardcoded values but this needs to be taken out and put in the database, then updated daily based 
+	// on what photos/projects there are...
+	$all_weightings = getPriorityWeightings ();
+	
+	$reqd_weightings = array_intersect_key ( $all_weightings, $photo_id_candidates );
+	//print "<br>nextSequence, got reqd_weightings: <br>" ;
+	//print_r ( $reqd_weightings );
+  
+	$total_weighting = array_sum($reqd_weightings);
+  
+	// Choose a random integer between 0 and $total_weightings.
+	$choice = rand ( 1, $total_weighting );
+	
+	//print "<br>nextSequence, choice:" . $choice . " <br>" ;
+	
+	// check through the accumulated weightings to see where the choice lies..
+	$count = 0;
+	foreach ( $reqd_weightings as $priority=>$weighting ) {
+		$count += $weighting;
+		if ( $choice <= $count ) {
+			$chosen_priority = $priority;
+			break;
+		}
+	}
+  }
+  
+  //print "<br>nextSequence, chosen priority is:" . $chosen_priority . " <br>" ;
+  //error_log ( "nextSequence, chosen priority is:" . $chosen_priority );
+  
+  $photo_id = $photo_id_candidates[$chosen_priority];
+  
+  //print "<br/> returning at end of nextSequence, sequence_id = " . $sequence_id;
+  return getSequence($photo_id);
+}
+
+function chooseMultiple ( $project_ids, $classify_own ) {
+	
+	$photo_id = null;
+	
+	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
+	$own_string = "";
+	if ( $classify_own ) {
+		$own_string = " AND P.person_id = " . (int)userID();
+	}
+		
+	if ( count($project_ids) > 0 ) {
+	
+		$project_id_str = implode(',', $project_ids);
+	
+		//error_log ( "chooseMultiple, project_id_str = " . $project_id_str );
+  
+		$db = JDatabase::getInstance(dbOptions());
+		$q1 = $db->getQuery(true);
+		$q2 = $db->getQuery(true);
+            
+		$q1->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("PSM.end_photo_id is null");
+		
+		$q2->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id") 
+			->where("P.photo_id <= PSM.end_photo_id");
+			
+		$q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $q1->union($q2) . ') a')
+             ->order("rand()");
+	
+		$db->setQuery($q3, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+			$photo_id = $photo->photo_id;
+		}	
+	}
+	
+	return $photo_id;
+}
+
+
+function chooseSingle ( $project_ids, $classify_own ) {
+	
+	$photo_id = null;
+	
+	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
+	$own_string = "";
+	if ( $classify_own ) {
+		$own_string = " AND P.person_id = " . (int)userID();
+	}
+	
+	$project_id_str = implode(',', $project_ids);
+  
+	$db = JDatabase::getInstance(dbOptions());
+	$q1 = $db->getQuery(true);
+	$q2 = $db->getQuery(true);
+            
+	$q1->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Site S ON P.site_id = S.site_id")
+        ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        ->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0" . $own_string )
+	    ->where("P.sequence_id > 0")
+		->where("P.sequence_num = 1" )
+		->where("P.photo_id >= PSM.start_photo_id")
+		->where("PSM.end_photo_id is null");
+		
+	$q2->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id")
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id") 
+			->where("P.photo_id <= PSM.end_photo_id");
+			
+	$q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $q1->union($q2) . ') a')
+             ->order("rand()");
+	
+	$db->setQuery($q3, 0, 1); // LIMIT 1
+	$photo = $db->loadObject();
+	if ( $photo ) {
+		$photo_id = $photo->photo_id;
+	}	
+	
+	return $photo_id;
+}
+
+function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
+	
+	//print "<br>chooseSiteTimeOrdered, last_photo_id is:" . $last_photo_id . " <br>" ;
+	
+	$photo_id = null;
+	
+	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
+	$own_string = "";
+	if ( $classify_own ) {
+		$own_string = " AND P.person_id = " . (int)userID();
+	}
+	
+	$project_id_str = implode(',', $project_ids);
+  
+	$db = JDatabase::getInstance(dbOptions());
+	
+	// If given a photo id, check for the next sequence in time order on that site.  If site is finishes, start a new site.
+	if ( $last_photo_id ) {
+		$q1 = $db->getQuery(true);
+		$q2 = $db->getQuery(true);
+            
+		$q1->select("P.photo_id, P.sequence_id, P.taken")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Photo P2 ON P2.site_id = P.site_id" )
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P2.photo_id = ".$last_photo_id )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("PSM.end_photo_id is null");
+		
+		$q2->select("P.photo_id, P.sequence_id, P.taken")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Photo P2 ON P2.site_id = P.site_id" )
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id")
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P2.photo_id = ".$last_photo_id )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id") 
+			->where("P.photo_id <= PSM.end_photo_id");
+			
+		$q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $q1->union($q2) . ') a')
+             ->order("a.taken");	// order by taken to get the oldest photo on this site that has not yet been classified.
+		
+		$db->setQuery($q3, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+			$photo_id = $photo->photo_id;
+		}	
+	}
+	if ( !$photo_id ) {
+		$q1 = $db->getQuery(true);
+		$q2 = $db->getQuery(true);
+            
+		$q1->select("P.photo_id, P.sequence_id, P.taken")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("PSM.end_photo_id is null");
+		
+		$q2->select("P.photo_id, P.sequence_id, P.taken")
+			->from("Photo P")
+			->innerJoin("Site S ON P.site_id = S.site_id")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id")
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id") 
+			->where("P.photo_id <= PSM.end_photo_id");
+			
+		$q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $q1->union($q2) . ') a')
+             ->order("a.taken");	// order by taken to get the oldest photo in the set that has not yet been classified.
+		
+		$db->setQuery($q3, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+			$photo_id = $photo->photo_id;
+		}	
+	}
+	
+	return $photo_id;
+}
+
+function getPriorityWeightings () {
+	$db = JDatabase::getInstance(dbOptions());
+	$app = JFactory::getApplication();
+	$query = $db->getQuery(true);
+	
+	$query->select("O.option_name, OD.value")
+        ->from("Options O")
+        ->innerJoin("OptionData OD ON O.option_id = OD.option_id")
+        ->where("OD.data_type = 'weighting'");
+        
+	$db->setQuery($query); 
+	$weightings = $db->loadAssocList("option_name", "value");
+	
+	//print "<br>getPriorityWeightings, got weightings: <br>" ;
+	//print_r ( $weightings );
+  
+	return $weightings;
+}
+
+
+function nextSequenceOld(){
   
   //print "<br/>nextSequence called<br/>";
 	
