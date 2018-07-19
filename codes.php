@@ -124,10 +124,15 @@ function codes_getCode($thisname, $type, $options = array()){
 		}
 		$db = db();
 		$qr = $db->query($query);
+		/*
 		if ($qr->num_rows > 0) {
 			if (isset($qr[0]['code'])) {
 				return $qr[0]['code'];
 			}
+		}
+		*/
+		if ($qrline = $qr->fetch_assoc()) {
+			return $qrline['code'];
 		}
 	}
 }
@@ -152,14 +157,15 @@ function codes_getName($thiscode, $type){
 		$code = $typeMeta["code"];
 		$name = $typeMeta["name"];
 
-
 		$table = $typeMeta["table"];
+		
 		$database = $typeMeta["database"];
 		if(!$table or !$database){
 			codes_warning("No meta data for structure $type");
 		}
 
 		$restriction = $typeMeta["restriction"];
+		
 		// if the name field starts with a % then it describes a function
 		// not a field
 		if(substr($name,0,1) == "%"){
@@ -406,7 +412,13 @@ function codes_getList($type,$features=array()){
 	}
 	if(!isset($features['order']) || !$order=$features['order']){
 		if(!isset($typeMeta['orderby']) || !$order=$typeMeta['orderby']) {
-			$order=$name;
+			// only set to order by $name if $name is not a function
+			if(substr($name,0,1) != "%") {
+				$order=$name;
+			}
+			else {
+				$order=$code;
+			}
 		}
 	}
 	$query.=" ORDER BY $order";

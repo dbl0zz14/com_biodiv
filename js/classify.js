@@ -40,7 +40,7 @@ jQuery(document).ready(function(){
 		jQuery.ajax(url);
 	    });
 	}
-	
+	 
 	jQuery('#photoCarousel').bind('slid.bs.carousel', function (e) {
 		// Need to change the facebook href to use the new photo_id
 		//console.log("Got slid event");
@@ -71,11 +71,22 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&task=add_animal&format=raw";
 		jQuery('#classify_tags').load(url, formData, BioDiv.removeClick);
 		
-	    });
+	});
 
 
+	jQuery('.filter_select').click(function (){
+		id = jQuery(this).attr("id");
+		console.log("id = " + id );
+		idbits = id.split("_");
+		filter_id = idbits.pop();
+		url = BioDiv.root + "&task=get_species&format=raw&filterid=" + filter_id;
+		jQuery('#carousel-species').load(url, {'success': function() {
+			    console.log ( "filter loaded" );  
+			}}
+			);
+	});
+		
 	jQuery('.species_select').click(function (){
-		console.log("species select clicked");
 		id = jQuery(this).attr("id");
 		idbits = id.split("_");
 		species_id = idbits.pop();
@@ -171,6 +182,8 @@ jQuery(document).ready(function(){
 	jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
 	jQuery('#favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to remove favourite status', 'placement': 'bottom'});
 	jQuery('#not-favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to make this one of your favourites', 'placement': 'bottom'});
+	jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
+	
 
 	jQuery('.sub-photo');
 		

@@ -723,7 +723,7 @@ and P.photo_id <= PSM.end_photo_id
   
 	// First the number of classifications for sites that are currently members of this project
 	$query = $db->getQuery(true);
-	$query->select("count(*)")->from("Animal A");
+	$query->select("count(distinct A.photo_id)")->from("Animal A");
 	$query->innerJoin("Photo P on A.photo_id = P.photo_id");
 	$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query->where("P.sequence_num = 1");
@@ -736,7 +736,7 @@ and P.photo_id <= PSM.end_photo_id
   
 	// Next the number of classifications for sites that have left the project, when they were part of the project!
 	$query2 = $db->getQuery(true);
-	$query2->select("count(*)")->from("Animal A");
+	$query2->select("count(distinct A.photo_id)")->from("Animal A");
 	$query2->innerJoin("Photo P on A.photo_id = P.photo_id");
 	$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query2->where("P.sequence_num = 1");
@@ -1872,6 +1872,7 @@ function someMsgs($type){
 }
 
 function showMessages(){
+	
   $app = JFactory::getApplication();
   $msgs = $app->getUserState("com_biodiv.msgs", noMsgs());
   foreach(array('success', 'warning', 'error') as $type){
@@ -1890,30 +1891,111 @@ function showMessages(){
   $app->setUserState("com_biodiv.msgs", noMsgs());
 }
 
-function filterId(){
+// Get all generic filters (eg Common, Mammals and Birds)
+function getFilters () {
 	
-	$app = JFactory::getApplication();
-	$filterName = $app->getUserState('com_biodiv.filtername', 'common');
-	return 209;
+	$filters = codes_getList ( 'filter' );
+	
+	//print ( "<br> filters: <br>" );
+	//print_r ( $filters );
+		
+	$returnFilters = array();
+	
+	foreach ($filters as $filter) {
+		$returnFilters[$filter[0]] = array('label'=>$filter[1]);
+	}
+	
+	return $returnFilters;
+	
+	//return array ( 210=>array("label"=>"Project"), 209=>array("label"=>"Common"), 207=>array("label"=>"Mammals"), 208=>array("label"=>"Birds" ) );
 }
 
-function getSpecies ( $filtername, $onePage ) {
+// Get project specific filters, either based on project_id or photo_id given
+function getProjectFilters ( $project_id, $photo_id = null ) {
+	
+	//print "<br>getProjectFilters called, project_id = " . $project_id . ", photo_id = " . $photo_id;
+	
+	$projectFilters = array();
+	if ( $project_id ) {
+		// Find filter for this project
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->select("O.option_id, O.option_name")->from("Options O");
+		$query->innerJoin("ProjectOptions PO on PO.option_id = O.option_id");
+		$query->where("PO.project_id = " . $project_id );
+		$query->where("O.struc = 'projectfilter'" );
+		$db->setQuery($query);
+		$projectFilters = $db->loadRowList();
+		//print ( "<br> Project id used - projectFilters: <br>" );
+		//print_r ( $projectFilters );
+	}
+	else if ( $photo_id ) {
+		// Use the photo_id to find all projects we want filters for
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->select("O.option_id, O.option_name")->from("Options O");
+		$query->innerJoin("ProjectOptions PO on PO.option_id = O.option_id");
+		$query->innerJoin("Photo P on P.photo_id = ". $photo_id);
+		$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
+		$query->where("P.photo_id >= PSM.start_photo_id" );
+		$query->where("PSM.end_photo_id is NULL" );
+		$query->where("PSM.project_id = PO.project_id" );
+		$query->where("O.struc = 'projectfilter'" );
+		$db->setQuery($query);
+		$projectFilters = $db->loadRowList();
+		//print ( "<br> Photo id used - projectFilters: <br>" );
+		//print_r ( $projectFilters );
+	}
+	
+	//print ( "<br> projectFilters: <br>" );
+	//print_r ( $projectFilters );
+		
+	$returnFilters = array();
+	
+	foreach ($projectFilters as $filter) {
+		$returnFilters[$filter[0]] = array('label'=>$filter[1]);
+	}
+	
+	return $returnFilters;
+}
+
+function cmp($a, $b)
+{
+	return strcmp($a[1], $b[1]);
+}
+
+function strucCmp($a, $b)
+{
+	// If it's mammal, put it first.  notinlist last. otherwise alphabetical.
+	if ( $a == "mammal" ) {
+		return -1;
+	}
+	else if ( $b == "mammal" ) {
+		return 1;
+	}
+	else if ( $a == "notinlist" ) {
+		return 1;
+	}
+	else if ( $b == "notinlist" ) {
+		return -1;
+	}
+	else {
+		return strcmp($a, $b);
+	}
+}
+	
+function getSpecies ( $filterid, $onePage ) {
 	
 	$speciesList = array();
 	  
 	//$species = codes_getList ( $filtername );
-	$species = codes_getList ( "filterspecies" );
+	$restrict = array();
+	$restrict['restriction'] = "value = '" . $filterid . "'";
+	$species = codes_getList ( "filterspecies", $restrict );
 	  
 	// Need to sort this list by name.
-	function cmp($a, $b)
-	{
-		return strcmp($a[1], $b[1]);
-	}
 	usort($species, "cmp");
 	  
-	//print ( "species - <br>" );
-	//print_r ( $species );
-
 	// Sort the data 
 	//array_multisort($name, SORT_ASC, $species);
 
@@ -1921,7 +2003,6 @@ function getSpecies ( $filtername, $onePage ) {
 	$features['restriction'] = "struc='notinlist'";
 	$notInListSpecies = codes_getList ( "species", $features );
 	$species = array_merge($species, $notInListSpecies);
-	//foreach(codes_getList("species") as $stuff){
 	foreach($species as $stuff){
 		  
 		list($id, $name) = $stuff;
@@ -1947,15 +2028,19 @@ function getSpecies ( $filtername, $onePage ) {
 		}
 	}
 	
+	// Just make sure mammal is the first struc type...
+	uksort($speciesList, "strucCmp");
+	
 	//print_r ( $speciesList );
 		
 	return $speciesList;
 }
 
 //$useSeq is flag if true uses page numbers given, if false, works pages out alphabetically
-function printSpeciesList ( $speciesList, $useSeq ) {
+function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 	
-	$numPerPage = 20;
+	// Should store this in the Options table as a system option.
+	$numPerPage = 36;
 	
 	//print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 
@@ -1980,6 +2065,8 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 			}
   
 			$name = $species['name'];
+			if ( strlen($name) > 20 ) $name = "<small>$name</small>";
+			
 			//print ( "name = " . $name . "<br>" );
 			switch($species['type']){
 			case 'mammal':
@@ -1996,7 +2083,6 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 			}
 	
 			$carouselItems[$page][] =
-			//"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block species_select' data-toggle='modal' data-target='#classify_modal'><small>$name</small></button> \n";
 			"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn species_select' data-toggle='modal' data-target='#classify_modal'>$name</button>";
 			
 			$speciesCount++;
@@ -2013,11 +2099,10 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 		for ( $i = 0; $i < $numPages; $i++ ) {
 			//print "i = " . $i . ", numPages = " . $numPages . "<br>";
 			if ( $i == 0 ) {
-				//print "<li title='' class='active spb' data-original-title='' data-target='#carousel-species' data-slide-to='" . $i . "'></li>";
-				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species' data-slide-to='" . $i . "'></li>";
+				print "<li title='' class='active spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
 			}
 			else {
-				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species' data-slide-to='" . $i . "'></li>";
+				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
 			}
 		}
 		print "</ol>";
@@ -2033,16 +2118,13 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 		if($pageNum<0){
 			continue;
 		}
-		// add notinlist items to every page
-		//$carouselPage = array_merge($carouselPage, $carouselItems[-1]);
-  
+		
 		// Count number of items to organise into columns
 		$numSpeciesButtons = count($carouselPage);
   
 		$numCols = 2;
   
 		$numRows = intval(($numSpeciesButtons + $numCols - 1)/$numCols);
-		//$numRows = 12;
 		//print "numRows = " . $numRows . "<br>";
 		//print "numCols = " . $numCols . "<br>";
   
@@ -2069,35 +2151,31 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 		print "<div class='item $active'>\n";
 	
 		//print "Making buttons<br>";
-		for ( $j = 0; $j < $numRows; $j++ ) {
-			//print "row = " . $j . "<br>";
-			print "<div class='row species-row'>";
-			for ( $i = 0; $i < $numCols; $i++ ) {
-				//print "col = ". $i . " count = " . count($cols[$i]) . "<br>";
+		
+		print "<div class='row species-row'>";
+		for ( $i = 0; $i < $numCols; $i++ ) {
+			print "<div class='col-md-6 species-carousel-col'>";
+			//print "col = ". $i . " count = " . count($cols[$i]) . "<br>";
+			for ( $j = 0; $j < $numRows; $j++ ) {
 				if ( $j < count($cols[$i]) ) {
-					print "<div class='col-md-6 species-carousel-col'>";
-					print $cols[$i][$j];
-					print "</div>";
+					print $cols[$i][$j];			
 				}
-				//else {
-					// print "<div class='col-md-4 species-carousel-col species-blank'>";
-					// print "";
-					// print "</div>";
-				//}
 			}
-			print "</div>";  // end of row
-		}	  
+			print "</div> <!-- /species-carousel-col -->\n";
+		}
+				
+		print "</div> <!-- /species-row -->\n";
   
-		//print implode("\n", $carouselPage);
-  
-		// Add the not in list items - just on the last page
-		//if ( $pageNum == $numPages ) {
-			foreach ( $carouselItems[-1] as $item ) {
+		// Separate row for notinlist items
+		print "<div class='row species-row'>";
+		
+		foreach ( $carouselItems[-1] as $item ) {
 				print "<div class='col-md-6 species-carousel-col'>";
 				print $item;
 				print "</div>";
 			}
-		//}
+		
+		print "</div> <!-- /species-row -->\n";
 		print "</div> <!-- / item -->\n";
 
 	}
@@ -2106,10 +2184,10 @@ function printSpeciesList ( $speciesList, $useSeq ) {
 
 	print "<!-- Controls -->";
 	if ( $numPages > 1 ) {
-		print "<a class='left carousel-control species-carousel-control' href='#carousel-species' role='button' data-slide='prev'>";
+		print "<a class='left carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='prev'>";
 		print "<span class='fa fa-chevron-left'></span>";
 		print "</a>";
-		print "<a class='right carousel-control species-carousel-control' href='#carousel-species' role='button' data-slide='next'>";
+		print "<a class='right carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='next'>";
 		print "<span class='fa fa-chevron-right'></span>";
 		print "</a>";
 	}

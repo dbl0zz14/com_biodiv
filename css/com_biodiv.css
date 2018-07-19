@@ -3,7 +3,22 @@
 #species-indicators li.active.spb {background-color: #32553F;}
 #species-indicators li.spb {border: 1px solid grey;}
 
-#species-carousel-inner {top:27px}
+/*#species-carousel-inner {top:27px}*/
+.species-carousel-lower {top:27px}
+
+.species-carousel-col { margin: 0; padding-left:0; padding-right:0; }
+.photo-col { padding-left:0; }
+
+#species-nav { padding: 0; background: #477171; border-color: #477171 !important; color: #fff !important; }
+.species-tab { font-size: 0.9em; padding-left: 0px; padding-right: 0px; }
+/*.species-nav > li > a { color: #fff; text-transform: capitalize !important; }*/
+.nav-tabs > li > a { color: #fff !important; text-transform: capitalize !important; }
+.nav-tabs > li.active > a { background-color: #32553f !important } 
+.nav-link > a { color: #fff !important; text-transform: capitalize !important; }
+.caret { color: #fff !important; }
+
+.species-btn { margin: 0 !important; font-size: 0.8em; padding-left: 0px; padding-right: 0px; }
+.species-row { margin: 0; margin-right: 0; margin-left: 0; }
 
 #sequence-progress {display: none;}
 
@@ -26,6 +41,8 @@
 .add-padding { padding: 0 0 1em 0; }
 
 .add-padding-all { padding: 1em 1em 1em 1em; }
+
+.no-padding { padding: 0 !important; }
 
 .project-col img { width: 100%; }
 

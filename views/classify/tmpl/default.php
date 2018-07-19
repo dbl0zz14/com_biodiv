@@ -60,7 +60,7 @@ function makeControlButton($control_id, $control){
 	<div class='col-md-9 cls-xs-12'>
 	
 	<div class='row'>
-     <div class='col-md-4'>
+     <div class='col-md-4 photo-col'>
 	<div class='btn-group pull-left' role='group'>
 <?php
 foreach($this->lcontrols as $control_id => $control){
@@ -97,7 +97,7 @@ foreach($this->lcontrols as $control_id => $control){
   </div> <!-- /.row -->
 
   <div class='row'>
-  <div class='col-md-12'>
+  <div class='col-md-12 photo-col'>
 
 
   <div class="row">
@@ -192,72 +192,115 @@ foreach($this->sequence as $photo_id  ){
 </div> <!-- /.col-md-9 -->
 
 
-    <div class='col-md-3 cls-xs-12'>
-	<!-- only needed if header in column div class='spacer-4em'></div -->
+<div class='col-md-3 cls-xs-12 species-carousel-col'>
+<!-- only needed if header in column div class='spacer-4em'></div -->
 	
+<?php	
+/*
+print "<div class='btn-group btn-group-justified d-flex'>";
+	
+$filterWidth = intval(12/count($this->filters));
+foreach ( $this->filters as $filterId=>$filtername ) {
+	print "<button type='button' id='filter_select_${filterId}' class='btn btn-danger btn-wrap-text species-btn filter_select'>$filtername</button>";
+	//print "<button type='button' id='filter_select_${filtername}' class='btn btn-primary btn-block btn-wrap-text species-btn filter_select'>$filterlabel</button>";
+	//print "<button type='button' id='filter_select_${filtername}' class='btn $btnClass btn-wrap-text species-btn filter_select' data-toggle='modal' data-target='#classify_modal'>$filtername</button>";
+	
+}
+print "</div>";
+*/
+// Use tabs for the filters:
+//print "<ul id = 'species-nav' class='nav nav-tabs nav-fill nav-justified'>";
+print "<ul id = 'species-nav' class='nav nav-tabs nav-fill'>";
+$first = true;
+$numProjectFilters = count($this->projectFilters);
+if ( $numProjectFilters == 1 ) {
+	foreach ( $this->projectFilters as $filterId=>$filter ) {
+		if ( $first == true ) {
+			print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			$first = false;
+		} else {
+			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		}
+	}
+}
+else if ( $numProjectFilters > 1 ) {
+	
+	foreach ( $this->projectFilters as $filterId=>$filter ) {
+		if ( $first == true ) {
+			//print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a>";
+			//print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown' href='#filter_${filterId}'>Projects";
+			print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown'>Projects ";
+			print "<span class='fa fa-caret-down'></span></a>";
+			print "<ul class='dropdown-menu'>";
+			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			$first = false;
+		} else {
+			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		}
+	}
+	print "</ul>";
+	print "</li>";
+}
+foreach ( $this->filters as $filterId=>$filter ) {
+	if ( $first == true ) {
+		print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		$first = false;
+	} else {
+		print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+	}
+}
+print "</ul>";
 
-<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>
 
-<ol id="species-indicators" class="carousel-indicators spb">
-    <li data-target="#carousel-species" data-slide-to="0" class="active spb"></li>
-    <li data-target="#carousel-species" data-slide-to="1" class="spb"></li>
-    <li data-target="#carousel-species" data-slide-to="2" class="spb"></li>
-	<li data-target="#carousel-species" data-slide-to="3" class="spb"></li>
-	<li data-target="#carousel-species" data-slide-to="4" class="spb"></li>
-  </ol>
+print "<div class='tab-content no-padding'>";
 
-<?php
-
-    $carouselItems = array(); // 2D array [page][item]
-foreach($this->species as $species_id => $species){
-  $page = $species['page'];
-  if(!in_array($page, array_keys($carouselItems))){
-    $carouselItems[$page] = array();
-  }
-  
-  $name = $species['name'];
-  switch($species['type']){
-  case 'mammal':
-    $btnClass = 'btn-warning';
-    break;
-
-  case 'bird':  
-    $btnClass = 'btn-info';
-    break;
-
-  case 'notinlist':
-    $btnClass = 'btn-primary';
-    break;
-
-  }
-  $carouselItems[$page][] =
-    "<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block species_select' data-toggle='modal' data-target='#classify_modal'>$name</button> \n";
+$extra = "active";
+foreach ( $this->projectFilters as $filterId=>$filter ) {
+	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
+	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+	//printSpeciesList ( $this->species, true );
+	printSpeciesList ( $filterId, $filter['species'], false );
+	print "</div> <!-- /carousel-species carousel--> \n";
+	print "  </div>";
+	$extra = "";
+}
+foreach ( $this->filters as $filterId=>$filter ) {
+	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
+	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+	//printSpeciesList ( $this->species, true );
+	$isCommon = $filter['label'] == 'Common';
+	printSpeciesList ( $filterId, $filter['species'], $isCommon );
+	print "</div> <!-- /carousel-species carousel--> \n";
+	print "  </div>";
+	$extra = "";
 }
 
-print "<div id='species-carousel-inner' class='carousel-inner'>";
-foreach($carouselItems as $pageNum => $carouselPage){
-  if($pageNum<0){
-    continue;
-  }
-  // add notinlist items to every page
-  $carouselPage = array_merge($carouselPage, $carouselItems[-1]);
-  $active = ($pageNum==1)?" active":"";
-  print "<div class='item $active'>\n";
-  print implode("\n", $carouselPage);
-  print "</div> <!-- / item -->\n";
+print "</div>";
 
-}
-print "</div> <!-- /carousel-inner--> \n";
+/*
+print "  <div id='filter_210' class='tab-pane fade in active'>";
+//print "    <p>Some content.</p>";
+print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+printSpeciesList ( $this->species, true );
+print "</div> <!-- /carousel-species carousel--> \n";
+print "  </div>";
+print "  <div id='menu1' class='tab-pane fade'>";
+print "    <h3>Menu 1</h3>";
+print "    <p>Some content in menu 1.</p>";
+print "  </div>";
+print "  <div id='menu2' class='tab-pane fade'>";
+print "    <h3>Menu 2</h3>";
+print "    <p>Some content in menu 2.</p>";
+print "  </div>";
+print "</div>";
+*/
+/*
+print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+printSpeciesList ( $this->species, true );
+print "</div> <!-- /carousel-species carousel--> \n";
+*/
 ?>
- <!-- Controls -->
-  <a class="left carousel-control species-carousel-control" href="#carousel-species" role="button" data-slide="prev">
-    <span class="fa fa-chevron-left"></span>
-  </a>
-  <a class="right carousel-control species-carousel-control" href="#carousel-species" role="button" data-slide="next">
-    <span class="fa fa-chevron-right"></span>
-  </a>
 
-</div>
 </div>
 </div>
 </div>
@@ -273,8 +316,10 @@ print "</div> <!-- /carousel-inner--> \n";
         <form id='classify-form' role='form'>
 		  <div id='classify-species'>
 <?php
-  foreach($this->species as $species_id => $species){
-  print "<h2 id='species_header_${species_id}' class='species_header'>" . $species['name']."</h2>\n";
+foreach ($this->species as $type=>$all_this_type) {
+	foreach($all_this_type as $species_id => $species){
+		print "<h2 id='species_header_${species_id}' class='species_header'>" . $species['name']."</h2>\n";
+	}
 }
 
 print "<input type='hidden' name='species' id='species_value'/>\n";
@@ -315,8 +360,8 @@ foreach($this->classifyInputs as $formInput){
 </div>
 
 <?php
-JHTML::stylesheet("com_biodiv/com_biodiv.css", true, true);
 JHTML::script("com_biodiv/bootbox.js", true, true);
+JHTML::stylesheet("com_biodiv/com_biodiv.css", true, true);
 JHTML::script("com_biodiv/classify.js", true, true);
 ?>
 

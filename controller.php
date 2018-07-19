@@ -146,6 +146,25 @@ class BioDivController extends JControllerLegacy
 
     parent::display();
   }
+  
+  function get_species () {
+	  $filterid = JRequest::getString('filterid');
+	  
+	  //print "filtername = " . $filterid . "<br>";
+	  //error_log ( "controller, get_species filterid = " . $filterid  );
+	  
+	  if ( !$filterid ) {
+		  error_log ( "controller, get_species no filterid"  );
+	
+	  }
+	  
+	  $app = JFactory::getApplication();
+	  $app->setUserState('com_biodiv.filterid', $filterid);
+	  
+	  $this->input->set('view', 'filter');
+
+	  parent::display();
+  }
 
   // update a single field
   function ajax_update_site(){

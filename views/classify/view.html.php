@@ -87,16 +87,74 @@ class BioDivViewClassify extends JViewLegacy
 	  
 	  $this->photoDetails = $this->sequence_details[0];
 	  
-
+	  // Get the filter ids and filter labels for this photo. 
+	  $project_id = codes_getCode($this->my_project, 'project');
 	  
-	  $this->species = array();
-	  foreach(codes_getList("species") as $stuff){
-	    list($id, $name) = $stuff;
-	    $details = codes_getDetails($id, 'species');
-	    $this->species[$id] = array("name" => $name,
-					"type" => $details['struc'], // mammal or bird or notinlist
-					"page" => $details['seq']);;
+	  $this->filters = getFilters ();
+	  
+	  foreach ( $this->filters as $filterId=>$filter ) {
+		  $isCommon = $filter['label'] == 'Common';
+		  $this->filters[$filterId]['species'] = getSpecies ( $filterId, $isCommon );
 	  }
+	  
+	  $this->projectFilters = getProjectFilters ( $project_id, $this->photo_id );
+	  
+	  foreach ( $this->projectFilters as $filterId=>$filter ) {
+		  $this->projectFilters[$filterId]['species'] = getSpecies ( $filterId, false );
+	  }
+	  
+	  /*
+	  $this->species = array();
+	  
+	  $commonSpecies = codes_getList ( "common" );
+	  
+	  // Need to sort this list by name.
+	  function cmp($a, $b)
+	  {
+		return strcmp($a[1], $b[1]);
+	  }
+	  usort($commonSpecies, "cmp");
+	  
+	  //print ( "commonSpecies - <br>" );
+	  //print_r ( $commonSpecies );
+
+	  // Sort the data with volume descending, edition ascending
+	  // Add $data as the last parameter, to sort by the common key
+	  array_multisort($name, SORT_ASC, $commonSpecies);
+
+	  $features = array();
+	  $features['restriction'] = "struc='notinlist'";
+	  $notInListSpecies = codes_getList ( "species", $features );
+	  $commonSpecies = array_merge($commonSpecies, $notInListSpecies);
+	  //foreach(codes_getList("species") as $stuff){
+	  foreach($commonSpecies as $stuff){
+		  
+		list($id, $name) = $stuff;
+	    //print ( "<br>classify view: species list - " . $id . ", " . $name . "<br>" );
+	    $details = codes_getDetails($id, 'species');
+		//print ( "details - <br>" );
+		//print_r ( $details );
+		
+		// If we don't have a slot for this struc type yet, create one.
+		if ( !in_array($details['struc'], array_keys($this->species)) ) {
+			//print "Creating array for " . $details['struc'];
+			$this->species[$details['struc']] = array();
+		}
+	    
+	    $this->species[$details['struc']][$id] = array("name" => $name,
+					"type" => $details['struc'], // mammal or bird or notinlist
+					"page" => $details['seq']);
+					
+		// For common species all fit on one page - and we want them grouped as mammals (alphabetical), birds (alphabetical), notinlist (may want to change this to go to Mammal or Bird list?).
+		if ( $details['struc'] == "mammal" or $details['struc'] == "bird" )
+		{
+			$this->species[$details['struc']][$id]["page"] = 1;
+		}
+		
+		//print ( "species[id] - <br>" );
+		//print_r ( $this->species[$id] );
+	  }
+	  */
 
 	  $this->lcontrols = array();
 	  $this->rcontrols = array();
