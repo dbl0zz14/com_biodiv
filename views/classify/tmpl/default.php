@@ -316,10 +316,10 @@ print "</div> <!-- /carousel-species carousel--> \n";
         <form id='classify-form' role='form'>
 		  <div id='classify-species'>
 <?php
-foreach ($this->species as $type=>$all_this_type) {
-	foreach($all_this_type as $species_id => $species){
-		print "<h2 id='species_header_${species_id}' class='species_header'>" . $species['name']."</h2>\n";
-	}
+
+foreach ($this->allSpecies as $stuff) {
+	list($species_id, $species_name) = $stuff;
+	print "<h2 id='species_header_${species_id}' class='species_header'>" . $species_name."</h2>\n";
 }
 
 print "<input type='hidden' name='species' id='species_value'/>\n";
@@ -361,7 +361,7 @@ foreach($this->classifyInputs as $formInput){
 
 <?php
 JHTML::script("com_biodiv/bootbox.js", true, true);
-JHTML::stylesheet("com_biodiv/com_biodiv.css", true, true);
+JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/classify.js", true, true);
 ?>
 

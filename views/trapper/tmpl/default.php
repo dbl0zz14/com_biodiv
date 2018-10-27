@@ -170,7 +170,7 @@ print JHtml::_('form.token');
 
 </form>
 <?php
-JHTML::stylesheet("com_biodiv/com_biodiv.css", true, true);
+JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/trapper.js", true, true);
 ?>
 

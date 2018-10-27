@@ -1,4 +1,5 @@
 # view including first and last photo id and timestamps of both.
+drop view ProjectAnimals;
 create view ProjectAnimals as
 select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
 from Animal A 

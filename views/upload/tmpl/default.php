@@ -77,7 +77,8 @@ foreach(array("Deployment", "Collection") as $field){
       print  "<label for='${lfield}_time' style='width:10em'>$field time</label>\n";
 
 
-  $hours = $defaultHours[$lfield];
+  //$hours = $defaultHours[$lfield];
+  $hours = $defaultHours['max'];
   print  "<select id='${lfield}_hours' name ='${lfield}_hours' class='form-control'/>\n";
   print "<option/>";
   for($i = 0; $i<24;  $i++){
@@ -94,7 +95,8 @@ foreach(array("Deployment", "Collection") as $field){
 
  <?php
 
-  $mins = $defaultMins[$lfield];
+  //$mins = $defaultMins[$lfield];
+  $mins = $defaultMins['max'];
   print  "<select id='${lfield}_mins' name='${lfield}_mins' class='form-control'/>\n";
   print "<option/>\n";
   for($i = 0; $i<60;  $i+=15){
@@ -107,8 +109,6 @@ foreach(array("Deployment", "Collection") as $field){
     print "<option $selected>".sprintf("%'02u",$i)."</option>\n";
   }
   print "</select>\n";
-
-
   
   ?>
   </div> <!-- /.form-group -->

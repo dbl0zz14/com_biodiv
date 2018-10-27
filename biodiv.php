@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 include "local.php";
 
-define('BIODIV_MAX_FILE_SIZE', 4000000);
+define('BIODIV_MAX_FILE_SIZE', 6500000);
 
 // link to javascript stuff
 $document = JFactory::getDocument();
@@ -320,6 +320,24 @@ function canCreate($struc, $fields){
   }
 }
 
+function canView ($struc, $fields) {
+	switch($struc){
+		case 'project':
+			// If it's a public or protected project can view it.  If not must have access.
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true);
+			$query->select("project_id, access_level from Project");
+			$query->where("access_level < 2" );
+			$db->setQuery($query);
+			$projects = $db->loadAssocList('project_id');
+			if ( in_array($fields->project_id, array_keys($projects)) ) return true;
+			else return false;
+			break;
+		default:
+			return false;
+	}
+}
+
 function uploadRoot(){
 //  return JPATH_COMPONENT . "/uploads";
     return "/var/www/html/biodivimages";
@@ -527,6 +545,30 @@ function myProjects(){
   return $myprojects;
 }
 
+// Get all options for a single project by project id or just a particular option type if set
+function getSingleProjectOptions ( $project_id, $option_type ) {
+	
+	$projectoptions = array();
+  
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id, P.project_prettyname, O.struc, O.option_name")->from("Project P");
+	$query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
+	$query->innerJoin("Options O on PO.option_id = O.option_id" );
+	$where_str = "P.project_id = ".$project_id;
+	if ( $option_type ) $where_str .= " AND O.struc = '" . $option_type . "'";
+	$query->where($where_str);
+	$query->order("P.project_id" );
+	$db->setQuery($query);
+	$projectoptions = $db->loadAssocList();
+  
+  
+	//print "<br/>Got " . count($projectoptions) . " project options for project " . $project_id . "<br/>They are:<br>";
+	//print_r($projectoptions);
+	
+	return $projectoptions;
+}
+
 // If project_id is null return for all myProjects.  Option_type is the struc in the Options table.  If null return all.
 function getProjectOptions( $project_name, $option_type, $use_exclusions ){
   // Call myprojects to get the project list, then get details for each.
@@ -560,7 +602,7 @@ function getProjectOptions( $project_name, $option_type, $use_exclusions ){
   
   }
   
-  $project_details = array();
+  $projectdetails = array();
   
   if ( count($myprojects) > 0 ) {
   
@@ -577,6 +619,8 @@ function getProjectOptions( $project_name, $option_type, $use_exclusions ){
 	$query->order("P.project_id" );
 	$db->setQuery($query);
 	$projectdetails = $db->loadAssocList("project_id");
+	
+	//NOTE this will only return a single row per project_id!! Possible bug.
   
   
 	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
@@ -630,15 +674,438 @@ function projectDetails ( $project_id ) {
   return $projectdetails;
 }
 
+// Calculate the number of sequences uploaded and the number of sequences with at least one classification for the project given (and children)
+// or for all projects.  Store the results in the Statistics table.  Overwrite a row if it already exists.
+function calculateStats ( $project_id = null, $end_date = null ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$projects = null;
+	
+	if ($project_id ) {
+		$projects = getSubProjectsById( $project_id );	
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("DISTINCT P.project_id, P.project_prettyname from Project P");
+		$db->setQuery($query);
+		$projects = $db->loadAssocList('project_id');
+	}
+	$project_ids = array_keys($projects);
+	
+	$endDatePlus1 = strtotime("first day of next month" );
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	if ( $end_date ) {
+		$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+		$endDate = date('Ymd', strtotime($end_date));
+	}
+	
+	$dateToUse = date('Ymd', $endDatePlus1);
+	
+	// Work through project by project as we don't want to include the children here.
+	foreach ( $project_ids as $proj_id ) {
+		
+		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
+		
+		$query = $db->getQuery(true);
+		$query->select("count(distinct photo_id) from ProjectSequences");
+		$query->where("project_id = " . $proj_id );
+		$query->where("uploaded < " . $dateToUse );
+		$db->setQuery($query);
+		$numLoaded = $db->loadResult();
+	
+		$query = $db->getQuery(true);
+		$query->select("count(distinct start_photo_id) from ProjectAnimals");
+		$query->where("project_id = " . $proj_id );
+		$query->where("classify_time < " . $dateToUse );
+		$db->setQuery($query);
+		$numClassified = $db->loadResult();
+	
+		// Now update or insert - this would all be better with a stored procedure
+		$query = $db->getQuery(true);
+		$query->select("project_id, end_date from Statistics")
+			->where("project_id = " . $proj_id )
+			->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$resultRow = $db->loadRowList();
+		
+		if ( count($resultRow) > 0 ) {
+			print "Existing entry for project $proj_id, end_date $endDate - updating<br/>";
+			
+			$query = $db->getQuery(true);
+			$query->update("Statistics");
+			$query->set("num_uploaded = " . $numLoaded . ", num_classified = " . $numClassified );
+			$query->where("project_id = " . $proj_id );
+			$query->where("end_date = '" . $endDate . "'" );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+		else {
+			print "New entry in statistics for project $proj_id, end_date $endDate<br/>";
+			
+			$query = $db->getQuery(true);
+			$query->insert("Statistics");
+			$query->columns($db->quoteName(array('project_id', 'end_date', 'num_uploaded', 'num_classified')));
+			$query->values("" . $proj_id . ", '" . $endDate . "', " . $numLoaded . ", " . $numClassified );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+	}
+}
+
+// Recalculate statistics for all projects
+// Use with care this will overwrite existing figures.
+function calculateStatsHistory ( $project_id = null, $num_months = null) {
+	
+	$endDate = strtotime("last day of this month");
+	$endDatePlus1 = strtotime("first day of next month" );
+
+	$datesArray = array();
+	
+	// Default to 3 years of data.
+	$numDisplayedMonths = 39;
+	if ( $num_months ) {
+		$numDisplayedMonths = $num_months + 3;
+	}
+  
+	for ( $i=$numDisplayedMonths; $i>=0; $i-- ) {
+		$minusMonths = "-" . $i . " months";
+		$firstOfMonth = strtotime($minusMonths, $endDatePlus1);
+		calculateStats($project_id, date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+	}
+}
+
+// Return some upload and classification data for the project (used in displaying charts)
+function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_date = null ) {
+  
+  // check project id is public or protected, or that this user can acess this project??
+  $fields = new StdClass();
+  $fields->project_id = $project_id;
+	      
+  if ( !canView('project',$fields) ) {
+	  return array();
+  }
+  
+  //$numDisplayedMonths = 6;
+  $numDisplayedMonths = $num_months + $interval_in_months;
+  if ( $end_date == null ) {
+	  $endDatePlus1 = strtotime("first day of next month" );
+	  $endDate = strtotime("last day of this month");
+  }
+  else {
+	  $endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+	  $endDate = strtotime($end_date);
+  }
+  
+  $datesArray = array();
+  $labelsArray = array();
+ // for ( $i=$numDisplayedMonths; $i>0; $i-- ) {
+  for ( $i=$numDisplayedMonths; $i>0; $i-=$interval_in_months ) {
+	  //$dateStr = "first day of next month -" . $i . " months";
+	  $minusMonths = "-" . $i . " months";
+	  $months = $i-$interval_in_months+1;
+	  $labelStr = "- " . $months . " months";
+	  $dateMinusMonths = strtotime($minusMonths, $endDatePlus1);
+	  //array_push ( $datesArray, date('Y-m-d H:i:s', strtotime($dateStr)) );
+	  array_push ( $datesArray, date('Ymd', strtotime("-1 day", $dateMinusMonths)) );
+	  array_push ( $labelsArray, date('M Y', strtotime($labelStr, $endDatePlus1)) );
+	  //array_push ( $labelsArray, $i-$interval_in_months+1 );
+  }
+  //array_push ( $datesArray, date('Ymd', strtotime("first day of next month")) );
+  array_push ( $datesArray, date('Ymd', strtotime("-1 day", $endDatePlus1)) );
+  
+  // Select number of sequences uploaded and number classified up to each of our dates.
+  $numIntervals = count($datesArray)-1;
+  //print "num intervals = " . $numIntervals;
+  
+  $projects = getSubProjectsById( $project_id );
+  $id_string = implode(",", array_keys($projects));
+  /*
+  $uploadedArray = array();
+  $db = JDatabase::getInstance(dbOptions());
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("count(distinct photo_id) from ProjectSequences");
+	$query->where("project_id in (" . $id_string . ")" );
+	$query->where("uploaded < " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	$numLoaded = $db->loadResult();
+	array_push ( $uploadedArray, $numLoaded );
+  }
+  
+  $classifiedArray = array();
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("count(distinct start_photo_id) from ProjectAnimals");
+	$query->where("project_id in (" . $id_string . ")" );
+	$query->where("classify_time < " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	$numClassified = $db->loadResult();
+	array_push ( $classifiedArray, $numClassified );
+  }
+  */
+  /* ProjectSequences select:
+  select PSM.project_id, P.site_id, P.photo_id, P.taken, P.uploaded from Photo P
+inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
+where P.photo_id >= PSM.start_photo_id
+and PSM.end_photo_id is NULL
+and P.sequence_num = 1
+union
+select PSM.project_id, P.site_id, P.photo_id, P.taken, P.uploaded from Photo P
+inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
+where P.photo_id >= PSM.start_photo_id
+and P.photo_id <= PSM.end_photo_id
+and P.sequence_num = 1
+*/
+/*
+  $uploadedArray = array();
+  $db = JDatabase::getInstance(dbOptions());
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("distinct P.photo_id from Photo P");
+	$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
+	$query->where("P.photo_id >= PSM.start_photo_id");
+	$query->where("PSM.end_photo_id is NULL");
+	$query->where("P.sequence_num = 1");
+	$query->where("PSM.project_id in (" . $id_string . ")" );
+	$query->where("P.uploaded < " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	
+	$query2 = $db->getQuery(true);
+	$query2->select("distinct P.photo_id from Photo P");
+	$query2->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
+	$query2->where("P.photo_id >= PSM.start_photo_id");
+	$query2->where("P.photo_id <= PSM.end_photo_id");
+	$query2->where("P.sequence_num = 1");
+	$query2->where("PSM.project_id in (" . $id_string . ")" );
+	$query2->where("P.uploaded < " . $datesArray[$j+1] );
+	$db->setQuery($query2);
+	
+	$q3 = $db->getQuery(true)
+             ->select('count(a.*)')
+             ->from('(' . $query->union($query2) . ') a');
+			 
+	//$numLoaded = $db->loadResult();
+	$numLoaded = $db->loadResult();
+	//$listedprojects = $db->loadObjectList();
+	
+	//print ( "Got " . $numLoaded . " photos loaded for projects in " . $id_string . "<br>" );
+	
+	array_push ( $uploadedArray, $numLoaded );
+  }
+  */
+  /*
+  $classifiedArray = array();
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("count(distinct start_photo_id) from ProjectAnimals");
+	$query->where("project_id in (" . $id_string . ")" );
+	$query->where("classify_time < " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	$numClassified = $db->loadResult();
+	array_push ( $classifiedArray, $numClassified );
+  }
+  */
+  /*
+  from Animal A 
+inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
+inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
+inner join Photo P2 on PS.end_photo_id = P2.photo_id
+inner join Site S on P.site_id = S.site_id
+inner join Options O on O.option_id = A.species
+left join Options O2 on O2.option_id = A.age
+left join Options O3 on O3.option_id = A.gender
+inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id 
+
+*/
+/*
+  $classifiedArray = array();
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("distinct A.photo_id from Animal A");
+	$query->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1");
+	$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
+	$query->where("P.photo_id >= PSM.start_photo_id");
+	$query->where("PSM.end_photo_id is NULL");
+	$query->where("project_id in (" . $id_string . ")" );
+	$query->where("P.uploaded < " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	
+	$query2 = $db->getQuery(true);
+	$query2->select("distinct A.photo_id from Animal A");
+	$query2->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1");
+	$query2->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
+	$query2->where("P.photo_id >= PSM.start_photo_id");
+	$query2->where("P.photo_id  <= PSM.end_photo_id");
+	$query2->where("project_id in (" . $id_string . ")" );
+	$query2->where("P.uploaded < " . $datesArray[$j+1] );
+	$db->setQuery($query2);
+	
+	$q3 = $db->getQuery(true)
+             ->select('count(a.*)')
+             ->from('(' . $query->union($query2) . ') a');
+			 
+	$numClassified = $db->loadResult();
+	array_push ( $classifiedArray, $numClassified );
+  }
+  */
+  
+  $uploadedArray = array();
+  $classifiedArray = array();
+  $db = JDatabase::getInstance(dbOptions());
+  
+  for ( $j=0; $j<$numIntervals; $j++ ) {
+	$query = $db->getQuery(true);
+	$query->select("sum(num_uploaded), sum(num_classified) from Statistics");
+	$query->where("project_id in (" . $id_string . ")" );
+	$query->where("end_date = " . $datesArray[$j+1] );
+	$db->setQuery($query);
+	
+	$row = $db->loadRow();
+	
+	array_push ( $uploadedArray, $row['0'] );
+	array_push ( $classifiedArray, $row['1'] );
+  }
+
+  
+  $projectData = array ( 
+		"labels" => $labelsArray,
+		"uploaded" => $uploadedArray,
+		"classified" => $classifiedArray
+		);
+  
+  
+  //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+  //print implode(",", $projectdetails);
+  
+  return $projectData;
+}
+
+function akrem($array,$key){
+    $holding=array();
+    foreach($array as $k => $v){
+        if($key!=$k){
+            $holding[$k]=$v;
+        }
+    }    
+    return $holding;
+}
+
+// Return some animal data for the project (used in displaying charts)
+// num_species is the max number of different species to return prioritised by number, if null use all, if not all animals are included the last entry is 
+// a combined number for everything else named "Other"
+function projectAnimals ( $project_id, $num_species = null, $include_dontknow = false, $include_human = false, $include_nothing = false ) {
+  
+  // check project id is public or protected, or that this user can acess this project??
+  $fields = new StdClass();
+  $fields->project_id = $project_id;
+	      
+  if ( !canView('project',$fields) ) {
+	  return array();
+  }
+  
+  $projects = getSubProjectsById( $project_id );
+  $id_string = implode(",", array_keys($projects));
+  
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  // count every classification
+  //$query->select("species, count(distinct start_photo_id) as num_animals FROM ProjectAnimals");
+  $query->select("species, count(start_photo_id) as num_animals FROM ProjectAnimals");
+  $query->where("project_id in (" . $id_string . ")" );
+  $query->group("species" );
+  $query->order("num_animals  DESC");
+  $db->setQuery($query);
+  $animals = $db->loadAssocList('species', 'num_animals');
+  
+  // Little fix to remove the additional text on Nothing and Human.
+  $array_changed = false;
+  if (isset($animals["Human <span class='fa fa-male'/>"])) {
+    $animals['Human'] = $animals["Human <span class='fa fa-male'/>"];
+    unset($animals["Human <span class='fa fa-male'/>"]);
+	$array_changed = true;
+  }
+  if (isset($animals["Nothing <span class='fa fa-ban'/>"])) {
+    $animals['Nothing'] = $animals["Nothing <span class='fa fa-ban'/>"];
+    unset($animals["Nothing <span class='fa fa-ban'/>"]);
+	$array_changed = true;
+  }
+  
+  // Remove human and nothing if not to be included
+  if ( !$include_human ) {
+	  unset($animals['Human']);
+	  $array_changed = true;
+  }
+  if ( !$include_nothing ) {
+	  unset($animals['Nothing']);
+	  $array_changed = true;
+  }
+   if ( !$include_dontknow ) {
+	  unset($animals["Don't Know"]);
+	  $array_changed = true;
+  }
+  
+  // Remove Likes
+  unset($animals["Like"]);
+  $array_changed = true;
+  
+  // If we had to change the key names we need to re-sort the array
+  if ( $array_changed ) {
+	  arsort($animals);
+  }
+   
+  $animals_to_return = array();
+  // Finally handle the number of species, if we have more than required
+  // NB Other is a possible option so combine this with Other Species if we have both
+  $num_other = 0;
+  
+  if ( key_exists("Other", $animals) ) {
+	$num_other = $animals["Other"];
+	$animals = akrem($animals, "Other");
+  }
+  
+  if ( $num_species && (count($animals) > $num_species) ) {
+	  $animals_to_return = array_slice($animals, 0, $num_species-1);
+	  $total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
+	  $animals_to_return['Other Species'] = "" + $total_other;
+  }
+  else {
+	  $animals_to_return = $animals;
+  }
+  
+  
+  /*
+  $labelsArray = array('Badger','Rabbit','Mouse','Blackbird','Other');
+  $animalsArray = array(120,103,76,56,30);
+  $projectData = array ( 
+		"labels" => $labelsArray,
+		"animals" => $animalsArray
+		);
+  */
+  
+  //print "<br/>Got " . count($animals_to_return) . " species to return from projectanimals <br/>They are:<br>";
+  //print_r ($animals_to_return);
+  
+  return array (
+		"labels" => array_keys($animals_to_return),
+		"animals" => array_values($animals_to_return)
+		);
+}
+
+
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
-function getSubProjects($project_prettyname){
+function getSubProjects($project_prettyname, $exclude_private = false){
   //print "<br/>getSubProjects called<br/>";
   
   // first select all project/parent pairs into memory
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
   $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
+  // exclude private projects
+  if ( $exclude_private ) {
+	  $query->where("access_level < 2");
+  }
   $db->setQuery($query);
   $allpairs = $db->loadAssocList();
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
@@ -675,17 +1142,44 @@ function getSubProjectsById($project_id){
 }
 
 // return all projects that are/should be listed on the website Projects page - all non-private top level projects
+// plus all second level projects which are non private but have a private parent (eg Highland Squirrel)
 function listedProjects(){
   
+  /*
+  SELECT * FROM `project` WHERE access_level < 2 
+and parent_project_id in (
+    select project_id from project where parent_project_id is null and access_level > 1)
+*/
+	
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description")->from("Project P");
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, O.option_name as priority")->from("Project P");
+  $query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
+  $query->innerJoin("Options O on PO.option_id = O.option_id");
+  $query->where("O.struc = 'priority'");
   $query->where("P.access_level < 2");
   $query->where("P.parent_project_id is null" );
-  $query->order("P.project_id" );
+  //$query->order("P.project_id" );
   $db->setQuery($query);
-  $listedprojects = $db->loadObjectList();
   
+  // Include second level non private...
+  $query2 = $db->getQuery(true);
+  $query2->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, O.option_name as priority")->from("Project P");
+  $query2->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
+  $query2->innerJoin("Options O on PO.option_id = O.option_id");
+  $query2->where("O.struc = 'priority'");
+  $query2->where("P.access_level < 2");
+  $query2->where("P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 1)" );
+  $db->setQuery($query);
+  
+  $q3 = $db->getQuery(true)
+             ->select('a.*')
+             ->from('(' . $query->union($query2) . ') a')
+             ->order("a.project_id");
+			 
+  $listedprojects = $db->loadObjectList();		
+	
+		
   //print "<br/>Got " . count($listedprojects) . " non-private top level projects<br/>They are:<br>";
   //print_r($listedprojects);
   
@@ -697,10 +1191,7 @@ function listedProjects(){
 function projectProgress ( $project_id ) {
 	
 	$thisAndSubs = getSubProjectsById ( $project_id );
-	$classifications = 0;
-	$sequences = 0;
-	foreach ( array_keys($thisAndSubs) as $proj_id ) {
-	
+		
 /* number of classifications:
 SELECT count(*) FROM `animal` A
 inner join Photo P on A.photo_id = P.photo_id
@@ -719,34 +1210,43 @@ and A.species not in (86,87,97)
 and P.photo_id >= PSM.start_photo_id
 and P.photo_id <= PSM.end_photo_id
 */
+
+	
+	// First the number of classifications for sites that are currently members of this project (exclude likes as not classifications)
+	
 	$db = JDatabase::getInstance(dbOptions());
-  
-	// First the number of classifications for sites that are currently members of this project
+	
+	$id_string = implode(",", array_keys($thisAndSubs));
+	
+	
 	$query = $db->getQuery(true);
-	$query->select("count(distinct A.photo_id)")->from("Animal A");
+	$query->select("A.photo_id")->from("Animal A");
 	$query->innerJoin("Photo P on A.photo_id = P.photo_id");
 	$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query->where("P.sequence_num = 1");
-	$query->where("PSM.project_id = " . $proj_id );
+	$query->where("PSM.project_id in (" . $id_string . ")" );
 	$query->where("P.photo_id >= PSM.start_photo_id" );
 	$query->where("PSM.end_photo_id is NULL" );
-	$query->where("A.species not in (86,87,97)" );
-	$db->setQuery($query);
-	$currentClassCount = $db->loadResult();
-  
+	$query->where("A.species != 97" );
+	
 	// Next the number of classifications for sites that have left the project, when they were part of the project!
 	$query2 = $db->getQuery(true);
-	$query2->select("count(distinct A.photo_id)")->from("Animal A");
+	$query2->select("A.photo_id")->from("Animal A");
 	$query2->innerJoin("Photo P on A.photo_id = P.photo_id");
 	$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query2->where("P.sequence_num = 1");
-	$query2->where("PSM.project_id = " . $proj_id );
+	$query2->where("PSM.project_id in (" . $id_string . ")" );
 	$query2->where("P.photo_id >= PSM.start_photo_id" );
 	$query2->where("P.photo_id <= PSM.end_photo_id" );
-	$query2->where("A.species not in (86,87,97)" );
-	$db->setQuery($query2);
-	$historyClassCount = $db->loadResult();
-  
+	$query2->where("A.species != 97" );
+	
+	$q3 = $db->getQuery(true)
+             ->select('count( distinct a.photo_id)')
+             ->from('(' . $query->union($query2) . ') a');
+	$db->setQuery($q3);
+	
+	$classifications = $db->loadResult();
+              
 /*
 SELECT count(*) from photo P 
 inner Join ProjectSiteMap PSM on P.site_id = PSM.site_id
@@ -762,38 +1262,35 @@ and PSM2.end_photo_id is null
 and P.sequence_num = 1
 where PSM2.project_id = 1
 */
-  
-	// Now the total number of sequences uploaded, for sites that are currently members of this project
+
 	$query3 = $db->getQuery(true);
-	$query3->select("count(*)")->from("Photo P");
+	$query3->select("P.photo_id")->from("Photo P");
 	$query3->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query3->where("P.sequence_num = 1");
-	$query3->where("PSM.project_id = " . $proj_id );
+	$query3->where("PSM.project_id in (" . $id_string . ")" );
 	$query3->where("P.photo_id >= PSM.start_photo_id" );
 	$query3->where("PSM.end_photo_id is NULL" );
-	$db->setQuery($query3);
-	$currentSequenceCount = $db->loadResult();
-  
+	
 	// And the total number of sequences uploaded, for sites that are have left the project
 	$query4 = $db->getQuery(true);
-	$query4->select("count(*)")->from("Photo P");
+	$query4->select("P.photo_id")->from("Photo P");
 	$query4->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
 	$query4->where("P.sequence_num = 1");
-	$query4->where("PSM.project_id = " . $proj_id );
+	$query4->where("PSM.project_id in (" . $id_string . ")" );
 	$query4->where("P.photo_id >= PSM.start_photo_id" );
 	$query4->where("P.photo_id <= PSM.end_photo_id" );
-	$db->setQuery($query4);
-	$historySequenceCount = $db->loadResult();
 	
-    // Add to totals
-	$classifications = $classifications + $currentClassCount + $historyClassCount;
-	$sequences = $sequences + $currentSequenceCount + $historySequenceCount;
-  }
-	
-  $percentComplete = 0;
-  if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
+	$q4 = $db->getQuery(true)
+             ->select('count(distinct a.photo_id)')
+             ->from('(' . $query3->union($query4) . ') a');
+	$db->setQuery($q4);
+	$sequences = $db->loadResult();
+    
+		
+	$percentComplete = 0;
+	if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
   
-  return array("numClassifications"=>$classifications, "numSequences"=>$sequences, "percentComplete"=>$percentComplete);
+	return array("numClassifications"=>$classifications, "numSequences"=>$sequences, "percentComplete"=>$percentComplete);
 }
 
 // return all sites for this project if user is project admin
@@ -911,8 +1408,10 @@ function nextSequence(){
 	  if ( $ph_id ) $photo_id_candidates["Single"] = $ph_id;
   }
   if ( in_array("Multiple", $distinct_priorities ) ) {
+	  //print "<br>nextSequence, about to ChooseMultiple <br>" ;
 	  $project_ids = array_keys ( $priority_array, "Multiple" );
 	  $ph_id = chooseMultiple ( $project_ids, $classify_own );
+	  //print "<br>nextSequence, chooseMultiple chose ph_id " . $ph_id . " <br>" ;
 	  if ( $ph_id ) $photo_id_candidates["Multiple"] = $ph_id;
   }
   if ( in_array("Single to multiple", $distinct_priorities ) ) {
@@ -931,7 +1430,10 @@ function nextSequence(){
   }
   
   $num_candidates = count($photo_id_candidates);
-  $chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
+  //print "<br>nextSequence, num_candidates = " . $num_candidates . " <br>" ;
+  
+  //$chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
+  $chosen_priority = array_keys($photo_id_candidates)[0];
   
   // If only one priority type we are done, but if more than one we have to pick.
   if ( $num_candidates > 1 ) {
@@ -968,12 +1470,13 @@ function nextSequence(){
   
   $photo_id = $photo_id_candidates[$chosen_priority];
   
-  //print "<br/> returning at end of nextSequence, sequence_id = " . $sequence_id;
+  //print "<br/> returning at end of nextSequence, photo_id = " . $photo_id;
   return getSequence($photo_id);
 }
 
 function chooseMultiple ( $project_ids, $classify_own ) {
 	
+	//print "<br>chooseMultiple called, classify_own = " . $classify_own . " <br>";
 	$photo_id = null;
 	
 	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
@@ -987,6 +1490,8 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		$project_id_str = implode(',', $project_ids);
 	
 		//error_log ( "chooseMultiple, project_id_str = " . $project_id_str );
+		//print "<br>chooseMultiple, project_id_str = " . $project_id_str . " <br>";
+	
   
 		$db = JDatabase::getInstance(dbOptions());
 		$q1 = $db->getQuery(true);
@@ -1027,6 +1532,7 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		$photo = $db->loadObject();
 		if ( $photo ) {
 			$photo_id = $photo->photo_id;
+			//print "<br>chooseMultiple, photo found with id " . $photo_id . " <br>";
 		}	
 	}
 	
@@ -1739,6 +2245,10 @@ function sequencePhotos($upload_id){
 	      $fields = new StdClass();
 	      $fields->start_photo_id = $prev_photo_id;
 	      $fields->upload_id = $upload_id;
+		  // Currently know the sequence is of length at least 2.  Set the end and length, these will be updated
+		  // if the sequence has a longer length.
+	      $fields->end_photo_id = $photo_id;
+	      $fields->sequence_length = 2;
 	      $sequence_id = codes_insertObject($fields, 'sequence');
 	      print "New sequence $sequence_id<br/>";
 	      $prev_seq_num = 1;
@@ -1830,7 +2340,7 @@ function sequencePhotos($upload_id){
       }
     }
     
-    $prev_photo_id = $photo_id;
+	$prev_photo_id = $photo_id;
     $prev_dateTime = $dateTime;
     $prev_seq_num = $seq_num;
   }

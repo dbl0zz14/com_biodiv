@@ -103,58 +103,11 @@ class BioDivViewClassify extends JViewLegacy
 		  $this->projectFilters[$filterId]['species'] = getSpecies ( $filterId, false );
 	  }
 	  
-	  /*
-	  $this->species = array();
 	  
-	  $commonSpecies = codes_getList ( "common" );
+	  $this->allSpecies = array();
+	  $this->allSpecies = codes_getList ( "species" );
 	  
-	  // Need to sort this list by name.
-	  function cmp($a, $b)
-	  {
-		return strcmp($a[1], $b[1]);
-	  }
-	  usort($commonSpecies, "cmp");
-	  
-	  //print ( "commonSpecies - <br>" );
-	  //print_r ( $commonSpecies );
-
-	  // Sort the data with volume descending, edition ascending
-	  // Add $data as the last parameter, to sort by the common key
-	  array_multisort($name, SORT_ASC, $commonSpecies);
-
-	  $features = array();
-	  $features['restriction'] = "struc='notinlist'";
-	  $notInListSpecies = codes_getList ( "species", $features );
-	  $commonSpecies = array_merge($commonSpecies, $notInListSpecies);
-	  //foreach(codes_getList("species") as $stuff){
-	  foreach($commonSpecies as $stuff){
-		  
-		list($id, $name) = $stuff;
-	    //print ( "<br>classify view: species list - " . $id . ", " . $name . "<br>" );
-	    $details = codes_getDetails($id, 'species');
-		//print ( "details - <br>" );
-		//print_r ( $details );
-		
-		// If we don't have a slot for this struc type yet, create one.
-		if ( !in_array($details['struc'], array_keys($this->species)) ) {
-			//print "Creating array for " . $details['struc'];
-			$this->species[$details['struc']] = array();
-		}
-	    
-	    $this->species[$details['struc']][$id] = array("name" => $name,
-					"type" => $details['struc'], // mammal or bird or notinlist
-					"page" => $details['seq']);
-					
-		// For common species all fit on one page - and we want them grouped as mammals (alphabetical), birds (alphabetical), notinlist (may want to change this to go to Mammal or Bird list?).
-		if ( $details['struc'] == "mammal" or $details['struc'] == "bird" )
-		{
-			$this->species[$details['struc']][$id]["page"] = 1;
-		}
-		
-		//print ( "species[id] - <br>" );
-		//print_r ( $this->species[$id] );
-	  }
-	  */
+	 
 
 	  $this->lcontrols = array();
 	  $this->rcontrols = array();
@@ -174,32 +127,6 @@ class BioDivViewClassify extends JViewLegacy
 	  else{
 	    $this->sequenceProgress = 0;
 	  }
-	  /*
-	  if($this->photo_id == $this->sequenceStartPhoto){
-	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left disabled'></span> Start";
-	  }
-	  else{
-	    $this->rcontrols["control_startseq"] = "<span class='fa fa-arrow-circle-left'></span> Start";
-	  }
-	  */
-/*
-	  if($this->photoDetails['prev_photo']>0){
-	    $this->rcontrols["control_prev"] = "<span class='fa fa-chevron-circle-left'></span> Previous";
-	  }
-	  else{
-	    $this->rcontrols["control_prev"] = "<span class='fa fa-chevron-circle-left disabled'></span> Previous";
-	  }
-*/
-/*
-	  if($this->photoDetails['next_photo']>0){
-	    $this->rcontrols["control_next"] = "Next <span class='fa fa-chevron-circle-right'/>";
-	  }
-	  else{
-	    $this->rcontrols["control_next"] = "Next <span class='fa fa-chevron-circle-right disabled'/>";
-	  }
-	  
-	  $this->rcontrols["control_nextseq"] = "Next sequence <span class='fa fa-arrow-circle-right'/>";
-	  */
 	  
 	  $this->nextseq = "Next sequence <span class='fa fa-arrow-circle-right'/>";
 
