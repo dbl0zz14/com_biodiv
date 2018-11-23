@@ -44,13 +44,23 @@ foreach ( $this->projects as $project ) {
 	
 	// Add the note for multiple and Single to multiple projects
 	$add_note = "";
-	if ( $project->priority == "Multiple" or $project->priority == "Single to multiple" ) $add_note = " *";
+	$multiple_complete = False;
+	if ( $project->priority == "Multiple" or $project->priority == "Single to multiple" ) {
+		$add_note = " *";
+		if ( $progress["percentComplete"] == 100 ) {
+			$multiple_complete = True;
+		}
+	}
 	print '<div class="progress">';
 	print '<div class="progress-bar ' . $progress_bar_type . '" role="progressbar" ';
 	print 'aria-valuenow="' . $progress["numClassifications"] . '"  aria-valuemin="0" ';
 	print 'aria-valuemax="' . $progress["numSequences"] . '" style="width:' . $progress["percentComplete"] . '%">';
-    //print '' . $progress["percentComplete"] . '% Classified (' . $progress["numClassifications"] . '/' . $progress["numSequences"] . ')';
-	print '' . $progress["percentComplete"] . '% Classified' . $add_note;
+	if ( $multiple_complete ) {
+		print 'Please keep spotting' . $add_note;
+	}
+	else {
+		print '' . $progress["percentComplete"] . '% Classified' . $add_note;
+	}
 	print '</div>';
 	print '</div>';
 	

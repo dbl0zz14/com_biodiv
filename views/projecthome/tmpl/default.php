@@ -39,38 +39,55 @@ defined('_JEXEC') or die;
 		print '<p class="spacer-1em"></p>';
 	}
 	// Print how to join the project for restricted projects.
-	/* use once extra access level is here
 	if ( $this->access_level == 1 ) {
-		print '<p>This project is available for public Spotting but Trapping is restricted.  If you would like to join this project as a Trapper please contact us.</p>';
-		print '<p class="spacer-2em"></p>';
+		print '<p>This project is available for public Spotting but Trapping is restricted.  If you would like to join this project as a Trapper please contact us at info@mammalweb.org</p>';
+		print '<p class="spacer-1em"></p>';
 	}
-	*/
-	if ( $this->access_level > 0 ) {
+	if ( $this->access_level > 1 ) {
 		print '<p>This is a restricted project and is not publicly available for Trapping and Spotting.  But if you would like to join the project, please contact us at info@mammalweb.org.</p>';
 		print '<p class="spacer-1em"></p>';
 	}
 	
+	/*
+	print "<form action = '" . BIODIV_ROOT . "' method = 'GET'>";
+	print "<div class='input-group'>";
+    print "<input type='hidden' name='view' value='classify'/>";
+    print "<input type='hidden' name='option' value='" . BIODIV_COMPONENT . "'/>";
+    print "<input type='hidden' name='classify_only_project' value='1'/>";
+	print "<input type='hidden' name='my_project' value='". $project->project_prettyname ."'/>";
+	
+	print "<span class='input-group-btn'>";
+    print "  <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> Classify This Project</button>";
+	print "</span>";
+	
+	print "</div>";
+	print "</form>";
+	print '<p class="spacer-2em"></p>';
+	
+	*/
 	print "</div>";
 	print "<div class='col-md-4 project-col' >";
 	//print '<p class="spacer-2em"></p>';
 	if ( in_array('ProgressChartShort', $this->displayOptions ) ) {
-		print "<canvas id='progressChartShort'  data-project-id='".$project->project_id."' height = '190px'></canvas>";
+		print "<canvas id='progressChartShort' class='progress-chart' data-project-id='".$project->project_id."' height='190px'></canvas>";
 		print '<p class="spacer-3em"></p>';
 	}
 	if ( in_array('ProgressChartMedium', $this->displayOptions ) ) {
-		print "<canvas id='progressChartMedium'  data-project-id='".$project->project_id."' height = '190px'></canvas>";
+		print "<canvas id='progressChartMedium' class='progress-chart' data-project-id='".$project->project_id."' height='190px'></canvas>";
 		print '<p class="spacer-3em"></p>';
 	}
 	if ( in_array('ProgressChartLong', $this->displayOptions ) ) {
-		print "<canvas id='progressChartLong'  data-project-id='".$project->project_id."' height = '190px'></canvas>";
+		print "<canvas id='progressChartLong' class='progress-chart' data-project-id='".$project->project_id."' height='190px'></canvas>";
 		print '<p class="spacer-3em"></p>';
 	}
 	if ( in_array('AnimalsChart', $this->displayOptions ) ) {
-		print "<canvas id='animalsChart'  data-project-id='".$project->project_id."' height = '230px'></canvas>";
+		print "<canvas id='animalsChart' class='animals-doughnut' data-project-id='".$project->project_id."' height='230px'></canvas>";
 		print '<p class="spacer-3em"></p>';
 	}
 	if ( in_array('AnimalsBarChart', $this->displayOptions ) ) {
-		print "<canvas id='animalsBarChart'  data-project-id='".$project->project_id."' height = '255px'></canvas>";
+		//print "<div class='animals-bar-container'>";
+		print "<canvas id='animalsBarChart' class='animals-bar' data-project-id='".$project->project_id."' height='320px' ></canvas>";
+		//print "</div>";
 		print '<p class="spacer-3em"></p>';
 	}
 	print "</div>";

@@ -8,13 +8,13 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-
 $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
 $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
 
 if(!$this->photo_id){
   print "<h2>No photos for you to classify</h2>\n";
+  print "<h3>You have classified all the images currently available for this project</h3>\n";
   print "<h3>If you have recently uploaded some images, please check back in 10 minutes, by which time they will be available for classification</h3>\n";
   return;
  }

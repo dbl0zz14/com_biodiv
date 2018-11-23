@@ -1,11 +1,13 @@
 jQuery(document).ready(function(){
 
+	//Chart.defaults.global.maintainAspectRatio = false;
+	
 	if ( jQuery('#progressChartShort').length > 0 ) {
 		project_id = jQuery('#progressChartShort').attr("data-project-id");
 		url = BioDiv.root + "&view=projectdata&format=raw&project_id=" + project_id + "&months=6";
 	
 		jQuery.ajax(url, {'success': function(data) {
-			console.log("short chart data is " + data);
+			//console.log("short chart data is " + data);
 		
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
@@ -48,7 +50,7 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&view=projectdata&format=raw&project_id=" + project_id + "&months=12";
 	
 		jQuery.ajax(url, {'success': function(data) {
-			console.log("medium chart data is " + data);
+			//console.log("medium chart data is " + data);
 		
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
@@ -91,7 +93,7 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&view=projectdata&format=raw&project_id=" + project_id + "&months=36";
 	
 		jQuery.ajax(url, {'success': function(data) {
-			console.log("long chart data is " + data);
+			//console.log("long chart data is " + data);
 		
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
@@ -134,7 +136,7 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&view=projectanimals&format=raw&project_id=" + project_id;
 	
 		jQuery.ajax(url, {'success': function(data) {
-			console.log("Animals data is: " + data);
+			//console.log("Animals data is: " + data);
 		
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
@@ -176,7 +178,7 @@ jQuery(document).ready(function(){
 			
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
-			
+			//Chart.defaults.global.maintainAspectRatio = false;
 			var ctx = document.getElementById('animalsBarChart').getContext('2d');
 			var chart = new Chart(ctx, {
 				// The type of chart we want to create
@@ -215,6 +217,7 @@ jQuery(document).ready(function(){
 							}
 						}]
 					}
+
 				}
 			});
 	

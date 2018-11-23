@@ -46,13 +46,25 @@
 
 .project-col img { width: 100%; text-align: center; }
 
-.project-col-logo { height: 350px; width: auto !important; }
+.project-col-logo { height: 450px; width: auto !important; }
 
+/*.progress-chart { height: 190px; }
+.animals-doughnut { height: 230px; }
+#animalsBarChart { height: 300px; }
+.animals-bar-container { height: 280px; }*/
 
 
 @media only screen and (min-width: 992px) {
 	.project-title { height: 120px;}
 }
+
+@media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+
+/*@media only screen and (min-width: 576px) and (max-width: 767.98px) {*/
+/*@media only screen and (min-width: 768px) and (max-width: 991.98px) {*/
+	.project-title h2 { font-size: 30px; }
+}
+
 
 @media only screen and (min-width: 992px) {
 	.project-description { height: 170px;}

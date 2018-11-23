@@ -11,7 +11,15 @@ defined('_JEXEC') or die;
 ?>
 <h1>Calculating Stats</h1>
 <?php
-if ($this->calcAll == 1 and $this->calcMonths > 0) {
+if ($this->calcLeagueTable == 1 ) {
+	print "Calculating league table <br>";
+	calculateLeagueTable();
+}
+else if ($this->calcTotals == 1) {
+	print "Calculating totals.<br>";
+	calculateStatsTotals();
+}
+else if ($this->calcAll == 1 and $this->calcMonths > 0) {
 	print "Calculating history for $this->calcMonths months. <br>";
 	calculateStatsHistory($this->projectId, $this->calcMonths);
 }

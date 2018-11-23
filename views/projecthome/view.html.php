@@ -34,6 +34,10 @@ class BioDivViewProjecthome extends JViewLegacy
     $this->status = array();
 	
 	$app = JFactory::getApplication();
+	
+	// Remove any stored photo id on project load.
+	$app->setUserState('com_biodiv.photo_id', null);
+	
 	$this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		

@@ -71,7 +71,7 @@ class BioDivViewTrapper extends JViewLegacy
 	  $this->projects = array();
 	  
 	  //$myprojects = myProjects();
-	  $this->userprojects = myProjects();
+	  $this->userprojects = myTrappingProjects();
 	  
 	  //print "<br/>Got " . count($this->userprojects) . " all projects user has access to<br/>They are:<br>";
       //print implode(",", $this->userprojects);
