@@ -83,7 +83,13 @@ foreach($this->mylikes as $photo_id  ){
 	else {
 		print '<div class="item">';
 	}
-	print JHTML::image(photoURL($photo_id), 'Photo ' . $photo_id, array('class' =>'img-responsive'));
+	if ( isVideo($photo_id) ) {
+		print '<video controls width="100%"><source src="'.photoURL($photo_id).'" type="video/mp4">Your browser does not support the video tag.</video>';
+		//print "Found video: ".photoURL($photo_id);
+	}
+	else {
+		print JHTML::image(photoURL($photo_id), 'Photo ' . $photo_id, array('class' =>'img-responsive'));
+	}
 	print '</div>';
  }
  if ( $first == true ) {

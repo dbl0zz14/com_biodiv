@@ -1,33 +1,30 @@
 jQuery(document).ready(function(){
 
+
 	BioDiv.removeClick = function (){
-	    console.log("Adding remove click actions");
 	    jQuery('.remove_animal').click(function (){
 		    id = jQuery(this).attr("id");
 		    idbits = id.split("_");
 		    animal_id = idbits.pop();
-		    console.log("Removing animal classification " + animal_id);
 		    removeurl = BioDiv.root + "&task=remove_animal&format=raw&animal_id=" + animal_id;
 		    jQuery('#classify_tags').load(removeurl, "", BioDiv.removeClick);
 		});
-		console.log("remove click actions added" );
-		console.log("Setting Nothing" );
 		if (document.getElementById('nothingDisabled')) {
-			console.log("...to disabled" );
 			jQuery('#control_content_86').prop('disabled', true);
 		}
 		else {
-			console.log("...to enabled" );
 			jQuery('#control_content_86').prop('disabled', false);
 		}
 	}
 	
 	BioDiv.likeActions = function (){
-	    console.log("Adding like actions");
-		jQuery('#not-favourite').click(function(){
+	    jQuery('#not-favourite').click(function(){
 		jQuery('#not-favourite').hide();
 		jQuery('#favourite').show();
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
+		if ( !activeId ) {
+			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=like_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
@@ -36,17 +33,17 @@ jQuery(document).ready(function(){
 		jQuery('#favourite').hide();
 		jQuery('#not-favourite').show();
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
+		if ( !activeId ) {
+			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=unlike_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
 	}
 	 
 	jQuery('#photoCarousel').bind('slid.bs.carousel', function (e) {
-		// Need to change the facebook href to use the new photo_id
-		//console.log("Got slid event");
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
 		var fbHref = BioDiv.root + '&view=show&photo-id=' + activeId;
-		//console.log( "Updating fb link to " + fbHref );
 		jQuery('.fb-like').attr('data-href', fbHref);
 		try {
 			FB.XFBML.parse();
@@ -63,6 +60,11 @@ jQuery(document).ready(function(){
 			
 	});
 	
+	jQuery('#classify-video').bind('ended', function (e) {
+		//console.log("video ended, enable next sequence");
+		jQuery('#control_nextseq').prop('disabled',false);
+	});
+	
 	jQuery('#classify_tags').load(BioDiv.root + '&view=tags&format=raw', BioDiv.removeClick);
 
 	jQuery('#classify-save').click(function (){
@@ -76,7 +78,6 @@ jQuery(document).ready(function(){
 
 	jQuery('.filter_select').click(function (){
 		id = jQuery(this).attr("id");
-		console.log("id = " + id );
 		idbits = id.split("_");
 		filter_id = idbits.pop();
 		url = BioDiv.root + "&task=get_species&format=raw&filterid=" + filter_id;
@@ -91,7 +92,7 @@ jQuery(document).ready(function(){
 		idbits = id.split("_");
 		species_id = idbits.pop();
 		jQuery('.species_header').hide();
-		jQuery('#species_header_'+species_id).show();
+		// for kiosk jQuery('#species_header_'+species_id).show();
 		jQuery('#species_value').attr('value', species_id);
 		jQuery('#classify_number').attr('value', 1);
 		jQuery('#classify_gender').val(84);
@@ -102,6 +103,9 @@ jQuery(document).ready(function(){
 		    jQuery('.species_classify').show();
 		    var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
 		    jQuery('#species_helplet').load(url);
+			if( !jQuery('#species_helplet').length ) {
+				jQuery('#species_header_'+species_id).show();
+			}
 		}
 		else{
 		    jQuery('.species_classify').hide();
@@ -109,6 +113,55 @@ jQuery(document).ready(function(){
 		
 	    });
 
+	jQuery('#fullscreen-button').click(function (){
+		var photos = document.getElementById('photoCarousel');
+		if("requestFullscreen" in photos) 
+		{
+			photos.requestFullscreen();
+		} 
+		else if ("webkitRequestFullscreen" in photos) 
+		{
+			photos.webkitRequestFullscreen();
+		} 
+		else if ("mozRequestFullScreen" in photos) 
+		{
+			photos.mozRequestFullScreen();
+		} 
+		else if ("msRequestFullscreen" in photos) 
+		{
+			photos.msRequestFullscreen();
+		}
+				
+	});
+		
+	jQuery('#fullscreen-exit-button').click(function (){
+		
+		if(document.exitFullscreen) 
+		{
+			console.log("Found exitFullscreen");
+			document.exitFullscreen();
+		} 
+		else if (document.webkitExitFullscreen) 
+		{
+			console.log("Found webkitExitFullscreen");
+			document.webkitExitFullscreen();
+		} 
+		else if (document.mozCancelFullScreen) 
+		{
+			console.log("Found mozCancelFullScreen");
+			document.mozCancelFullScreen();
+		} 
+		else if (document.msExitFullscreen) 
+		{
+			console.log("Found msExitFullscreen");
+			document.msExitFullscreen();
+		}
+		else {
+			console.log("No exit found");
+			
+		}		
+	});
+		
 	jQuery('.species_header').hide();
 	
 	jQuery('#classify_modal').bind('shown.bs.modal', function (e) {
@@ -126,6 +179,9 @@ jQuery(document).ready(function(){
 		jQuery('#not-favourite').hide();
 		jQuery('#favourite').show();
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
+		if ( !activeId ) {
+			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=like_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
@@ -136,6 +192,9 @@ jQuery(document).ready(function(){
 		jQuery('#favourite').hide();
 		jQuery('#not-favourite').show();
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
+		if ( !activeId ) {
+			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=unlike_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
@@ -154,17 +213,13 @@ jQuery(document).ready(function(){
 	
 	jQuery('#control_nextseq').click(function (){
 		id = jQuery(this).attr("id");
-		console.log("About to call next_sequence");
 		url = BioDiv.root + "&task=get_photo&format=raw&action=" + id;
 		jQuery.ajax(url, {'success': function() {
 			    window.location.reload(true);
-				console.log("Next sequence success");
 				if (document.getElementById('sub-photo-1')) {
-					console.log("more than one photo" );
 					jQuery('#control_nextseq').prop('disabled', true);
 				}
 				else {
-					console.log("only one photo in sequence" );
 					jQuery('#control_nextseq').prop('disabled', false);
 				}
 			}});
@@ -175,23 +230,33 @@ jQuery(document).ready(function(){
 		jQuery('#photo-carousel-control-right').focus();
 		console.log("focus set");
 	    });
-
-
+	
 
 	jQuery('.species-carousel-control').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
 	jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
 	jQuery('#favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to remove favourite status', 'placement': 'bottom'});
 	jQuery('#not-favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to make this one of your favourites', 'placement': 'bottom'});
 	jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
-	
+	jQuery('#fullscreen-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Full screen', 'placement': 'top'});
+	jQuery('#fullscreen-exit-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Exit full screen', 'placement': 'top'});
 
+	//jQuery('#fullscreen-exit-button').hide();
+	
 	jQuery('.sub-photo');
-		
+	
+	// to test IE: jQuery('#fullscreen-exit-button').hide();
 	jQuery('#photo-carousel-control-right').focus();
 	
-	if (document.getElementById('sub-photo-1')) {
-					console.log("more than one photo" );
-					jQuery('#control_nextseq').prop('disabled', true);
-				}
-    });
+	// For sequences of more than 1 photo or for videos disable NextSequence until the user has viewed all.
+	if ( document.getElementById('sub-photo-1') ) {
+		jQuery('#control_nextseq').prop('disabled',true);
+	}
+	
+	if ( document.getElementById('classify-video') ) {
+		jQuery('#control_nextseq').prop('disabled',true);
+	}
+		
+});
+
+	
     

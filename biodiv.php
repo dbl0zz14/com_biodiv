@@ -9,6 +9,7 @@
 defined('_JEXEC') or die;
 
 include "local.php";
+include "Project.php";
 
 define('BIODIV_MAX_FILE_SIZE', 6500000);
 
@@ -20,11 +21,14 @@ BioDiv.root = "'. BIODIV_ROOT . '";');
 
 JHtml::_('bootstrap.framework');
 JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", array(), true);
+//JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", true, true);
 JHTML::script("bootstrap3-editable/bootstrap-editable.js", true, true);
 JHTML::script("com_biodiv/biodiv.js", true, true);
 
 // set up external database links
 include "codes.php";
+require_once('libraries/getid3/getid3/getid3.php');
+
 
 
 function db(){
@@ -387,6 +391,17 @@ function siteURL($site_id){
   return JURI::root()."/biodivimages/person_${person_id}/site_${site_id}";
 }
 
+function isVideo($photo_id) {
+	$details = codes_getDetails($photo_id, 'photo');
+	$filename = $details['filename'];
+	if ( strpos(strtolower($filename), '.mp4') !== false ) {
+		return true;
+	}
+	return false;
+	
+}
+
+
 function photoURL($photo_id){
   $details = codes_getDetails($photo_id, 'photo');
   // debug
@@ -499,8 +514,43 @@ function deleteNothingClassification ( $photo_id ) {
 	$success = $db->execute();
 }
 
-// Helper function to recursively add child projects.
-//function addSubProjects (&$projects, &$pairs) {
+
+
+// Helper function to add child projects.
+/*
+function findSubProjects ($projects, $pairs) {
+
+  //echo "findSubProjects called<br>";
+  //print "<br/>Got " . count($projects) . " projects.<br/>";
+  
+  // Start by adding the projects we know about to a new array
+  $allProjects = array();
+  foreach ($projects as $proj_id=>$proj_prettyname){
+	  $allProjects += [ $proj_id=>$proj_prettyname ];
+  }
+  
+  foreach ($allProjects as $proj_id=>$proj_prettyname){	
+	//print "proj_id, proj_prettyname = " . $proj_id . ", " . $proj_prettyname . "<br>";
+	$project_id = null;
+	$parent_project_id = null;
+	$project_prettyname = null;
+	$childAdded = false;
+	foreach ($pairs as $allpairsline){
+	  extract($allpairsline);
+	  //echo "all pairs: parent_project_id, project_id = " . $parent_project_id . ", " . $project_id . "<br>";
+      if ( $parent_project_id == $proj_id ) {
+	    if ( !array_key_exists($project_id, $allProjects) ) {
+		  //print "<br/>Not there yet so adding " . $project_id . "=>" . $project_prettyname . " to allProjects<br/>\n";
+		  // need to watch this - new project must be added at the end...
+		  $allProjects += [ $project_id => $project_prettyname ];
+		  $childAdded = true;
+	    }
+	  }
+	}
+  }
+  return $allProjects;
+}*/
+
 function addSubProjects (&$projects, &$pairs) {
 
   //echo "addSubProjects called<br>";
@@ -577,12 +627,14 @@ function myTrappingProjects () {
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
   $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
-	->where("access_level < 3");
+	->where("access_level < 3")
+	->where("parent_project_id is not NULL");
   $db->setQuery($query);
   $allpairs = $db->loadAssocList();
   
   $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+	->where("parent_project_id is not NULL");
   $db->setQuery($query);
   $allpairsincpriv = $db->loadAssocList();
   
@@ -628,6 +680,9 @@ function myTrappingProjects () {
   // add to private project list by working through $allpairsincpriv to find the children, repeatedly
   //print "<br/>Calling addSubProjects<br/>";
   addSubProjects( $privateprojects, $allpairsincpriv );
+  // Include all the child projects
+  //$privateprojects = findSubProjects ( $privateprojects, $allpairsincpriv );
+
   
   // Next get any hybrid, restricted or private projects I am a member of
   $query = $db->getQuery(true);
@@ -643,6 +698,9 @@ function myTrappingProjects () {
   // add to restricted/hybrid project list by working through $allpairs to find the children, repeatedly
   //print "<br/>Calling addSubProjects<br/>";
   addSubProjects( $myprojects, $allpairs );
+  // Include all the child projects
+  //$myprojects = findSubProjects ( $myprojects, $allpairs );
+
   
   //print "<br>Pre mergerd restricted and hybrid projects: <br>";
   //print_r ( $myprojects );
@@ -659,8 +717,100 @@ function myTrappingProjects () {
   return $myprojects;
 }
 
+function mySpottingProjects ($reduce = false) {
+	$person_id = (int)userID();
+  
+  // first select all project/parent pairs into memory, exclude private ones.
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+	->where("access_level < 3")
+	->where("parent_project_id is not NULL");
+  $db->setQuery($query);
+  $allpairs = $db->loadAssocList();
+  
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+	->where("parent_project_id is not NULL");
+  $db->setQuery($query);
+  $allpairsincpriv = $db->loadAssocList();
+  
+  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
+  
+  // First, public and hybrid projects
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
+  $query->where("P.access_level in (0,1)");
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $publicandhybridprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  //print "<br>Public and hybrid projects<br>";
+  //print_r ( $publicandhybridprojects );
+  
+  // Next all private projects I am a member of
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
+  $query->where("P.access_level = 3 and PUM.person_id = " . $person_id);
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $privateprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  // Include all the child projects
+  //$privateprojects = findSubProjects ( $privateprojects, $allpairsincpriv );
+  addSubProjects($privateprojects, $allpairsincpriv );
+	
+  
+  // Next get any restricted projects I am a member of, and get subprojects of those
+  $query = $db->getQuery(true);
+  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
+  $query->where("P.access_level = 2 and PUM.person_id = " . $person_id );
+  $query->order("P.project_id" );
+  $db->setQuery($query);
+  $restrictedprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
+
+  // Get all the child projects
+  //$restrictedprojects = findSubProjects ( $restrictedprojects, $allpairs );
+  addSubProjects($restrictedprojects, $allpairs );
+
+  
+  //print "<br>Pre mergerd restricted and hybrid projects: <br>";
+  //print_r ( $myprojects );
+  
+  // Add in the public, hybrid and private projects
+  $myprojects = $restrictedprojects + $publicandhybridprojects + $privateprojects;
+  
+  //print "<br>Mergerd projects: <br>";
+  //print_r ( $myprojects );
+  
+  
+  if ( $reduce ) {
+	  // Only want the private projects plus the projects that don't have a parent already in the list.
+	
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+	$query->where("P.access_level = 3 or (P.access_level < 3 and P.parent_project_id is null) or (P.access_level < 3 and P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2))");
+	$db->setQuery($query);
+	$allreduced = $db->loadAssocList('proj_id', 'proj_prettyname');
+	$myprojects = array_intersect_key ( $myprojects, $allreduced );
+  }
+  
+  //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
+  //print implode(",", $myprojects);
+  
+  asort($myprojects);
+  return $myprojects;
+  
+  
+}
+/*
 // If $reduce is True, return only the private projects and the top level listed ones.
-function mySpottingProjects ( $reduce = false ) {
+function oldSpottingProjects ( $reduce = false ) {
   //print "<br/>myTrappingProjects called<br/>";
   // what user am I?
   $person_id = (int)userID();
@@ -679,22 +829,6 @@ function mySpottingProjects ( $reduce = false ) {
   $allpairsincpriv = $db->loadAssocList();
   
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
-  
-  /* going to try to do this in two parts so can allow private sub project of public proj
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("(P.access_level in (0,1)) or (PUM.person_id = " . $person_id . ") ");
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $myprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
-
-  // add to project list by working through $allpairs to find the children, repeatedly
-  //print "<br/>Calling addSubProjects<br/>";
-  addSubProjects( $myprojects, $allpairs );
-  */
   
   // First, public and hybrid projects
   $query = $db->getQuery(true);
@@ -764,7 +898,7 @@ function mySpottingProjects ( $reduce = false ) {
   asort($myprojects);
   return $myprojects;
 }
-
+*/
 
 // Get all options for a single project by project id or just a particular option type if set
 function getSingleProjectOptions ( $project_id, $option_type ) {
@@ -1122,7 +1256,7 @@ function calculateLeagueTable () {
 	
 	$query = $db->getQuery(true);
     $query->select("A.person_id as person_id, count(distinct P.sequence_id) as num_sequences")
-		->from("Animal A")
+		->from("Animal A use index (classification_id)")
 		->innerJoin("Photo P on P.photo_id = A.photo_id")
 		->where("A.species != 97")
 		->group("A.person_id ")
@@ -1164,6 +1298,58 @@ function calculateLeagueTable () {
 			$result = $db->execute();
 		}
 	}
+}
+
+// Update the AnimalStatistics table with count of classifications by project and species
+function calculateAnimalStatistics () {
+
+  $db = JDatabase::getInstance(dbOptions());
+  
+  print "<br>Truncating table";
+  // Truncate the table
+  
+  $truncate = $db->getQuery(true)
+                   ->truncateTable('AnimalStatistics');
+
+  $db->truncateTable('AnimalStatistics');
+  
+  print "<br>Inserting new data";
+  
+  $query = $db->getQuery(true);
+  $query2 = $db->getQuery(true);
+  // count every classification but exclude Likes
+  $query->select("PSM.project_id as project_id, A.species as option_id, O.option_name as species, count(A.animal_id) as num_animals from Animal A")
+        ->innerJoin("Photo P on P.photo_id = A.photo_id and P.sequence_num = 1")
+		->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id")
+        ->innerJoin("Options O on A.species = O.option_id")
+		->where("A.species!= 97")
+		->group("PSM.project_id, A.species");
+		
+  $query2->select("PSM.project_id as project_id, A.species as option_id, O.option_name as species, count(A.animal_id) as num_animals from Animal A")
+        ->innerJoin("Photo P on P.photo_id = A.photo_id and P.sequence_num = 1")
+		->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL")
+        ->innerJoin("Options O on A.species = O.option_id")
+		->where("A.species!= 97")
+		->group("PSM.project_id, A.species");
+		
+  
+ $q3 = $db->getQuery(true)
+             ->select('a.project_id,  a.option_id, a.species, sum(a.num_animals)')
+			 ->from('(' . $query->union($query2) . ') a')
+			 ->group("a.project_id, a.option_id");
+  
+    
+  $queryInsert = $db->getQuery(true)
+  ->insert('AnimalStatistics')
+  ->columns($db->qn(array('project_id','option_id','species','num_animals')))
+  ->values($q3);
+  
+  $db->setQuery($queryInsert);
+  $result = $db->execute();
+  
+  print "<br>Complete";
+  
+  
 }
 
 
@@ -1211,135 +1397,6 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
   
   $projects = getSubProjectsById( $project_id );
   $id_string = implode(",", array_keys($projects));
-  /*
-  $uploadedArray = array();
-  $db = JDatabase::getInstance(dbOptions());
-  for ( $j=0; $j<$numIntervals; $j++ ) {
-	$query = $db->getQuery(true);
-	$query->select("count(distinct photo_id) from ProjectSequences");
-	$query->where("project_id in (" . $id_string . ")" );
-	$query->where("uploaded < " . $datesArray[$j+1] );
-	$db->setQuery($query);
-	$numLoaded = $db->loadResult();
-	array_push ( $uploadedArray, $numLoaded );
-  }
-  
-  $classifiedArray = array();
-  for ( $j=0; $j<$numIntervals; $j++ ) {
-	$query = $db->getQuery(true);
-	$query->select("count(distinct start_photo_id) from ProjectAnimals");
-	$query->where("project_id in (" . $id_string . ")" );
-	$query->where("classify_time < " . $datesArray[$j+1] );
-	$db->setQuery($query);
-	$numClassified = $db->loadResult();
-	array_push ( $classifiedArray, $numClassified );
-  }
-  */
-  /* ProjectSequences select:
-  select PSM.project_id, P.site_id, P.photo_id, P.taken, P.uploaded from Photo P
-inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
-where P.photo_id >= PSM.start_photo_id
-and PSM.end_photo_id is NULL
-and P.sequence_num = 1
-union
-select PSM.project_id, P.site_id, P.photo_id, P.taken, P.uploaded from Photo P
-inner join ProjectSiteMap PSM on P.site_id = PSM.site_id
-where P.photo_id >= PSM.start_photo_id
-and P.photo_id <= PSM.end_photo_id
-and P.sequence_num = 1
-*/
-/*
-  $uploadedArray = array();
-  $db = JDatabase::getInstance(dbOptions());
-  for ( $j=0; $j<$numIntervals; $j++ ) {
-	$query = $db->getQuery(true);
-	$query->select("distinct P.photo_id from Photo P");
-	$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
-	$query->where("P.photo_id >= PSM.start_photo_id");
-	$query->where("PSM.end_photo_id is NULL");
-	$query->where("P.sequence_num = 1");
-	$query->where("PSM.project_id in (" . $id_string . ")" );
-	$query->where("P.uploaded < " . $datesArray[$j+1] );
-	$db->setQuery($query);
-	
-	$query2 = $db->getQuery(true);
-	$query2->select("distinct P.photo_id from Photo P");
-	$query2->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
-	$query2->where("P.photo_id >= PSM.start_photo_id");
-	$query2->where("P.photo_id <= PSM.end_photo_id");
-	$query2->where("P.sequence_num = 1");
-	$query2->where("PSM.project_id in (" . $id_string . ")" );
-	$query2->where("P.uploaded < " . $datesArray[$j+1] );
-	$db->setQuery($query2);
-	
-	$q3 = $db->getQuery(true)
-             ->select('count(a.*)')
-             ->from('(' . $query->union($query2) . ') a');
-			 
-	//$numLoaded = $db->loadResult();
-	$numLoaded = $db->loadResult();
-	//$listedprojects = $db->loadObjectList();
-	
-	//print ( "Got " . $numLoaded . " photos loaded for projects in " . $id_string . "<br>" );
-	
-	array_push ( $uploadedArray, $numLoaded );
-  }
-  */
-  /*
-  $classifiedArray = array();
-  for ( $j=0; $j<$numIntervals; $j++ ) {
-	$query = $db->getQuery(true);
-	$query->select("count(distinct start_photo_id) from ProjectAnimals");
-	$query->where("project_id in (" . $id_string . ")" );
-	$query->where("classify_time < " . $datesArray[$j+1] );
-	$db->setQuery($query);
-	$numClassified = $db->loadResult();
-	array_push ( $classifiedArray, $numClassified );
-  }
-  */
-  /*
-  from Animal A 
-inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-inner join Photo P2 on PS.end_photo_id = P2.photo_id
-inner join Site S on P.site_id = S.site_id
-inner join Options O on O.option_id = A.species
-left join Options O2 on O2.option_id = A.age
-left join Options O3 on O3.option_id = A.gender
-inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id 
-
-*/
-/*
-  $classifiedArray = array();
-  for ( $j=0; $j<$numIntervals; $j++ ) {
-	$query = $db->getQuery(true);
-	$query->select("distinct A.photo_id from Animal A");
-	$query->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1");
-	$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
-	$query->where("P.photo_id >= PSM.start_photo_id");
-	$query->where("PSM.end_photo_id is NULL");
-	$query->where("project_id in (" . $id_string . ")" );
-	$query->where("P.uploaded < " . $datesArray[$j+1] );
-	$db->setQuery($query);
-	
-	$query2 = $db->getQuery(true);
-	$query2->select("distinct A.photo_id from Animal A");
-	$query2->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1");
-	$query2->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
-	$query2->where("P.photo_id >= PSM.start_photo_id");
-	$query2->where("P.photo_id  <= PSM.end_photo_id");
-	$query2->where("project_id in (" . $id_string . ")" );
-	$query2->where("P.uploaded < " . $datesArray[$j+1] );
-	$db->setQuery($query2);
-	
-	$q3 = $db->getQuery(true)
-             ->select('count(a.*)')
-             ->from('(' . $query->union($query2) . ') a');
-			 
-	$numClassified = $db->loadResult();
-	array_push ( $classifiedArray, $numClassified );
-  }
-  */
   
   $uploadedArray = array();
   $classifiedArray = array();
@@ -1402,9 +1459,8 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   $query = $db->getQuery(true);
   // count every classification
   //$query->select("species, count(distinct start_photo_id) as num_animals FROM ProjectAnimals");
-  $query->select("species, count(start_photo_id) as num_animals FROM ProjectAnimals");
+  $query->select("species, num_animals FROM AnimalStatistics");
   $query->where("project_id in (" . $id_string . ")" );
-  $query->group("species" );
   $query->order("num_animals  DESC");
   $db->setQuery($query);
   $animals = $db->loadAssocList('species', 'num_animals');
@@ -1484,6 +1540,27 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
 }
 
 
+function getProjectTree ( $project_id ) {
+	
+	//print ("getProjectTree called, project_id = " . $project_id );
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.listing_level as level, P.access_level, O.option_name as priority")->from("Project P");
+	$query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
+	$query->innerJoin("Options O on PO.option_id = O.option_id");
+	$query->where("O.struc = 'priority'");
+	$query->where("P.project_id = ".$project_id);
+	
+	$db->setQuery($query);
+
+	$result = $db->loadObject();
+	
+	//print_r($result);
+	
+	return new Project ( $result->project_id, $result->project_prettyname, $result->project_description, $result->level, $result->access_level, $result->priority );
+}
+
+
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
 function getSubProjects($project_prettyname, $exclude_private = false){
@@ -1492,7 +1569,8 @@ function getSubProjects($project_prettyname, $exclude_private = false){
   // first select all project/parent pairs into memory
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+		->where("parent_project_id is not NULL");
   // exclude private projects
   if ( $exclude_private ) {
 	  $query->where("access_level < 3");
@@ -1500,6 +1578,7 @@ function getSubProjects($project_prettyname, $exclude_private = false){
   $db->setQuery($query);
   $allpairs = $db->loadAssocList();
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
+  //print_r($allpairs);
   
   // Need to get the proj id and name of the top level project
   $query = $db->getQuery(true);
@@ -1744,7 +1823,7 @@ function isFavourite($photo_id){
 // New version of nextSequence which considers the classify priority mode of each project.
 // At the time of writing this could be:
 // Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
-function nextSequence(){
+function nextSequenceSlow(){
   
   //print "<br/>nextSequence called<br/>";
 	
@@ -1873,7 +1952,229 @@ function nextSequence(){
 	}
   }
   //print "<br/> returning at end of nextSequence, photo_id = " . $photo_id;
-  return getSequence($photo_id);
+  //return getSequence($photo_id);
+  return getSequenceDetails($photo_id);
+}
+
+// New version of nextSequence which considers the classify priority mode of each project.
+// At the time of writing this could be:
+// Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
+function nextSequence(){
+  
+  //print "<br/>nextSequence called<br/>";
+	
+  $db = JDatabase::getInstance(dbOptions());
+  $app = JFactory::getApplication();
+  
+  // Initialise photo_id and sequence_id to null
+  $photo_id = null;
+  $sequence_id = null;
+  
+  // First find out which classify button was pressed.
+  $classify_project = $app->getUserState("com_biodiv.classify_only_project");
+  $classify_own = $app->getUserState("com_biodiv.classify_self");
+  $last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+  
+  $my_project = null;
+  
+  if ( $classify_project ) $my_project = $app->getUserState("com_biodiv.my_project");
+  
+  //print "<br>nextSequence, my_project: " . $my_project . "<br>" ;
+  
+  // Get a list of projects over which we are working and their priority mode (an assoc list keyed on project_id)
+  // If we are doing a "classify all" then exclude some projects
+  $exclude_flag = true;
+  if ( $classify_project or $classify_own ) $exclude_flag = false;
+  $project_options = getProjectOptions ( $my_project, "priority", $exclude_flag );
+  
+  //print "<br>nextSequence, got project options: <br>" ;
+  //print_r ( $project_options );
+  
+  // Get all the priority option names indexed on project_id
+  $priority_array = array_column ( $project_options, "option_name", "project_id" );
+  
+  //print "<br>nextSequence, got priority_array: <br>" ;
+  //print_r ( $priority_array );
+  
+  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered");
+  
+  // which priorities do we have projects for?
+  $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
+  
+  //print "<br>nextSequence, got distinct_priorities: <br>" ;
+  //print_r ( $distinct_priorities );
+  
+  //error_log ( "distinct priorities: " . implode ( ',', $distinct_priorities ) );
+  
+  // Determine the order of priority types to try.  Take a weighted choice from each priority type that this user has 
+  // access to.  
+  $all_weightings = getPriorityWeightings ();
+  //print "<br>nextSequence, got all_weightings: <br>" ;
+  //print_r ( $all_weightings );
+
+
+  $reqd_weightings = array_intersect_key ( $all_weightings, array_flip($priority_array ));
+  //print "<br>nextSequence, got reqd_weightings: <br>" ;
+  //print_r ( $reqd_weightings );
+
+  $total_weighting = array_sum($reqd_weightings);
+  
+  $ordered_priorities = array();
+  
+  $num_iterations = count($reqd_weightings);
+
+  for ( $i=0; $i< $num_iterations; $i++ ) {
+	//print "<br>nextSequence, i = " . $i . ", now got reqd_weightings: <br>" ;
+    //print_r ( $reqd_weightings );
+	//print "<br>nextSequence, i = " . $i . ", total_weighting =  " . $total_weighting . "<br>" ;
+    
+
+	if ( count($reqd_weightings) == 1 ) {
+		//print "<br>just one reqd weighting left <br>" ;
+
+		$ordered_priorities[] = array_keys($reqd_weightings)[0];
+		break;
+	}
+	// Choose a random integer between 0 and $total_weightings.
+    $choice = rand ( 1, $total_weighting );
+
+    //print "<br>nextSequence, choice:" . $choice . " <br>" ;
+
+    // check through the accumulated weightings to see where the choice lies..
+    $count = 0;
+    foreach ( $reqd_weightings as $priority=>$weighting ) {
+	  $count += $weighting;
+	  if ( $choice <= $count ) {
+	    $ordered_priorities[] = $priority;
+		$total_weighting -= $weighting;
+		//print "<br>About to unset " . $priority . " <br>" ;
+        unset($reqd_weightings[$priority]);
+		//print "<br>nextSequence, after unset reqd_weightings: <br>" ;
+        //print_r ( $reqd_weightings );
+	
+	    break;
+	  }
+    }
+  }
+  //print "<br>nextSequence, got ordered_priorities: <br>" ;
+  //print_r ( $ordered_priorities );
+
+  foreach ( $ordered_priorities as $current_priority ) {
+	  if ( !$photo_id ) {
+		  switch ($current_priority) {
+			  case "Multiple":
+				$project_ids = array_keys ( $priority_array, "Multiple" );
+	            $photo_id = chooseMultiple ( $project_ids, $classify_own );
+				break;
+			  case "Single":
+				$project_ids = array_keys ( $priority_array, "Single" );
+	            $photo_id = chooseSingle ( $project_ids, $classify_own );
+				break;
+			  case "Single to multiple":
+				$project_ids = array_keys ( $priority_array, "Single to multiple" );
+	            $photo_id = chooseSingle ( $project_ids, $classify_own );
+				if ( !$photo_id ) {
+					$photo_id = chooseMultiple ( $project_ids, $classify_own );
+				}
+				break;
+			  case "Site time ordered":
+				$project_ids = array_keys ( $priority_array, "Site time ordered" );
+	            $photo_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
+				break;
+			  default:
+			    break;
+	  
+		  }
+	  }
+  }
+  
+  /*
+  $photo_id_candidates = array();
+  
+  // THere may be no photos left to classify.
+  $num_candidates = 0;
+  
+  if ( count($distinct_priorities) > 0 ) {
+	//print "distinct priorities are:<br>";
+	//print_r($distinct_priorities);
+	if ( in_array("Single", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Single" );
+	  $ph_id = chooseSingle ( $project_ids, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Single"] = $ph_id;
+	}
+	if ( in_array("Multiple", $distinct_priorities ) ) {
+	  //print "<br>nextSequence, about to ChooseMultiple <br>" ;
+	  $project_ids = array_keys ( $priority_array, "Multiple" );
+	  $ph_id = chooseMultiple ( $project_ids, $classify_own );
+	  //print "<br>nextSequence, chooseMultiple chose ph_id " . $ph_id . " <br>" ;
+	  if ( $ph_id ) $photo_id_candidates["Multiple"] = $ph_id;
+	}
+	if ( in_array("Single to multiple", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Single to multiple" );
+	  $ph_id = chooseSingle ( $project_ids, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
+	  else {
+		  $ph_id = chooseMultiple ( $project_ids, $classify_own );
+		  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
+	  }
+	}
+	if ( in_array("Site time ordered", $distinct_priorities ) ) {
+	  $project_ids = array_keys ( $priority_array, "Site time ordered" );
+	  $ph_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
+	  if ( $ph_id ) $photo_id_candidates["Site time ordered"] = $ph_id;
+	}
+  
+	$num_candidates = count($photo_id_candidates);
+  
+	//print "<br>nextSequence, num_candidates = " . $num_candidates . " <br>" ;
+  
+	//$chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
+	
+	if ( $num_candidates > 0 ) {
+		$chosen_priority = array_keys($photo_id_candidates)[0];
+	}
+  
+	// If only one priority type we are done, but if more than one we have to pick.
+	if ( $num_candidates > 1 ) {
+	
+		// Determine which priority type we're using.  Take a weighted choice from each priority type that this user has 
+		// access to.  For now use these hardcoded values but this needs to be taken out and put in the database, then updated daily based 
+		// on what photos/projects there are...
+		$all_weightings = getPriorityWeightings ();
+	
+		$reqd_weightings = array_intersect_key ( $all_weightings, $photo_id_candidates );
+		//print "<br>nextSequence, got reqd_weightings: <br>" ;
+		//print_r ( $reqd_weightings );
+  
+		$total_weighting = array_sum($reqd_weightings);
+  
+		// Choose a random integer between 0 and $total_weightings.
+		$choice = rand ( 1, $total_weighting );
+	
+		//print "<br>nextSequence, choice:" . $choice . " <br>" ;
+	
+		// check through the accumulated weightings to see where the choice lies..
+		$count = 0;
+		foreach ( $reqd_weightings as $priority=>$weighting ) {
+			$count += $weighting;
+			if ( $choice <= $count ) {
+				$chosen_priority = $priority;
+				break;
+			}
+		}
+	}
+    
+	//print "<br>nextSequence, chosen priority is:" . $chosen_priority . " <br>" ;
+	//error_log ( "nextSequence, chosen priority is:" . $chosen_priority );
+	
+	if ( $num_candidates > 0 ) {
+		$photo_id = $photo_id_candidates[$chosen_priority];
+	}
+  }
+  */
+  //print "<br/> returning at end of nextSequence, photo_id = " . $photo_id;
+  //return getSequence($photo_id);
+  return getSequenceDetails($photo_id);
 }
 
 function chooseMultiple ( $project_ids, $classify_own ) {
@@ -1901,9 +2202,8 @@ function chooseMultiple ( $project_ids, $classify_own ) {
             
 		$q1->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
 			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
 			->where("A.photo_id IS NULL")
 			->where("P.contains_human =0" . $own_string )
@@ -1914,9 +2214,8 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		
 		$q2->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
 			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
 			->where("A.photo_id IS NULL")
 			->where("P.contains_human =0" . $own_string )
@@ -1960,22 +2259,21 @@ function chooseSingle ( $project_ids, $classify_own ) {
             
 	$q1->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
-        ->innerJoin("Site S ON P.site_id = S.site_id")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
         ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
         ->where("A.photo_id IS NULL")
         ->where("P.contains_human =0" . $own_string )
 	    ->where("P.sequence_id > 0")
 		->where("P.sequence_num = 1" )
 		->where("P.photo_id >= PSM.start_photo_id")
-		->where("PSM.end_photo_id is null");
-		
+		->where("P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null")
+		->order("rand()");
+	/*	
 	$q2->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
 			->leftJoin("Animal A ON P.photo_id = A.photo_id")
 			->where("A.photo_id IS NULL")
 			->where("P.contains_human =0" . $own_string )
@@ -1990,6 +2288,9 @@ function chooseSingle ( $project_ids, $classify_own ) {
              ->order("rand()");
 	
 	$db->setQuery($q3, 0, 1); // LIMIT 1
+	*/
+	
+	$db->setQuery($q1, 0, 1); // LIMIT 1
 	$photo = $db->loadObject();
 	if ( $photo ) {
 		$photo_id = $photo->photo_id;
@@ -2319,6 +2620,29 @@ function getSequence($photo_id) {
   }
 
   return $sequence;
+}
+
+// Return all the photo details for this sequence, in order.  Do one db call (well two) rather than one photo at a time.
+function getSequenceDetails($photo_id) {
+  
+  $sequenceDetails = array();
+  
+  if ( $photo_id > 0 ) {
+    // First get the sequence id
+    $photoDetails = codes_getDetails($photo_id, 'photo');
+    $sequenceId = $photoDetails['sequence_id'];
+  
+    $db = JDatabase::getInstance(dbOptions());
+	
+    $query = $db->getQuery(true);
+    $query->select("photo_id, site_id, dirname, filename, sequence_id, sequence_num, prev_photo, next_photo, person_id from Photo P")
+		->where("P.sequence_id = " . $sequenceId )
+		->order("P.sequence_num");
+    $db->setQuery($query);
+	
+    $sequenceDetails = $db->loadAssocList();
+  }
+  return $sequenceDetails;
 }
 
 function updateSequence($photo_id){
@@ -2683,7 +3007,7 @@ function sequencePhotos($upload_id){
 		//print "<br/>after updating prev photo id $prev_photo_id seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
 	
       }
-      else{  // end current sequence
+      else {  // end current sequence
 	    // at this point we want to check whether the previous photo was sequenced.  If no, then it is a single photo, not 
 		// part of a burst.  So we want to give it a sequence_id but no prev or next photo.
 		print "<br/><br/>Photos are not close so now on next sequence<br/>";
@@ -2741,10 +3065,36 @@ function sequencePhotos($upload_id){
 	    $sequence_id = 0;
       }
     }
-    
 	$prev_photo_id = $photo_id;
     $prev_dateTime = $dateTime;
     $prev_seq_num = $seq_num;
+	
+	if ( $num_results === 1 ) {
+		// Special case for when only one file is uploaded
+		print "<br/>Only one file uploaded: $prev_photo_id<br/>";
+		  $fields = new StdClass();
+	      $fields->start_photo_id = $prev_photo_id;
+		  $fields->end_photo_id = $prev_photo_id;
+		  $fields->sequence_length = 1;
+	      $fields->upload_id = $upload_id;
+	      $sequence_id = codes_insertObject($fields, 'sequence');
+	      print "new sequence $sequence_id<br/>";
+	      $seq_num = 1; // as we're just starting a new sequence
+	      //print "<br/>end of adding sole photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+		  
+		  canEdit( $prev_photo_id, 'photo', 1);
+          //canEdit( $photo_id, 'photo' , 1);		
+		  $fields = new StdClass();
+	      $fields->sequence_id = $sequence_id;
+	      $fields->sequence_num = 1;
+	      $fields->photo_id = $prev_photo_id;
+	      print "updating photo ";
+	      print_r($fields);
+	      codes_updateObject($fields, 'photo');
+		  //print "<br/>end of updating sole photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
+		  
+	}
+    
   }
   
   // This is the catch all for the ones that have not been sequenced.  
@@ -3107,6 +3457,45 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 	//print "</div> <!-- /carousel-species carousel--> \n";
 }
 
+function getVideoMeta ( $filename ) {
+	// Initialize getID3 engine
+	$getID3 = new getID3;
+	// Analyze file and store returned data in $ThisFileInfo
+	$fileinfo = $getID3->analyze($filename);
+	
+	/*
+	$videoMeta = Array();
+	
+	$creation_time_unix = $fileinfo['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
+	$creation_time = $fileinfo['quicktime']['moov']['subatoms'][0]['creation_time'];
+	print_r ($creation_time_unix);
+	print ("<br>As date (from Unix): " . date('Y-m-d', $creation_time_unix) . "<br>");
+	print_r ($creation_time);
+	print ("<br>As date: " . date('Y-m-d', $creation_time - 2082844800) . "<br>");
+	*/
+	return $fileinfo;
+
+}
+/*
+function makeControlButton($control_id, $control){
+  $disabled = strpos($control, "disabled");
+  if($disabled !== false){
+    $extras = array('disabled');
+  }
+  else{
+    $extras = array('classify_control');
+  }
+
+  $confirm = strpos($control, "biodiv-confirm");
+
+  if($confirm !== false){
+    $extras[] = "biodiv-confirm";
+  }
+
+  $extraText = implode(" ", $extras);
+  print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
+}
+*/
 
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');

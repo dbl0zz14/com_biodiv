@@ -32,6 +32,7 @@ class BioDivViewCalculatestats extends JViewLegacy
 			$this->calcDate = JRequest::getInt("calc_date");
 			$this->calcTotals = JRequest::getInt("calc_totals");
 			$this->calcLeagueTable = JRequest::getInt("calc_leaguetable");
+			$this->calcAnimals = JRequest::getInt("calc_animals");
 		
 			parent::display($tpl);
         }

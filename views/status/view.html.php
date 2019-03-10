@@ -174,9 +174,10 @@ class BioDivViewStatus extends JViewLegacy
 	$this->status['Total number of Spotters in the system' ] = $this->totalSpotters;
 	$this->status['You are currently the ' . $userPos . $th . ' highest contributor to Spotting' ] ='';
 		
-	// call new biodiv.php function myProjects()
-	// Changed argument while redirect issue is sorted  $this->projects = mySpottingProjects( true );
-	$this->projects = mySpottingProjects();
+	// call new biodiv.php function instead of myProjects()
+	// Changed back argument to check redirect issue  
+	$this->projects = mySpottingProjects( true );
+	//$this->projects = mySpottingProjects();
 	$this->mylikes = getLikes(1);
 	
     // Display the view

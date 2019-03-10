@@ -48,7 +48,7 @@ defined('_JEXEC') or die;
 		print '<p class="spacer-1em"></p>';
 	}
 	
-	/*
+	
 	print "<form action = '" . BIODIV_ROOT . "' method = 'GET'>";
 	print "<div class='input-group'>";
     print "<input type='hidden' name='view' value='classify'/>";
@@ -64,7 +64,7 @@ defined('_JEXEC') or die;
 	print "</form>";
 	print '<p class="spacer-2em"></p>';
 	
-	*/
+	
 	print "</div>";
 	print "<div class='col-md-4 project-col' >";
 	//print '<p class="spacer-2em"></p>';
@@ -144,10 +144,23 @@ defined('_JEXEC') or die;
 			//print "image url is " . $url;
 			//print '<img alt = "" src="/rhombus/images/tree.jpg" itemprop="thumbnailUrl" width="90%"/>';
 			//print '<img alt = "" src="'.$url.'" itemprop="thumbnailUrl" width="90%"/>';
+			/*
 			print '<div class="crop-width">';
-			print '<img class="project-col-image cover scale2" alt = "project image" src="'.$url.'" />';
+			print '<img id = "subprojectimage_'.$proj_id.'" class="project-col-image cover scale2" alt = "project image" src="'.$url.'" />';
 			print '</div>';
+			*/
 	
+			print '<form action = "';
+			print BIODIV_ROOT;
+			print '" method = "GET">';
+			print "<input type='hidden' name='view' value='projecthome'/>";
+			print "<input type='hidden' name='option' value='";
+			print BIODIV_COMPONENT;
+			print "'/>";
+			print "<input type='hidden' name='project_id' value='".$proj_id."'/>";
+			print "<button class='image-btn project-btn' type='submit'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+			print "</form>";
+			
 			//print '<img class="project-col-image" alt = "" src="'.$url.'" />';
 			print '<div class="subproject-title">';
 			print '<h3 itemprop="name">';
@@ -155,6 +168,7 @@ defined('_JEXEC') or die;
 			print '</h3>';
 			print '</div>';
 			//print '<p>'.$project->project_description.'</p>';
+			/*
 			print "<table><tr>";
 			print '<td><form action = "';
 			print BIODIV_ROOT;
@@ -167,6 +181,7 @@ defined('_JEXEC') or die;
 			print "<button  class='btn btn-primary btn-projects' type='submit'>More</a></button>";
 			print "</form></td>";
 			print "</tr></table>";
+			*/
 			print '<p class="spacer-3em"></p>';
 			print '</div>';
 			$project_num += 1;

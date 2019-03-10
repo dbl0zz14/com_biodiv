@@ -11,6 +11,7 @@ jQuery(document).ready(function(){
 	var checkUploadUrl = BioDiv.root + "&task=verify_upload&upload_id=" + BioDiv.upload_id + "&guid=" + guid
 	var uploadObj = jQuery('#fileuploader').uploadFile({
 		sequential: true,
+		allowedTypes: "jpg,JPG,JPEG,mp4,MP4",
 
 		url:BioDiv.root + "&task=uploadm&upload_id=" + BioDiv.upload_id,
 		    multiple: true,
@@ -27,7 +28,11 @@ jQuery(document).ready(function(){
 		    //		    alert(data);
 		},
 
-		    afterUploadAll: function(){
+		onError: function(files,status,errMsg,pd){
+		    console.log("uploadFile error: " + errMsg);
+		},
+
+    afterUploadAll: function(){
 		    jQuery('#fileuploadspinner').hide();
 		    //		    var url = BioDiv.root + "&task=sequence_photos&upload_id=" + BioDiv.upload_id;
 		    //		    jQuery.ajax(url);

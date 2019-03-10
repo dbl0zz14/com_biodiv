@@ -489,6 +489,8 @@ function codes_getCheckboxes($input_name, $type, $features=array()){
 
 	$thiscode=$features['thiscode'];
 
+	$options = "";
+
 	foreach(codes_getList($type,$features) as $listitem){
 		list($lcode,$lname)=$listitem;
 

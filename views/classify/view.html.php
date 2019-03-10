@@ -48,19 +48,8 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->my_project = 
 	    $app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
-	  //echo "BioDivViewClassify, this->my_project = ", $this->my_project;
-	  /*
-	  if(!$this->photo_id){
-	    
-	    $this->photo_id = nextPhoto(0);
-	    $app->setUserState('com_biodiv.photo_id', $this->photo_id);
-	  }
-	  
-	  $this->photoDetails = codes_getDetails($this->photo_id, 'photo');
-	  */
-	  
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
-	  /*
+	  
 	  if ( !userID() ) {
 		$app = JFactory::getApplication();
 		$message = "Please log in before classifying.";
@@ -88,20 +77,21 @@ class BioDivViewClassify extends JViewLegacy
 			
 		  }
 	  }
-	  */
+	  
 	  
 	  $this->sequence = null;
 	  // Need to do a check here so that refresh doesn't load next sequence......
 	  // If there is a photo_id then get the sequence for that photo id.  If not, get a new sequence
 	  if(!$this->photo_id){
-	    $this->sequence = nextSequence(null);
+		$this->sequence = nextSequence();
 	  }
 	  else {
-		$this->sequence = getSequence($this->photo_id);
+		$this->sequence = getSequenceDetails($this->photo_id);
 	  }
 	
-	  if ($this->sequence) {
-		$this->photo_id = $this->sequence[0];
+	  if (count($this->sequence) > 0) {
+		$this->firstPhoto = $this->sequence[0];
+		$this->photo_id = $this->firstPhoto["photo_id"];
 	  }
 	  $app->setUserState('com_biodiv.photo_id', $this->photo_id);
 	  
@@ -109,6 +99,7 @@ class BioDivViewClassify extends JViewLegacy
 	  //print "<br>Got the following sequence:<br>";
 	  //print_r($this->sequence);
 	  
+	  /* now sequence contains the details
 	  $this->sequence_details = array();
 	  foreach ($this->sequence as $next_photo_id) {
 		  //print "<br>Adding photo " . $next_photo_id->photo_id . "<br>";
@@ -116,10 +107,18 @@ class BioDivViewClassify extends JViewLegacy
 	  }
 	  //print "<br>Got the following ". count($this->sequence_details) . " sequence details:<br>";
 	  //print_r($this->sequence_details);
-	  
+	  */
+	  $this->photoDetails = null;
 	  // There might be nothing to classify...
-	  if ( count($this->sequence_details) > 0 ) {
-		  $this->photoDetails = $this->sequence_details[0];
+	  if ( count($this->sequence) > 0 ) {
+		 $this->photoDetails = $this->sequence[0];
+		
+		 // Check for video
+		 $this->isVideo = false;
+		 $filename = $this->photoDetails['filename'];
+		 if ( strpos(strtolower($filename), '.mp4') !== false ) {
+			 $this->isVideo = true;
+		 }
 	  
 	  
 		// Get the filter ids and filter labels for this photo. 

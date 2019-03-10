@@ -10,7 +10,9 @@ defined('_JEXEC') or die;
 
 $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
-$document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
+if ( $this->photo_id ) {
+  $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
+}
 
 if(!$this->photo_id){
   print "<h2>No photos for you to classify</h2>\n";
@@ -37,9 +39,15 @@ function makeControlButton($control_id, $control){
   $extraText = implode(" ", $extras);
   print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
 }
+
+if ( $this->isVideo === true ) {
+	print '<h2>What do you see in this video?</h2>';
+}
+else {
+	print '<h2>What do you see in this sequence?</h2>';
+    //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
+}
 ?>
-<h2>What do you see in this sequence?</h2>
-<h5 class='bg-warning clashing add-padding-all'>Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>
 
 <?php
 // h2 was just above here.
@@ -103,10 +111,20 @@ foreach($this->lcontrols as $control_id => $control){
   <div class="row">
     <!-- div id='photo_img' class='col-md-12' -->
 <div class='col-md-12' >
-<div id="photoCarousel" class="carousel slide carousel-fade" data-ride="carousel" data-interval='false' data-wrap="false">
-  <!-- Indicators -->
-  <ol id="photo-indicators" class="carousel-indicators">
-  <?php
+
+<!-- either do photo carousel or video here -->
+<?php 
+
+if ( $this->isVideo === true ) {
+	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" controls><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">Your browser does not support the video tag.</video></div>';
+}
+else {
+	
+
+print '<div id="photoCarousel" class="carousel slide carousel-fade contain" data-ride="carousel" data-interval="false" data-wrap="false">';
+  print '<!-- Indicators -->';
+  print '<ol id="photo-indicators" class="carousel-indicators">';
+  
   $numphotos = count($this->sequence);
   for ($i = 0; $i < $numphotos; $i++) {
 	$class_extras = "";
@@ -114,33 +132,37 @@ foreach($this->lcontrols as $control_id => $control){
 	else $class_extras = ' class="spb" id = "sub-photo-'.$i.'"';
     print '<li data-target="#photoCarousel" data-slide-to="'.$i.'"'.$class_extras.'></li>';
   }
-  ?>
-  </ol>
+  
+  print '</ol>';
 
-  <!-- Wrapper for slides -->
-  <div id="photoCarouselInner" class="carousel-inner">
-<?php
+  print '<button  id="fullscreen-button" type="button" class="right" ><span class="fa fa-expand fa-2x"></span></button>';
+  print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-3x"></span></button>';
+  
+  print '<!-- Wrapper for slides -->';
+  print '<div id="photoCarouselInner" class="carousel-inner contain">';
+
 $numphotos = count($this->sequence);
 $j = 1;
-foreach($this->sequence as $photo_id  ){
+//foreach($this->sequence as $photo_id  ){
+foreach($this->sequence as $photo_details  ){
 	$lastclass = "";
 	if ( $j == $numphotos ) $lastclass .= 'last-photo';
 	if ($j==1) {
-		print '<div class="item active '.$lastclass.'" data-photo-id="'.$photo_id.'">';
+		print '<div class="item active '.$lastclass.'" data-photo-id="'.$photo_details["photo_id"].'">';
 	}
 	else {
-		print '<div class="item '.$lastclass.'" data-photo-id="'.$photo_id.'">';
+		print '<div class="item '.$lastclass.'" data-photo-id="'.$photo_details["photo_id"].'">';
 	}
-	print JHTML::image(photoURL($photo_id), 'Photo ' . $photo_id, array('class' =>'img-responsive'));
+	//print JHTML::image(photoURL($photo_details["photo_id"]), 'Photo ' . $photo_details["photo_id"], array('class' =>'img-responsive'));
+	print JHTML::image(photoURL($photo_details["photo_id"]), 'Photo ' . $photo_details["photo_id"], array('class' =>'img-responsive contain'));
 	print '</div>';
 	$j++;
  }
-?>
 
-  </div> <!-- /.carousel-inner -->
+  print '</div> <!-- /.carousel-inner -->';
   
-  <!-- Left and right controls -->
-  <?php
+  print '<!-- Left and right controls -->';
+  
   if (count($this->sequence) > 1 ) {
   //print '<a class="left carousel-control" href="#photoCarousel" data-slide="prev">';
   print '<a class="left carousel-control photo-carousel-control" href="#photoCarousel" data-slide="prev">';
@@ -153,8 +175,11 @@ foreach($this->sequence as $photo_id  ){
   print '  <span class="sr-only">Next</span>';
   print '</a>';
   }
-  ?>
-</div> <!-- /.photoCarousel -->
+  
+print '</div> <!-- /.photoCarousel -->';
+}
+?>
+
 </div> <!-- /.col-md-12 carousel-->
 </div> <!-- /.row -->
 
@@ -162,6 +187,8 @@ foreach($this->sequence as $photo_id  ){
 <div class='col-md-6 pull-left'>
 
 <div>
+
+  
 <div id='classify_tags'></div>
 </div>
 </div>

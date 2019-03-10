@@ -1,4 +1,11 @@
 jQuery(document).ready(function(){
+	
+	// Submit form on image click
+	/*
+	jQuery( "#subprojectimage_4" ).click(function() {
+		jQuery( "#subprojectform_4" ).submit();
+		});
+		*/
 
 	//Chart.defaults.global.maintainAspectRatio = false;
 	
@@ -224,5 +231,6 @@ jQuery(document).ready(function(){
 		}});
 	}
 	
-		
+jQuery('.project-btn').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Click the image for project details', 'placement': 'top'});
+			
 });

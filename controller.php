@@ -137,7 +137,9 @@ class BioDivController extends JControllerLegacy
       case "nextseq":
 	    //$photo_id = nextPhoto(0);
 	    $sequence = nextSequence();
-	    $photo_id = $sequence[0];
+	    //$photo_id = $sequence[0];
+		$firstPhoto = $sequence[0];
+		$photo_id = $firstPhoto["photo_id"];
 	    break;
       }
     }
@@ -310,8 +312,9 @@ class BioDivController extends JControllerLegacy
 	  continue;
 	} 
 	//	$tmpName = JFile::makeSafe($tmpName);
+	// NB can get this error if PHP max dilsize and upload size are too small:
 	if(!is_uploaded_file($tmpName)){
-	  addMsg("error", "Not an uploaded file $tmpName");
+	  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits");
 	  continue;
 	}
 	//	JHelperMedia::isImage($tmpName) or die("Not an image");
@@ -326,12 +329,27 @@ class BioDivController extends JControllerLegacy
 	  continue;
 	}
 	
-	$exif_extract = exif_read_data($tmpName);
-	$taken = $exif_extract['DateTimeOriginal'];
-	$manufacturer = $exif_extract['Manufacturer'];
-	$exif = serialize($exif_extract);
-	// check exif headers for camera type?
-	// check dates defined and photos in range
+	// Check whether video. Assume image if not.
+	$exif_extract = null;
+	$taken = null;
+	$manufacturer = null;
+	$exif = null;
+	if ( !strcmp( strtolower($ext), "mp4") ) {
+		error_log ( "Found mp4 video file, ext is " . $ext );
+		$exif_extract = getVideoMeta ( $tmpName );  // Assumes quicktime format
+		$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
+		$taken = date('Y-m-d H:i:s', $creation_time_unix);
+		$exif = serialize($exif_extract);
+	}
+	else {
+		error_log ( "Found non mp4 file, ext is " . $ext );
+		$exif_extract = exif_read_data($tmpName);
+		$taken = $exif_extract['DateTimeOriginal'];
+		$manufacturer = $exif_extract['Manufacturer'];
+		$exif = serialize($exif_extract);
+		// check exif headers for camera type?
+		// check dates defined and photos in range
+	}
 
 	$exists = JFile::exists($tmpName);
 	$success=	JFile::upload($tmpName, $newFullName);

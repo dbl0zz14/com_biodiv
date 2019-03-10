@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>2.4.0</version>
+  <version>2.5.0</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images from camera traps</description>
  
@@ -30,7 +30,9 @@
 	<filename>biodiv.php</filename>
 	<filename>codes.php</filename>
 	<filename>controller.php</filename>
+	<filename>Project.php</filename>
 	<folder>views</folder>
+	<folder>libraries</folder>
 <!--
     <filename>index.html</filename>
     <filename>helloworld.php</filename>

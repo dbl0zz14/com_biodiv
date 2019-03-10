@@ -53,7 +53,8 @@ class BioDivViewProjecthome extends JViewLegacy
 	// Remove this project from the sub projects list...
 	unset($this->subProjects[$this->project_id]);
 	
-	// use sep ajax call to get this data... $this->projectData = projectData ( $this->project_id );
+	$this->projectTree = getProjectTree($this->project_id);
+	
 	
 	$article = JTable::getInstance("content");
 	$project_id = JRequest::getInt("project_id");

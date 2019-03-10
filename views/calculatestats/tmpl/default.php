@@ -15,6 +15,10 @@ if ($this->calcLeagueTable == 1 ) {
 	print "Calculating league table <br>";
 	calculateLeagueTable();
 }
+else if ($this->calcAnimals == 1 ) {
+	print "Calculating animal statistics <br>";
+	calculateAnimalStatistics();
+}
 else if ($this->calcTotals == 1) {
 	print "Calculating totals.<br>";
 	calculateStatsTotals();
