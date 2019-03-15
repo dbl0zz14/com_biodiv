@@ -233,6 +233,7 @@ jQuery(document).ready(function(){
 	
 	if ( !document.fullscreenEnabled ) {
 		jQuery('#fullscreen-button').hide();
+		jQuery('#fullscreen-exit-button').hide();
 	}
 
 	jQuery('.species-carousel-control').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
