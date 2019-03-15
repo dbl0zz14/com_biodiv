@@ -24,9 +24,23 @@ foreach ( $this->projects as $project ) {
 	//print "image url is " . $url;
 	//print '<img alt = "" src="/rhombus/images/tree.jpg" itemprop="thumbnailUrl" width="90%"/>';
 	//print '<img alt = "" src="'.$url.'" itemprop="thumbnailUrl" width="90%"/>';
+	
+	print '<form action = "';
+	print BIODIV_ROOT;
+	print '" method = "GET">';
+	print "<input type='hidden' name='view' value='projecthome'/>";
+	print "<input type='hidden' name='option' value='";
+	print BIODIV_COMPONENT;
+	print "'/>";
+	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
+	print "<button class='image-btn project-btn' type='submit'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+	print "</form>";
+	
+	/*
 	print '<div class="crop-width">';
 	print '<img class="project-col-image cover scale2" alt = "project image" src="'.$url.'" />';
 	print '</div>';
+	*/
 	print '<div class="project-title">';
 	print '<h2 itemprop="name">';
 	print $project->project_prettyname;
@@ -68,7 +82,7 @@ foreach ( $this->projects as $project ) {
 	print '<p>'.$project->project_description.'</p>';
 	print '</div>';
 	
-	
+	/*
 	print "<table><tr>";
 	print '<td><form action = "';
 	print BIODIV_ROOT;
@@ -80,7 +94,7 @@ foreach ( $this->projects as $project ) {
 	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
 	print "<button  class='btn btn-primary btn-projects' type='submit'>More</button>";
 	print "</form></td>";
-	print "</tr></table>";
+	print "</tr></table>";*/
 	print '<p class="spacer-3em"></p>';
 	print '</div>';
 	$project_num += 1;
@@ -101,7 +115,7 @@ print '</div>';
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 //JHTML::script("com_biodiv/bootbox.js", true, true);
 //JHTML::script("com_biodiv/classify.js", true, true);
-
+JHTML::script("com_biodiv/project.js", true, true);
 ?>
 
 
