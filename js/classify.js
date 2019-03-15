@@ -231,6 +231,9 @@ jQuery(document).ready(function(){
 		console.log("focus set");
 	    });
 	
+	if ( !document.fullscreenEnabled ) {
+		jQuery('#fullscreen-button').hide();
+	}
 
 	jQuery('.species-carousel-control').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
 	jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
