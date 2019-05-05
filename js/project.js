@@ -182,7 +182,7 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&view=projectanimals&format=raw&project_id=" + project_id;
 	
 		jQuery.ajax(url, {'success': function(data) {
-			
+			console.log(data);
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
 			//Chart.defaults.global.maintainAspectRatio = false;
@@ -225,6 +225,62 @@ jQuery(document).ready(function(){
 						}]
 					}
 
+				}
+			});
+	
+		}});
+	}
+	
+	if ( jQuery('#animalsBarChartKiosk').length > 0  ) {
+		project_id = jQuery('#animalsBarChartKiosk').attr("data-project-id");
+		url = BioDiv.root + "&view=projectanimals&format=raw&project_id=" + project_id;
+	
+		jQuery.ajax(url, {'success': function(data) {
+			console.log(data);
+			// Now get the json data into the chart and display it.
+			var jsonObject = JSON.parse ( data );
+			//Chart.defaults.global.maintainAspectRatio = false;
+			var ctx = document.getElementById('animalsBarChartKiosk').getContext('2d');
+			var chart = new Chart(ctx, {
+				// The type of chart we want to create
+				type: 'bar',
+
+				// The data for our dataset
+				data: {
+					labels: jsonObject.labels,
+					datasets: [{
+						label: "Number of classifications",
+						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+						data: jsonObject.animals
+					}
+					]
+				},
+				
+				// Configuration options go here
+				options: {
+					title: {
+						display: true,
+						text: 'Species classified',
+						fontColor: 'white'
+					},
+					legend: {
+						display: false
+					},
+					scales: {
+						yAxes: [{
+							ticks: {
+								fontColor: "white",
+								beginAtZero:true,
+								autoSkip:false
+							}
+						}],
+						xAxes: [{
+							ticks: {
+								fontColor: "white",
+								autoSkip:false
+							}
+						}]
+					}
 				}
 			});
 	

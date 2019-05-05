@@ -1459,8 +1459,9 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   $query = $db->getQuery(true);
   // count every classification
   //$query->select("species, count(distinct start_photo_id) as num_animals FROM ProjectAnimals");
-  $query->select("species, num_animals FROM AnimalStatistics");
+  $query->select("species, sum(num_animals) as num_animals FROM AnimalStatistics");
   $query->where("project_id in (" . $id_string . ")" );
+  $query->group("species");
   $query->order("num_animals  DESC");
   $db->setQuery($query);
   $animals = $db->loadAssocList('species', 'num_animals');
@@ -1973,7 +1974,8 @@ function nextSequence(){
   // First find out which classify button was pressed.
   $classify_project = $app->getUserState("com_biodiv.classify_only_project");
   $classify_own = $app->getUserState("com_biodiv.classify_self");
-  $last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+  //$last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+  $last_photo_id = (int)$app->getUserState('com_biodiv.prev_photo_id', 0);
   
   $my_project = null;
   
@@ -1996,7 +1998,7 @@ function nextSequence(){
   //print "<br>nextSequence, got priority_array: <br>" ;
   //print_r ( $priority_array );
   
-  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered");
+  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered", "Random");
   
   // which priorities do we have projects for?
   $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
@@ -2081,6 +2083,9 @@ function nextSequence(){
 				$project_ids = array_keys ( $priority_array, "Site time ordered" );
 	            $photo_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
 				break;
+			  case "Random":
+			    $project_ids = array_keys ( $priority_array, "Random" );
+	            $photo_id = chooseRandom ( $project_ids, $last_photo_id, $classify_own );
 			  default:
 			    break;
 	  
@@ -2198,8 +2203,7 @@ function chooseMultiple ( $project_ids, $classify_own ) {
   
 		$db = JDatabase::getInstance(dbOptions());
 		$q1 = $db->getQuery(true);
-		$q2 = $db->getQuery(true);
-            
+		    
 		$q1->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
@@ -2213,25 +2217,7 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 			->where("P.photo_id >= PSM.start_photo_id")
 			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
 			->order("rand()");
-		/*
-		$q2->select("P.photo_id, P.sequence_id")
-			->from("Photo P")
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-			->where("P.status = 1")
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0" . $own_string )
-			->where("P.sequence_id > 0")
-			->where("P.sequence_num = 1" )
-			->where("P.photo_id >= PSM.start_photo_id") 
-			->where("P.photo_id <= PSM.end_photo_id");
-			
-		$q3 = $db->getQuery(true)
-             ->select('a.*')
-             ->from('(' . $q1->union($q2) . ') a')
-             ->order("rand()");
-		*/
+		
 		$db->setQuery($q1, 0, 1); // LIMIT 1
 		$photo = $db->loadObject();
 		if ( $photo ) {
@@ -2258,8 +2244,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
   
 	$db = JDatabase::getInstance(dbOptions());
 	$q1 = $db->getQuery(true);
-	$q2 = $db->getQuery(true);
-            
+	        
 	$q1->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
@@ -2273,26 +2258,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
 		->where("P.photo_id >= PSM.start_photo_id")
 		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
 		->order("rand()");
-	/*	
-	$q2->select("P.photo_id, P.sequence_id")
-			->from("Photo P")
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id")
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0" . $own_string )
-			->where("P.sequence_id > 0")
-			->where("P.sequence_num = 1" )
-			->where("P.photo_id >= PSM.start_photo_id") 
-			->where("P.photo_id <= PSM.end_photo_id");
-			
-	$q3 = $db->getQuery(true)
-             ->select('a.*')
-             ->from('(' . $q1->union($q2) . ') a')
-             ->order("rand()");
 	
-	$db->setQuery($q3, 0, 1); // LIMIT 1
-	*/
 	
 	$db->setQuery($q1, 0, 1); // LIMIT 1
 	$photo = $db->loadObject();
@@ -2305,7 +2271,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
 
 function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	
-	//print "<br>chooseSiteTimeOrdered, last_photo_id is:" . $last_photo_id . " <br>" ;
+	error_log( "chooseSiteTimeOrdered, last_photo_id is:" . $last_photo_id  );
 	
 	$photo_id = null;
 	
@@ -2322,8 +2288,7 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	// If given a photo id, check for the next sequence in time order on that site.  If site is finished, start a new site.
 	if ( $last_photo_id ) {
 		$q1 = $db->getQuery(true);
-		$q2 = $db->getQuery(true);
-            
+		    
 		$q1->select("P.photo_id, P.sequence_id, P.taken")
 			->from("Photo P")
 			->innerJoin("Site S ON P.site_id = S.site_id")
@@ -2338,30 +2303,10 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 			->where("P.sequence_id > 0")
 			->where("P.sequence_num = 1" )
 			->where("P.photo_id >= PSM.start_photo_id")
-			->where("PSM.end_photo_id is null");
-		
-		$q2->select("P.photo_id, P.sequence_id, P.taken")
-			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
-			->innerJoin("Photo P2 ON P2.site_id = P.site_id" )
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id")
-			->where("P.status = 1")
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0" . $own_string )
-			->where("P2.photo_id = ".$last_photo_id )
-			->where("P.sequence_id > 0")
-			->where("P.sequence_num = 1" )
-			->where("P.photo_id >= PSM.start_photo_id") 
-			->where("P.photo_id <= PSM.end_photo_id");
+			->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+			->order("P.taken");
 			
-		$q3 = $db->getQuery(true)
-             ->select('a.*')
-             ->from('(' . $q1->union($q2) . ') a')
-             ->order("a.taken");	// order by taken to get the oldest photo on this site that has not yet been classified.
-		
-		$db->setQuery($q3, 0, 1); // LIMIT 1
+		$db->setQuery($q1, 0, 1); // LIMIT 1
 		$photo = $db->loadObject();
 		if ( $photo ) {
 			$photo_id = $photo->photo_id;
@@ -2369,8 +2314,7 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	}
 	if ( !$photo_id ) {
 		$q1 = $db->getQuery(true);
-		$q2 = $db->getQuery(true);
-            
+		    
 		$q1->select("P.photo_id, P.sequence_id, P.taken")
 			->from("Photo P")
 			->innerJoin("Site S ON P.site_id = S.site_id")
@@ -2383,28 +2327,10 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 			->where("P.sequence_id > 0")
 			->where("P.sequence_num = 1" )
 			->where("P.photo_id >= PSM.start_photo_id")
-			->where("PSM.end_photo_id is null");
+			->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+			->order("P.taken");
 		
-		$q2->select("P.photo_id, P.sequence_id, P.taken")
-			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id")
-			->where("P.status = 1")
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0" . $own_string )
-			->where("P.sequence_id > 0")
-			->where("P.sequence_num = 1" )
-			->where("P.photo_id >= PSM.start_photo_id") 
-			->where("P.photo_id <= PSM.end_photo_id");
-			
-		$q3 = $db->getQuery(true)
-             ->select('a.*')
-             ->from('(' . $q1->union($q2) . ') a')
-             ->order("a.taken");	// order by taken to get the oldest photo in the set that has not yet been classified.
-		
-		$db->setQuery($q3, 0, 1); // LIMIT 1
+		$db->setQuery($q1, 0, 1); // LIMIT 1
 		$photo = $db->loadObject();
 		if ( $photo ) {
 			$photo_id = $photo->photo_id;
@@ -2413,6 +2339,53 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	
 	return $photo_id;
 }
+
+function chooseRandom ( $project_ids, $classify_own ) {
+	
+	//print "<br>chooseRandom called, classify_own = " . $classify_own . " <br>";
+	$photo_id = null;
+	
+	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
+	$own_string = "";
+	if ( $classify_own ) {
+		$own_string = " AND P.person_id = " . (int)userID();
+	}
+		
+	if ( count($project_ids) > 0 ) {
+	
+		$project_id_str = implode(',', $project_ids);
+	
+		//error_log ( "chooseRandom, project_id_str = " . $project_id_str );
+		//print "<br>chooseRandom, project_id_str = " . $project_id_str . " <br>";
+	
+  
+		$db = JDatabase::getInstance(dbOptions());
+		$q1 = $db->getQuery(true);
+		$q2 = $db->getQuery(true);
+            
+		$q1->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			->where("P.status = 1")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+			->order("rand()");
+		
+		$db->setQuery($q1, 0, 1); // LIMIT 1
+		$photo = $db->loadObject();
+		if ( $photo ) {
+			$photo_id = $photo->photo_id;
+			//print "<br>chooseRandom, photo found with id " . $photo_id . " <br>";
+		}	
+	}
+	
+	return $photo_id;
+}
+
 
 function getPriorityWeightings () {
 	$db = JDatabase::getInstance(dbOptions());
@@ -3058,6 +3031,21 @@ function getProjectFilters ( $project_id, $photo_id = null ) {
 	return $returnFilters;
 }
 
+function extractLabel ( $v )
+{
+	return $v['label'];
+}
+
+function getFilterNames ( $filterArray ) {
+	return array_map ( 'extractLabel', $filterArray );
+}
+
+function getFilterId ( $label, $filterArray ) {
+	$filterNames = getFilterNames ( $filterArray );
+	$labelKey = array_search ( $label, $filterNames );
+	return $labelKey;
+}
+
 function cmp($a, $b)
 {
 	return strcmp($a[1], $b[1]);
@@ -3135,11 +3123,38 @@ function getSpecies ( $filterid, $onePage ) {
 	return $speciesList;
 }
 
+function makeControlButton($control_id, $control, $extraClasses=''){
+  $disabled = strpos($control, "disabled");
+  if($disabled !== false){
+    $extras = array('disabled');
+  }
+  else{
+    $extras = array('classify_control');
+  }
+
+  $confirm = strpos($control, "biodiv-confirm");
+
+  if($confirm !== false){
+    $extras[] = "biodiv-confirm";
+  }
+
+  $extraText = implode(" ", $extras);
+  //print "<button type='button' class='btn btn-warning btn-block $extraText $extraClasses' id='$control_id'>$control</button>";
+  print "<button type='button' class='btn btn-primary $extraText $extraClasses' id='$control_id'>$control</button>";
+}
+
+
+
+
 //$useSeq is flag if true uses page numbers given, if false, works pages out alphabetically
-function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
+//if $largeButtons then use image buttons with larger size as for kiosk mode
+function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButtons=false, $includeExtraControls = false, $extraControls = null ) {
 	
 	// Should store this in the Options table as a system option.
 	$numPerPage = 36;
+	if ( $largeButtons ) {
+		$numPerPage = 36;
+	}
 	
 	//print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 
@@ -3164,7 +3179,11 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 			}
   
 			$name = $species['name'];
-			if ( strlen($name) > 20 ) $name = "<small>$name</small>";
+			$isLongSpeciesName = false;
+			if ( $largeButtons && strlen($name) > 12 ) $isLongSpeciesName = true;
+			else if ( strlen($name) > 20 ) $isLongSpeciesName = true;
+			
+			$largeButtonImage = true;
 			
 			//print ( "name = " . $name . "<br>" );
 			switch($species['type']){
@@ -3177,13 +3196,49 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 				break;
 
 			case 'notinlist':
+			/*
+				if ( $largeButtons ) {
+					$btnClass = 'btn-warning';
+				}
+				else {
+					$btnClass = 'btn-primary';
+				}
+				$largeButtonImage = false;
+			*/
 				$btnClass = 'btn-primary';
+				$largeButtonImage = false;
 				break;
 			}
 	
-			$carouselItems[$page][] =
-			"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn species_select' data-toggle='modal' data-target='#classify_modal'>$name</button>";
-			
+			if ( $largeButtons ) {
+				if ( $largeButtonImage ) {
+					$image = codes_getName($species_id,'png');
+					$imageText = "";
+					if ( $image ) {
+						$imageURL = JURI::root().$image;
+						$imageText = "<div><img width='50px' src='".$imageURL."'></div>";
+					}
+					if ( $isLongSpeciesName ) {
+						$carouselItems[$page][] =
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText."<div><div class='long-species-name'>$name</div></div></button>";
+					
+					}
+					else {
+						$carouselItems[$page][] =
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText."<div>$name</div></button>";
+						//"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'><div><img width='50px' src='http://localhost/rhombus/images/thumbnails/Stoat.png'></div><div>$name</div></button>";
+					}
+				}
+				else {
+					$carouselItems[$page][] =
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'><div>$name</div></button>";
+				
+				}
+			}
+			else {
+				$carouselItems[$page][] =
+				"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn species_select' data-toggle='modal' data-target='#classify_modal'>$name</button>";
+			}
 			$speciesCount++;
 		}
 	}
@@ -3222,6 +3277,9 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 		$numSpeciesButtons = count($carouselPage);
   
 		$numCols = 2;
+		if ( $largeButtons ) {
+			$numCols = 4;
+		}
   
 		$numRows = intval(($numSpeciesButtons + $numCols - 1)/$numCols);
 		//print "numRows = " . $numRows . "<br>";
@@ -3230,16 +3288,33 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 		$cols = array();
   
 		$carouselPageIndex = 0;
-  
-		for ( $j = 0; $j < $numCols; $j++ ) {
-			//print "col = ". $j . "<br>";
-			$cols[] = array();
+		
+		// Read across for large buttons, down for small buttons.
+		if ( $largeButtons ) {
 			for ( $i = 0; $i < $numRows; $i++ ) {
-				//print "row = " . $i . "<br>";
-				if ( $carouselPageIndex < count($carouselPage) ) {
-					//print "setting next value to be " . $carouselPage[$carouselPageIndex] . "<br>";
-					$cols[$j][] = $carouselPage[$carouselPageIndex];
-					$carouselPageIndex++;
+				//print "col = ". $j . "<br>";
+				$cols[] = array();
+				for ( $j = 0; $j < $numCols; $j++ ) {
+					//print "row = " . $i . "<br>";
+					if ( $carouselPageIndex < count($carouselPage) ) {
+						//print "setting next value to be " . $carouselPage[$carouselPageIndex] . "<br>";
+						$cols[$j][] = $carouselPage[$carouselPageIndex];
+						$carouselPageIndex++;
+					}
+				}
+			}
+		}
+		else {
+			for ( $j = 0; $j < $numCols; $j++ ) {
+				//print "col = ". $j . "<br>";
+				$cols[] = array();
+				for ( $i = 0; $i < $numRows; $i++ ) {
+					//print "row = " . $i . "<br>";
+					if ( $carouselPageIndex < count($carouselPage) ) {
+						//print "setting next value to be " . $carouselPage[$carouselPageIndex] . "<br>";
+						$cols[$j][] = $carouselPage[$carouselPageIndex];
+						$carouselPageIndex++;
+					}
 				}
 			}
 		}
@@ -3251,12 +3326,16 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 	
 		//print "Making buttons<br>";
 		
+		$columnClass = "col-md-6";
+		if ( $largeButtons ) {
+			$columnClass = "col-md-3";
+		}
 		print "<div class='row species-row'>";
 		for ( $i = 0; $i < $numCols; $i++ ) {
-			print "<div class='col-md-6 species-carousel-col'>";
+			print "<div class='" . $columnClass . " species-carousel-col'>";
 			//print "col = ". $i . " count = " . count($cols[$i]) . "<br>";
 			for ( $j = 0; $j < $numRows; $j++ ) {
-				if ( $j < count($cols[$i]) ) {
+				if ( $i < count($cols) and $j < count($cols[$i]) ) {
 					print $cols[$i][$j];			
 				}
 			}
@@ -3268,13 +3347,45 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq ) {
 		// Separate row for notinlist items
 		print "<div class='row species-row'>";
 		
+		$widthClass = 'col-md-6';
+		if ( $largeButtons ) { $widthClass = 'col-md-3'; }
 		foreach ( $carouselItems[-1] as $item ) {
-				print "<div class='col-md-6 species-carousel-col'>";
+				print "<div class='" . $widthClass . " species-carousel-col'>";
 				print $item;
 				print "</div>";
 			}
+		if ( $includeExtraControls and $extraControls ) {
+			$extraClasses = '';
+			if ( $largeButtons ) { 
+				$extraClasses = 'btn-block species-btn-large';
+			}
+			foreach($extraControls as $control_id => $control){
+				print "<div class='" . $widthClass . " species-carousel-col'>";
+				makeControlButton($control_id, $control, $extraClasses);
+				print "</div>";
+			}
+			
+		}
 		
 		print "</div> <!-- /species-row -->\n";
+		
+		// Explicitly include these rows - needed for kiosk design - should be improved!
+		/* moved to include on same row as DK and other
+		if ( $includeExtraControls and $extraControls ) {
+			print "<div class='row species-row'>";
+			$extraClasses = '';
+			if ( $largeButtons ) { 
+				$extraClasses = 'btn-block species-btn-large';
+			}
+			foreach($extraControls as $control_id => $control){
+				print "<div class='col-md-3 species-carousel-col'>";
+				makeControlButton($control_id, $control, $extraClasses);
+				print "</div>";
+			}
+			
+			print "</div> <!-- /species-row -->\n";
+		}
+		*/
 		print "</div> <!-- / item -->\n";
 
 	}

@@ -26,12 +26,16 @@ class BioDivViewClassify extends JViewLegacy
 
     public function display($tpl = null) 
     {
+	  //error_log("BioDivViewClassify.display() called");
+	  
       // Assign data to the view
 	  //($person_id = (int)userID()) or die("No person_id");
 	  $app = JFactory::getApplication();
 	  $this->photo_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
-
+		
+	  //error_log("BioDivViewClassify.display got photo_id from request, = " . $this->photo_id);
+	  
 	  $this->self = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
 	  
@@ -83,9 +87,11 @@ class BioDivViewClassify extends JViewLegacy
 	  // Need to do a check here so that refresh doesn't load next sequence......
 	  // If there is a photo_id then get the sequence for that photo id.  If not, get a new sequence
 	  if(!$this->photo_id){
+        //error_log("BioDivViewClassify.display calling nextSequence ");
 		$this->sequence = nextSequence();
 	  }
 	  else {
+		//error_log("BioDivViewClassify.display cusing existing sequence ");
 		$this->sequence = getSequenceDetails($this->photo_id);
 	  }
 	
@@ -93,7 +99,12 @@ class BioDivViewClassify extends JViewLegacy
 		$this->firstPhoto = $this->sequence[0];
 		$this->photo_id = $this->firstPhoto["photo_id"];
 	  }
+	  
+	  //error_log("BioDivViewClassify.display photo_id now = " . $this->photo_id . ", setting user state" );
+	  
+	  
 	  $app->setUserState('com_biodiv.photo_id', $this->photo_id);
+	  $app->setUserState('com_biodiv.prev_photo_id', $this->photo_id);
 	  
 	  
 	  //print "<br>Got the following sequence:<br>";
@@ -127,7 +138,7 @@ class BioDivViewClassify extends JViewLegacy
 		$this->filters = getFilters ();
 	  
 		foreach ( $this->filters as $filterId=>$filter ) {
-		  $isCommon = $filter['label'] == 'Common';
+		  $isCommon = $filter['label'] == 'Common' or $filter['label'] == 'Common Species';
 		  $this->filters[$filterId]['species'] = getSpecies ( $filterId, $isCommon );
 		}
 	  

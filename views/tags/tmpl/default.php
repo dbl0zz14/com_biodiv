@@ -13,7 +13,8 @@ if(count($this->animals) == 0){
   print "<p class='text-primary lead'>No classification yet</p>";
  }
  else{
-   foreach($this->animals as $animal_id => $details){
+	 print "<div class='btn-group'>";
+     foreach($this->animals as $animal_id => $details){
 	 $label = codes_getName($details->species, 'content');
      $contentDetails = codes_getDetails($details->species, 'content');
      $type = $contentDetails['struc'];
@@ -48,8 +49,9 @@ if(count($this->animals) == 0){
 	   $nothingDisabled = true;
      }
 
-     print "<div><button id='remove_animal_${animal_id}' type='button' class='remove_animal btn $btnClass btn-lg'>$label <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button></div>\n";
+     print "<button id='remove_animal_${animal_id}' type='button' class='remove_animal btn $btnClass btn-lg'>$label <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button>\n";
    }
+   print "</div>";
  }
 print "</div> \n";
 if ( $nothingDisabled == true ) {

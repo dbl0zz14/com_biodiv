@@ -65,6 +65,7 @@ jQuery(document).ready(function(){
 		jQuery('#control_nextseq').prop('disabled',false);
 	});
 	
+	// For repeat classifications don't load existing tags - what about repeat view??
 	jQuery('#classify_tags').load(BioDiv.root + '&view=tags&format=raw', BioDiv.removeClick);
 
 	jQuery('#classify-save').click(function (){
@@ -213,7 +214,10 @@ jQuery(document).ready(function(){
 	
 	jQuery('#control_nextseq').click(function (){
 		id = jQuery(this).attr("id");
-		url = BioDiv.root + "&task=get_photo&format=raw&action=" + id;
+		var sideBarToggled = jQuery('#wrapper').is(".toggled");
+		var extra = "";
+		if ( sideBarToggled ) extra = "&toggled=" + "1";
+		url = BioDiv.root + "&task=get_photo&format=raw&action=" + id + extra;
 		jQuery.ajax(url, {'success': function() {
 			    window.location.reload(true);
 				if (document.getElementById('sub-photo-1')) {
@@ -225,24 +229,51 @@ jQuery(document).ready(function(){
 			}});
 		
 	    });
+	
+	jQuery('#classify_increase').click(function (){
+		console.log("increasing number");
+		this.parentNode.querySelector('input[type=number]').stepUp()
+		/*jQuery('#classify_number').stepUp();*/
+		
+	    });
+	
+	jQuery('#classify_decrease').click(function (){
+		console.log("decreasing number");
+		this.parentNode.querySelector('input[type=number]').stepDown()
+		/*jQuery('#classify_number').stepDown();*/
+		
+	    });
 
 	jQuery('#photoCarousel').click(function (){
 		jQuery('#photo-carousel-control-right').focus();
 		console.log("focus set");
 	    });
 	
-	if ( !document.fullscreenEnabled ) {
+	jQuery("#menu-toggle").click(function(e) {
+		e.preventDefault();
+		jQuery("#wrapper").toggleClass("toggled");
+		});
+	
+	var haveFullscreen = document.fullscreenEnabled || /* Standard syntax */
+						document.webkitFullscreenEnabled || /* Chrome, Safari and Opera syntax */
+						document.mozFullScreenEnabled ||/* Firefox syntax */
+						document.msFullscreenEnabled; /* IE/Edge syntax */
+						
+	if ( !haveFullscreen ) {
 		jQuery('#fullscreen-button').hide();
 		jQuery('#fullscreen-exit-button').hide();
 	}
-
-	jQuery('.species-carousel-control').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
-	jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
-	jQuery('#favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to remove favourite status', 'placement': 'bottom'});
-	jQuery('#not-favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to make this one of your favourites', 'placement': 'bottom'});
-	jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
-	jQuery('#fullscreen-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Full screen', 'placement': 'top'});
-	jQuery('#fullscreen-exit-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Exit full screen', 'placement': 'top'});
+	
+	let isKiosk = jQuery('.view-kiosk').html();
+	if ( !isKiosk){
+		jQuery('.species-carousel-control').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
+		jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
+		jQuery('#favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to remove favourite status', 'placement': 'bottom'});
+		jQuery('#not-favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to make this one of your favourites', 'placement': 'bottom'});
+		jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
+		jQuery('#fullscreen-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Full screen', 'placement': 'top'});
+		jQuery('#fullscreen-exit-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Exit full screen', 'placement': 'top'});
+	}
 
 	//jQuery('#fullscreen-exit-button').hide();
 	
@@ -260,6 +291,9 @@ jQuery(document).ready(function(){
 		jQuery('#control_nextseq').prop('disabled',true);
 	}
 		
+	
+	
+	
 });
 
 	

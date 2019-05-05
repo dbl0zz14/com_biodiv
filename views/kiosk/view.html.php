@@ -32,54 +32,123 @@ class BioDivViewKiosk extends JViewLegacy
 	  $this->photo_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
 
+	  error_log("Kiosk View: photo_id = " . $this->photo_id);
+	
 	  $this->self = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
 	  
+	  error_log("Kiosk View: self = " . $this->self);
+	
 	  $this->classify_project = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_project', 'classify_project', 0);
 		
+	  error_log("Kiosk View: classify_project = " . $this->classify_project);
+	
 	  //echo "BioDivViewClassify, this->classify_project = ", $this->classify_project;
 	  
 	  $this->classify_only_project = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_only_project', 'classify_only_project', 0);
 		
+	  error_log("Kiosk View: classify_only_project = " . $this->classify_only_project);
+	
 	  //echo "BioDivViewClassify, this->classify_only_project = ", $this->classify_only_project;
 	  
 	  $this->my_project = 
 	    $app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
+	  error_log("Kiosk View: my_project = " . $this->my_project);
+	
 	  $this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-	  $this->project = projectDetails($this->project_id);
-	
-	
+	  if ( !$this->project_id ) {
+		  $this->project_id = codes_getCode($this->my_project, "project" );
+	  }
 		
-	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
+	  error_log("Kiosk View: project_id = " . $this->project_id);
+	
+	  $this->project = projectDetails($this->project_id);
 	  
+	  $this->user_key =
+	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
+		
+	  if ( !$this->user_key ) {
+		  $this->user_key = JRequest::getString("user_key");
+	  }
+	  
+	  error_log("Kiosk View: user_key = " . $this->user_key);
+	  
+	  $this->toggled = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.toggled', 'toggled', 0);
+		
+	  error_log("Kiosk View: toggled = " . $this->toggled);
+	
+	  
+	  
+	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  if ( !userID() ) {
+		  
+		// If there is a user key then redirect to start kiosk
+		if ( $this->user_key ) {
+		  /*
+		  $url = "".BIODIV_ROOT."&view=startkiosk";
+		  if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
+		  $url .= "&user_key=" . $this->user_key;
+		  $app->redirect($url);	
+		  */
+		  $url = "".BIODIV_ROOT."&view=kiosk";
+		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
+		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
+		  if ( $this->self ) $url .= "&classify_self=" . $this->self;
+		  $url .= "&user_key=" . $this->user_key;
+		  $url .= "&" . $this->user_key;
+          $app->redirect($url);
+		
+			/*
+		  $url = "".BIODIV_ROOT;
+		  if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
+		  $url .= "&user_key=" . $this->user_key;
+		  error_log ("Kiosk view, no user id, have user key, url for redirect is " . $url );
+		  //$url = urlencode(base64_encode($url));
+		  //$url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
+		  $app->redirect($url);	
+		  */
+		}
+		else {
+		  $app = JFactory::getApplication();
+		  $message = "Please log in before classifying.";
+		  $url = "".BIODIV_ROOT."&view=kiosk";
+		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
+		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
+		  if ( $this->self ) $url .= "&classify_self=" . $this->self;
+		  $url = urlencode(base64_encode($url));
+		  $url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
+		  $app->redirect($url, $message);
+		}
+		
+		/*
 		$app = JFactory::getApplication();
-		$message = "Please log in before classifying.";
-		$url = "".BIODIV_ROOT."&view=classify";
-		if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
-		if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
-		if ( $this->self ) $url .= "&classify_self=" . $this->self;
-		$url = urlencode(base64_encode($url));
-		$url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
-		$app->redirect($url, $message);
+		  $message = "Please log in before classifying.";
+		  $url = "".BIODIV_ROOT."&view=kiosk";
+		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
+		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
+		  if ( $this->self ) $url .= "&classify_self=" . $this->self;
+		  $url = urlencode(base64_encode($url));
+		  $url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
+		  $app->redirect($url, $message);
+		*/
 	  }
 
 	  
 	  // Check the user can access this project, if a project is specified.
 	  if ( $this->my_project ) {
-		  $project_id = codes_getCode($this->my_project, "project" );
 		  $fields = new StdClass();
-		  $fields->project_id = $project_id;
+		  $fields->project_id = $this->project_id;
 		  if ( !canClassify("project", $fields) ) {
 			$app = JFactory::getApplication();
 			$message = "Sorry you do not have access to classify on this project.";
 			$url = "".BIODIV_ROOT."&view=projecthome";
-			$url .= "&project_id=" . $project_id;
+			$url .= "&project_id=" . $this->project_id;
 			$app->redirect($url, $message);
 			
 		  }
@@ -101,7 +170,7 @@ class BioDivViewKiosk extends JViewLegacy
 		$this->photo_id = $this->firstPhoto["photo_id"];
 	  }
 	  $app->setUserState('com_biodiv.photo_id', $this->photo_id);
-	  
+	  $app->setUserState('com_biodiv.prev_photo_id', $this->photo_id);
 	  
 	  //print "<br>Got the following sequence:<br>";
 	  //print_r($this->sequence);
@@ -126,30 +195,33 @@ class BioDivViewKiosk extends JViewLegacy
 		 if ( strpos(strtolower($filename), '.mp4') !== false ) {
 			 $this->isVideo = true;
 		 }
-	  
-	  
+	  	  
 		// Get the filter ids and filter labels for this photo. 
-		$project_id = codes_getCode($this->my_project, 'project');
-	  
 		$this->filters = getFilters ();
 	  
 		foreach ( $this->filters as $filterId=>$filter ) {
-		  $isCommon = $filter['label'] == 'Common';
+		  $isCommon = ($filter['label'] == 'Common') or ($filter['label'] == 'Common Species');
 		  $this->filters[$filterId]['species'] = getSpecies ( $filterId, $isCommon );
 		}
 	  
-		$this->projectFilters = getProjectFilters ( $project_id, $this->photo_id );
+		$this->projectFilters = getProjectFilters ( $this->project_id, $this->photo_id );
 	  
 		foreach ( $this->projectFilters as $filterId=>$filter ) {
 		  $this->projectFilters[$filterId]['species'] = getSpecies ( $filterId, false );
 		}
-	  
-	  
-		$this->allSpecies = array();
+		
+		// If there is a Common Species list then split this out
+		$this->commonFilterId = getFilterId ( "Common Species", $this->projectFilters );
+		
+		$this->commonSpeciesFilter = null;
+		if ( $this->commonFilterId ) {
+			$this->commonSpeciesFilter = $this->projectFilters[$this->commonFilterId];
+			unset($this->projectFilters[$this->commonFilterId]);
+		}
+	   
+	  	$this->allSpecies = array();
 		$this->allSpecies = codes_getList ( "species" );
-	  
 	 
-
 		$this->lcontrols = array();
 		$this->rcontrols = array();
 		foreach(codes_getList("noanimal") as $stuff){
@@ -183,10 +255,13 @@ class BioDivViewKiosk extends JViewLegacy
 			$this->classifyInputs[] = $input;	    
 		}
 		$number = "<label for ='classify_number'>How many?</label>\n";
-		$number .= "<input id='classify_number' type='number' min='1' value='1' name='number'/>\n";
+		$number .= "<div id='classify_how_many'><button type='button' class='btn' id='classify_decrease'>-</button><input id='classify_number' type='number' min='1' max='99' value='1' name='number'/><button type='button' class='btn' id='classify_increase'>+</button></div>\n";
 		$this->classifyInputs[] = $number;
 	  
 	  }
+	  
+	  // get the url for the project image
+	  $this->projectImageUrl = projectImageURL($this->project_id);
 
 	  // Display the view
 	  parent::display($tpl);

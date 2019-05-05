@@ -13,9 +13,68 @@ $document = JFactory::getDocument();
 if ( $this->photo_id ) {
   $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
 }
+if ( $this->toggled ) {
+	print '<div id="wrapper" class="toggled">';
+}
+else {
+	print '<div id="wrapper">';
+}
 
-print "<div class='row'>";
-print "<div class='col-md-10'>";
+print '<div id="sidebar-wrapper">';
+print '    <div class="classify-header">';
+print '        <h1>' . $this->my_project . '</h1>';
+print '    </div> <!-- classify-header -->';
+print "    <div class='project-sidebar-image'><img src='".$this->projectImageUrl."' /></div>";
+print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='250px' ></canvas>";
+print ' <div class="mwlogos">';
+//print ' <div class="logo-image"><img src="images/logos/Hancock.png"></div>';
+//print ' <div class="logo-image"><img src="images/logos/MammalWebSquareBlackExt2.png"></div>';
+//print ' <div class="logo-image"><img src="images/logos/dulogo.png"></div>';
+//print ' <div class="logo-image"><img src="images/logos/esrc-logo.jpg"></div>';
+print '</div>';
+//print '   <ul class="sidebar-nav">';
+//print '       <li class="sidebar-brand">';
+//print '           <h1>' . $this->my_project . '</h1>';
+//print '       </li>';
+//print '       <li class = "sidebar-brand">';
+//print "           <canvas id='animalsBarChart' class='animals-bar' data-project-id='".$this->project_id."' height='300px' ></canvas>";
+//print '       </li>';
+//print '   </ul>';
+
+//print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
+//print "" . $this->my_project . " Project Details";
+//print '</div>';
+print '</div>';
+print '<!-- /#sidebar-wrapper -->';
+print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
+print "" . $this->my_project . " Project Details";
+print '</div>';
+
+print '<div id="page-content-wrapper">';
+//print "<div class='row'>";
+
+//print "<div class='col-md-1 no-padding well-background'>";
+//print '<div class="classify-header">';
+//print '<h1>' . $this->my_project . '</h1>';
+//print '</div> <!-- classify-header -->';
+//print "<div class='spacer-2em'>";
+//print "</div>";
+
+//<div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div>
+//print "<img class='logo-project-image' src='".$this->projectImageUrl."' />";
+//print "<canvas id='animalsBarChart' class='animals-bar' data-project-id='".$this->project_id."' height='300px' ></canvas>";
+//print "<div class='spacer-2em'></div>";
+?>
+<!-- div class="logos">
+<img src="images/logos/MammalWebSquareBlackExt2.png">
+<div class="spacer-2em"></div>
+<img src="images/logos/dulogo.png">
+<div class="spacer-2em"></div>
+<img src="images/logos/esrc-logo.jpg">
+</div --> <!-- /div logos -->
+<!-- /div --> <!-- col-md-1 logos -->
+<?php
+//print "<div class='col-md-11'>";
 
 if(!$this->photo_id){
   print "<h2>No photos for you to classify</h2>\n";
@@ -23,7 +82,7 @@ if(!$this->photo_id){
   print "<h3>If you have recently uploaded some images, please check back in 10 minutes, by which time they will be available for classification</h3>\n";
   return;
  }
-
+/*
 function makeControlButton($control_id, $control){
   $disabled = strpos($control, "disabled");
   if($disabled !== false){
@@ -40,32 +99,11 @@ function makeControlButton($control_id, $control){
   }
 
   $extraText = implode(" ", $extras);
-  print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
+  print "<button type='button' class='btn btn-warning btn-block $extraText' id='$control_id'>$control</button>";
 }
-
-print '<div class="classify-header">';
-print '<h1>' . $this->my_project . '</h1>';
-if ( $this->isVideo === true ) {
-	print '<h2>What do you see in this video?</h2>';
-}
-else {
-	print '<h2>What do you see in this sequence?</h2>';
-	//print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
-
-}
-print '</div> <!-- classify-header -->';
-?>
-
-<?php
-// h2 was just above here.
-/*
-	      if($this->photoDetails['person_id'] == userID()){
-    print "<div class='lead alert-info'>You uploaded this!</div>";
-  }
 */
+
 ?>
-
-
 
 
 <div id='debug' style='display:none'>Debug <?php
@@ -74,39 +112,18 @@ print '</div> <!-- classify-header -->';
 </div>
 
 <div class="container-fluid" id="photo-container">
-	<div class='col-md-9 cls-xs-12'>
-	
-	<div class='row'>
-     <div class='col-md-4 photo-col'>
-	<div class='btn-group pull-left' role='group'>
-<?php
-foreach($this->lcontrols as $control_id => $control){
-  makeControlButton($control_id, $control);
-}
-?>
-        </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-4 -->
-<?php
-	print "<div class='col-md-4'></div>";
-?>
-	
-     <div class='col-md-4'>
-	<div class='btn-group pull-right' role='group'>
-  <?php
-  foreach($this->rcontrols as $control_id => $control){
-    makeControlButton($control_id, $control);  
-  }
-  print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
-?>
-        </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-4 -->
+	<div class='col-md-8 cls-xs-12 kiosk-photos'>
+	<!-- div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab" -->
+	<!-- ?php print "" . $this->my_project . " Project Details"; ? -->
+	<!-- a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Project Details</a -->
+	<!-- /div -->
 
-     <div class='col-md-4'>
-  <?php
-?>
-     </div> <!-- /.col-md-4 -->
-
-  </div> <!-- /.row -->
+	<!-- row containing buttons was here -->
+	<h2>What do you see in this sequence?</h2>
+	
+	<!--h3>Look through the whole sequence then choose from the animals.  You can filter the options using the tabs.</h3 -->
+	
+	<!-- div class='spacer-2em'></div -->	
 
   <div class='row'>
   <div class='col-md-12 photo-col'>
@@ -188,13 +205,13 @@ print '</div> <!-- /.photoCarousel -->';
 </div> <!-- /.row -->
 
 <div class='row'>
-<div class='col-md-6 pull-left'>
+<div class='col-md-9 pull-left'>
 
-<div>
+<!-- div -->
 
   
 <div id='classify_tags'></div>
-</div>
+<!-- /div -->
 </div>
 
 <?php
@@ -208,14 +225,29 @@ print '</div> <!-- /.photoCarousel -->';
   }
 
 ?>
-<div id='like_image_container' class='pull-right col-md-6'>
-  <button  id='favourite' type='button' class='btn btn-warning pull-right' 
-  <?php print "style='display:$favDisp'";?>><span class='fa fa-thumbs-up fa-2x'></span></button>
-  <button id='not-favourite' type='button' class='btn btn-warning pull-right'
-  <?php print "style='display:$nonFavDisp'";?>><span class='fa fa-thumbs-o-up fa-2x'></span></button>
+<!-- this etc div id='like_image_container' class='pull-right col-md-6' -->
+<div class='col-md-3'>  
+<?php
+print "<div class='spacer-1em'></div>";
+print "<button type='button' class='pull-right btn btn-danger' id='control_nextseq'>".$this->nextseq."</button>";
+?>
 </div> <!-- /.col-md-6 -->
 
 </div> <!-- /.row -->
+
+<div class="row logo-row">
+<img src="images/logos/Hancock.png">
+<img src="images/logos/MammalWebSquareBlackExt2.png">
+<img src="images/logos/dulogo.png">
+<img src="images/logos/esrc-logo.jpg">
+</div> <!-- /div logo-row -->
+<div class='row'>
+<!-- div class='col-md-12' classify_explain>
+<h3>Choose a species from the buttons on the right.</h3>
+<h3>  Use the tabs to filter the list.</h3>
+</div -->
+</div>
+
 </div> <!-- /.col-md-12 -->
 
 </div> 
@@ -223,62 +255,31 @@ print '</div> <!-- /.photoCarousel -->';
 </div> <!-- /.col-md-9 -->
 
 
-<div class='col-md-3 cls-xs-12 species-carousel-col'>
-<!-- only needed if header in column div class='spacer-4em'></div -->
-	
+<div class='col-md-4 cls-xs-12 species-carousel-col'>
+<div class='spacer-4em'></div>
+<!-- h4>Choose from the options below.  Filter the species using the tabs.</h4 -->
 <?php	
-/*
-print "<div class='btn-group btn-group-justified d-flex'>";
-	
-$filterWidth = intval(12/count($this->filters));
-foreach ( $this->filters as $filterId=>$filtername ) {
-	print "<button type='button' id='filter_select_${filterId}' class='btn btn-danger btn-wrap-text species-btn filter_select'>$filtername</button>";
-	//print "<button type='button' id='filter_select_${filtername}' class='btn btn-primary btn-block btn-wrap-text species-btn filter_select'>$filterlabel</button>";
-	//print "<button type='button' id='filter_select_${filtername}' class='btn $btnClass btn-wrap-text species-btn filter_select' data-toggle='modal' data-target='#classify_modal'>$filtername</button>";
-	
-}
-print "</div>";
-*/
 // Use tabs for the filters:
 //print "<ul id = 'species-nav' class='nav nav-tabs nav-fill nav-justified'>";
-print "<ul id = 'species-nav' class='nav nav-tabs nav-fill'>";
+print "<ul id = 'kiosk-species-nav' class='nav nav-tabs'>";
 $first = true;
 $numProjectFilters = count($this->projectFilters);
-if ( $numProjectFilters == 1 ) {
-	foreach ( $this->projectFilters as $filterId=>$filter ) {
-		if ( $first == true ) {
-			print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
-			$first = false;
-		} else {
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
-		}
-	}
+
+if ( $this->commonSpeciesFilter ) {
+	print "  <li class='nav-link active btn-default species-tab'><a data-toggle='tab' href='#filter_".$this->commonFilterId."'>".$this->commonSpeciesFilter["label"]."</a></li>";
+	$first = false;
 }
-else if ( $numProjectFilters > 1 ) {
-	
-	foreach ( $this->projectFilters as $filterId=>$filter ) {
-		if ( $first == true ) {
-			//print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a>";
-			//print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown' href='#filter_${filterId}'>Projects";
-			print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown'>Projects ";
-			print "<span class='fa fa-caret-down'></span></a>";
-			print "<ul class='dropdown-menu'>";
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
-			$first = false;
-		} else {
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
-		}
-	}
-	print "</ul>";
-	print "</li>";
-}
+
 foreach ( $this->filters as $filterId=>$filter ) {
 	if ( $first == true ) {
-		print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		print "  <li class='nav-link active btn-default species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 		$first = false;
 	} else {
-		print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		print "  <li class='nav-link btn-default species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 	}
+}
+foreach ( $this->projectFilters as $filterId=>$filter ) {
+		print "  <li class='nav-link btn-default species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 }
 print "</ul>";
 
@@ -286,11 +287,11 @@ print "</ul>";
 print "<div class='tab-content no-padding'>";
 
 $extra = "active";
-foreach ( $this->projectFilters as $filterId=>$filter ) {
-	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
-	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
-	//printSpeciesList ( $this->species, true );
-	printSpeciesList ( $filterId, $filter['species'], false );
+
+if ( $this->commonSpeciesFilter ) {
+	print "  <div id='filter_".$this->commonFilterId."' class='tab-pane fade in $extra'>";
+	print "<div id='carousel-species-".$this->commonFilterId."' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+	printSpeciesList ( $this->commonFilterId, $this->commonSpeciesFilter['species'], true, true, true, $this->lcontrols );
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
 	$extra = "";
@@ -299,55 +300,54 @@ foreach ( $this->filters as $filterId=>$filter ) {
 	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
 	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 	//printSpeciesList ( $this->species, true );
-	$isCommon = $filter['label'] == 'Common';
-	printSpeciesList ( $filterId, $filter['species'], $isCommon );
+	$isCommon = $filter['label'] == 'Common' or $filter['label'] == 'Common Species' ;
+	printSpeciesList ( $filterId, $filter['species'], $isCommon, true, true, $this->lcontrols );
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
 	$extra = "";
 }
+foreach ( $this->projectFilters as $filterId=>$filter ) {
+	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
+	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+	//printSpeciesList ( $this->species, true );
+	printSpeciesList ( $filterId, $filter['species'], false, true, true, $this->lcontrols );
+	print "</div> <!-- /carousel-species carousel--> \n";
+	print "  </div>";
+	$extra = "";
+}
+/* moving to biodiv.php
+print "<div class='row species-row' id='nothing-human-row'>";		
+foreach($this->lcontrols as $control_id => $control){
+	print "<div class='col-md-6 species-carousel-col'>";
+    makeControlButton($control_id, $control);
+	print "</div>";
+}
+print "</div> <!-- /species-row -->\n";
+*/
+
 
 print "</div>";
 
-/*
-print "  <div id='filter_210' class='tab-pane fade in active'>";
-//print "    <p>Some content.</p>";
-print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
-printSpeciesList ( $this->species, true );
-print "</div> <!-- /carousel-species carousel--> \n";
-print "  </div>";
-print "  <div id='menu1' class='tab-pane fade'>";
-print "    <h3>Menu 1</h3>";
-print "    <p>Some content in menu 1.</p>";
-print "  </div>";
-print "  <div id='menu2' class='tab-pane fade'>";
-print "    <h3>Menu 2</h3>";
-print "    <p>Some content in menu 2.</p>";
-print "  </div>";
 print "</div>";
-*/
-/*
-print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
-printSpeciesList ( $this->species, true );
-print "</div> <!-- /carousel-species carousel--> \n";
-*/
+
+print "</div>";
+
+//print "</div> <!-- col-md-11 -->";
+
+//print "</div> <!-- outer row -->";
+
+print '</div>';
+print '<!-- /#page-content-wrapper -->';
+
+print '</div><!-- wrapper -->';
 ?>
 
-</div>
-</div>
-</div> <!-- col-md-10 -->
-<div class="col-md-2">
-<div class="spacer-10em">
-</div>
-<div class="logos">
+<!-- div class="row logo-row">
 <img src="images/logos/MammalWebSquareBlackExt2.png">
-<div class="spacer-6em"></div>
 <img src="images/logos/dulogo.png">
-<div class="spacer-6em"></div>
 <img src="images/logos/esrc-logo.jpg">
-</div> <!-- /div logos -->
-</div> <!-- col-md-2 logos -->
-</div> <!-- outer row -->
- 
+</div --> <!-- /div logo-row -->
+
 <div class="modal fade" id="classify_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -362,7 +362,7 @@ print "</div> <!-- /carousel-species carousel--> \n";
 
 foreach ($this->allSpecies as $stuff) {
 	list($species_id, $species_name) = $stuff;
-	print "<h2 id='species_header_${species_id}' class='species_header'>" . $species_name."</h2>\n";
+	print "<h3 id='species_header_${species_id}' class='species_header'>" . $species_name."</h3>\n";
 	}
 
 print "<input type='hidden' name='species' id='species_value'/>\n";
@@ -374,37 +374,48 @@ print "<input id='currPhotoId' type='hidden' name='photo_id' value='".$this->pho
   
   <div class='container-fluid'>
 <?php
-print "<div class='spacer-2em'></div>";
+print "<div class='spacer-1em'></div>";
 print "<div class='row'>\n";
-print "<div class='col-md-7'>\n";
+print "<div class='col-md-8'>\n";
   
 print "<div id='species_helplet'></div>";
 
-print "</div>"; // col7
+print "</div>"; // col8
 
-print "<div class='col-md-5'>\n";
-//print "<div class='spacer-4em'></div>";
+print "<div class='col-md-4 species-modal-side'>\n";
+//print "<div class='spacer-2em'></div>";
+
+print '<h2>Can you add more detail?</h2>';
+
+print "<div class='row'>\n";
   
 foreach($this->classifyInputs as $formInput){
-  print "<div class='row'>\n";
-  print "<div class='col-md-12'>\n";
+  //print "<div class='row'>\n";
+  print "<div class='col-md-6'>\n";
   print "<div class='form-group species_classify'>\n";
   print $formInput;
   print "</div>\n";
   print "</div>\n";
-  print "</div> <!-- /.row -->\n";
+  //print "</div> <!-- /.row -->\n";
 }
+print "</div> <!-- /.row -->\n";
 
-print "</div>"; // col5
+print "<div class='spacer-4em'></div>";
+print '<h2>Are you happy with your choice?</h2>';
+print '<button type="button" class="btn btn-default classify-modal-button" data-dismiss="modal">No, Cancel</button>';
+print '<button type="button" class="btn btn-danger classify-modal-button" id="classify-save">Yes, Classify</button>';
+
+print "</div>"; // col4
 print "</div>";
 ?>
  </div> <!-- /.container-fluid -->
         </form>
       </div> <!-- modal-body -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id='classify-save'>Save changes</button>
-      </div>
+      <!--div class="modal-footer">
+	    <h2> Is this what you see? </h2>
+        <button type="button" class="btn btn-default" data-dismiss="modal">No, Try Again</button>
+        <button type="button" class="btn btn-primary" id='classify-save'>Yes, Save</button>
+      </div -->
 	  <!--
 <div id='species_helplet'>
 </div>
@@ -420,6 +431,9 @@ print "</div>";
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/classify.js", true, true);
+JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+JHTML::script("com_biodiv/project.js", true, true);
+
 ?>
 
 

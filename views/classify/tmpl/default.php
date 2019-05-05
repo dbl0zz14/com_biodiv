@@ -21,24 +21,6 @@ if(!$this->photo_id){
   return;
  }
 
-function makeControlButton($control_id, $control){
-  $disabled = strpos($control, "disabled");
-  if($disabled !== false){
-    $extras = array('disabled');
-  }
-  else{
-    $extras = array('classify_control');
-  }
-
-  $confirm = strpos($control, "biodiv-confirm");
-
-  if($confirm !== false){
-    $extras[] = "biodiv-confirm";
-  }
-
-  $extraText = implode(" ", $extras);
-  print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
-}
 
 if ( $this->isVideo === true ) {
 	print '<h2>What do you see in this video?</h2>';
@@ -184,7 +166,7 @@ print '</div> <!-- /.photoCarousel -->';
 </div> <!-- /.row -->
 
 <div class='row'>
-<div class='col-md-6 pull-left'>
+<div class='col-md-10 pull-left'>
 
 <div>
 
@@ -204,7 +186,7 @@ print '</div> <!-- /.photoCarousel -->';
   }
 
 ?>
-<div id='like_image_container' class='pull-right col-md-6'>
+<div id='like_image_container' class='pull-right col-md-2'>
   <button  id='favourite' type='button' class='btn btn-warning pull-right' 
   <?php print "style='display:$favDisp'";?>><span class='fa fa-thumbs-up fa-2x'></span></button>
   <button id='not-favourite' type='button' class='btn btn-warning pull-right'
@@ -243,10 +225,10 @@ $numProjectFilters = count($this->projectFilters);
 if ( $numProjectFilters == 1 ) {
 	foreach ( $this->projectFilters as $filterId=>$filter ) {
 		if ( $first == true ) {
-			print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			print "  <li class='nav-link active btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 			$first = false;
 		} else {
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			print "  <li class='nav-link btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 		}
 	}
 }
@@ -256,13 +238,13 @@ else if ( $numProjectFilters > 1 ) {
 		if ( $first == true ) {
 			//print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a>";
 			//print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown' href='#filter_${filterId}'>Projects";
-			print "<li class='dropdown active btn-danger species-tab'><a class='dropdown-toggle' data-toggle='dropdown'>Projects ";
+			print "<li class='dropdown active btn-secondary species-tab'><a class='dropdown-toggle' data-toggle='dropdown'>Filters ";
 			print "<span class='fa fa-caret-down'></span></a>";
 			print "<ul class='dropdown-menu'>";
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			print "  <li class='nav-link btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 			$first = false;
 		} else {
-			print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+			print "  <li class='nav-link btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 		}
 	}
 	print "</ul>";
@@ -270,10 +252,10 @@ else if ( $numProjectFilters > 1 ) {
 }
 foreach ( $this->filters as $filterId=>$filter ) {
 	if ( $first == true ) {
-		print "  <li class='nav-link active btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		print "  <li class='nav-link active btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 		$first = false;
 	} else {
-		print "  <li class='nav-link btn-danger species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
+		print "  <li class='nav-link btn-secondary species-tab'><a data-toggle='tab' href='#filter_${filterId}'>".$filter["label"]."</a></li>";
 	}
 }
 print "</ul>";
@@ -295,7 +277,7 @@ foreach ( $this->filters as $filterId=>$filter ) {
 	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
 	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 	//printSpeciesList ( $this->species, true );
-	$isCommon = $filter['label'] == 'Common';
+	$isCommon = $filter['label'] == 'Common' or $filter['label'] == 'Common Species' ;
 	printSpeciesList ( $filterId, $filter['species'], $isCommon );
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";

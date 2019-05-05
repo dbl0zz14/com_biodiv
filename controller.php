@@ -67,10 +67,13 @@ class BioDivController extends JControllerLegacy
   function get_photo(){
     $app = JFactory::getApplication();
     $photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+	//error_log("Controller.get_photo() photo_id = " . $photo_id);
 
     $action = JRequest::getString('action');
     $actionBits = explode("_", $action);
     $firstBit = array_shift($actionBits);
+	
+	$need_page_reload = false;
 	
 	if($firstBit == "control"){
 		
@@ -115,6 +118,8 @@ class BioDivController extends JControllerLegacy
 		//if($photoDetails['next_photo']){
 		//  $photo_id = nextPhoto($photo_id);
 		//}
+		$need_page_reload = true;
+		
 		break;
 
       case "next":
@@ -135,18 +140,30 @@ class BioDivController extends JControllerLegacy
 	    break;
 
       case "nextseq":
+	    //error_log("Controller.get_photo() nextseq found photo_id = " . $photo_id);
+		/*
 	    //$photo_id = nextPhoto(0);
 	    $sequence = nextSequence();
 	    //$photo_id = $sequence[0];
 		$firstPhoto = $sequence[0];
 		$photo_id = $firstPhoto["photo_id"];
+		*/
+		//error_log("Controller.get_photo() nextseq setting photo_id to 0");
+		
+		$app->setUserState('com_biodiv.photo_id', 0);
+		$isToggled = JRequest::getInt('toggled');
+		if ( $isToggled ) $app->setUserState('com_biodiv.toggled', 1 );
+		else $app->setUserState('com_biodiv.toggled', 0 );
 	    break;
       }
     }
-    $app->setUserState('com_biodiv.photo_id', $photo_id);
-    $this->input->set('view', 'Ajax');
+	
+	if ( $need_page_reload ) {
+		$app->setUserState('com_biodiv.photo_id', $photo_id);
+		$this->input->set('view', 'Ajax');
 
-    parent::display();
+		parent::display();
+	}
   }
   
   function get_species () {
