@@ -52,6 +52,10 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->my_project = 
 	    $app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
+	  $this->animal_ids = 
+	    $app->getUserStateFromRequest('com_biodiv.animal_ids', 'animal_ids', 0);
+	  
+		
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  
 	  if ( !userID() ) {
@@ -93,6 +97,20 @@ class BioDivViewClassify extends JViewLegacy
 	  else {
 		//error_log("BioDivViewClassify.display cusing existing sequence ");
 		$this->sequence = getSequenceDetails($this->photo_id);
+		
+		// Only check for existing classifications if we are refreshing...
+		if ( $this->animal_ids ) {
+			error_log("classify view, animal ids found: " . $this->animal_ids );
+			$animals_csv = implode(",", explode("_", $this->animal_ids));
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true);
+			$query->select("animal_id, species, gender, age, number")
+			->from("Animal")
+			->where("animal_id in (".$animals_csv.")");
+
+			$db->setQuery($query);
+			$this->animals = $db->loadObjectList("animal_id");
+		}
 	  }
 	
 	  if (count($this->sequence) > 0) {

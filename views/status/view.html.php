@@ -39,6 +39,7 @@ class BioDivViewStatus extends JViewLegacy
     $app->setUserState('com_biodiv.classify_project', 0);
     $app->setUserState('com_biodiv.classify_self', 0);
     $app->setUserState('com_biodiv.my_project', 0);
+	$app->setUserState('com_biodiv.animal_ids', 0);
     
 
     $db = JDatabase::getInstance(dbOptions());

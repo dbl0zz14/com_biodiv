@@ -17,29 +17,41 @@ jimport('joomla.application.component.view');
 */
 class BioDivViewAjax extends JViewLegacy
 {
-        /**
-         *
-         * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
-         *
-         * @return  void
-         */
+	/**
+	 *
+	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
+	 *
+	 * @return  void
+	 */
 
-        public function display($tpl = null) 
-        {
-                // Assign data to the view
-	  // Display the view
-
+	public function display($tpl = null) 
+	{
+	  $this->person_id = (int)userID();
+	  
 	  $article = JTable::getInstance("content");
 	  $option_id = JRequest::getInt("option_id");
 	  $option = codes_getDetails($option_id, "option");
 	  $article_id = $option['article_id'];
+	  
 	  $article->load($article_id); 
   //	  print_r($article);
-	  $this->title = $article->title;
-	  $this->introtext = $article->introtext;
+	  
+	  // Default the title and introtext
+	  $this->title = $option['option_name'];
+	  $this->introtext = 0;
+	  
+      if ( $article_id ) {
+		$this->title = $article->title;
+		$this->introtext = $article->introtext;
+	  }
+	  
+	  // Catch all in case the article id is not available
+	  if ( !$this->title ) {
+		$this->title = $option['option_name'];
+	  }
 	  
 	  parent::display($tpl);
-        }
+    }
 }
 
 

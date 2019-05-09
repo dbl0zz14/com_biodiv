@@ -151,6 +151,7 @@ class BioDivController extends JControllerLegacy
 		//error_log("Controller.get_photo() nextseq setting photo_id to 0");
 		
 		$app->setUserState('com_biodiv.photo_id', 0);
+		$app->setUserState('com_biodiv.animal_ids', 0);
 		$isToggled = JRequest::getInt('toggled');
 		if ( $isToggled ) $app->setUserState('com_biodiv.toggled', 1 );
 		else $app->setUserState('com_biodiv.toggled', 0 );
@@ -256,6 +257,70 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
 
+  function add_animal_single_tag(){
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+
+    $fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		// Now set the photo_id from the form value, but check it is in the same sequence as the "current" one.
+		//$fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+		$formFields = array("photo_id", "species", "gender", "age", "number");
+		foreach($formFields as $formField){
+		  $fields->$formField = JRequest::getInt($formField, 0);
+		}
+		// If no photo_id, add it from the request:
+		if ( !$fields->photo_id ) $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+		
+		$animal_id = codes_insertObject($fields, 'animal');
+		
+		$app->setUserState('com_biodiv.animal_id', $animal_id);
+		
+		// add new control classification (nothing or human)
+		//	$fields = new stdClass();
+		//	$fields->person_id = userID();
+		//	$fields->photo_id = $photo_id;
+		//	$fields->species = $content_id;
+		//	codes_insertObject($fields, 'animal');
+
+		// if human then update the photo to say so
+		if($fields->species == 87){
+			$db = JDatabase::getInstance(dbOptions());	
+			$fields2 = new stdClass();
+			$fields2->photo_id = $fields->photo_id;
+			$fields2->contains_human = 1;
+			// we do note own this object so access db directly
+			$db->updateObject('Photo', $fields2, 'photo_id');
+		}
+		
+		$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+		
+		// If anything other than nothing, remove any existing Nothing classification
+		// And if there is an animal_id for a nothing classification delete this too.
+		if ( $fields->species != 86 ) {
+			$deleted_id = deleteNothingClassification($fields->photo_id, $animal_ids);
+			error_log ( "Found deleted nothing id = " . $deleted_id );
+			if ( $deleted_id ) removeAnimalId ($deleted_id);
+			$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+		}
+		
+		// And add the new animal_id
+		if ( !$animal_ids ) {
+			error_log("Setting animal_ids to " . $animal_id);
+			$app->setUserState('com_biodiv.animal_ids', $animal_id);
+		}
+		else {
+			error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
+			$app->setUserState('com_biodiv.animal_ids', $animal_ids . "_" . $animal_id);
+		}
+    }
+	$this->input->set('view', 'singletag');
+    parent::display();
+  }
+
   function remove_animal(){
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $app = JFactory::getApplication();
@@ -288,6 +353,51 @@ class BioDivController extends JControllerLegacy
     $result = $db->execute();
 	
     $this->input->set('view', 'tags');
+  
+    parent::display();
+  }
+
+  function remove_animal_single_tag(){
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+
+	// Only do the work if user is logged in
+	if ( userID() ) {
+
+		$photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+		$animal_id = JRequest::getInt("animal_id");
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$animal = codes_getDetails($animal_id, "animal");
+		if ( $animal['species'] == 87 ) {
+			$fields = new stdClass();
+			$fields->photo_id = $photo_id;
+			$fields->contains_human = 0;
+			// we do note own this object so access db directly
+			$db->updateObject('Photo', $fields, 'photo_id');
+		}
+		
+		$conditions = array('person_id = ' . userID(),
+				 'photo_id = ' . $photo_id,
+				 'animal_id = ' . $animal_id);
+
+		$query = $db->getQuery(true);
+		$query->delete($db->quoteName('Animal'));
+		$query->where($conditions);
+	 
+		$db->setQuery($query);
+	 
+	 
+		$result = $db->execute();
+	
+		$app->setUserState('com_biodiv.animal_id', 0);
+    
+		removeAnimalId ($animal_id);
+	
+	}
+    
+	$this->input->set('view', 'singletag');
   
     parent::display();
   }

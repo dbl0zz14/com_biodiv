@@ -47,7 +47,7 @@ print '</div>';
 print '</div>';
 print '<!-- /#sidebar-wrapper -->';
 print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
-print "" . $this->my_project . " Project Details";
+print "What has been spotted in " . $this->my_project . "?";
 print '</div>';
 
 print '<div id="page-content-wrapper">';
@@ -121,7 +121,7 @@ function makeControlButton($control_id, $control){
 	<!-- row containing buttons was here -->
 	<h2>What do you see in this sequence?</h2>
 	
-	<!--h3>Look through the whole sequence then choose from the animals.  You can filter the options using the tabs.</h3 -->
+	<h3>Look through all the images then choose from the list.</h3>
 	
 	<!-- div class='spacer-2em'></div -->	
 
@@ -210,7 +210,11 @@ print '</div> <!-- /.photoCarousel -->';
 <!-- div -->
 
   
-<div id='classify_tags'></div>
+<div id='classify_tags'>
+<div id='first_classification' class='singletag-classification'></div>
+<div id='second_classification' class='singletag-classification'></div>
+<div id='third_classification' class='singletag-classification'></div>
+</div>
 <!-- /div -->
 </div>
 
@@ -256,11 +260,16 @@ print "<button type='button' class='pull-right btn btn-danger' id='control_nexts
 
 
 <div class='col-md-4 cls-xs-12 species-carousel-col'>
-<div class='spacer-4em'></div>
-<!-- h4>Choose from the options below.  Filter the species using the tabs.</h4 -->
+<!-- div class='spacer-3em'></div -->
+
 <?php	
 // Use tabs for the filters:
 //print "<ul id = 'species-nav' class='nav nav-tabs nav-fill nav-justified'>";
+print "<div class='row'>";
+print "<div class='spacer-1em'></div>";
+print "<button type='button' class='pull-right btn btn-danger classify-help'>Help</button>";
+print "<div class='spacer-3em'></div>";
+print "</div>";
 print "<ul id = 'kiosk-species-nav' class='nav nav-tabs'>";
 $first = true;
 $numProjectFilters = count($this->projectFilters);
@@ -291,7 +300,7 @@ $extra = "active";
 if ( $this->commonSpeciesFilter ) {
 	print "  <div id='filter_".$this->commonFilterId."' class='tab-pane fade in $extra'>";
 	print "<div id='carousel-species-".$this->commonFilterId."' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
-	printSpeciesList ( $this->commonFilterId, $this->commonSpeciesFilter['species'], true, true, true, $this->lcontrols );
+	printSpeciesList ( $this->commonFilterId, $this->commonSpeciesFilter['species'], false, true, true, $this->lcontrols );
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
 	$extra = "";
@@ -347,6 +356,46 @@ print '</div><!-- wrapper -->';
 <img src="images/logos/dulogo.png">
 <img src="images/logos/esrc-logo.jpg">
 </div --> <!-- /div logo-row -->
+
+<div id="too_many_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sorry! You can't have more than three classifications for a sequence.</h4>
+      </div>
+      <div class="modal-body">
+        <p>If you want to make a change, you can remove an existing classification by clicking on it.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="timed_out_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sorry! This classification has expired. Please choose Next Sequence to move on.</h4>
+      </div>
+      <div class="modal-body">
+        <p></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <div class="modal fade" id="classify_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -430,7 +479,8 @@ print "</div>";
 <?php
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-JHTML::script("com_biodiv/classify.js", true, true);
+JHTML::script("com_biodiv/commonclassify.js", true, true);
+JHTML::script("com_biodiv/kiosk.js", true, true);
 JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
 JHTML::script("com_biodiv/project.js", true, true);
 

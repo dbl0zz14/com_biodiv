@@ -1,8 +1,13 @@
 <?php 
-if($this->title || $this->introtext){
+if ( !$this->person_id ) {
+	print "<div id='no_user_id'></div>";
+}
+if($this->title ){
   print "<div class='well'>\n";
   print "<h2>" . $this->title . "</h2>\n";
-  print "<div id=species-article>".$this->introtext."</div>"; 
+  if ( $this->introtext ) {
+	print "<div id=species-article>".$this->introtext."</div>"; 
+  }
   print "</div>\n";
  }
 ?>

@@ -401,6 +401,9 @@ function isVideo($photo_id) {
 	
 }
 
+function helpVideoURL() {
+	return JURI::root()."/images/video/HowTo.mp4";
+}
 
 function photoURL($photo_id){
   $details = codes_getDetails($photo_id, 'photo');
@@ -501,20 +504,68 @@ function getLikes($max_num){
 	
 }
 
-function deleteNothingClassification ( $photo_id ) {
+function deleteNothingClassification ( $photo_id, $animal_ids = 0 ) {
 	
-	// remove any existing classification of 'Nothing'
-	$db = JDatabase::getInstance(dbOptions());
-	$query = $db->getQuery(true);
-	$query->delete("Animal")
-		->where($db->quoteName("photo_id") . " = '$photo_id'")
-		->where($db->quoteName("person_id") . " = " . (int)userID())
-		->where($db->quoteName("species") . " = 86");
-	$db->setQuery($query);
-	$success = $db->execute();
+	// Default to 0 means no matches if $animals_id set or meaningless if general delete done.
+	$delete_id = 0;
+	// If animal_ids, remove any existing classification of 'Nothing' which match the ids on the list
+	if ( $animal_ids ) {		
+		$animals_csv = implode (',', explode ( "_", $animal_ids ) );
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		// Do any Nothings match?
+		$query = $db->getQuery(true);
+		$query->select($db->quoteName("animal_id"))
+			->from("Animal")
+			->where($db->quoteName("photo_id") . " = '$photo_id'" )
+			->where($db->quoteName("person_id") . " = " . (int)userID())
+			->where($db->quoteName("animal_id") . "in (".$animals_csv.")")
+			->where($db->quoteName("species") . " = 86");
+		$db->setQuery($query);
+		$delete_id = $db->loadResult();
+		
+		if ( $delete_id ) {
+			$query = $db->getQuery(true);
+			$query->delete("Animal")
+				->where($db->quoteName("photo_id") . " = '$photo_id'" )
+				->where($db->quoteName("person_id") . " = " . (int)userID())
+				->where($db->quoteName("animal_id") . " = '$delete_id'" )
+				->where($db->quoteName("species") . " = 86");
+			$db->setQuery($query);
+			$success = $db->execute();
+		}
+	}		
+	// If no animal_ids, remove any existing classification of 'Nothing'
+	else {
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->delete("Animal")
+			->where($db->quoteName("photo_id") . " = '$photo_id'" )
+			->where($db->quoteName("person_id") . " = " . (int)userID())
+			->where($db->quoteName("species") . " = 86");
+		$db->setQuery($query);
+		$success = $db->execute();
+	}
+	
+	return $delete_id;
 }
 
-
+function removeAnimalId ( $animal_id ) {
+	$app = JFactory::getApplication();
+	$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+	
+	if ( $animal_ids ) {
+		$animals = explode("_", $animal_ids);
+		
+		if (($key = array_search($animal_id , $animals)) !== false) {
+			unset($animals[$key]);
+			$animals = array_values ( $animals );
+		}
+    
+		$app->setUserState('com_biodiv.animal_ids', implode ("_" , $animals));
+	}
+}
 
 // Helper function to add child projects.
 /*
@@ -1998,7 +2049,7 @@ function nextSequence(){
   //print "<br>nextSequence, got priority_array: <br>" ;
   //print_r ( $priority_array );
   
-  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered", "Random");
+  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered", "Repeat");
   
   // which priorities do we have projects for?
   $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
@@ -2083,9 +2134,9 @@ function nextSequence(){
 				$project_ids = array_keys ( $priority_array, "Site time ordered" );
 	            $photo_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
 				break;
-			  case "Random":
-			    $project_ids = array_keys ( $priority_array, "Random" );
-	            $photo_id = chooseRandom ( $project_ids, $last_photo_id, $classify_own );
+			  case "Repeat":
+			    $project_ids = array_keys ( $priority_array, "Repeat" );
+	            $photo_id = chooseRepeat ( $project_ids, $last_photo_id, $classify_own );
 			  default:
 			    break;
 	  
@@ -2340,9 +2391,9 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	return $photo_id;
 }
 
-function chooseRandom ( $project_ids, $classify_own ) {
+function chooseRepeat ( $project_ids, $classify_own ) {
 	
-	//print "<br>chooseRandom called, classify_own = " . $classify_own . " <br>";
+	error_log ( "chooseRepeat called, classify_own = " . $classify_own );
 	$photo_id = null;
 	
 	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
@@ -2355,8 +2406,8 @@ function chooseRandom ( $project_ids, $classify_own ) {
 	
 		$project_id_str = implode(',', $project_ids);
 	
-		//error_log ( "chooseRandom, project_id_str = " . $project_id_str );
-		//print "<br>chooseRandom, project_id_str = " . $project_id_str . " <br>";
+		error_log ( "chooseRepeat, project_id_str = " . $project_id_str );
+		//print "<br>chooseRepeat, project_id_str = " . $project_id_str . " <br>";
 	
   
 		$db = JDatabase::getInstance(dbOptions());
@@ -2379,7 +2430,7 @@ function chooseRandom ( $project_ids, $classify_own ) {
 		$photo = $db->loadObject();
 		if ( $photo ) {
 			$photo_id = $photo->photo_id;
-			//print "<br>chooseRandom, photo found with id " . $photo_id . " <br>";
+			//print "<br>chooseRepeat, photo found with id " . $photo_id . " <br>";
 		}	
 	}
 	
@@ -3424,6 +3475,60 @@ function getVideoMeta ( $filename ) {
 	return $fileinfo;
 
 }
+
+function getClassificationButton ( $id, $animalArray ) {
+	$label = codes_getName($animalArray[$id]->species, 'content');
+     $contentDetails = codes_getDetails($animalArray[$id]->species, 'content');
+     $type = $contentDetails['struc'];
+     $features = array();
+     if($type == 'like'){
+       // do nothing
+     }
+     if($type == 'noanimal'){
+       $btnClass = 'btn-primary';
+	   if ( $animalArray[$id]->species != 86 ) {
+		   $nothingDisabled = true;
+	   }
+	   else {
+		   $btnClass .= ' nothing-classification';
+	   }
+	 }
+     else if($type== 'notinlist'){
+       $btnClass = 'btn-primary';
+	   $nothingDisabled = true;
+     }
+     else{
+       if($animalArray[$id]->number >1){
+	     $features[] = $animalArray[$id]->number;
+       }
+       foreach(array("gender", "age") as $struc){
+	     $featureName = codes_getName($animalArray[$id]->$struc, $struc);
+	     if($featureName != "Unknown"){
+	       $features[] = $featureName;
+	     }
+       }
+       if ( $type == 'mammal' ) {
+			$btnClass = 'btn-warning';
+	   }
+	   else {
+		   $btnClass = 'btn-info';
+	   }
+       if(count($features) >0){
+	     $label .= " (" . implode(",", $features) . ")";
+       }
+	   $nothingDisabled = true;
+     }
+	$retString = "<button id='remove_animal_". $id."' type='button' class='remove_animal btn $btnClass'>$label <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button>\n";
+	if ( $nothingDisabled == true ) {
+		$retString .= "<div id='nothingDisabled'></div>\n";
+	}
+	else {
+		$retString .= "<div id='nothingEnabled'></div>\n";
+	}
+	return $retString;
+}
+
+
 /*
 function makeControlButton($control_id, $control){
   $disabled = strpos($control, "disabled");

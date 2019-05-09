@@ -11,7 +11,7 @@
 
 #species-nav { padding: 0; background: #477171; border-color: #477171 !important; color: #fff !important; }
 
-.species-tab { font-size: 0.9em; padding-left: 0px; padding-right: 0px; }
+.species-tab { padding-left: 0px; padding-right: 0px; }
 /*.species-nav > li > a { color: #fff; text-transform: capitalize !important; }*/
 .nav-tabs > li > a { color: #fff !important; text-transform: capitalize !important; }
 .nav-tabs > li.active > a { background-color: #32553f !important } 
@@ -387,6 +387,18 @@
   height: 60px; 
   margin: 10px 20px 10px;
 }
+
+.singletag-classification {
+	margin: 0;
+	display: inline-block;
+	float: left;
+}
+
+.singletag-classification > button {
+	margin: 0;
+}
+
+
 .view-kiosk  .t3-mainnav { display: none; }
 .view-kiosk  .t3-footer { display: none; }
 .view-kiosk  .t3-mainbody { padding: 0; }
@@ -407,16 +419,24 @@
 }
 
 #start-kiosk-jumbotron h1 {
-	margin-top: 130px;
-	margin-bottom: 50px;
+    margin-top: 130px;
+    margin-bottom: 50px;
     font-size: 10em;
+}
+
+#start-kiosk-jumbotron h2 {
+	font-size: 7em;
+}
+
+#start-kiosk-jumbotron h3 {
+	font-size: 3em;
 }
 
 
 #start-kiosk-btn {
 	font-size: 3em;
 	padding: 1em;
-	margin: 50px 100px 150px 100px;
+	margin: 50px 100px 200px 100px;
 }
 
 
@@ -503,7 +523,7 @@
 
 /*.view-kiosk .species-tab, .view-kiosk .species-tab > li, .view-kiosk .species-tab > a {*/
 #kiosk-species-nav .species-tab, #kiosk-species-nav .species-tab > li, #kiosk-species-nav .species-tab > a {
-	font-size: 14px;
+	font-size: 12px;
 	color: black;
 	border 1px solid #cccccc;
 	-webkit-border-top-left-radius: 8px;

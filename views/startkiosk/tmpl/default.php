@@ -22,7 +22,11 @@ if ( $this->user_key) {
 // Just want an image with a start button, at least for now.
 //print '<div id="start-kiosk-jumbotron" data-project-img="'.$this->projectImageUrl.' class="jumbotron" >';
 print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" >';
-print '  <h1>'.$this->project->project_prettyname.'</h1>';      
+print '  <h1>'.$this->project->project_prettyname.'</h1>';  
+print '  <div>';  
+print '  <!-- h2>Can you classify 10 sequences?</h2 -->';      
+print '  <!-- h3>Touch the button to start spotting</h3 -->';   
+print '  </div>';   
 //print '  <a id="start-kiosk-spotting" class="btn btn-danger" src="">Start Spotting</a>';
 ?>
 
@@ -34,19 +38,18 @@ print '  <h1>'.$this->project->project_prettyname.'</h1>';
 	<input type='hidden' name='user_key' value='<?php print $this->user_key; ?>' />
 	<button  id='start-kiosk-btn' class='btn btn-danger' type='submit'><i class='fa fa-search'></i> Start Spotting</button>
     
+
 </form>
 
-
+<!--button type='button' id='classify_help_button' class='btn btn-danger btn-block' data-toggle='modal' data-target='#help_modal'>Learn How</button -->
 
 <?php
 //print '<p>user key: '.$this->user_key.'</p>';
 //print '<p>project_id: '.$this->project_id.'</p>';
 //print '<p>project: </p>';
 //print_r($this->project);
+
 print '</div>';
-
-
-
 
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);

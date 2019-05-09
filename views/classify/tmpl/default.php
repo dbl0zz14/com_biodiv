@@ -170,8 +170,74 @@ print '</div> <!-- /.photoCarousel -->';
 
 <div>
 
-  
-<div id='classify_tags'></div>
+<?php  
+
+$animals = 0;
+if ( $this->animal_ids ) {
+	$animals = explode("_", $this->animal_ids);
+}
+if ( $animals ) {
+	print "<div id='classify_tags'>";
+	print "<div id='first_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+	print "<div id='second_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+
+	print "<div id='third_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+
+	print "<div id='fourth_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+
+	print "<div id='fifth_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+
+	print "<div id='sixth_classification' class='singletag-classification'>";
+	$next_id = array_pop($animals);
+	if ( $next_id ) {
+		$button_code = getClassificationButton ( $next_id, $this->animals );
+		print $button_code;
+	}
+	print "</div>";
+
+	print "</div>";
+}
+else {
+	print "<div id='classify_tags'>";
+	print "<div id='first_classification' class='singletag-classification'></div>";
+	print "<div id='second_classification' class='singletag-classification'></div>";
+	print "<div id='third_classification' class='singletag-classification'></div>";
+	print "<div id='fourth_classification' class='singletag-classification'></div>";
+	print "<div id='fifth_classification' class='singletag-classification'></div>";
+	print "<div id='sixth_classification' class='singletag-classification'></div>";
+	print "</div>";
+}
+?>
 </div>
 </div>
 
@@ -314,6 +380,46 @@ print "</div> <!-- /carousel-species carousel--> \n";
 </div>
 </div>
 
+<div id="too_many_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sorry! You can't have more than six classifications for a sequence.</h4>
+      </div>
+      <div class="modal-body">
+        <p></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="timed_out_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sorry! This classification has expired. Please choose Next Sequence to move on.</h4>
+      </div>
+      <div class="modal-body">
+        <p></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div class="modal fade" id="classify_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -371,6 +477,7 @@ foreach($this->classifyInputs as $formInput){
 <?php
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
+JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/classify.js", true, true);
 ?>
 
