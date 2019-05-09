@@ -47,7 +47,7 @@ print '</div>';
 print '</div>';
 print '<!-- /#sidebar-wrapper -->';
 print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
-print "What has been spotted in " . $this->my_project . "?";
+print "Find out about " . $this->my_project;
 print '</div>';
 
 print '<div id="page-content-wrapper">';
@@ -260,16 +260,18 @@ print "<button type='button' class='pull-right btn btn-danger' id='control_nexts
 
 
 <div class='col-md-4 cls-xs-12 species-carousel-col'>
-<!-- div class='spacer-3em'></div -->
+<div class='spacer-3em'></div>
 
 <?php	
 // Use tabs for the filters:
 //print "<ul id = 'species-nav' class='nav nav-tabs nav-fill nav-justified'>";
-print "<div class='row'>";
-print "<div class='spacer-1em'></div>";
-print "<button type='button' class='pull-right btn btn-danger classify-help'>Help</button>";
-print "<div class='spacer-3em'></div>";
-print "</div>";
+
+//print "<div class='row'>";
+//print "<div class='spacer-1em'></div>";
+//print "<button type='button' class='pull-right btn btn-danger classify-help'>Help</button>";
+//print "<div class='spacer-3em'></div>";
+//print "</div>";
+
 print "<ul id = 'kiosk-species-nav' class='nav nav-tabs'>";
 $first = true;
 $numProjectFilters = count($this->projectFilters);
