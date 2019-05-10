@@ -50,7 +50,7 @@ print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
 print "Find out about " . $this->my_project;
 print '</div>';
 
-print '<div id="page-content-wrapper">';
+print '<div id="page-content-wrapper" data-project-id="'.$this->project_id.'">';
 //print "<div class='row'>";
 
 //print "<div class='col-md-1 no-padding well-background'>";
@@ -119,9 +119,10 @@ function makeControlButton($control_id, $control){
 	<!-- /div -->
 
 	<!-- row containing buttons was here -->
-	<h2>What do you see in this sequence?</h2>
-	
-	<h3>Look through all the images then choose from the list.</h3>
+<?php	
+print '   <h1>What do you see in this sequence?</h1>';
+?>
+	<!-- h3>Look through all the images then choose from the list.</h3 -->
 	
 	<!-- div class='spacer-2em'></div -->	
 
@@ -158,7 +159,7 @@ print '<div id="photoCarousel" class="carousel slide carousel-fade" data-ride="c
 print '</ol>';
 
   print '<button  id="fullscreen-button" type="button" class="right" ><span class="fa fa-expand fa-2x"></span></button>';
-  print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-3x"></span></button>';
+  print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-4x"></span></button>';
   
   print '<!-- Wrapper for slides -->';
   print '<div id="photoCarouselInner" class="carousel-inner">';
@@ -171,9 +172,22 @@ foreach($this->sequence as $photo_details  ){
 	if ( $j == $numphotos ) $lastclass .= 'last-photo';
 	if ($j==1) {
 		print '<div class="item active '.$lastclass.'" data-photo-id="'.$photo_details["photo_id"].'">';
+		if ( $numphotos > 1 ) {
+			print '<div class="carousel-caption">';
+			print '  <p><span>1 of '.$numphotos.': Use the arrows or swipe to look through all photos in the sequence</span></p>';
+			print '</div>';
+		}
+		else {
+			print '<div class="carousel-caption">';
+			print '  <p><span>1 of 1<span></p>';
+			print '</div>';
+		}
 	}
 	else {
 		print '<div class="item '.$lastclass.'" data-photo-id="'.$photo_details["photo_id"].'">';
+		print '<div class="carousel-caption">';
+		print '  <p><span>'.$j.' of '.$numphotos.'<span></p>';
+		print '</div>';
 	}
 	print JHTML::image(photoURL($photo_details["photo_id"]), 'Photo ' . $photo_details["photo_id"], array('class' =>'img-responsive'));
 	print '</div>';

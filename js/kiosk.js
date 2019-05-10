@@ -1,3 +1,37 @@
+
+var timeoutInMiliseconds = 60000;
+var timeoutId; 
+  
+function startTimer() { 
+    // window.setTimeout returns an Id that can be used to start and stop a timer
+    timeoutId = window.setTimeout(doInactive, timeoutInMiliseconds)
+}
+  
+function doInactive() {
+    // does whatever you need it to actually do - probably signs them out or stops polling the server for info
+	console.log("doInactive called");
+	var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
+	console.log("project_id = " + projectId);
+	var url = BioDiv.root + "&view=startkiosk&project_id=" + project_id;
+	window.location.href = "" + url;
+}
+ 
+function setupTimers () {
+    document.addEventListener("mousemove", resetTimer, false);
+    document.addEventListener("mousedown", resetTimer, false);
+    document.addEventListener("keypress", resetTimer, false);
+	document.addEventListener("touchstart", resetTimer, false);
+    document.addEventListener("touchmove", resetTimer, false);
+     
+    startTimer();
+}
+
+function resetTimer() { 
+    window.clearTimeout(timeoutId)
+    startTimer();
+}
+
+
 jQuery(document).ready(function(){
 
 
@@ -93,9 +127,45 @@ jQuery(document).ready(function(){
 		}
 	});	
 	
+	jQuery(".carousel").on("touchstart", function(event){
+        var xClick = event.originalEvent.touches[0].pageX;
+		jQuery(this).one("touchmove", function(event){
+			var xMove = event.originalEvent.touches[0].pageX;
+			if( Math.floor(xClick - xMove) > 5 ){
+				jQuery(this).carousel('next');
+			}
+			else if( Math.floor(xClick - xMove) < -5 ){
+				jQuery(this).carousel('prev');
+			}
+    });
+    jQuery(".carousel").on("touchend", function(){
+            jQuery(this).off("touchmove");
+		});
+	});
+	
+	// Hide sidebar if the wrapper is toggled
+	/*
+	if ( document.getElementById("wrapper").getElementsByClassName("toggled").length > 0 ) {
+		jQuery('slide-out-tab').click();
+	}
+	*/
+	
 	// Add any remove click functions on refresh.
 	removeClicks();
 	
+	setupTimers();
+	
+	// Disable pinch zoom
+	/*
+	document.addEventListener('touchmove', function(event){ 
+		if ( event.touches.length === 2 ) {
+			event.stopPropagation(); 
+			event.preventDefault(); 
+		}
+	},
+	{passive: false}
+	);
+	*/
 });
 
 	

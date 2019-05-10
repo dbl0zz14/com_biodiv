@@ -260,7 +260,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'Species classified',
+						text: 'Species League Table',
 						fontColor: 'white'
 					},
 					legend: {

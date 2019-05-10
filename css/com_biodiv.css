@@ -26,9 +26,22 @@
 
 #sequence-progress {display: none;}
 
+
 .photo-carousel-control.left, .photo-carousel-control.right {
-    background-image: none;
+    /*background-image: none;*/
 	color: #ffffff;
+}
+.photo-carousel-control .glyphicon-chevron-left,
+.photo-carousel-control .glyphicon-chevron-right {
+    width: 35px;
+    height: 35px;
+	margin-left: -35px;
+	margin-right: -35px;
+}
+
+.photo-carousel-control .glyphicon-chevron-left:before,
+.photo-carousel-control .glyphicon-chevron-right:before {
+    font-size: 35px;
 }
 
 #classify-video { width: 100%; }
@@ -37,6 +50,10 @@
 #photo-indicators li.active.spb {background-color: #00ffcc;}
 #fullscreen-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.4); color: white; bottom: 8px; right: 8px; z-index: 100;/*transform: translate(-50%, -50%);*/}
 #fullscreen-exit-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.4); color: white; bottom: 40px; right: 40px; z-index: 100;} /*top 680px */
+
+.view-kiosk #fullscreen-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 0; right: 0; z-index: 100;/*transform: translate(-50%, -50%);*/}
+.view-kiosk #fullscreen-exit-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 40px; right: 40px; z-index: 100;} /*top 680px */
+
 
 
 :fullscreen .carousel-inner > .item > img {
@@ -374,7 +391,7 @@
   bottom: 0px;
   left: 20px;
   right: 700px;
-  background-image: linear-gradient(20deg, #477171, #477171, #47717190, #47717120, white, white);
+  background-image: linear-gradient(60deg, #477171, #477171, #47717190, #47717120, white, white);
    
 }
 /*
@@ -399,17 +416,25 @@
 }
 
 
+.carousel-caption {padding: 5px 0 0 0; top: 0; bottom: auto; left: 0; right: 0; background-image: linear-gradient(180deg, rgb(0,0,0,1.0), rgb(0,0,0,0.2)); /*background-color: rgba(0, 0, 0, 0.6);*/}
+/*.carousel-caption > p { background-color: rgba(0, 0, 0, 0.8);}*/
+
 .view-kiosk  .t3-mainnav { display: none; }
 .view-kiosk  .t3-footer { display: none; }
 .view-kiosk  .t3-mainbody { padding: 0; }
 .view-kiosk  .t3-content { padding: 0; }
+.view-kiosk { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
 
 .view-startkiosk  .t3-mainnav { display: none; }
 .view-startkiosk  .t3-footer { display: none; }
-.view-startkiosk  .body { padding-top: 0 !important; }
+.view-startkiosk  .body { padding-top: 0 !important; zoom-level: 1.1;}
 .view-startkiosk  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
 .view-startkiosk  .t3-content { padding: 0; }
+.view-startkiosk { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
 .view-startkiosk  > h1 { margin-top: 100px; }
+
+
+/*.view-kiosk .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
 
 #start-kiosk-jumbotron {
  background-image: url("http://localhost/rhombus/biodivimages/projects/hancock_urban.jpg");
@@ -440,46 +465,16 @@
 }
 
 
-/*.view-kiosk  .t3-wrapper { overflow: hidden; }*/
-/*.view-kiosk  > body { padding-top: 20px; overflow: hidden; zoom: 0.95; }*/
-/*.view-kiosk  > body { padding-top: 15px; zoom: 0.95; overflow: hidden; object-fit: contain; }*/
-.view-kiosk  > body { padding-top: 0; /*zoom: 0.95;*/ overflow: hidden; object-fit: contain; }
+.view-kiosk  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
 .view-kiosk  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}
+.view-kiosk .kiosk-photos > h1 { font-size: 38px; margin-bottom: 20px; }
 .view-kiosk  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 50px; }
 .kiosk-h2 { margin-top: 20px; margin-bottom: 20px; }
 .view-kiosk  .classify-header > h2 { margin-top: 15px; margin-bottom: 15px; }
 .view-kiosk  .well  > h2 { margin-top: 0; margin-bottom: 10px; }
 /*.view-kiosk .animals-bar { margin-left: -10px;  }*/
 .view-kiosk #species-nav { padding: 0; color: grey !important; }
-/*.view-kiosk #species_helplet > img { width: 40%; }
-.view-kiosk #species_helplet > p { width: 40%; }*/
 
-/*.view-kiosk .modal-dialog #species-article > p {*/
-/*
-.view-kiosk .modal-dialog #species-article {
-	max-height: 500px;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-}
-
-.view-kiosk .modal-dialog #species-article > p {
-	width: 30%;
-	margin: 10px;
-}
-*/
-/*
-.view-kiosk #photoCarouselInner .item > img {
-	max-height: 70vh;
-	margin: auto;
-}
-*/
-/*
-#photoCarouselInner .item > img {
-	max-height: 70vh;
-	margin: auto;
-}
-*/
 
 .view-kiosk .modal-dialog .classify-modal-button {
 	height: 5em;
@@ -649,14 +644,6 @@
   background-color: grey;
 }
 
-/*
-.view-kiosk input[type="radio"] {
-    -ms-transform: scale(1.5); 
-    -webkit-transform: scale(1.5);
-    transform: scale(1.5);
-}
-*/
-
 .view-kiosk #photo-container {
 	padding-left: 5px;
 }
@@ -675,7 +662,6 @@
   font-weight: normal;
 }
 
-/*.view-kiosk .species-carousel-lower {top:0}*/
 .view-kiosk .species-carousel-control { height: 27px;}
 .view-kiosk .species-carousel-control.left { /*left: -30px;*/ }
 .view-kiosk .species-carousel-control.right { /*right: -30px;*/ }
@@ -684,6 +670,7 @@
 /* This is the sidebar testing styling */
 #wrapper {
     padding-left: 0;
+	touch-action: pan-x pan-y;
 	-webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;

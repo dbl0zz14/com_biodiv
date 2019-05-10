@@ -58,8 +58,8 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  
 	  error_log("Kiosk View: user_key = " . $this->user_key);
 		
-	  
-	
+	  // Sidebar should start hidden
+	  $app->setUserState('com_biodiv.toggled', 1);
 		
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  /*
