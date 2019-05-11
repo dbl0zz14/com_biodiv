@@ -431,11 +431,16 @@
 .view-startkiosk  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
 .view-startkiosk  .t3-content { padding: 0; }
 .view-startkiosk { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
-.view-startkiosk  > h1 { margin-top: 100px; }
+.view-startkiosk  > h1 { margin-top: 50px; }
 
+.view-feedback  .t3-mainnav { display: none; }
+.view-feedback  .t3-footer { display: none; }
+.view-feedback  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
+.view-feedback  .t3-content { padding: 0; }
+.view-feedback { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
 
 /*.view-kiosk .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
-
+/*
 #start-kiosk-jumbotron {
  background-image: url("http://localhost/rhombus/biodivimages/projects/hancock_urban.jpg");
  background-color: #477171;
@@ -446,17 +451,17 @@
 #start-kiosk-jumbotron h1 {
     margin-top: 130px;
     margin-bottom: 50px;
-    font-size: 10em;
+    font-size: 8em;
 }
 
 #start-kiosk-jumbotron h2 {
-	font-size: 7em;
+	font-size: 5em;
 }
 
 #start-kiosk-jumbotron h3 {
 	font-size: 3em;
 }
-
+*/
 
 #start-kiosk-btn {
 	font-size: 3em;
@@ -464,10 +469,36 @@
 	margin: 50px 100px 200px 100px;
 }
 
+#start-again-btn {
+	font-size: 3em;
+	padding: 1em;
+	margin: 50px 100px 200px 100px;
+}
+
+.jumbotron {
+	/*background-image: url("http://localhost/rhombus/biodivimages/projects/hancock_urban.jpg");*/
+	background-color: #477171;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.jumbotron h1 {
+    margin-top: 130px;
+    margin-bottom: 50px;
+    font-size: 8em;
+}
+
+.jumbotron h2 {
+	font-size: 5em;
+}
+
+.jumbotron h3 {
+	font-size: 3em;
+}
 
 .view-kiosk  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
 .view-kiosk  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}
-.view-kiosk .kiosk-photos > h1 { font-size: 38px; margin-bottom: 20px; }
+.view-kiosk .kiosk-photos > h1 { font-size: 35px; margin-bottom: 20px; }
 .view-kiosk  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 50px; }
 .kiosk-h2 { margin-top: 20px; margin-bottom: 20px; }
 .view-kiosk  .classify-header > h2 { margin-top: 15px; margin-bottom: 15px; }

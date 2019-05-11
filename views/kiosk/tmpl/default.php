@@ -50,7 +50,7 @@ print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
 print "Find out about " . $this->my_project;
 print '</div>';
 
-print '<div id="page-content-wrapper" data-project-id="'.$this->project_id.'">';
+print '<div id="page-content-wrapper" data-project-id="'.$this->project_id. '" data-classify-count="'.$this->classify_count.'">';
 //print "<div class='row'>";
 
 //print "<div class='col-md-1 no-padding well-background'>";
@@ -120,7 +120,10 @@ function makeControlButton($control_id, $control){
 
 	<!-- row containing buttons was here -->
 <?php	
-print '   <h1>What do you see in this sequence?</h1>';
+
+print '   <h1>Look through all the photos. What can you see?</h1>';
+
+
 ?>
 	<!-- h3>Look through all the images then choose from the list.</h3 -->
 	

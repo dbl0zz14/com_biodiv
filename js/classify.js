@@ -129,6 +129,25 @@ jQuery(document).ready(function(){
 		
 	});
 	
+	jQuery('#control_nextseq').click(function (){
+	id = jQuery(this).attr("id");
+	var sideBarToggled = jQuery('#wrapper').is(".toggled");
+	var extra = "";
+	if ( sideBarToggled ) extra = "&toggled=" + "1";
+	url = BioDiv.root + "&task=get_photo&format=raw&action=" + id + extra;
+	jQuery.ajax(url, {'success': function() {
+			window.location.reload(true);
+			if (document.getElementById('sub-photo-1')) {
+				jQuery('#control_nextseq').prop('disabled', true);
+			}
+			else {
+				jQuery('#control_nextseq').prop('disabled', false);
+			}
+		}});
+	
+	});
+	
+
 	// Add any remove click functions on refresh.
 	removeClicks();
 	

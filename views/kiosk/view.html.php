@@ -83,7 +83,19 @@ class BioDivViewKiosk extends JViewLegacy
 		
 	  error_log("Kiosk View: toggled = " . $this->toggled);
 	
+	  $this->classify_count = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.classify_count', 'classify_count', 0);
+		
+	  error_log("Kiosk View: classify count = " . $this->classify_count);
 	  
+	  // If classify count reached 10 then the user is done - redirect to feedback page.
+	  if ( $this->classify_count > 1 ) { // 3 for testing....
+		  $url = "".BIODIV_ROOT."&view=feedback";
+		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
+		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
+		  if ( $this->self ) $url .= "&classify_self=" . $this->self;
+		  $app->redirect($url);		
+	  }
 	  
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  if ( !userID() ) {

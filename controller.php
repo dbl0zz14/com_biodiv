@@ -152,9 +152,15 @@ class BioDivController extends JControllerLegacy
 		
 		$app->setUserState('com_biodiv.photo_id', 0);
 		$app->setUserState('com_biodiv.animal_ids', 0);
+		
+		$classifyCount = JRequest::getInt('classify_count');
+		if ( $classifyCount ) $app->setUserState('com_biodiv.classify_count', $classifyCount);
+		else $app->setUserState('com_biodiv.classify_count', 0);
+		
 		$isToggled = JRequest::getInt('toggled');
 		if ( $isToggled ) $app->setUserState('com_biodiv.toggled', 1 );
 		else $app->setUserState('com_biodiv.toggled', 0 );
+		
 	    break;
       }
     }

@@ -10,9 +10,11 @@ function startTimer() {
 function doInactive() {
     // does whatever you need it to actually do - probably signs them out or stops polling the server for info
 	console.log("doInactive called");
-	var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
-	console.log("project_id = " + projectId);
-	var url = BioDiv.root + "&view=startkiosk&project_id=" + project_id;
+	//var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
+	//var url = BioDiv.root + "&view=startkiosk&project_id=" + projectId;
+	//var userKey = jQuery('#page-content-wrapper').attr("data-user-key");
+	//url += "&user_key=" + userKey;
+	var url = BioDiv.root + "&view=startkiosk";
 	window.location.href = "" + url;
 }
  
@@ -73,7 +75,32 @@ jQuery(document).ready(function(){
 			removeClicks();
 		}
 	}
-
+	
+	jQuery('#control_nextseq').click(function (){
+	id = jQuery(this).attr("id");
+	var sideBarToggled = jQuery('#wrapper').is(".toggled");
+	var extra = "";
+	if ( sideBarToggled ) extra = "&toggled=" + "1";
+	var currCount = parseInt(jQuery("#page-content-wrapper").attr("data-classify-count"));
+	if ( document.getElementsByClassName("remove_animal").length > 0 ) {
+		currCount += 1;
+	}
+	extra += "&classify_count=" +  currCount;
+	var projectId = parseInt(jQuery("#page-content-wrapper").attr("data-project-id"));
+	extra += "&project_id=" +  projectId;
+	url = BioDiv.root + "&task=get_photo&format=raw&action=" + id + extra;
+	jQuery.ajax(url, {'success': function() {
+			window.location.reload(true);
+			if (document.getElementById('sub-photo-1')) {
+				jQuery('#control_nextseq').prop('disabled', true);
+			}
+			else {
+				jQuery('#control_nextseq').prop('disabled', false);
+			}
+		}});
+	
+	});
+	
 	jQuery('#classify-save').click(function (){
 		jQuery('#classify_modal').modal('hide');
 		formData = jQuery('#classify-form').serialize();

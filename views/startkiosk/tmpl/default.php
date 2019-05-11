@@ -10,9 +10,6 @@ defined('_JEXEC') or die;
 
 $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
-if ( $this->photo_id ) {
-  $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
-}
 /*
 if ( $this->user_key) {
   $document->addScriptDeclaration("BioDiv.user_key = ".$this->user_key.";");
@@ -24,7 +21,7 @@ if ( $this->user_key) {
 print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" >';
 print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '  <div>';  
-print '  <!-- h2>Can you classify 10 sequences?</h2 -->';      
+print '  <h2>Can you classify 10 sequences?</h2>';      
 print '  <!-- h3>Touch the button to start spotting</h3 -->';   
 print '  </div>';   
 //print '  <a id="start-kiosk-spotting" class="btn btn-danger" src="">Start Spotting</a>';
@@ -35,7 +32,6 @@ print '  </div>';
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_only_project' value='1'/>
 	<input type='hidden' name='my_project' value='<?php print $this->project->project_prettyname; ?>' />
-	<input type='hidden' name='user_key' value='<?php print $this->user_key; ?>' />
 	<button  id='start-kiosk-btn' class='btn btn-danger' type='submit'><i class='fa fa-search'></i> Start Spotting</button>
     
 
