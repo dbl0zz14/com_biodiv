@@ -439,6 +439,10 @@
 .view-feedback  .t3-content { padding: 0; }
 .view-feedback { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
 
+.view-kiosk { cursor: none; }
+.view-startkiosk { cursor: none; }
+.view-feedback { cursor: none; }
+
 /*.view-kiosk .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
 /*
 #start-kiosk-jumbotron {
