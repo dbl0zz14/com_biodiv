@@ -21,7 +21,7 @@ if ( $this->user_key) {
 print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" >';
 print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '  <div>';  
-print '  <h2>Can you classify 10 sequences?</h2>';      
+print '  <h2>Can you classify 5 sequences?</h2>';      
 print '  <!-- h3>Touch the button to start spotting</h3 -->';   
 print '  </div>';   
 //print '  <a id="start-kiosk-spotting" class="btn btn-danger" src="">Start Spotting</a>';

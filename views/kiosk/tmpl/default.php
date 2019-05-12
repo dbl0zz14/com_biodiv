@@ -27,81 +27,32 @@ print '    </div> <!-- classify-header -->';
 print "    <div class='project-sidebar-image'><img src='".$this->projectImageUrl."' /></div>";
 print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='250px' ></canvas>";
 print ' <div class="mwlogos">';
-//print ' <div class="logo-image"><img src="images/logos/Hancock.png"></div>';
-//print ' <div class="logo-image"><img src="images/logos/MammalWebSquareBlackExt2.png"></div>';
-//print ' <div class="logo-image"><img src="images/logos/dulogo.png"></div>';
-//print ' <div class="logo-image"><img src="images/logos/esrc-logo.jpg"></div>';
 print '</div>';
-//print '   <ul class="sidebar-nav">';
-//print '       <li class="sidebar-brand">';
-//print '           <h1>' . $this->my_project . '</h1>';
-//print '       </li>';
-//print '       <li class = "sidebar-brand">';
-//print "           <canvas id='animalsBarChart' class='animals-bar' data-project-id='".$this->project_id."' height='300px' ></canvas>";
-//print '       </li>';
-//print '   </ul>';
-
-//print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
-//print "" . $this->my_project . " Project Details";
-//print '</div>';
 print '</div>';
 print '<!-- /#sidebar-wrapper -->';
 print '<div href="#menu-toggle" id="menu-toggle" class="btn slide-out-tab">';
 print "Find out about " . $this->my_project;
 print '</div>';
 
-print '<div id="page-content-wrapper" data-project-id="'.$this->project_id. '" data-classify-count="'.$this->classify_count.'">';
-//print "<div class='row'>";
+print '<div id="page-content-wrapper" data-project-id="'.$this->project_id. '" data-classify-count="'.$this->classify_count.'" data-user-key="'.$this->user_key.'">';
 
-//print "<div class='col-md-1 no-padding well-background'>";
-//print '<div class="classify-header">';
-//print '<h1>' . $this->my_project . '</h1>';
-//print '</div> <!-- classify-header -->';
-//print "<div class='spacer-2em'>";
-//print "</div>";
-
-//<div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div>
-//print "<img class='logo-project-image' src='".$this->projectImageUrl."' />";
-//print "<canvas id='animalsBarChart' class='animals-bar' data-project-id='".$this->project_id."' height='300px' ></canvas>";
-//print "<div class='spacer-2em'></div>";
-?>
-<!-- div class="logos">
-<img src="images/logos/MammalWebSquareBlackExt2.png">
-<div class="spacer-2em"></div>
-<img src="images/logos/dulogo.png">
-<div class="spacer-2em"></div>
-<img src="images/logos/esrc-logo.jpg">
-</div --> <!-- /div logos -->
-<!-- /div --> <!-- col-md-1 logos -->
-<?php
-//print "<div class='col-md-11'>";
 
 if(!$this->photo_id){
   print "<h2>No photos for you to classify</h2>\n";
   print "<h3>You have classified all the images currently available for this project</h3>\n";
   print "<h3>If you have recently uploaded some images, please check back in 10 minutes, by which time they will be available for classification</h3>\n";
+  print "<form action = '".BIODIV_ROOT."' method = 'GET'>";
+  print "    <input type='hidden' name='view' value='feedback'/>";
+  print "    <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
+  print "    <input type='hidden' name='project_id' value='".$this->project_id."' />";
+  print "	<button  id='start-again-btn' class='btn btn-danger' type='submit'>Continue</button>";
+  print "</form>";
+  print "</div>"; // page-content-wrapper
+  print "</div>"; // wrapper
+  
   return;
  }
-/*
-function makeControlButton($control_id, $control){
-  $disabled = strpos($control, "disabled");
-  if($disabled !== false){
-    $extras = array('disabled');
-  }
-  else{
-    $extras = array('classify_control');
-  }
-
-  $confirm = strpos($control, "biodiv-confirm");
-
-  if($confirm !== false){
-    $extras[] = "biodiv-confirm";
-  }
-
-  $extraText = implode(" ", $extras);
-  print "<button type='button' class='btn btn-warning btn-block $extraText' id='$control_id'>$control</button>";
-}
-*/
+ 
 
 ?>
 

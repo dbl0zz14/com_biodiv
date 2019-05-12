@@ -30,7 +30,7 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  //($person_id = (int)userID()) or die("No person_id");
 	  $app = JFactory::getApplication();
 	  
-	  $this->project_id =
+	  $this->my_project =
 	    (int)$app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
 	  $this->project_id =
@@ -39,24 +39,26 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  if ( !$this->project_id ) {
 		  $this->project_id = codes_getCode($this->my_project, "project" );
 	  }
+	  
+	  if ( !$this->project_id ) die ("no project id given" );
 		
 	  $this->project = projectDetails($this->project_id);
 	
 	  $this->user_key = 
 	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
 		
-	  /*
 	  if ( !$this->user_key ) {
 		  $this->user_key = JRequest::getString("user_key");
+		  $app->setUserState('com_biodiv.user_key', $this->user_key);
 	  }
-	  */
 	  
 	  error_log("Kiosk View: user_key = " . $this->user_key);
 		
-	  // Sidebar should start hidden
+	  // Sidebar should start hidden, start classify count and associated animal ids again
 	  
 	  $app->setUserState('com_biodiv.toggled', 1);
 	  $app->setUserState('com_biodiv.classify_count', 0);
+	  $app->setUserState('com_biodiv.all_animal_ids', 0);
 	  
 	  // get the url for the project image
 	  $this->projectImageUrl = projectImageURL($this->project_id);

@@ -38,7 +38,10 @@ class BioDivViewSingletag extends JViewLegacy
 			(int)$app->getUserStateFromRequest('com_biodiv.animal_id', 'animal_id');
 			
 			
-		  //error_log("Singletag view, animal_ids = " .   $app->getUserStateFromRequest('com_biodiv.animal_ids', 'animal_ids') );
+		  error_log("Singletag view, animal_ids = " .   $app->getUserStateFromRequest('com_biodiv.animal_ids', 'animal_ids') );
+		  error_log("Singletag view, all_animal_ids (request) = " .   $app->getUserStateFromRequest('com_biodiv.all_animal_ids', 'all_animal_ids') );
+		  error_log("Singletag view, all_animal_ids = " .   $app->getUserState('com_biodiv.all_animal_ids', 'all_animal_ids') );
+		
 			
 		  
 		  if ( $this->animal_id ) {

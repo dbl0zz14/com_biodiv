@@ -161,6 +161,12 @@ class BioDivController extends JControllerLegacy
 		if ( $isToggled ) $app->setUserState('com_biodiv.toggled', 1 );
 		else $app->setUserState('com_biodiv.toggled', 0 );
 		
+		// If used this stores all those classified by the user.
+		$this->all_animal_ids =
+	        $app->getUserStateFromRequest('com_biodiv.all_animal_ids', 'all_animal_ids', 0);
+		error_log("Controller: nextseq got all_animal_ids " . $this->all_animal_ids );
+		
+		
 	    break;
       }
     }
@@ -304,6 +310,11 @@ class BioDivController extends JControllerLegacy
 		
 		$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
 		
+		// Sometimes we store all the animal ids spotted by the user.
+		// In original classify mode this is set to 0 on each load of the page
+		// In kiosk mode we keep track of the animals in order to give feedback.
+		$all_animal_ids = $app->getUserState('com_biodiv.all_animal_ids', 0);
+		
 		// If anything other than nothing, remove any existing Nothing classification
 		// And if there is an animal_id for a nothing classification delete this too.
 		if ( $fields->species != 86 ) {
@@ -321,6 +332,16 @@ class BioDivController extends JControllerLegacy
 		else {
 			error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
 			$app->setUserState('com_biodiv.animal_ids', $animal_ids . "_" . $animal_id);
+		}
+		
+		// And add the new animal_id
+		if ( !$all_animal_ids ) {
+			error_log("Setting all_animal_ids to " . $animal_id);
+			$app->setUserState('com_biodiv.all_animal_ids', $animal_id);
+		}
+		else {
+			error_log("Setting all_animal_ids to " . $all_animal_ids . "_" . $animal_id);
+			$app->setUserState('com_biodiv.all_animal_ids', $all_animal_ids . "_" . $animal_id);
 		}
     }
 	$this->input->set('view', 'singletag');
@@ -404,6 +425,23 @@ class BioDivController extends JControllerLegacy
 	}
     
 	$this->input->set('view', 'singletag');
+  
+    parent::display();
+  }
+  
+  function kiosk_timeout() {
+	
+	$app = JFactory::getApplication();
+	
+	$project_id =
+	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
+	
+	$user_key =
+	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
+	
+	error_log ("Controller - user_key = " . $user_key );	
+	
+	$this->input->set('view', 'startkiosk');
   
     parent::display();
   }

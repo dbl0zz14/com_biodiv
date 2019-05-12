@@ -71,10 +71,10 @@ class BioDivViewKiosk extends JViewLegacy
 	  
 	  $this->user_key =
 	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
-		
+		/*
 	  if ( !$this->user_key ) {
 		  $this->user_key = JRequest::getString("user_key");
-	  }
+	  }*/
 	  
 	  error_log("Kiosk View: user_key = " . $this->user_key);
 	  
@@ -83,13 +83,25 @@ class BioDivViewKiosk extends JViewLegacy
 		
 	  error_log("Kiosk View: toggled = " . $this->toggled);
 	
+	  // just for debug
+	  $this->all_animal_ids = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.all_animal_ids', 'all_animal_ids', 0);
+		
+	  error_log("Kiosk View: all_animal_ids (request) = " . $this->all_animal_ids);
+	  
+	  $this->all_animal_ids = 
+	    $app->getUserState('com_biodiv.all_animal_ids', 0);
+		
+	  error_log("Kiosk View: all_animal_ids = " . $this->all_animal_ids);
+	  
+	  
 	  $this->classify_count = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_count', 'classify_count', 0);
 		
 	  error_log("Kiosk View: classify count = " . $this->classify_count);
 	  
-	  // If classify count reached 10 then the user is done - redirect to feedback page.
-	  if ( $this->classify_count > 1 ) { // 3 for testing....
+	  // If classify count reached 5 then the user is done - redirect to feedback page.
+	  if ( $this->classify_count > 4 ) { // 3 for testing....
 		  $url = "".BIODIV_ROOT."&view=feedback";
 		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
@@ -102,12 +114,13 @@ class BioDivViewKiosk extends JViewLegacy
 		  
 		// If there is a user key then redirect to start kiosk
 		if ( $this->user_key ) {
-		  /*
+		  
 		  $url = "".BIODIV_ROOT."&view=startkiosk";
 		  if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
 		  $url .= "&user_key=" . $this->user_key;
 		  $app->redirect($url);	
-		  */
+		  
+		  /*
 		  $url = "".BIODIV_ROOT."&view=kiosk";
 		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
@@ -115,6 +128,7 @@ class BioDivViewKiosk extends JViewLegacy
 		  $url .= "&user_key=" . $this->user_key;
 		  $url .= "&" . $this->user_key;
           $app->redirect($url);
+		  */
 		
 			/*
 		  $url = "".BIODIV_ROOT;

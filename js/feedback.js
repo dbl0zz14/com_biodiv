@@ -10,7 +10,10 @@ function startTimer() {
 function doInactive() {
     // does whatever you need it to actually do - probably signs them out or stops polling the server for info
 	console.log("doInactive called");
-	var url = BioDiv.root + "&view=startkiosk";
+	var projectId = jQuery('#feedback').attr("data-project-id");
+	var url = BioDiv.root + "&view=startkiosk&project_id=" + projectId;
+	var userKey = jQuery('#feedback').attr("data-user-key");
+	url += "&user_key=" + userKey;
 	window.location.href = "" + url;
 }
  

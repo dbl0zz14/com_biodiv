@@ -475,6 +475,20 @@
 	margin: 50px 100px 200px 100px;
 }
 
+.spotted-animals {
+	margin-left: 15vw;
+	margin-right: 15vw;
+	font-size: 2em;
+}
+
+.spotted-animals .col-md-12 > img {
+	width: 60px;
+	padding: 10px 0;
+	margin: 5px;
+	border-radius: 30px;
+    background-color: #66a381;
+}
+
 .jumbotron {
 	/*background-image: url("http://localhost/rhombus/biodivimages/projects/hancock_urban.jpg");*/
 	background-color: #477171;
@@ -482,19 +496,25 @@
 	background-repeat: no-repeat;
 }
 
-.jumbotron h1 {
-    margin-top: 130px;
+#start-kiosk-jumbotron h1 {
+    margin-top: 100px;
     margin-bottom: 50px;
     font-size: 8em;
 }
 
 .jumbotron h2 {
-	font-size: 5em;
+	font-size: 4em;
 }
 
 .jumbotron h3 {
 	font-size: 3em;
 }
+
+.jumbotron h3 {
+	font-size: 1.2em;
+	margin-top: 25px;
+}
+
 
 .view-kiosk  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
 .view-kiosk  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}

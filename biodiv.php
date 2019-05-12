@@ -554,6 +554,7 @@ function deleteNothingClassification ( $photo_id, $animal_ids = 0 ) {
 function removeAnimalId ( $animal_id ) {
 	$app = JFactory::getApplication();
 	$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+	$all_animal_ids = $app->getUserState('com_biodiv.all_animal_ids', 0);
 	
 	if ( $animal_ids ) {
 		$animals = explode("_", $animal_ids);
@@ -564,6 +565,16 @@ function removeAnimalId ( $animal_id ) {
 		}
     
 		$app->setUserState('com_biodiv.animal_ids', implode ("_" , $animals));
+	}
+	if ( $all_animal_ids ) {
+		$all_animals = explode("_", $all_animal_ids);
+		
+		if (($key = array_search($animal_id , $all_animals)) !== false) {
+			unset($all_animals[$key]);
+			$all_animals = array_values ( $all_animals );
+		}
+    
+		$app->setUserState('com_biodiv.all_animal_ids', implode ("_" , $all_animals));
 	}
 }
 
@@ -1875,6 +1886,7 @@ function isFavourite($photo_id){
 // New version of nextSequence which considers the classify priority mode of each project.
 // At the time of writing this could be:
 // Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
+/*
 function nextSequenceSlow(){
   
   //print "<br/>nextSequence called<br/>";
@@ -2007,6 +2019,7 @@ function nextSequenceSlow(){
   //return getSequence($photo_id);
   return getSequenceDetails($photo_id);
 }
+*/
 
 // New version of nextSequence which considers the classify priority mode of each project.
 // At the time of writing this could be:
@@ -2136,7 +2149,15 @@ function nextSequence(){
 				break;
 			  case "Repeat":
 			    $project_ids = array_keys ( $priority_array, "Repeat" );
-	            $photo_id = chooseRepeat ( $project_ids, $last_photo_id, $classify_own );
+	            $photo_id = chooseRepeat ( $project_ids, $classify_own );
+				break;
+			  case "Single to repeat":
+			    $project_ids = array_keys ( $priority_array, "Single to repeat" );
+	            $photo_id = chooseSingle ( $project_ids, $classify_own );
+				if ( !$photo_id ) {
+					$photo_id = chooseRepeat ( $project_ids, $classify_own );
+				}
+				break;
 			  default:
 			    break;
 	  

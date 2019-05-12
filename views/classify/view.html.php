@@ -55,7 +55,10 @@ class BioDivViewClassify extends JViewLegacy
 	  $this->animal_ids = 
 	    $app->getUserStateFromRequest('com_biodiv.animal_ids', 'animal_ids', 0);
 	  
-		
+	  // all_animal_ids not used in original classify mode so set to 0 here.
+	  $app->setUserState('com_biodiv.all_animal_ids', 0);
+	  
+	
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  
 	  if ( !userID() ) {

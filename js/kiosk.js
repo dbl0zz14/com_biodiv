@@ -10,12 +10,17 @@ function startTimer() {
 function doInactive() {
     // does whatever you need it to actually do - probably signs them out or stops polling the server for info
 	console.log("doInactive called");
-	//var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
-	//var url = BioDiv.root + "&view=startkiosk&project_id=" + projectId;
-	//var userKey = jQuery('#page-content-wrapper').attr("data-user-key");
-	//url += "&user_key=" + userKey;
-	var url = BioDiv.root + "&view=startkiosk";
+	var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
+	var url = BioDiv.root + "&view=startkiosk&project_id=" + projectId;
+	var userKey = jQuery('#page-content-wrapper').attr("data-user-key");
+	url += "&user_key=" + userKey;
 	window.location.href = "" + url;
+	/*
+	var url = BioDiv.root + "&task=kiosk_timeout";
+	jQuery.get(url, {'success': function( data ) {
+		window.location.href = data;
+		}});
+		*/
 }
  
 function setupTimers () {
