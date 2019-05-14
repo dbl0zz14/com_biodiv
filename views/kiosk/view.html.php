@@ -71,10 +71,10 @@ class BioDivViewKiosk extends JViewLegacy
 	  
 	  $this->user_key =
 	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
-		/*
+		
 	  if ( !$this->user_key ) {
 		  $this->user_key = JRequest::getString("user_key");
-	  }*/
+	  }
 	  
 	  error_log("Kiosk View: user_key = " . $this->user_key);
 	  
@@ -106,21 +106,22 @@ class BioDivViewKiosk extends JViewLegacy
 		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
 		  if ( $this->self ) $url .= "&classify_self=" . $this->self;
+		  if ( $this->user_key ) $url .= "&user_key=" . $this->user_key;
 		  $app->redirect($url);		
 	  }
 	  
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  if ( !userID() ) {
-		  
-		// If there is a user key then redirect to start kiosk
+		 
 		if ( $this->user_key ) {
-		  
+		   /*
 		  $url = "".BIODIV_ROOT."&view=startkiosk";
 		  if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
 		  $url .= "&user_key=" . $this->user_key;
 		  $app->redirect($url);	
+		  */
 		  
-		  /*
+		  //If there is a user key just reload using it
 		  $url = "".BIODIV_ROOT."&view=kiosk";
 		  if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		  if ( $this->my_project ) $url .= "&my_project=" . $this->my_project;
@@ -128,7 +129,7 @@ class BioDivViewKiosk extends JViewLegacy
 		  $url .= "&user_key=" . $this->user_key;
 		  $url .= "&" . $this->user_key;
           $app->redirect($url);
-		  */
+		  
 		
 			/*
 		  $url = "".BIODIV_ROOT;

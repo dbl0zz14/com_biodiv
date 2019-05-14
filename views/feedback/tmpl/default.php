@@ -60,6 +60,7 @@ print "<form action = '".BIODIV_ROOT."&".$this->user_key."' method = 'GET'>";
 print "    <input type='hidden' name='view' value='startkiosk'/>";
 print "    <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
 print "    <input type='hidden' name='project_id' value='".$this->project_id."' />";
+print "    <input type='hidden' name='user_key' value='".$this->user_key."' />";
 print "	<button  id='start-again-btn' class='btn btn-danger' type='submit'>Start Again</button>";
 print "</form>";
 

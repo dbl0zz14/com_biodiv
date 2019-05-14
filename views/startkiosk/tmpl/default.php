@@ -18,7 +18,7 @@ if ( $this->user_key) {
 
 // Just want an image with a start button, at least for now.
 //print '<div id="start-kiosk-jumbotron" data-project-img="'.$this->projectImageUrl.' class="jumbotron" >';
-print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" >';
+print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->project_id.'" data-user-key="'.$this->user_key.'" >';
 print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '  <div>';  
 print '  <h2>Can you classify 5 sequences?</h2>';      

@@ -45,11 +45,11 @@ class BioDivViewFeedback extends JViewLegacy
 	
 	  $this->user_key =
 		$app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
-		/*
+		
 	  if ( !$this->user_key ) {
 		  $this->user_key = JRequest::getString("user_key");
 	  }
-	  */
+	  
 	  
 	  error_log("Feedback View: user_key = " . $this->user_key);
 	  

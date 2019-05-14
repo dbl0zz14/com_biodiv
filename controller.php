@@ -436,10 +436,22 @@ class BioDivController extends JControllerLegacy
 	$project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 	
+	if ( !$project_id ) {
+		  $project_id = JRequest::getString("project_id");
+	}
+	
 	$user_key =
 	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
 	
+	if ( !$user_key ) {
+		  $user_key = JRequest::getString("user_key");
+	}
+	  
+	error_log ("Controller - project_id = " . $project_id );  
 	error_log ("Controller - user_key = " . $user_key );	
+	
+	$app->setUserState('com_biodiv.project_id', $project_id);
+	$app->setUserState('com_biodiv.user_key', $user_key);
 	
 	$this->input->set('view', 'startkiosk');
   
