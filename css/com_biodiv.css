@@ -467,6 +467,18 @@
 }
 */
 
+.opaque-bg {
+	padding: 30px;
+	margin-top: 50px;
+	background: rgb(0,50,50,0.4);
+}
+
+#feedback .opaque-bg {
+	padding: 20px 10px 10px 10px;
+	margin-top: -10px;
+	margin-bottom: 10px;
+}
+
 #start-kiosk-btn {
 	font-size: 3em;
 	padding: 1em;
@@ -476,12 +488,12 @@
 #start-again-btn {
 	font-size: 3em;
 	padding: 1em;
-	margin: 50px 100px 200px 100px;
+	margin: 10px 100px 200px 100px;
 }
 
 .spotted-animals {
-	margin-left: 15vw;
-	margin-right: 15vw;
+	margin-left: 5vw;
+	margin-right: 5vw;
 	font-size: 2em;
 }
 
@@ -501,7 +513,7 @@
 }
 
 #start-kiosk-jumbotron h1 {
-    margin-top: 100px;
+    margin-top: 0;
     margin-bottom: 50px;
     font-size: 8em;
 }
@@ -515,7 +527,7 @@
 	font-size: 3em;
 }
 
-.jumbotron h3 {
+.jumbotron h4 {
 	font-size: 1.2em;
 	margin-top: 25px;
 }
@@ -664,8 +676,8 @@
 
 .view-kiosk #control_nextseq {
 	
-	height: 5em;
-	width: 10em;
+	height: 6em;
+	width: 11em;
 	margin: 2px;
 	font-size: 16px;
 	font-weight: bolder;
@@ -673,7 +685,11 @@
 	margin: auto;
 	margin-top: 5px;
 	margin-bottom: 0;
-	
+	/*
+	font-size: 3em;
+	padding: 1em;
+	margin: 10px 100px 200px 100px;
+	*/
 	/*font-size: 16px;
 	height: 3em;
 	font-weight: bolder;

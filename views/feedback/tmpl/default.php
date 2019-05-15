@@ -9,13 +9,15 @@
 defined('_JEXEC') or die;
 print '<div id="feedback" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->project_id.'" data-user-key="'.$this->user_key.'" >';
 
-print "<h2>Thank you for being a citizen scientist and classifying 5 sequences!</h2>";
+print '<div class="opaque-bg">';
+
+print "<h2>Thank you for being a citizen scientist!</h2>";
 
 //print "<p>Species league table</p>";
-
 if ( $this->all_animals ) {
 	print "<div class='row spotted-animals'>";
-	print "<h3>You spotted....</h3>";
+	print "<div class='col-md-7'>";
+	print "<h4>You spotted....</h4>";
 	print "<div class='col-md-12'>";
 	foreach ($this->all_animals as $animal) {
 		if ( $animal->png_image ) {
@@ -42,19 +44,26 @@ if ( $this->all_animals ) {
 			
 		}
 	}
-	print "</div>";
+	print "</div>"; // col-md-12
 
 	foreach ($this->all_animals as $animal) {
 		if ($animal->number > 1 ) {
-			print "<div class='col-md-4 text-left'> " . $animal->number . " " . $animal->name . "s</div>" ;
+			print "<div class='col-md-6 text-left'> " . $animal->number . " " . $animal->name . "s</div>" ;
 		}
 		else {
-			print "<div class='col-md-4 text-left'> 1 " . $animal->name . "</div>" ;
+			print "<div class='col-md-6 text-left'> 1 " . $animal->name . "</div>" ;
 		}
 	}
-	print "</div>";
+	print "</div>"; // col-md-7
+	print "<div class='col-md-4'>";
+	print "<h4>Most spotted species...</h4>";
+	print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='250px' ></canvas>";
+	print "</div>"; // col-md-4
+	print "</div>"; // row
+	
 }
 
+print '</div>'; // opaque-bg
 
 print "<form action = '".BIODIV_ROOT."&".$this->user_key."' method = 'GET'>";
 print "    <input type='hidden' name='view' value='startkiosk'/>";
@@ -71,5 +80,7 @@ print "</div>";
 
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/feedback.js", true, true);
+JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+JHTML::script("com_biodiv/project.js", true, true);
 
 ?>

@@ -19,11 +19,14 @@ if ( $this->user_key) {
 // Just want an image with a start button, at least for now.
 //print '<div id="start-kiosk-jumbotron" data-project-img="'.$this->projectImageUrl.' class="jumbotron" >';
 print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->project_id.'" data-user-key="'.$this->user_key.'" >';
+print '<div class="opaque-bg">';
 print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '  <div>';  
-print '  <h2>Can you classify 5 sequences?</h2>';      
+print '  <h3>We need your help to identify animals on camera trap images. What can you see on each sequence of photos?</h3>';      
 print '  <!-- h3>Touch the button to start spotting</h3 -->';   
-print '  </div>';   
+print '  </div>'; 
+print '</div>'; // opaque-bg
+  
 //print '  <a id="start-kiosk-spotting" class="btn btn-danger" src="">Start Spotting</a>';
 ?>
 
