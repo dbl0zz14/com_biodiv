@@ -9,14 +9,6 @@ function startTimer() {
   
 function doInactive() {
     // does whatever you need it to actually do - probably signs them out or stops polling the server for info
-	console.log("doInactive called");
-	/*
-	var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
-	var url = BioDiv.root + "&view=startkiosk&project_id=" + projectId;
-	var userKey = jQuery('#page-content-wrapper').attr("data-user-key");
-	url += "&user_key=" + userKey;
-	window.location.href = "" + url;
-	*/
 	var projectId = jQuery('#start-kiosk-jumbotron').attr("data-project-id");
 	var url = BioDiv.root + "&task=kiosk_timeout&project_id=" + projectId;
 	var userKey = jQuery('#start-kiosk-jumbotron').attr("data-user-key");
@@ -48,9 +40,12 @@ jQuery(document).ready(function(){
 
 	var backgroundUrl = jQuery('#start-kiosk-jumbotron').attr("data-project-img");
 	var bgString = "url('" + backgroundUrl + "')";
-	console.log("Got project image url: " + backgroundUrl);
-	console.log("Got bg string: " + bgString);
 	jQuery('#start-kiosk-jumbotron').css({"background-image": bgString, "background-color": "#477171", "color": "white"}); 
+	
+	var projectId = jQuery('#start-kiosk-jumbotron').attr("data-project-id");
+	if ( projectId == 20 ) {
+		jQuery('#start-kiosk-jumbotron').css({"zoom": "0.85"});
+	}
 
 	setupTimers();
 	

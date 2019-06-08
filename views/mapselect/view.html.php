@@ -33,6 +33,8 @@ class BioDivViewMapSelect extends JViewLegacy
 	  $this->site_name = codes_getName($this->site_id, "site");
 	  $this->site_details = codes_getDetails($this->site_id, "site");
 	  $this->grid_ref = $this->site_details['grid_ref'];
+	  $this->latitude = $this->site_details['latitude'];
+	  $this->longitude = $this->site_details['longitude'];
 	  // Display the view
 	  parent::display($tpl);
         }

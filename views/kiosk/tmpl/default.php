@@ -25,7 +25,8 @@ print '    <div class="classify-header">';
 print '        <h1>' . $this->my_project . '</h1>';
 print '    </div> <!-- classify-header -->';
 print "    <div class='project-sidebar-image'><img src='".$this->projectImageUrl."' /></div>";
-print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='250px' ></canvas>";
+print "    <h4>Species League Table</h4>";
+print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='200px' ></canvas>";
 print ' <div class="mwlogos">';
 print '</div>';
 print '</div>';
@@ -207,12 +208,19 @@ print "<button type='button' class='pull-right btn btn-danger' id='control_nexts
 
 </div> <!-- /.row -->
 
-<div class="row logo-row">
+<!-- div class="row logo-row">
 <img src="images/logos/Hancock.png">
 <img src="images/logos/MammalWebSquareBlackExt2.png">
 <img src="images/logos/dulogo.png">
 <img src="images/logos/esrc-logo.jpg">
-</div> <!-- /div logo-row -->
+</div --> <!-- /div logo-row -->
+<?php
+	print '<div class="row logo-row">';
+	foreach ( $this->logos as $logo ) {
+		print '<img src="' . $logo . '">';
+	}
+	print '</div>';
+?>
 <div class='row'>
 <!-- div class='col-md-12' classify_explain>
 <h3>Choose a species from the buttons on the right.</h3>

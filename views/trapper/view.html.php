@@ -28,7 +28,7 @@ class BioDivViewTrapper extends JViewLegacy
         {
                 // Assign data to the view
 	  $this->fields = array("site_name" => "Site Name",
-				"grid_ref" => "OS grid reference");
+				"grid_ref" => "OS grid reference or lat long");
 	  $this->help = array("site_name" => "Site name: Something specific that reminds you of where the camera trap is. E.g. \"backyard\" or \"woods next to my house\".",
 				"grid_ref" => "The location of the site: Please note this cannot be changed once photos are uploaded.");
 	  foreach(array("habitat", "purpose", "camera") as $struc){

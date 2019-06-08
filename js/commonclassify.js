@@ -62,7 +62,6 @@ jQuery(document).ready(function(){
 	});
 		
 	jQuery('.species_select').click(function (){
-		console.log("commonclassify .species_select clicked");
 		id = jQuery(this).attr("id");
 		idbits = id.split("_");
 		species_id = idbits.pop();
@@ -71,16 +70,12 @@ jQuery(document).ready(function(){
 		jQuery('#classify_number').attr('value', 1);
 		jQuery('#classify_gender').val(84);
 		jQuery('#classify_age').val(85);
-		inlist = jQuery.inArray(species_id, ["95", "96"]);
+		
+		
 		jQuery('#species_helplet').empty();
-		if(inlist<0){
-		    jQuery('.species_classify').show();
-		    var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
-		    jQuery('#species_helplet').load(url);
-		}
-		else{
-		    jQuery('.species_classify').hide();
-		}
+		jQuery('.species_classify').show();
+		var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
+		jQuery('#species_helplet').load(url);
 		
 	    });
 
@@ -109,22 +104,18 @@ jQuery(document).ready(function(){
 		
 		if(document.exitFullscreen) 
 		{
-			console.log("Found exitFullscreen");
 			document.exitFullscreen();
 		} 
 		else if (document.webkitExitFullscreen) 
 		{
-			console.log("Found webkitExitFullscreen");
 			document.webkitExitFullscreen();
 		} 
 		else if (document.mozCancelFullScreen) 
 		{
-			console.log("Found mozCancelFullScreen");
 			document.mozCancelFullScreen();
 		} 
 		else if (document.msExitFullscreen) 
 		{
-			console.log("Found msExitFullscreen");
 			document.msExitFullscreen();
 		}
 		else {
@@ -173,14 +164,12 @@ jQuery(document).ready(function(){
 	
 	
 	jQuery('#classify_increase').click(function (){
-		console.log("increasing number");
 		this.parentNode.querySelector('input[type=number]').stepUp()
 		/*jQuery('#classify_number').stepUp();*/
 		
 	    });
 	
 	jQuery('#classify_decrease').click(function (){
-		console.log("decreasing number");
 		this.parentNode.querySelector('input[type=number]').stepDown()
 		/*jQuery('#classify_number').stepDown();*/
 		
@@ -188,8 +177,7 @@ jQuery(document).ready(function(){
 
 	jQuery('#photoCarousel').click(function (){
 		jQuery('#photo-carousel-control-right').focus();
-		console.log("focus set");
-	    });
+		});
 	
 	jQuery("#menu-toggle").click(function(e) {
 		e.preventDefault();
@@ -206,10 +194,6 @@ jQuery(document).ready(function(){
 		jQuery('#fullscreen-exit-button').hide();
 	}
 
-	//jQuery('#fullscreen-exit-button').hide();
-	
-	//jQuery('.sub-photo');
-	
 	// to test IE: jQuery('#fullscreen-exit-button').hide();
 	// For sequences of more than 1 photo or for videos disable NextSequence until the user has viewed all.
 	if ( document.getElementById('sub-photo-1') ) {

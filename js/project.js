@@ -258,11 +258,6 @@ jQuery(document).ready(function(){
 				
 				// Configuration options go here
 				options: {
-					title: {
-						display: true,
-						text: 'Species League Table',
-						fontColor: 'white'
-					},
 					legend: {
 						display: false
 					},
@@ -286,6 +281,8 @@ jQuery(document).ready(function(){
 	
 		}});
 	}
+	
+	
 	
 jQuery('.project-btn').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Click the image for project details', 'placement': 'top'});
 			

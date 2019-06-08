@@ -37,6 +37,10 @@ if ( $this->all_animals ) {
 				$imageURL = JURI::root()."/images/thumbnails/Nothing.png";
 				print "<img src='".$imageURL."'>";
 			}
+			else if ( $animal->name == "Don't Know" or $animal->species == 96 ){
+				$imageURL = JURI::root()."/images/thumbnails/DontKnow.png";
+				print "<img src='".$imageURL."'>";
+			}
 			else {
 				$imageURL = JURI::root()."/images/thumbnails/OtherMammal.png";
 				print "<img src='".$imageURL."'>";
@@ -55,9 +59,9 @@ if ( $this->all_animals ) {
 		}
 	}
 	print "</div>"; // col-md-7
-	print "<div class='col-md-4'>";
-	print "<h4>Most spotted species...</h4>";
-	print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='250px' ></canvas>";
+	print "<div class='col-md-5'>";
+	print "<h4>".$this->project->project_prettyname." most spotted...</h4>";
+	print "    <canvas id='animalsBarChartKiosk' class='animals-bar' data-project-id='".$this->project_id."' height='200px' ></canvas>";
 	print "</div>"; // col-md-4
 	print "</div>"; // row
 	

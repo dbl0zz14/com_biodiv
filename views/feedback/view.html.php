@@ -42,6 +42,11 @@ class BioDivViewFeedback extends JViewLegacy
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
 	  error_log("Feedback View: project_id = " . $this->project_id);
+	  
+	  // Get the project name for using in text.
+	  if ( !$this->project_id ) die ("no project id given" );
+		
+	  $this->project = projectDetails($this->project_id);
 	
 	  $this->user_key =
 		$app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
@@ -71,7 +76,8 @@ class BioDivViewFeedback extends JViewLegacy
 		  ->from("Animal A")
 		  ->innerJoin("Options O on A.species = O.option_id")
 		  ->leftJoin("OptionData OD on O.option_id = OD.option_id and OD.data_type='png'")
-		  ->where("A.animal_id in (" . implode(",", $all_animals) . ")");
+		  ->where("A.animal_id in (" . implode(",", $all_animals) . ")")
+		  ->order("A.animal_id");
 
 		$db->setQuery($query);
 		$this->all_animals = $db->loadObjectList();

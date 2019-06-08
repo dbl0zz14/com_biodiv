@@ -232,6 +232,40 @@ function codes_getOptionName ( $option_id ) {
 	return codes_getName ( $option_id, "option" );
 }
   
+function update_siteLatLong ( $site_id, $lat, $lon ) {
+	if ( !$lat or !$lon ) {
+		return;
+	}
+	// check user id one of admin team
+	// could do this better but short of time
+	$person_id = userID();
+	if ($person_id and ($person_id == 972 or $person_id == 900 or $person_id == 659) ) {
+	
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true);
+				
+		$fields = array(
+			$db->quoteName('latitude') . ' = ' . $lat,
+			$db->quoteName('longitude') . ' = ' . $lon
+		);
+
+		// Conditions for which records should be updated.
+		$conditions = array(
+			$db->quoteName('site_id') . ' = ' . $site_id
+		);
+
+		$query->update("Site")->set($fields)->where($conditions);
+		
+		$db->setQuery($query);
+		$result = $db->execute();
+	
+	}
+	else {
+		error_log ("No permission to update lat long" );
+	}
+			
+}
 
 function biodiv_label($type, $what=""){
   switch($type){
@@ -3477,6 +3511,26 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 	//print "</div> <!-- /carousel-species carousel--> \n";
 }
 
+function getLogos ( $project_id ) {
+	
+	$logos = array();
+	
+	if ( $project_id ) {
+		// Find logos for this project
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->select("OD.value")->from("OptionData OD");
+		$query->innerJoin("ProjectOptions PO on PO.option_id = OD.option_id");
+		$query->innerJoin("Options O on PO.option_id = O.option_id");
+		$query->where("PO.project_id = " . $project_id );
+		$query->where("OD.data_type = 'image'" );
+		$query->order("O.seq");
+		$db->setQuery($query);
+		$logos = $db->loadColumn();
+	}
+	return $logos;
+}
+
 function getVideoMeta ( $filename ) {
 	// Initialize getID3 engine
 	$getID3 = new getID3;
@@ -3502,6 +3556,7 @@ function getClassificationButton ( $id, $animalArray ) {
      $contentDetails = codes_getDetails($animalArray[$id]->species, 'content');
      $type = $contentDetails['struc'];
      $features = array();
+	 $nothingDisabled=false;
      if($type == 'like'){
        // do nothing
      }

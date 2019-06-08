@@ -237,15 +237,52 @@ class BioDivController extends JControllerLegacy
   function set_site_grid_reference(){
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $site_id = JRequest::getInt('site_id');
-    $grid_ref = JRequest::getString('grid_ref');
+    $lat = JRequest::getString('latitude');
+    $lng = JRequest::getString('longitude');
+	$grid_ref = JRequest::getString('grid_ref');
+	
+	// If no local ref set to be the lat long
+	if ( !$grid_ref ) {
+		$short_lat = substr($lat, 0, 5);
+		$short_lng = substr($lng, 0, 5);
+		$grid_ref = "[" . $short_lat . "," . $short_lng . "]";
+	}
+    
     $fields = new stdClass();
     $fields->site_id = $site_id;
     $fields->grid_ref = $grid_ref;
+	$fields->latitude = $lat;
+    $fields->longitude = $lng;
+    
     codes_updateObject($fields, 'site');
 
     $this->input->set('view', 'trapper');
 
     parent::display();
+  }
+  
+  function update_lat_long() {
+	  error_log ("update_lat_long called" );
+	  
+	  $jinput = JFactory::getApplication()->input;
+	  
+	  $sitesArray = $jinput->getArray();
+	  
+	  $site_ids = array_keys($sitesArray["site"]);
+	  
+	  foreach ( $site_ids as $site_id ) {
+		  
+		  $lat = $sitesArray["lat"][$site_id];
+		  $lon = $sitesArray["lon"][$site_id];
+		  
+		  error_log ("updating site " . $site_id .", lat " . $lat . ", long ".$lon  );
+		  
+		  update_siteLatLong ( $site_id, $lat, $lon );
+	  }
+	  
+	  $this->input->set('view', 'updatesites');
+
+	  parent::display();
   }
 
   function add_animal(){

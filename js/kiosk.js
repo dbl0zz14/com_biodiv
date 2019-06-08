@@ -48,6 +48,7 @@ jQuery(document).ready(function(){
 
 	removeClicks = function (){
 	    jQuery('.remove_animal').click(function (){
+			resetTimer();
 		    id = jQuery(this).attr("id");
 		    idbits = id.split("_");
 		    animal_id = idbits.pop();
@@ -86,6 +87,7 @@ jQuery(document).ready(function(){
 	}
 	
 	jQuery('#control_nextseq').click(function (){
+	resetTimer()
 	id = jQuery(this).attr("id");
 	var sideBarToggled = jQuery('#wrapper').is(".toggled");
 	var extra = "";
@@ -111,6 +113,7 @@ jQuery(document).ready(function(){
 	});
 	
 	jQuery('#classify-save').click(function (){
+		resetTimer();
 		jQuery('#classify_modal').modal('hide');
 		formData = jQuery('#classify-form').serialize();
 		url = BioDiv.root + "&task=add_animal_single_tag&format=raw";
@@ -142,6 +145,7 @@ jQuery(document).ready(function(){
 
 
 	jQuery('.classify_control').click(function (){
+		resetTimer();
 		id = jQuery(this).attr("id");
 		url = BioDiv.root + "&task=add_animal_single_tag&format=raw&species=" + id;
 		// How many animals do we have so far?
@@ -186,6 +190,11 @@ jQuery(document).ready(function(){
 	}
 	*/
 	
+	var projectId = jQuery('#page-content-wrapper').attr("data-project-id");
+	if ( projectId == 20 ) {
+		jQuery('.view-kiosk > body').css({"zoom": "0.9"});
+	}
+
 	// Add any remove click functions on refresh.
 	removeClicks();
 	
@@ -202,6 +211,10 @@ jQuery(document).ready(function(){
 	{passive: false}
 	);
 	*/
+	
+	// Stop kiosk users right clicking using long press
+	document.addEventListener('contextmenu', event => event.preventDefault());
+	
 });
 
 	

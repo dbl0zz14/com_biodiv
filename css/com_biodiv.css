@@ -423,26 +423,33 @@
 .view-kiosk  .t3-footer { display: none; }
 .view-kiosk  .t3-mainbody { padding: 0; }
 .view-kiosk  .t3-content { padding: 0; }
-.view-kiosk { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
+/* .view-kiosk { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
+.view-kiosk { touch-action: none; }
 
 .view-startkiosk  .t3-mainnav { display: none; }
 .view-startkiosk  .t3-footer { display: none; }
 .view-startkiosk  .body { padding-top: 0 !important; zoom-level: 1.1;}
 .view-startkiosk  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
 .view-startkiosk  .t3-content { padding: 0; }
-.view-startkiosk { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
+/*.view-startkiosk { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
+.view-startkiosk { touch-action: none; } 
 .view-startkiosk  > h1 { margin-top: 50px; }
+
+
 
 .view-feedback  .t3-mainnav { display: none; }
 .view-feedback  .t3-footer { display: none; }
 .view-feedback  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
 .view-feedback  .t3-content { padding: 0; }
-.view-feedback { touch-action: pan-x pan-y; } /* disable pinch zoom on kiosk */
+/*.view-feedback { touch-action: pan-x pan-y; } *//* disable all touch actions on kiosk */
+.view-feedback { touch-action: none; } /* disable pinch zoom on kiosk */
 
+
+/*
 .view-kiosk { cursor: none; }
 .view-startkiosk { cursor: none; }
 .view-feedback { cursor: none; }
-
+*/
 /*.view-kiosk .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
 /*
 #start-kiosk-jumbotron {
@@ -535,14 +542,16 @@
 
 .view-kiosk  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
 .view-kiosk  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}
-.view-kiosk .kiosk-photos > h1 { font-size: 35px; margin-bottom: 20px; }
-.view-kiosk  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 50px; }
+.view-kiosk .kiosk-photos > h1 { font-size: 35px; margin-bottom: 20px; margin-top: 30px; }
+.view-kiosk  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 30px; }
 .kiosk-h2 { margin-top: 20px; margin-bottom: 20px; }
 .view-kiosk  .classify-header > h2 { margin-top: 15px; margin-bottom: 15px; }
 .view-kiosk  .well  > h2 { margin-top: 0; margin-bottom: 10px; }
 /*.view-kiosk .animals-bar { margin-left: -10px;  }*/
 .view-kiosk #species-nav { padding: 0; color: grey !important; }
 
+
+#sidebar-wrapper > h4 { margin-top: 40px; color: white; text-align: center; }
 
 .view-kiosk .modal-dialog .classify-modal-button {
 	height: 5em;
@@ -796,6 +805,13 @@
 #wrapper.toggled .slide-out-tab, #wrapper.toggled .slide-out-tab:focus {
 	left: -110px;
 }
+
+/*
+@media only screen and (min-width: 992px) {
+	#wrapper.toggled .slide-out-tab, #wrapper.toggled .slide-out-tab:focus {
+	left: -160px;
+}
+*/
 /*
 #wrapper.toggled #photoCarouselInner .item > img {
 	max-height: 70vh;
