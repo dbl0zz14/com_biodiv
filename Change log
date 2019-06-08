@@ -1,0 +1,8 @@
+# 8/6/19 - Commit a87c2ec061201f93263cff7063a65cfd54b62777  #
+* Store position of site in latitude and longitude to enable sites to be positioned outside UK, OS grid reference stored in addition for UK
+* Stop long press opening context menu for kiosk users
+* Add project specific logos
+* Create project specific zoom level for Safari kiosk County Durham Survey project
+
+# Previous release #
+* Added kiosk mode for Hancock museum
