@@ -26,7 +26,7 @@ jQuery(document).ready(function () {
 						  try {
 							  grid = OsGridRef.latLonToOsGrid(p);
 						  }
-						  catch {
+						  catch (err) {
 							  console.log("Position does not have an OS equivalent");
 							  grid = 0;
 						  }
