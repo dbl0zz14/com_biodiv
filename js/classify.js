@@ -48,6 +48,24 @@ jQuery(document).ready(function(){
 		}
 	}
 	
+	jQuery('.species_select').click(function (){
+		id = jQuery(this).attr("id");
+		idbits = id.split("_");
+		species_id = idbits.pop();
+		jQuery('.species_header').hide();
+		jQuery('#species_value').attr('value', species_id);
+		jQuery('#classify_number').attr('value', 1);
+		jQuery('#classify_gender').val(84);
+		jQuery('#classify_age').val(85);
+		
+		
+		jQuery('#species_helplet').empty();
+		jQuery('.species_classify').show();
+		var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
+		jQuery('#species_helplet').load(url);
+		
+	});
+
 
 	jQuery('#classify-save').click(function (){
 		jQuery('#classify_modal').modal('hide');

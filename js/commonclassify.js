@@ -60,7 +60,7 @@ jQuery(document).ready(function(){
 			}}
 			);
 	});
-		
+	/* move to kiosk and classify as kiosk has to remove hyperlinks	
 	jQuery('.species_select').click(function (){
 		id = jQuery(this).attr("id");
 		idbits = id.split("_");
@@ -78,6 +78,7 @@ jQuery(document).ready(function(){
 		jQuery('#species_helplet').load(url);
 		
 	    });
+	*/
 
 	jQuery('#fullscreen-button').click(function (){
 		var photos = document.getElementById('photoCarousel');
