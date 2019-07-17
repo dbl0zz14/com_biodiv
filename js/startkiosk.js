@@ -42,9 +42,10 @@ jQuery(document).ready(function(){
 	var bgString = "url('" + backgroundUrl + "')";
 	jQuery('#start-kiosk-jumbotron').css({"background-image": bgString, "background-color": "#477171", "color": "white"}); 
 	
+	// This should be in the CSS
 	var projectId = jQuery('#start-kiosk-jumbotron').attr("data-project-id");
 	if ( projectId == 20 ) {
-		jQuery('#start-kiosk-jumbotron').css({"zoom": "0.85"});
+		jQuery('#start-kiosk-jumbotron').css({"zoom": "0.5"});
 	}
 
 	setupTimers();

@@ -62,6 +62,9 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  
 	  // get the url for the project image
 	  $this->projectImageUrl = projectImageURL($this->project_id);
+	  
+	  // Get the logos to be displayed for this project
+	  $this->logos = getLogos($this->project_id);
 
 	  // Display the view
 	  parent::display($tpl);

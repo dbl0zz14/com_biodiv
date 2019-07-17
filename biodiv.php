@@ -29,6 +29,8 @@ JHTML::script("com_biodiv/biodiv.js", true, true);
 include "codes.php";
 require_once('libraries/getid3/getid3/getid3.php');
 
+include "aws.php";
+
 
 
 function db(){
@@ -52,6 +54,7 @@ function userID(){
     return $user->id;
   }
 }
+
 
 $dbOptions = dbOptions();
 codes_parameters_addTable("StructureMeta", $dbOptions['database']);
@@ -397,6 +400,27 @@ function canClassify ($struc, $fields) {
 	}
 }
 
+function canRunScripts(){
+  
+  /* For now return true - need IP login to work for this...
+  $user = JFactory::getUser();
+  $groups = $user->getAuthorisedGroups();
+  //print_r($groups);
+  $groupnames = array();
+  foreach ( $groups as $id ) {
+	  array_push ( $groupnames, JAccess::getGroupTitle($id) );
+  }
+  //print_r ( $groupnames );
+  if(in_array("Backend", $groupnames)){
+    return true;
+  }
+  else{
+    return false;
+  }
+  */
+  return true;
+}
+
 function uploadRoot(){
 //  return JPATH_COMPONENT . "/uploads";
     return "/var/www/html/biodivimages";
@@ -441,10 +465,16 @@ function helpVideoURL() {
 
 function photoURL($photo_id){
   $details = codes_getDetails($photo_id, 'photo');
-  // debug
-  // echo siteURL($details['site_id']) . "/". $details['filename'];
-  // debug end
-  return siteURL($details['site_id']) . "/". $details['filename'];
+  if ( $details['s3_status'] == 1 ) {
+	  // File has been transferred to s3 so get AWS S3 url
+	  return s3URL($details);
+  }
+  else {
+	  // debug
+	  // echo siteURL($details['site_id']) . "/". $details['filename'];
+	  // debug end
+	  return siteURL($details['site_id']) . "/". $details['filename'];
+  }
 }
 
 function projectImageURL($proj_id) {

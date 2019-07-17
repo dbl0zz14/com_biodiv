@@ -48,6 +48,12 @@ print '</div>'; // opaque-bg
 //print '<p>project: </p>';
 //print_r($this->project);
 
+	print '<div class="row opaque-logo-row">';
+	foreach ( $this->logos as $logo ) {
+		print '<img src="' . $logo . '">';
+	}
+	print '</div>';
+
 print '</div>';
 
 JHTML::script("com_biodiv/bootbox.js", true, true);

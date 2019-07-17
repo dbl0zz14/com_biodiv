@@ -405,6 +405,21 @@
   margin: 10px 20px 10px;
 }
 
+.opaque-logo-row {
+	/*padding: 30px;
+	margin-top: 50px;*/
+	background: rgb(0,50,50,0.4);
+	position: fixed;
+    bottom: 0px;
+	left: 0px;
+	right: 0px;
+}
+
+.opaque-logo-row > img { 
+  height: 100px; 
+  margin: 20px 50px 20px;
+}
+
 .singletag-classification {
 	margin: 0;
 	display: inline-block;
@@ -476,7 +491,7 @@
 
 .opaque-bg {
 	padding: 30px;
-	margin-top: 50px;
+	margin-top: 30px;
 	background: rgb(0,50,50,0.4);
 }
 
