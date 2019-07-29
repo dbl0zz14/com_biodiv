@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 include "local.php";
 include "Project.php";
 
-define('BIODIV_MAX_FILE_SIZE', 6500000);
+define('BIODIV_MAX_FILE_SIZE', 35000000);
 
 // link to javascript stuff
 $document = JFactory::getDocument();
@@ -344,6 +344,7 @@ function canCreate($struc, $fields){
 
   case 'photo':
   case 'site':
+  case 'sitedata':
   case 'upload':
   case 'photo':
   case 'classification':
@@ -3634,6 +3635,23 @@ function getClassificationButton ( $id, $animalArray ) {
 	return $retString;
 }
 
+function getSiteDataStrucs ( $projectIds ) {
+	//print "getSiteDataStrucs called\n";
+	//print_r ( $projectIds );
+	$db = JDatabase::getInstance(dbOptions());
+		
+	$project_ids = implode(',', $projectIds);
+	//print "project_ids = " . $project_ids;
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT PO.project_id, O.option_name as struc")
+		->from("ProjectOptions PO")
+		->innerJoin("Options O on O.option_id = PO.option_id and O.struc = 'sitedatastruc'")
+		->where("PO.project_id in (" . $project_ids . ")");
+	$db->setQuery($query);
+	$sitedatastrucs = $db->loadAssocList();
+	//print_r($sitedatastrucs);
+	return $sitedatastrucs;
+}
 
 /*
 function makeControlButton($control_id, $control){

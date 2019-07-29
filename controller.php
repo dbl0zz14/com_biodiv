@@ -28,17 +28,60 @@ class BioDivController extends JControllerLegacy
 
   function add_site(){
     JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
-    $fields = new stdClass();
-    $fields->person_id = userID();
-    $fields->site_name = "[New site]";
-    $site_id = codes_insertObject($fields, 'site');
 	
-	// Initialise to be MammalWeb UK project.
-	$fields2 = new stdClass();
-	$fields2->site_id = $site_id;
-	$fields2->projects = "1";    
-	codes_updateSiteProjects($fields2, 'site');
-
+	// Get all the data
+	$fields = new stdClass();
+    $fields->person_id = userID();
+	$fields->site_name = JRequest::getString('site_name');
+	
+	// Validate on person and sitename - don't add if already exists - add message
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("site_id")
+		->from("Site")
+		->where("person_id = " . $fields->person_id . " and site_name = '" . $fields->site_name . "'" );
+	
+	$db->setQuery($query);
+	$result = $db->loadRow();
+	
+	if ( count($result) > 0 ) {
+		// Trying to insert site with same name as another site belonging to this person
+		JFactory::getApplication()->enqueueMessage('Sorry, you already have a site with that name, could not add the site.');
+	}
+	else {
+		$fields->latitude = JRequest::getString('latitude');
+		$fields->longitude = JRequest::getString('longitude');
+		$fields->grid_ref = JRequest::getString('grid_ref');
+		$fields->habitat_id = JRequest::getInt('habitat_id');
+		$fields->water_id = JRequest::getInt('water_id');
+		$fields->purpose_id = JRequest::getInt('purpose_id');
+		$fields->camera_id = JRequest::getInt('camera_id');
+		$fields->camera_height = JRequest::getInt('camera_height');
+		$fields->notes = JRequest::getString('notes');
+		
+		// Insert into the Site table
+		$site_id = codes_insertObject($fields, 'site');
+		
+		//Update the ProjectSiteMap table with the projects this site is in
+		$project_ids = JRequest::getVar('project_ids');  
+		$fields2 = new stdClass();
+		$fields2->site_id = $site_id;
+		$fields2->projects = implode(',', $project_ids);
+		codes_updateSiteProjects($fields2, 'site');
+		
+		// Get any project specific data
+		$projectsitedata = getSiteDataStrucs($project_ids);
+		$unique_strucs = array_unique(array_column($projectsitedata, 'struc'));
+		foreach ( $unique_strucs as $struc ) {
+			$fields = new stdClass();
+			$fields->person_id = userID();
+			$fields->site_id = $site_id;
+			$fields->option_id = JRequest::getInt($struc."_id");
+			// Insert into the SiteData table
+			$sitedata_id = codes_insertObject($fields, 'sitedata');
+		}
+	}
+	
     $this->input->set('view', 'trapper');
 
     parent::display();

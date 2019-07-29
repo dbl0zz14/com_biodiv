@@ -70,17 +70,23 @@ class BioDivViewTrapper extends JViewLegacy
 	  $this->projecthelp = "All projects which this site and this user are members of.";
 	  $this->projects = array();
 	  
-	  //$myprojects = myProjects();
 	  $this->userprojects = myTrappingProjects();
 	  
-	  //print "<br/>Got " . count($this->userprojects) . " all projects user has access to<br/>They are:<br>";
-      //print implode(",", $this->userprojects);
-	  //print_r($this->userprojects);
-	  //print_r(array_keys($this->userprojects));
-	  //$userproj = json_encode($this->userprojects);
-	  //print "<br>userprojects = " . $userproj . "<br>";
-  
+	  // For each user project get any additional data required
+	  $this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
 	  
+	  $this->projectsitedataJSON = array();
+	  
+	  $project_ids = array_keys($this->userprojects);
+	  foreach ($project_ids as $project_id ) {
+		  $strucs = array_column( array_filter($this->projectsitedata, function ($element) use ($project_id) {
+				return ($element["project_id"] == $project_id);
+			}), "struc");
+			if (count($strucs) > 0 ) {
+				$this->projectsitedataJSON[$project_id] = json_encode($strucs);
+			}
+	  }
+	    
 	  foreach($this->sites as $site_id => $site){
 		// Get list of projects this site is part of and which this user is a user of
 		$query = $db->getQuery(true);
@@ -92,18 +98,9 @@ class BioDivViewTrapper extends JViewLegacy
 	    $db->setQuery($query);
 	    $siteprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
 		
-		//print "<br/>Got " . count($siteprojects) . " site projects for site ". $site_id . "<br/>They are:<br>";
-        //print implode(",", $siteprojects);
-		
-		//print_r(array_keys($siteprojects));
-  
 		// Remove any siteprojects where this user is not a member of the project.
 		$intersectprojects = array_intersect_key($this->userprojects, $siteprojects);
 		
-		//print "<br/>Got " . count($intersectprojects) . " intersect projects for site ". $site_id . "<br/>They are:<br>";
-        //print implode(",", $intersectprojects);
-        
-		//$this->projects[$site_id] = array_values($intersectprojects);
 		$this->projects[$site_id] = array_keys($intersectprojects);
 		
 	  }
