@@ -319,8 +319,8 @@ print '</div>';
 
 ?>
 <?php
-// Live site or test env JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY");
-JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY"); // Live site or test env
+//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
