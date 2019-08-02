@@ -210,7 +210,8 @@ print '          <p>';
 foreach(array("habitat", "water", "purpose") as $struc){
   $struc_key = $struc.'_id';
   print '          <h5>'.$this->help[$struc_key].'</h5>';
-  print '          <select name = "'.$struc_key.'" class = "form-control" >';
+  print '          <select name = "'.$struc_key.'" class = "form-control required" >';
+  print '            <option value="" disabled selected hidden>Please select...</option>';
   foreach ( codes_getList($struc) as $thing ) {
 	  list($code, $name) = $thing;
 	  print "<option value='$code'>$name</option>";
@@ -225,8 +226,9 @@ print '        <div class="tab"><h2>Which camera are you using?</h2>';
 $struc = "camera";
 $struc_key = $struc.'_id';
 print '          <h5>'.$this->help[$struc_key].'</h5>';
-print '          <select name = "'.$struc_key.'" class = "form-control" >';
-foreach ( codes_getList($struc) as $thing ) {
+print '          <select name = "'.$struc_key.'" class = "form-control required" >';
+ print '            <option value="" disabled selected hidden>Please select...</option>';
+ foreach ( codes_getList($struc) as $thing ) {
 	list($code, $name) = $thing;
 	print "<option value='$code'>$name</option>";
 }
@@ -239,6 +241,7 @@ print '        </div>';
 
 // --------------------------------------------- Projects ------------------------------------------------------
 print '        <div id="projecttab" class="tab"><h2>Which projects does this site belong to?<h2>';
+print '        <h5>Hold down Ctrl or Cmd if you need to select more than one project.<h5>';
 print '          <select id="projectselect" name = "project_ids[]" class = "form-control" size="15" multiple>';
     
 foreach($this->userprojects as $proj_id=>$proj_name){
@@ -264,7 +267,8 @@ if ( count($this->projectsitedata) > 0 ) {
 		print '<div id="'.$struc.'_section" class="struc_section">';
 		$meta = codes_getMeta($struc);
 		print '          <h5>'.$meta["helptext"].'</h5>';
-		print '          <select name = "'.$struc.'_id" class = "form-control sitedata" >';
+		print '          <select name = "'.$struc.'_id" class = "form-control sitedata required" >';
+		print '            <option value="" disabled selected hidden>Please select...</option>';
 		foreach ( codes_getList($struc) as $thing ) {
 			list($code, $name) = $thing;
 			print "<option value='$code'>$name</option>";
@@ -319,13 +323,12 @@ print '</div>';
 
 ?>
 <?php
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY"); // Live site or test env
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+//JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY"); // Live site or test env
+JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/dms.js", true, true);
-
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/trapper.js", true, true);
 JHTML::script("com_biodiv/mapselect.js", true, true);
