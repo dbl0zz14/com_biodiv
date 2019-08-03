@@ -122,6 +122,21 @@ function validateForm() {
 	  valid = false;
 	}
   }
+  // Validate lat/long is not the default value if we are on that tab.
+  lat = document.getElementById("latitude");
+  lon = document.getElementById("longitude");
+  if (x[currentTab].contains(lat)) {
+	  if ( lat.value == 54.763213 && lon.value == -1.581919 ) {
+		  lat.className += " invalid";
+		  lon.className += " invalid";
+		  document.getElementById("latlonhelp").innerHTML = "Please set the site location";
+		  valid = false;
+	  }
+	  else {
+		  document.getElementById("latlonhelp").innerHTML = "";
+	  }
+  }
+  
   // If the valid status is true, mark the step as finished and valid:
   if (valid) {
 	document.getElementsByClassName("step")[currentTab].className += " finish";

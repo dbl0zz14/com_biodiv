@@ -195,12 +195,13 @@ print '			<div class="input-group" style="width:400px">';
 print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">Latitude</span>';
 print '			    <input type="text" class="form-control required" id="latitude" name="latitude"/>';
 print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">Longitude</span>';
-print '			    <input type="text" class="form-control" id="longitude" name="longitude"/>';
+print '			    <input type="text" class="form-control required" id="longitude" name="longitude"/>';
 print '			</div>';
 print '			<div class="input-group" style="width:400px"> ';
 print '			    <span class="input-group-addon" id="basic-addon1" style="width:100px">Grid Reference</span>';
 print '			    <input type="text" class="form-control required" id="grid_ref" name="grid_ref"/>';
 print '			</div>';
+print '         <div id="latlonhelp"></div>';
 print '         </p>';
 
 print '        </div>';
@@ -323,8 +324,8 @@ print '</div>';
 
 ?>
 <?php
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY"); // Live site or test env
-JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY"); // Live site or test env
+//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
 JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
