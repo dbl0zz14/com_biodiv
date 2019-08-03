@@ -133,6 +133,9 @@ function validateForm() {
 		  valid = false;
 	  }
 	  else {
+		  lat.className = "form-control required";
+		  lon.className = "form-control required";
+		  
 		  document.getElementById("latlonhelp").innerHTML = "";
 	  }
   }
