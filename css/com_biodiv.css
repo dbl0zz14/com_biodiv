@@ -435,26 +435,18 @@
 /*.carousel-caption > p { background-color: rgba(0, 0, 0, 0.8);}*/
 
 /* Bits for add site wizard */
-* Style the form */
-#regForm {
-  background-color: #ffffff;
-  margin: 100px auto;
-  padding: 40px;
-  width: 70%;
-  min-width: 300px;
-}
+/* Style the form */
 
 /* Style the input fields */
-input {
+#siteForm input {
   padding: 10px;
   width: 100%;
-  font-size: 17px;
-  font-family: Raleway;
+  font-size: 14px;
   border: 1px solid #aaaaaa;
 }
 
 /* Mark input boxes that gets an error on validation: */
-input.invalid {
+#siteForm input.invalid {
   background-color: #ffdddd;
 }
 
