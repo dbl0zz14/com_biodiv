@@ -1,9 +1,5 @@
 
 var currentTab = 0; // Current tab is set to be the first tab (0)
-//showTab(currentTab); // Display the current tab
-
-//console.log("Project struc array");
-//console.log(projectstrucs);
 
 function resetTabs () {
 	currentTab = 0;
@@ -23,10 +19,8 @@ function showTab(n) {
   // If this is the additional site data tab, set the strucs to display or not depending on projects selected.
   if ( x[currentTab].id == "projectdatatab" ) {
 	  var selectedProjectIds = jQuery('#projectselect').val();
-	  console.log(selectedProjectIds);
 	  
-	  //var selected = $(this).find('option:selected', this);
-      var strucs = [];
+	  var strucs = [];
 
       for (proj_id of selectedProjectIds) {
 		let newstrucs = document.getElementById("select_proj_" + proj_id).dataset.strucs;
@@ -36,19 +30,21 @@ function showTab(n) {
 	  }
 	  let strucs_unique = [...new Set(strucs)];
 	  
-	  console.log(strucs);
-	  console.log(strucs_unique);
-	  
 	  // Set everything else to display none
-	  // If no project specfic data is required hide the whole tab
 	  if ( strucs_unique.length == 0 ) {
 		  jQuery('#noprojectdata').show();
 	  }
 	  else {
 		  jQuery('#noprojectdata').hide();
 	  }
+	  // Hide everything then make selected shown and required.
 	  jQuery('.struc_section').hide();
-	  for (struc of strucs_unique) jQuery('#'+ struc + '_section').show();
+	  jQuery('.sitedata').removeClass("required");
+	  for (struc of strucs_unique) {
+		  jQuery('#'+ struc + '_section').show();
+		  let strucidname = "" + struc + '_id';
+		  jQuery("[name='" + strucidname + "']").addClass("required");
+	  }
   }
   
   // ... and fix the Previous/Next buttons:
@@ -84,14 +80,6 @@ function nextPrev(n) {
   }
   // Otherwise, display the correct tab:
   showTab(currentTab);
-}
-
-
-function updateProjectStrucs () {
-	// Check which projects are selected and so which strucs are required
-
-	console.log(names);
-
 }
 
 
@@ -159,9 +147,6 @@ function fixStepIndicator(n) {
 
 jQuery(document).ready(function(){
 	
-//	console.log("Project struc array");
-//	console.log(projectstrucs);
-
 	// On Add Site click, show the modal
 	jQuery('#add_site').click(function (){
 		currentTab = 0; // Current tab is set to be the first tab (0)

@@ -2408,7 +2408,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
 
 function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	
-	error_log( "chooseSiteTimeOrdered, last_photo_id is:" . $last_photo_id  );
+	//error_log( "chooseSiteTimeOrdered, last_photo_id is:" . $last_photo_id  );
 	
 	$photo_id = null;
 	
@@ -2479,7 +2479,7 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 
 function chooseRepeat ( $project_ids, $classify_own ) {
 	
-	error_log ( "chooseRepeat called, classify_own = " . $classify_own );
+	//error_log ( "chooseRepeat called, classify_own = " . $classify_own );
 	$photo_id = null;
 	
 	// If just classifying what this user has uploaded, add to the where string to reduce results to that set.
@@ -2492,7 +2492,7 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 	
 		$project_id_str = implode(',', $project_ids);
 	
-		error_log ( "chooseRepeat, project_id_str = " . $project_id_str );
+		//error_log ( "chooseRepeat, project_id_str = " . $project_id_str );
 		//print "<br>chooseRepeat, project_id_str = " . $project_id_str . " <br>";
 	
   

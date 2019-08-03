@@ -207,7 +207,7 @@ class BioDivController extends JControllerLegacy
 		// If used this stores all those classified by the user.
 		$this->all_animal_ids =
 	        $app->getUserStateFromRequest('com_biodiv.all_animal_ids', 'all_animal_ids', 0);
-		error_log("Controller: nextseq got all_animal_ids " . $this->all_animal_ids );
+		//error_log("Controller: nextseq got all_animal_ids " . $this->all_animal_ids );
 		
 		
 	    break;
@@ -305,7 +305,7 @@ class BioDivController extends JControllerLegacy
   }
   
   function update_lat_long() {
-	  error_log ("update_lat_long called" );
+	  //error_log ("update_lat_long called" );
 	  
 	  $jinput = JFactory::getApplication()->input;
 	  
@@ -318,7 +318,7 @@ class BioDivController extends JControllerLegacy
 		  $lat = $sitesArray["lat"][$site_id];
 		  $lon = $sitesArray["lon"][$site_id];
 		  
-		  error_log ("updating site " . $site_id .", lat " . $lat . ", long ".$lon  );
+		  //error_log ("updating site " . $site_id .", lat " . $lat . ", long ".$lon  );
 		  
 		  update_siteLatLong ( $site_id, $lat, $lon );
 	  }
@@ -399,28 +399,28 @@ class BioDivController extends JControllerLegacy
 		// And if there is an animal_id for a nothing classification delete this too.
 		if ( $fields->species != 86 ) {
 			$deleted_id = deleteNothingClassification($fields->photo_id, $animal_ids);
-			error_log ( "Found deleted nothing id = " . $deleted_id );
+			//error_log ( "Found deleted nothing id = " . $deleted_id );
 			if ( $deleted_id ) removeAnimalId ($deleted_id);
 			$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
 		}
 		
 		// And add the new animal_id
 		if ( !$animal_ids ) {
-			error_log("Setting animal_ids to " . $animal_id);
+			//error_log("Setting animal_ids to " . $animal_id);
 			$app->setUserState('com_biodiv.animal_ids', $animal_id);
 		}
 		else {
-			error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
+			//error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
 			$app->setUserState('com_biodiv.animal_ids', $animal_ids . "_" . $animal_id);
 		}
 		
 		// And add the new animal_id
 		if ( !$all_animal_ids ) {
-			error_log("Setting all_animal_ids to " . $animal_id);
+			//error_log("Setting all_animal_ids to " . $animal_id);
 			$app->setUserState('com_biodiv.all_animal_ids', $animal_id);
 		}
 		else {
-			error_log("Setting all_animal_ids to " . $all_animal_ids . "_" . $animal_id);
+			//error_log("Setting all_animal_ids to " . $all_animal_ids . "_" . $animal_id);
 			$app->setUserState('com_biodiv.all_animal_ids', $all_animal_ids . "_" . $animal_id);
 		}
     }
@@ -527,8 +527,8 @@ class BioDivController extends JControllerLegacy
 		  $user_key = JRequest::getString("user_key");
 	}
 	  
-	error_log ("Controller - project_id = " . $project_id );  
-	error_log ("Controller - user_key = " . $user_key );	
+	//error_log ("Controller - project_id = " . $project_id );  
+	//error_log ("Controller - user_key = " . $user_key );	
 	
 	$app->setUserState('com_biodiv.project_id', $project_id);
 	$app->setUserState('com_biodiv.user_key', $user_key);

@@ -199,7 +199,7 @@ print '			    <input type="text" class="form-control required" id="longitude" na
 print '			</div>';
 print '			<div class="input-group" style="width:400px"> ';
 print '			    <span class="input-group-addon" id="basic-addon1" style="width:100px">Grid Reference</span>';
-print '			    <input type="text" class="form-control required" id="grid_ref" name="grid_ref"/>';
+print '			    <input type="text" class="form-control" id="grid_ref" name="grid_ref"/>';
 print '			</div>';
 print '         <div id="latlonhelp"></div>';
 print '         </p>';
@@ -301,9 +301,7 @@ print '          <span class="step"></span>';
 print '          <span class="step"></span>';
 print '          <span class="step"></span>';
 print '          <span class="step"></span>';
-if ( count($this->projectsitedata) > 0 ) {
-	print '          <span id="projectdatastep" class="step"></span>';
-}
+print '          <span id="projectdatastep" class="step"></span>';
 print '          <span class="step"></span>';
 print '        </div>';
 
