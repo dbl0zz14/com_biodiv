@@ -28,6 +28,10 @@ class BioDivViewProjects extends JViewLegacy
   {
     $person_id = (int)userID();
     //$person_id or die("No person_id");
+	
+	// Get all the text snippets for this view in the current language
+	$this->translations = getTranslations("project");
+
 
     $this->root = 
     $this->status = array();

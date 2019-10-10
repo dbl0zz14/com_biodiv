@@ -30,8 +30,13 @@ class BioDivViewAjax extends JViewLegacy
 	  
 	  $article = JTable::getInstance("content");
 	  $option_id = JRequest::getInt("option_id");
-	  $option = codes_getDetails($option_id, "option");
-	  $article_id = $option['article_id'];
+	  $option = codes_getDetails($option_id, "optiontran");
+	  
+	  $associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $option['article_id']);
+
+	  $langObject = JFactory::getLanguage();
+	  //print ("Tag = " . $langObject->getTag() );
+	  $article_id = $associations[$langObject->getTag()]->id;
 	  
 	  $article->load($article_id); 
   //	  print_r($article);

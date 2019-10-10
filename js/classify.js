@@ -48,6 +48,39 @@ jQuery(document).ready(function(){
 		}
 	}
 	
+	drawMap = function (){
+		
+		jQuery('#no_map').hide();
+		
+		try{
+			let lat = parseFloat(BioDiv.latitude);
+			let lng = parseFloat(BioDiv.longitude);
+			//console.log("lat = " + lat);
+			//console.log("lng = " + lng);
+			
+			let myLatlng = new google.maps.LatLng(lat, lng);
+		
+			let myOptions = {
+				zoom: 5,
+				center: myLatlng,
+				mapTypeId: google.maps.MapTypeId.TERRAIN
+			}
+			
+			var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+			
+			var marker = new google.maps.Marker({
+				position: myLatlng, 
+				map: map,
+				draggable:false
+			});
+		}
+		catch(err){
+			console.log("No location given");
+			jQuery('#no_map').show();
+		}
+		
+	};
+	
 	jQuery('.species_select').click(function (){
 		id = jQuery(this).attr("id");
 		idbits = id.split("_");
@@ -144,6 +177,13 @@ jQuery(document).ready(function(){
 			console.log("Error: already have six classifications and a seventh requested");
 			jQuery('#too_many_modal').modal('show');
 		}
+		
+	});
+	
+	jQuery('#control_map').click(function (){
+		console.log("Display location");
+		jQuery('#map_modal').modal('show');
+		drawMap();
 		
 	});
 	

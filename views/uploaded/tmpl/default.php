@@ -11,13 +11,13 @@ $action = $this->root . "&view=uploadm";
 
 ?>
 
-<h1>Uploaded images from <?php print $this->site_name;?></h1>
+<h1><?php print $this->translations['up_from']['translation_text'] . ' ' . $this->site_name;?></h1>
 
 <table class='table'>
 <thead>
 <tr>
-<th>File name</th>
-<th>Date</th>
+<th><?php print $this->translations['file_name']['translation_text'];?></th>
+<th><?php print $this->translations['date']['translation_text'];?></th>
 </tr> 
 </thead>
 <tbody>
@@ -34,5 +34,5 @@ $action = $this->root . "&view=uploadm";
 </tbody>
 </table>
 
-  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=upload&site_id=". $this->site_id;?>'>Upload more photos</a></p>
+  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=upload&site_id=". $this->site_id;?>'><?php print $this->translations['more_ph']['translation_text'];?></a></p>
 

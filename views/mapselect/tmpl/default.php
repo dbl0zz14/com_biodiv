@@ -8,7 +8,7 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 ?>
-<h1>Select site location for <?php print $this->site_name ?></h1>
+<h1><?php print $this->translations['sel_loc']['translation_text'] . ' ' . $this->site_name ?></h1>
 <div id="map_canvas" style="width:400px;height:400px;"></div>
 <script type='text/javascript'>
     BioDiv.grid_ref = '<?php print $this->grid_ref;?>';
@@ -18,15 +18,15 @@ defined('_JEXEC') or die;
 <form id='map_select_form' action='<?php print BIODIV_ROOT . "&task=set_site_grid_reference"; ?>' method='post'>
 <input type='hidden' name='site_id' value='<?php print $this->site_id;?>'/>
 <div class='input-group' style='width:400px'>
-    <span class="input-group-addon" id="basic-addon2" style='width:80px'>Latitude</span>
+    <span class="input-group-addon" id="basic-addon2" style='width:80px'><?php print $this->translations['lat']['translation_text'] ?></span>
     <input type="text" class='form-control' id='latitude' name='latitude'/>
-    <span class="input-group-addon" id="basic-addon2" style='width:80px'>Longitude</span>
+    <span class="input-group-addon" id="basic-addon2" style='width:80px'><?php print $this->translations['lon']['translation_text'] ?></span>
     <input type="text" class='form-control' id='longitude' name='longitude'/>
 </div>
 <div class='input-group' style='width:400px'> 
-    <span class="input-group-addon" id="basic-addon1" style='width:100px'>Grid Reference</span>
+    <span class="input-group-addon" id="basic-addon1" style='width:100px'><?php print $this->translations['grid']['translation_text'] ?></span>
     <input type="text" class='form-control' id='grid_ref' name='grid_ref'/>
-    <span class="input-group-btn"><button class='btn btn-primary' type='submit'>Select</button></span>
+    <span class="input-group-btn"><button class='btn btn-primary' type='submit'><?php print $this->translations['select']['translation_text'] ?></button></span>
 </div>
 </form>
 <?php

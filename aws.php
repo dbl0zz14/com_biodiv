@@ -88,7 +88,6 @@ function post_s3_upload_actions ( $photo_id, $filename ) {
 	$db->updateObject('Photo', $fields, 'photo_id');
 
 	// remove the file from the fileserver
-	/*  To start with don't remove the files
 	try {
 		unlink($filename);
 	}
@@ -96,7 +95,7 @@ function post_s3_upload_actions ( $photo_id, $filename ) {
 		print ("<br>Couldn't delete file: " . $filename);
 		throw $e;
 	}
-	*/
+	
 }
 
 function s3URL ( $details ) {

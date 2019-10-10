@@ -16,7 +16,7 @@ else if(!$this->animal){
   print "";
  }
  else{
-	 $label = codes_getName($this->animal->species, 'content');
+	 $label = codes_getName($this->animal->species, 'contenttran');
      $contentDetails = codes_getDetails($this->animal->species, 'content');
      $type = $contentDetails['struc'];
      $features = array();
@@ -46,7 +46,7 @@ else if(!$this->animal){
 	     $features[] = $this->animal->number;
        }
        foreach(array("gender", "age") as $struc){
-	     $featureName = codes_getName($this->animal->$struc, $struc);
+	     $featureName = codes_getName($this->animal->$struc, $struc . "tran");
 	     if($featureName != "Unknown"){
 	       $features[] = $featureName;
 	     }

@@ -28,12 +28,12 @@ jQuery(document).ready(function(){
 				data: {
 					labels: jsonObject.labels,
 					datasets: [{
-						label: "Classified",
+						label: jsonObject.cla_label, //"Classified",
 						backgroundColor: '#00ba8a',
 						borderColor: '#00ba8a',
 						data: jsonObject.classified
 					},{
-						label: "Uploaded",
+						label: jsonObject.upl_label, //"Uploaded",
 						backgroundColor: '#32553f',
 						borderColor: '#32553f',
 						data: jsonObject.uploaded
@@ -45,7 +45,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'Sequences Uploaded and Classified (6 months)'
+						text: jsonObject.title //'Sequences Uploaded and Classified (6 months)'
 					}
 				}
 			});
@@ -70,12 +70,12 @@ jQuery(document).ready(function(){
 				data: {
 					labels: jsonObject.labels,
 					datasets: [{
-						label: "Classified",
+						label: jsonObject.cla_label, //"Classified",
 						backgroundColor: '#00ba8a',
 						borderColor: '#00ba8a',
 						data: jsonObject.classified
 					},{
-						label: "Uploaded",
+						label: jsonObject.upl_label, //"Uploaded",
 						backgroundColor: '#32553f',
 						borderColor: '#32553f',
 						data: jsonObject.uploaded
@@ -87,7 +87,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'Sequences Uploaded and Classified (1 year)'
+						text: jsonObject.title //'Sequences Uploaded and Classified (1 year)'
 					}
 				}
 			});
@@ -113,12 +113,12 @@ jQuery(document).ready(function(){
 				data: {
 					labels: jsonObject.labels,
 					datasets: [{
-						label: "Classified",
+						label: jsonObject.cla_label, // "Classified",
 						backgroundColor: '#00ba8a',
 						borderColor: '#00ba8a',
 						data: jsonObject.classified
 					},{
-						label: "Uploaded",
+						label: jsonObject.upl_label, // "Uploaded",
 						backgroundColor: '#32553f',
 						borderColor: '#32553f',
 						data: jsonObject.uploaded
@@ -130,7 +130,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'Sequences Uploaded and Classified (3 years)'
+						text: jsonObject.title, // 'Sequences Uploaded and Classified (3 years)'
 					}
 				}
 			});
@@ -143,7 +143,7 @@ jQuery(document).ready(function(){
 		url = BioDiv.root + "&view=projectanimals&format=raw&project_id=" + project_id;
 	
 		jQuery.ajax(url, {'success': function(data) {
-			//console.log("Animals data is: " + data);
+			console.log("Animals data is: " + data);
 		
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
@@ -158,7 +158,7 @@ jQuery(document).ready(function(){
 				data: {
 					labels: jsonObject.labels,
 					datasets: [{
-						label: "Animals",
+						label: jsonObject.ani_label, // "Animals",
 						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
 						data: jsonObject.animals
 					}
@@ -168,7 +168,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'All Classifications by Species'
+						text: jsonObject.title // 'All Classifications by Species'
 					}
 
 				}
@@ -195,7 +195,7 @@ jQuery(document).ready(function(){
 				data: {
 					labels: jsonObject.labels,
 					datasets: [{
-						label: "Number of classifications",
+						label: jsonObject.ani_label, // "Number of classifications",
 						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
 						data: jsonObject.animals
 					}
@@ -206,7 +206,7 @@ jQuery(document).ready(function(){
 				options: {
 					title: {
 						display: true,
-						text: 'All Classifications by Species'
+						text: jsonObject.title // 'All Classifications by Species'
 					},
 					legend: {
 						display: false,
@@ -283,7 +283,7 @@ jQuery(document).ready(function(){
 	}
 	
 	
-	
-jQuery('.project-btn').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Click the image for project details', 'placement': 'top'});
+let tooltip_text = jQuery('.project-btn').attr('data-tooltip');
+jQuery('.project-btn').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': tooltip_text, 'placement': 'top'});
 			
 });

@@ -577,7 +577,7 @@ class BioDivController extends JControllerLegacy
 	//	$tmpName = JFile::makeSafe($tmpName);
 	// NB can get this error if PHP max dilsize and upload size are too small:
 	if(!is_uploaded_file($tmpName)){
-	  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits");
+	  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits, or there may be a network problem");
 	  continue;
 	}
 	//	JHelperMedia::isImage($tmpName) or die("Not an image");

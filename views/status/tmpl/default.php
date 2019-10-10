@@ -8,9 +8,9 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 ?>
-<h1>Spotter Status</h1>
+<h1><?php print $this->translations['spot_stat']['translation_text'] ?></h1>
 <div class='row'>
-<div class='col-md-5'>
+<div class='col-md-6'>
 <p>
 <table class="table">
 <?php
@@ -24,7 +24,7 @@ foreach($this->status as $msg => $count){
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> Classify All</a></button>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></a></button>
 </form>
 </p>
 <p>
@@ -32,7 +32,7 @@ foreach($this->status as $msg => $count){
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> Classify My Images Only</a></button>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></a></button>
     
 </form>
 </p>
@@ -42,17 +42,17 @@ foreach($this->status as $msg => $count){
     <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_only_project' value='1'/>
-	<select name = 'my_project' class = 'form-control'>
-	  <option value="" disabled selected hidden>Select a project...</option>
+	<select name = 'project_id' class = 'form-control'>
+	  <option value="" disabled selected hidden><?php print $this->translations['sel_proj']['translation_text']?>...</option>
     
       <?php
-        foreach($this->projects as $proj){
-          print "<option value='$proj'>$proj</option>";
+        foreach($this->projects as $proj_id=>$proj){
+          print "<option value='$proj_id'>$proj</option>";
         }
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> Classify Selected Project Only</a></button>
+      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></a></button>
 	</span>
 	
 </div>
@@ -84,7 +84,7 @@ foreach($this->mylikes as $photo_id  ){
 		print '<div class="item">';
 	}
 	if ( isVideo($photo_id) ) {
-		print '<video controls width="100%"><source src="'.photoURL($photo_id).'" type="video/mp4">Your browser does not support the video tag.</video>';
+		print '<video  oncontextmenu="return false;" controls controlsList="nodownload" width="100%"><source src="'.photoURL($photo_id).'" type="video/mp4">Your browser does not support the video tag.</video>';
 		//print "Found video: ".photoURL($photo_id);
 	}
 	else {

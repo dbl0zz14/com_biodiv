@@ -32,14 +32,14 @@ jQuery(document).ready(function(){
 		    console.log("uploadFile error: " + errMsg);
 		},
 
-    afterUploadAll: function(){
-		    jQuery('#fileuploadspinner').hide();
-		    //		    var url = BioDiv.root + "&task=sequence_photos&upload_id=" + BioDiv.upload_id;
-		    //		    jQuery.ajax(url);
-		    window.location.replace(BioDiv.root + "&view=upload");
+		afterUploadAll: function(){
+				jQuery('#fileuploadspinner').hide();
+				//		    var url = BioDiv.root + "&task=sequence_photos&upload_id=" + BioDiv.upload_id;
+				//		    jQuery.ajax(url);
+				window.location.replace(BioDiv.root + "&view=upload");
 		}
-	    });
+	});
 	
 	
-    });
+});
     

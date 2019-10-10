@@ -70,7 +70,7 @@ function codes_getMeta($type, $cachemeta = 1){
 					html_warning("Codes: Added structure");
 					print_r($metaLine);
 				}
-
+				
 				if(codes_parameters('usecache')){
 					cache_dependencies($metaLine['structure'],
 					                   "list",
@@ -85,7 +85,7 @@ function codes_getMeta($type, $cachemeta = 1){
 			print_r($meta);
 		}
 	}
-
+	
 	$meta[$type]['table'] = codes_eval($meta[$type]['table']);
 
 	if(isset($meta[$type]['restriction']) && $restriction = $meta[$type]['restriction']){
@@ -186,6 +186,12 @@ function codes_getName($thiscode, $type){
 			}
 
 			$db = db();
+			
+			//Use utf8 for multilingual
+			if (!$db->set_charset("utf8")) {
+				error_log("Error loading character set utf8: %s\n", $db->error);
+			}
+			
 			$qr = $db->query($query);
 			if ($qr->num_rows > 0) {
 				$nameLine = $qr[0];
@@ -280,6 +286,12 @@ function codes_getDetails($thiscode, $type, $features=null){
 			}
 
 			$db = db();
+			
+			//Use utf8 for multilingual
+			if (!$db->set_charset("utf8")) {
+				error_log("Error loading character set utf8: %s\n", $db->error);
+			}
+			
 			$qr = $db->query($query);
 
 			$considerMultiple = array();
@@ -432,6 +444,7 @@ function codes_getList($type,$features=array()){
 	while ($optionLine = $optionRes->fetch_assoc()) {
 		$code = $optionLine['code'];
 		$name = codes_getName($code, $type);
+		//error_log ( "codes_getList got name: " . $name );
 		if (isset($features['url_name']) && $features['url_name']) {
 			if (isset($typeMeta['url_name']) && strlen($typeMeta['url_name']) > 0) {
 				$details = codes_getDetails($code, $type);

@@ -10,6 +10,7 @@ defined('_JEXEC') or die;
 
 include "local.php";
 include "Project.php";
+include "Location.php";
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
 
@@ -235,6 +236,30 @@ function codes_getOptionName ( $option_id ) {
 	return codes_getName ( $option_id, "option" );
 }
   
+function codes_getOptionTranslation ( $option_id ) {
+	
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+		
+	if (!isLanguageSupported($lang)) $lang = "en-GB";
+	
+	if ( $lang == "en-GB" ) {
+		return codes_getName ( $option_id, "option" );
+	}
+	else {
+		// Remove spaces and use first 12 letters
+		$structure = "opt-" . $lang;
+		//error_log ( "codes_getOptionTranslation, structure = " . $structure );
+		
+		// Get the translated name
+		//error_log ( "codes_getOptionTranslation, calling getName with id " . $option_id );
+		$name_tl = codes_getName ( $option_id, $structure );
+		
+		// Default to the english name is there's no translation
+		return $name_tl ? $name_tl : codes_getName ( $option_id, "option" );
+	}
+}
+  
 function update_siteLatLong ( $site_id, $lat, $lon ) {
 	if ( !$lat or !$lon ) {
 		return;
@@ -288,6 +313,36 @@ function biodiv_label($type, $what=""){
     return "<i class='fa fa-upload'></i> Upload $what";
     break;
 
+  }
+}
+
+// For multilingual
+function biodiv_label_icons($type, $str, $what=""){
+  switch($type){
+  case "add":
+    return "<i class='fa fa-plus'></i> $str $what";
+    break;
+
+  case "edit":
+    return "<i class='fa fa-edit'></i> $str $what";
+    break;
+
+  case "delete":
+    return "<i class='fa fa-remove'></i> $str $what";
+    break;
+
+  case "upload":
+    return "<i class='fa fa-upload'></i> $str $what";
+    break;
+  case "nothing":
+	return "$str <span class='fa fa-ban'/>";
+	break;
+  case "human":
+    return "$str <span class='fa fa-male'/>";
+	break;
+  default:
+    return $str;
+	break;
   }
 }
 
@@ -1052,11 +1107,11 @@ function getSingleProjectOptions ( $project_id, $option_type ) {
 }
 
 // If project_id is null return for all mySpottingProjects.  Option_type is the struc in the Options table.  If null return all.
-function getProjectOptions( $project_name, $option_type, $use_exclusions ){
+function getProjectOptions( $project_id, $option_type, $use_exclusions ){
   // Call myprojects to get the project list, then get details for each.
   $myprojects = null;
-  if ( $project_name ) {
-	  $myprojects = getSubProjects( $project_name );
+  if ( $project_id ) {
+	  $myprojects = getSubProjectsById( $project_id );
   }
   else {
 	  $myprojects = mySpottingProjects();
@@ -1491,6 +1546,14 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
 	  return array();
   }
   
+  // Get all the text snippets for this view in the current language
+  $translations = getTranslations("project");
+  
+  $title = $translations["seq_dflt"]["translation_text"];
+  if ( $num_months == 6 ) $title = $translations["seq_sixm"]["translation_text"];
+  else if ( $num_months == 12 ) $title = $translations["seq_oneyr"]["translation_text"];
+  else if ( $num_months == 36 ) $title = $translations["seq_thryr"]["translation_text"];
+  
   //$numDisplayedMonths = 6;
   $numDisplayedMonths = $num_months + $interval_in_months;
   if ( $end_date == null ) {
@@ -1546,7 +1609,11 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
   $projectData = array ( 
 		"labels" => $labelsArray,
 		"uploaded" => $uploadedArray,
-		"classified" => $classifiedArray
+		"classified" => $classifiedArray,
+		"cla_label" => $translations["classified"]["translation_text"],
+		"upl_label" => $translations["uploaded"]["translation_text"],
+		"title" => $title
+		
 		);
   
   
@@ -1579,6 +1646,11 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
 	  return array();
   }
   
+  // Get all the text snippets for this view in the current language
+  $translations = getTranslations("project");
+  
+  $title = $translations["by_sp"]["translation_text"];
+  	
   $projects = getSubProjectsById( $project_id );
   $id_string = implode(",", array_keys($projects));
   
@@ -1586,11 +1658,90 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   $query = $db->getQuery(true);
   // count every classification
   //$query->select("species, count(distinct start_photo_id) as num_animals FROM ProjectAnimals");
-  $query->select("species, sum(num_animals) as num_animals FROM AnimalStatistics");
+  $query->select("option_id, species, sum(num_animals) as num_animals FROM AnimalStatistics");
   $query->where("project_id in (" . $id_string . ")" );
   $query->group("species");
   $query->order("num_animals  DESC");
   $db->setQuery($query);
+  
+  
+  // Include id...
+  $animals_w_id = $db->loadAssocList('species');
+  
+  $animals = $db->loadAssocList('species', 'num_animals');
+  //$animals = array_column($animals_w_id, 'num_animals', 'species');
+  
+  
+  // Little fix to remove the additional text on Nothing and Human.
+  $array_changed = false;
+  if (isset($animals["Human <span class='fa fa-male'/>"])) {
+    $animals['Human'] = $animals["Human <span class='fa fa-male'/>"];
+    unset($animals["Human <span class='fa fa-male'/>"]);
+	$array_changed = true;
+  }
+  if (isset($animals["Nothing <span class='fa fa-ban'/>"])) {
+    $animals['Nothing'] = $animals["Nothing <span class='fa fa-ban'/>"];
+    unset($animals["Nothing <span class='fa fa-ban'/>"]);
+	$array_changed = true;
+  }
+  
+  // Remove human and nothing if not to be included
+  if ( !$include_human ) {
+	  unset($animals['Human']);
+	  $array_changed = true;
+  }
+  if ( !$include_nothing ) {
+	  unset($animals['Nothing']);
+	  $array_changed = true;
+  }
+   if ( !$include_dontknow ) {
+	  unset($animals["Don't Know"]);
+	  $array_changed = true;
+  }
+  
+  // Remove Likes
+  unset($animals["Like"]);
+  $array_changed = true;
+  
+  // If we had to change the key names we need to re-sort the array
+  if ( $array_changed ) {
+	  arsort($animals);
+  }
+   
+  $animals_to_return_en = array();
+  // Finally handle the number of species, if we have more than required
+  // NB Other is a possible option so combine this with Other Species if we have both
+  $num_other = 0;
+  
+  if ( key_exists("Other", $animals) ) {
+	$num_other = $animals["Other"];
+	$animals = akrem($animals, "Other");
+  }
+  
+  if ( $num_species && (count($animals) > $num_species) ) {
+	  $animals_to_return_en = array_slice($animals, 0, $num_species-1);
+	  $total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
+	  $animals_to_return_en['Other Species'] = "" + $total_other;
+  }
+  else {
+	  $animals_to_return_en = $animals;
+  }
+  
+  $animals_to_return = array();
+  foreach ( $animals_to_return_en as $sp=>$num ) {
+	  error_log( "animal row: " . $sp . ", " . $num );
+	  if ( $sp == "Other Species" ) {
+		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
+		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+	  }
+	  else {
+		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
+		  $animals_to_return[codes_getName($animals_w_id[$sp]["option_id"], "speciestran")] = $num;
+	  }
+  }
+  
+  
+  /*
   $animals = $db->loadAssocList('species', 'num_animals');
   
   // Little fix to remove the additional text on Nothing and Human.
@@ -1647,7 +1798,7 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   else {
 	  $animals_to_return = $animals;
   }
-  
+  */
   
   /*
   $labelsArray = array('Badger','Rabbit','Mouse','Blackbird','Other');
@@ -1661,10 +1812,21 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   //print "<br/>Got " . count($animals_to_return) . " species to return from projectanimals <br/>They are:<br>";
   //print_r ($animals_to_return);
   
+  //$final_array = array ();
+  /*
+  $final_array["labels"] = array_keys($animals_to_return);
+  $final_array["animals"] = array_values($animals_to_return);
+  $final_array["title"] = $title;
+  */
+  //return $final_array;
+
+
   return array (
 		"labels" => array_keys($animals_to_return),
-		"animals" => array_values($animals_to_return)
+		"animals" => array_values($animals_to_return),
+		"title" => $title
 		);
+		
 }
 
 
@@ -1691,6 +1853,7 @@ function getProjectTree ( $project_id ) {
 
 // Return a list of this project and all its children.
 // Called with proj prettyname for now.  Refactor later if necessary.
+/*  Refactoring now - see below, use project_id
 function getSubProjects($project_prettyname, $exclude_private = false){
   //print "<br/>getSubProjects called<br/>";
   
@@ -1725,10 +1888,11 @@ function getSubProjects($project_prettyname, $exclude_private = false){
   return $subprojects;
   
 }
+*/
 
 
-
-function getSubProjectsById($project_id){
+function getSubProjectsById($project_id, $exclude_private = false){
+	/*
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
   $query->select("project_prettyname")->from("Project");
@@ -1737,6 +1901,38 @@ function getSubProjectsById($project_id){
   $prettyname = $db->loadResult();
   
   return getSubProjects($prettyname);
+  */
+  
+  // first select all project/parent pairs into memory
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+		->where("parent_project_id is not NULL");
+  // exclude private projects
+  if ( $exclude_private ) {
+	  $query->where("access_level < 3");
+  }
+  $db->setQuery($query);
+  $allpairs = $db->loadAssocList();
+  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
+  //print_r($allpairs);
+  
+  // Need to get the proj id and name of the top level project
+  $query = $db->getQuery(true);
+  $query->select("project_id AS proj_id, project_prettyname AS proj_prettyname")->from("Project");
+  $query->where("project_id = '" . $project_id . "'");
+  $db->setQuery($query);
+  $subprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  
+  // add to project list by working through $allpairs to find the children, repeatedly
+  addSubProjects( $subprojects, $allpairs );
+  
+  //print "<br/>Got " . count($subprojects) . " sub projects.<br/>They are:<br>";
+  //print implode(",", $subprojects);
+  
+  return $subprojects;
+  
 }
 
 function cmpListedProjects($a, $b)
@@ -1759,7 +1955,7 @@ and parent_project_id in (
 	
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.listing_level as level, O.option_name as priority")->from("Project P");
+  $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.article_id, P.listing_level as level, O.option_name as priority")->from("Project P");
   $query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
   $query->innerJoin("Options O on PO.option_id = O.option_id");
   $query->where("O.struc = 'priority'");
@@ -1770,7 +1966,7 @@ and parent_project_id in (
   
   // Include second level non private...
   $query2 = $db->getQuery(true);
-  $query2->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.listing_level as level, O.option_name as priority")->from("Project P");
+  $query2->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.article_id, P.listing_level as level, O.option_name as priority")->from("Project P");
   $query2->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
   $query2->innerJoin("Options O on PO.option_id = O.option_id");
   $query2->where("O.struc = 'priority'");
@@ -2106,17 +2302,17 @@ function nextSequence(){
   //$last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
   $last_photo_id = (int)$app->getUserState('com_biodiv.prev_photo_id', 0);
   
-  $my_project = null;
+  $project_id = null;
   
-  if ( $classify_project ) $my_project = $app->getUserState("com_biodiv.my_project");
+  if ( $classify_project ) $project_id = $app->getUserState("com_biodiv.project_id");
   
-  //print "<br>nextSequence, my_project: " . $my_project . "<br>" ;
+  //print "<br>nextSequence, project_id: " . $project_id . "<br>" ;
   
   // Get a list of projects over which we are working and their priority mode (an assoc list keyed on project_id)
   // If we are doing a "classify all" then exclude some projects
   $exclude_flag = true;
   if ( $classify_project or $classify_own ) $exclude_flag = false;
-  $project_options = getProjectOptions ( $my_project, "priority", $exclude_flag );
+  $project_options = getProjectOptions ( $project_id, "priority", $exclude_flag );
   
   //print "<br>nextSequence, got project options: <br>" ;
   //print_r ( $project_options );
@@ -3123,8 +3319,15 @@ function getFilters () {
 function getProjectFilters ( $project_id, $photo_id = null ) {
 	
 	//print "<br>getProjectFilters called, project_id = " . $project_id . ", photo_id = " . $photo_id;
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+	
+	// Check language is supported.  If not, default to English.
+	if (!isLanguageSupported($lang)) $lang = "en-GB";
+	
 	
 	$projectFilters = array();
+	// First get the ENglish version
 	if ( $project_id ) {
 		// Find filter for this project
 		$db = JDatabase::getInstance(dbOptions());
@@ -3133,6 +3336,7 @@ function getProjectFilters ( $project_id, $photo_id = null ) {
 		$query->innerJoin("ProjectOptions PO on PO.option_id = O.option_id");
 		$query->where("PO.project_id = " . $project_id );
 		$query->where("O.struc = 'projectfilter'" );
+		$query->order("O.seq");
 		$db->setQuery($query);
 		$projectFilters = $db->loadRowList();
 		//print ( "<br> Project id used - projectFilters: <br>" );
@@ -3150,12 +3354,21 @@ function getProjectFilters ( $project_id, $photo_id = null ) {
 		$query->where("PSM.end_photo_id is NULL" );
 		$query->where("PSM.project_id = PO.project_id" );
 		$query->where("O.struc = 'projectfilter'" );
+		$query->order("O.seq");
 		$db->setQuery($query);
 		$projectFilters = $db->loadRowList();
 		//print ( "<br> Photo id used - projectFilters: <br>" );
 		//print_r ( $projectFilters );
 	}
-	
+	// if we are not in English, use the translated filter names if they exist
+	if ( $lang != "en-GB" ) {
+		//foreach ($projectFilters as $filter) {
+		for ( $i = 0; $i < count($projectFilters); $i++ ) {
+			list($id, $name) = $projectFilters[$i];
+			$translatedName = codes_getName($id, 'projectfiltertran');
+			$projectFilters[$i][1] = $translatedName;
+		}
+	}
 	//print ( "<br> projectFilters: <br>" );
 	//print_r ( $projectFilters );
 		
@@ -3215,7 +3428,8 @@ function getSpecies ( $filterid, $onePage ) {
 	//$species = codes_getList ( $filtername );
 	$restrict = array();
 	$restrict['restriction'] = "value = '" . $filterid . "'";
-	$species = codes_getList ( "filterspecies", $restrict );
+	//$species = codes_getList ( "filterspecies", $restrict );
+	$species = codes_getList ( "filterspeciestran", $restrict );
 	  
 	// Need to sort this list by name.
 	usort($species, "cmp");
@@ -3225,7 +3439,8 @@ function getSpecies ( $filterid, $onePage ) {
 
 	$features = array();
 	$features['restriction'] = "struc='notinlist'";
-	$notInListSpecies = codes_getList ( "species", $features );
+	//$notInListSpecies = codes_getList ( "species", $features );
+	$notInListSpecies = codes_getList ( "speciestran", $features );
 	$species = array_merge($species, $notInListSpecies);
 	foreach($species as $stuff){
 		  
@@ -3583,7 +3798,7 @@ function getVideoMeta ( $filename ) {
 }
 
 function getClassificationButton ( $id, $animalArray ) {
-	$label = codes_getName($animalArray[$id]->species, 'content');
+	$label = codes_getName($animalArray[$id]->species, 'contenttran');
      $contentDetails = codes_getDetails($animalArray[$id]->species, 'content');
      $type = $contentDetails['struc'];
      $features = array();
@@ -3609,7 +3824,7 @@ function getClassificationButton ( $id, $animalArray ) {
 	     $features[] = $animalArray[$id]->number;
        }
        foreach(array("gender", "age") as $struc){
-	     $featureName = codes_getName($animalArray[$id]->$struc, $struc);
+	     $featureName = codes_getName($animalArray[$id]->$struc, $struc . "tran");
 	     if($featureName != "Unknown"){
 	       $features[] = $featureName;
 	     }
@@ -3643,7 +3858,7 @@ function getSiteDataStrucs ( $projectIds ) {
 	$project_ids = implode(',', $projectIds);
 	//print "project_ids = " . $project_ids;
 	$query = $db->getQuery(true);
-	$query->select("DISTINCT PO.project_id, O.option_name as struc")
+	$query->select("DISTINCT PO.project_id, O.option_id, O.option_name as struc")
 		->from("ProjectOptions PO")
 		->innerJoin("Options O on O.option_id = PO.option_id and O.struc = 'sitedatastruc'")
 		->where("PO.project_id in (" . $project_ids . ")");
@@ -3652,6 +3867,103 @@ function getSiteDataStrucs ( $projectIds ) {
 	//print_r($sitedatastrucs);
 	return $sitedatastrucs;
 }
+
+function isLanguageSupported ( $lang ) {
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("count(*)")
+		->from("Language")
+		->where("tag = " . $db->quote($lang) );
+	$db->setQuery($query);
+	$count = $db->loadResult();
+	
+	//error_log ( "count = " . $count );
+	
+	return $count > 0;
+}
+
+function getTranslations ( $view ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+	
+	error_log("language = " . $lang);
+	
+	// Check language is supported.  If not, default to English.
+	if (!isLanguageSupported($lang)) $lang = "en-GB";
+	
+	error_log ("using language " . $lang );
+	$query = $db->getQuery(true);
+	$query->select("translation_key, translation_text")
+		->from("Translation")
+		->where("view = " . $db->quote($view))
+		->where("language = " . $db->quote($lang));
+	$db->setQuery($query);
+	$translations = $db->loadAssocList("translation_key");
+	
+	return $translations;
+}
+
+function getOrdinal ( $num ) {
+	
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+	$th = "";
+	
+	if ( $lang == "en-GB" ) {
+		$th = 'th';
+	
+		$finalDigit = $num - 10*intval($num/10);
+		if ( $finalDigit == 1 ) $th = 'st';
+		if ( $finalDigit == 2 ) $th = 'nd';
+		if ( $finalDigit == 3 ) $th = 'rd';
+		
+		// Set back to th for 11, 12 and 13, 111, 112, 113, etc
+		if ( ($num - 11)%100 == 0 ) $th = 'th';
+		if ( ($num - 12)%100 == 0 ) $th = 'th';
+		if ( ($num - 13)%100 == 0 ) $th = 'th';
+	}
+	else if ( $lang == "es-ES" ) {
+		$th = 'º';
+	
+		$finalDigit = $num - 10*intval($num/10);
+		if ( $finalDigit == 1 ) $th = 'er';
+		// may need this for tercer   if ( $finalDigit == 3 ) $th = 'er';
+	}
+	return ( "" . $num . $th );
+}
+
+function getAssociatedArticleId ( $article_id ) {
+	
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+	
+	$assoc_id = null;
+
+	if ($article_id != null)
+	{
+		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $article_id);
+		
+		//print_r($associations);
+		$assoc_id = $associations[$lang]->id;
+	}
+	
+	// If no associated article (for this language) return the original one
+	if ( $assoc_id == null ) $assoc_id = $article_id;
+	
+	return $assoc_id;
+}
+
+
+function getSiteLocation($site_id) {
+	
+	$siteDetails = codes_getDetails($site_id, 'site');	
+	return new Location($siteDetails['latitude'], $siteDetails['longitude']);	
+
+}
+
 
 /*
 function makeControlButton($control_id, $control){

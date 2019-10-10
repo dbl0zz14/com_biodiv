@@ -35,20 +35,23 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	$app = JFactory::getApplication();
 	
+	// Get all the text snippets for this view in the current language
+	$this->translations = getTranslations("project");
+	
 	// Remove any stored photo id on project load.
 	$app->setUserState('com_biodiv.photo_id', null);
 	
 	$this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-	$this->project = projectDetails($this->project_id);
+	//$this->project = projectDetails($this->project_id);
 	
 	$displayOptionArray = getSingleProjectOptions($this->project_id, 'projectdisplay');
 	
 	// Just get the option names.
 	$this->displayOptions = array_column($displayOptionArray, 'option_name');
 	
-	$this->subProjects = getSubProjects($this->project->project_prettyname, true);
+	$this->subProjects = getSubProjectsById($this->project_id, true);
 	
 	// Remove this project from the sub projects list...
 	unset($this->subProjects[$this->project_id]);
@@ -57,16 +60,20 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	
 	$article = JTable::getInstance("content");
-	$project_id = JRequest::getInt("project_id");
-	$project = codes_getDetails($project_id, "project");
-	$article_id = $project['article_id'];
+	//$project_id = JRequest::getInt("project_id");
+	
+	$this->project = codes_getDetails($this->project_id, "project");
+	
+	// Check whether there's an article in current language
+	$article_id = getAssociatedArticleId($this->project['article_id']);
+	
+	
 	$article->load($article_id); 
-  //	  print_r($article);
-	$this->title = $article->title;
+  	$this->title = $article->title;
 	$this->introtext = $article->introtext;
-	$this->access_level = $project['access_level'];
-	
-	
+	$this->fulltext = $article->fulltext;
+	$this->access_level = $this->project['access_level'];
+		
 
     // Display the view
     parent::display($tpl);

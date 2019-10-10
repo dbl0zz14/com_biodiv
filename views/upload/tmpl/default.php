@@ -14,23 +14,23 @@ JHTML::stylesheet("bootstrap-datepicker-master/datepicker3.css", array(), true);
 showMessages();
 ?>
 
-<h1>Upload images from <?php print $this->site_name;?> ID <?php print $this->site_id;?></h1>
+<h1><?php print $this->translations['upload_im']['translation_text'] . ' ' . $this->site_name . ' ' . $this->translations['id']['translation_text'] . ' ' . $this->site_id; ?></h1>
 
 <?php if ($this->previous_upload_id){
-  print "<h3>Last upload</h3>\n";
-  print "<p>The last upload was at ". $this->previous_upload_date;
+  print "<h3>" . $this->translations['last_up']['translation_text'] . "</h3>\n";
+  print "<p>" . $this->translations['last_at']['translation_text'] . " ". $this->previous_upload_date;
   if($this->previous_collection_date){
-    print " with a collection date of ". $this->previous_collection_date;
+    print " " . $this->translations['with_coll']['translation_text'] . " ". $this->previous_collection_date;
   }
-  print ".</p> <p><a class='btn btn-primary btn-lg active' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>Upload more files within these dates</a></p>";
+  print ".</p> <p><a class='btn btn-primary btn-lg active' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>" . $this->translations['up_more']['translation_text'] . "</a></p>";
  }
 
 
 ?>
 
-  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id;?>'>List photos already uploaded</a></p>
+  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id;?>'><?php print $this->translations['list_up']['translation_text'] ?></a></p>
 
-<h1>Start new upload</h1>
+<h1><?php print $this->translations['start_new']['translation_text'] ?></h1>
 
 <form role='form' action='<?php print $this->root . "&task=add_upload";?>&site_id=<?php print $this->site_id;?>'
  method='post' class='form-inline'>
@@ -61,12 +61,21 @@ foreach($defaultDate as $what => $date){
 
 foreach(array("Deployment", "Collection") as $field){
   $lfield = strtolower($field);
+  
+  $date_text = $this->translations['dep_date']['translation_text'];
+  $time_text = $this->translations['dep_time']['translation_text'];
+  if ( $field == "Collection" ) {
+	  $date_text = $this->translations['coll_date']['translation_text'];
+      $time_text = $this->translations['coll_time']['translation_text'];
+  
+  }
+  
 ?>
 <div class='row'>
 
 <div class='col-sm-6 col-md-2'>
    <div class='form-group'>
-  <?php print  "<label for='${lfield}_date' style='width: 10em'>$field date</label>\n";?>
+  <?php print  "<label for='${lfield}_date' style='width: 10em'>$date_text</label>\n";?>
   <?php print "<input type='text' size='10' class='form-control' name='${lfield}_date' id='${lfield}_date'/>";?>
   </div>
 </div> 
@@ -74,7 +83,7 @@ foreach(array("Deployment", "Collection") as $field){
 <div class='col-sm-6 col-md-2'>
       <div class='form-group'>
       <?php  
-      print  "<label for='${lfield}_time' style='width:10em'>$field time</label>\n";
+      print  "<label for='${lfield}_time' style='width:10em'>$time_text</label>\n";
 
 
   //$hours = $defaultHours[$lfield];
@@ -121,7 +130,7 @@ foreach(array("Deployment", "Collection") as $field){
 
 
 
-  <div><button type='submit' id='add_upload' class='btn btn-primary'><?php print biodiv_label("upload");?></button></div>
+  <div><button type='submit' id='add_upload' class='btn btn-primary'><?php print biodiv_label_icons("upload", $this->translations['upload']['translation_text']);?></button></div>
 
 </div> <!-- /.container -->  
 </form>

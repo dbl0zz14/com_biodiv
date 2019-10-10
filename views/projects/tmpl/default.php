@@ -33,7 +33,7 @@ foreach ( $this->projects as $project ) {
 	print BIODIV_COMPONENT;
 	print "'/>";
 	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
-	print "<button class='image-btn project-btn' type='submit'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+	print "<button class='image-btn project-btn' type='submit' data-tooltip='".$this->translations['tooltip']['translation_text']."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
 	print "</form>";
 	
 	/*
@@ -70,15 +70,26 @@ foreach ( $this->projects as $project ) {
 	print 'aria-valuenow="' . $progress["numClassifications"] . '"  aria-valuemin="0" ';
 	print 'aria-valuemax="' . $progress["numSequences"] . '" style="width:' . $progress["percentComplete"] . '%">';
 	if ( $multiple_complete ) {
-		print 'Please keep spotting' . $add_note;
+		print $this->translations['keep_spot']['translation_text'] . $add_note;
 	}
 	else {
-		print '' . $progress["percentComplete"] . '% Classified' . $add_note;
+		print '' . $progress["percentComplete"] . $this->translations['frac_class']['translation_text'] . $add_note;
 	}
 	print '</div>';
 	print '</div>';
 	
 	print '<div class="project-description">';
+	// If there is an article available, use the introtext here, getting the correct language in the process.
+	if ( $project->article_id ) {
+		// Get the associated article (ie depending which langage we are in)
+		$assoc_id = getAssociatedArticleId($project->article_id);
+		
+		$article = JTable::getInstance("content");
+		$article->load($assoc_id); 
+		
+		// Truncate in case its long..
+		$project->project_description = substr($article->introtext, 0, 300);
+	}
 	print '<p>'.$project->project_description.'</p>';
 	print '</div>';
 	
@@ -105,7 +116,7 @@ foreach ( $this->projects as $project ) {
 	}
 }
 print '<div class="row">';
-print "* Please note that the progress bars relate to the number of sequences with <strong>at least one</strong> classification.  The more classifications the better, so if images are available please keep spotting, even if 100% is shown!" ;
+print "* " . $this->translations['proj_note']['translation_text'] ;
 print '</div>';
 
 

@@ -36,6 +36,7 @@ class BioDivViewProjectAnimals extends JViewLegacy
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id');
 		
 		$this->data = projectAnimals ( $this->project_id, 8 );
+		
 		//$this->data = projectAnimals ( $this->project_id );
 
 		// Display the view

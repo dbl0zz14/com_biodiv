@@ -48,15 +48,17 @@ function showTab(n) {
   }
   
   // ... and fix the Previous/Next buttons:
+  let nextBtn = document.getElementById("nextBtn");
   if (n == 0) {
 	document.getElementById("prevBtn").style.display = "none";
   } else {
 	document.getElementById("prevBtn").style.display = "inline";
   }
   if (n == (x.length - 1)) {
-	document.getElementById("nextBtn").innerHTML = "Submit";
+	nextBtn.innerHTML = nextBtn.dataset.submit;
   } else {
-	document.getElementById("nextBtn").innerHTML = "Next";
+	nextBtn.innerHTML = nextBtn.dataset.next;
+	//document.getElementById("nextBtn").innerHTML = "Next";
   }
   // ... and run a function that displays the correct step indicator:
   fixStepIndicator(n)
@@ -117,7 +119,8 @@ function validateForm() {
 	  if ( lat.value == 54.763213 && lon.value == -1.581919 ) {
 		  lat.className += " invalid";
 		  lon.className += " invalid";
-		  document.getElementById("latlonhelp").innerHTML = "Please set the site location";
+		  let latlonhelp = document.getElementById("latlonhelp")
+		  latlonhelp.innerHTML = latlonhelp.dataset.help;
 		  valid = false;
 	  }
 	  else {

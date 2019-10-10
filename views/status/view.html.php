@@ -38,89 +38,15 @@ class BioDivViewStatus extends JViewLegacy
 	$app->setUserState('com_biodiv.classify_only_project', 0);
     $app->setUserState('com_biodiv.classify_project', 0);
     $app->setUserState('com_biodiv.classify_self', 0);
-    $app->setUserState('com_biodiv.my_project', 0);
+    $app->setUserState('com_biodiv.project_id', 0);
 	$app->setUserState('com_biodiv.animal_ids', 0);
     
 
     $db = JDatabase::getInstance(dbOptions());
-/*
-    $query = $db->getQuery(true);
-    $query->select("COUNT(DISTINCT photo_id)");
-    $query->from("Animal");
-    $query->where("person_id = " . $person_id);
-    $db->setQuery($query);
-    $this->status['Number of classifications'] = $db->loadResult();
 
-    $query = $db->getQuery(true);
-    $query->select("COUNT(*)");
-    $query->from("Animal");
-    $query->where("person_id = " . $person_id);
-    $query->where("species not in (86,87,97)");
-    $db->setQuery($query);
-    $this->status['Number of animals identified'] = $db->loadResult();
+	// Get all the text snippets for this view in the current language
+	$this->translations = getTranslations("status");
 
-    $query = $db->getQuery(true);
-    $query->select("COUNT(DISTINCT species)");
-    $query->from("Animal");
-    $query->where("person_id = " . $person_id);
-    $query->where("species not in (86,97)");
-    $db->setQuery($query);
-    $this->status['Number of species identified'] = $db->loadResult();
-
-    $query = $db->getQuery(true);
-    $query->select("COUNT(*)");
-    $query->from("Photo");
-    $db->setQuery($query);
-    $this->status['Total photos in system'] = $db->loadResult();
-
-    $query = $db->getQuery(true);
-    $query->select("COUNT(DISTINCT person_id)");
-    $query->from("Animal");
-    $db->setQuery($query);
-    $this->status['Total spotters in system'] = $db->loadResult();
-*/
-/*
-	$query = $db->getQuery(true);
-    $query->select("COUNT(*)")
-		->from("Photo")
-		->where("sequence_num = 1");
-    $db->setQuery($query);
-    $this->status['Total number of sequences in the system'] = $db->loadResult();
-
-	$query = $db->getQuery(true);
-    $query->select("COUNT(DISTINCT P.sequence_id)")
-		->from("Photo P")
-		->innerJoin("Animal A on P.photo_id = A.photo_id")
-		->where("A.species != 97");
-    $db->setQuery($query);
-    $this->status['Total number of sequences classified'] = $db->loadResult();
-
-
-	$query = $db->getQuery(true);
-    $query->select("COUNT(DISTINCT P.sequence_id)")
-		->from("Animal A")
-		->innerJoin("Photo P on P.photo_id = A.photo_id")
-		->where("A.species != 97")
-		->where("A.person_id = " . $person_id);
-    $db->setQuery($query);
-    $this->status['Number of sequences classified by you'] = $db->loadResult();
-
-
-	$query = $db->getQuery(true);
-    $query->select("A.person_id, count(distinct P.sequence_id)")
-		->from("Animal A")
-		->innerJoin("Photo P on P.photo_id = A.photo_id")
-		->where("A.species != 97")
-		->group("A.person_id ")
-		->order("count(distinct P.sequence_id) desc");
-    $db->setQuery($query);
-	
-    $leagueTable = $db->loadAssocList();
-	*/
-
-
-	//print_r($leagueTable);
-	
 	$query = $db->getQuery(true);
     $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
 		->from("Statistics")
@@ -128,11 +54,11 @@ class BioDivViewStatus extends JViewLegacy
 		->order("end_date DESC");
 	$db->setQuery($query, 0, 1); // LIMIT 1
 	$row = $db->loadAssoc();
-	$this->status['Total number of sequences in the system'] = $row['uploaded'];
-	$this->status['Total number of sequences classified'] = $row['classified'];
+	$this->status[$this->translations['tot_system']['translation_text']] = $row['uploaded'];
+	$this->status[$this->translations['tot_class']['translation_text']] = $row['classified'];
 	
 	// Default to zero.
-	$this->status['Number of sequences classified by you'] = 0;
+	$this->status[$this->translations['num_you']['translation_text']] = 0;
 	
 	$query = $db->getQuery(true);
     $query->select("person_id, num_classified")
@@ -156,24 +82,11 @@ class BioDivViewStatus extends JViewLegacy
 		$this->totalSpotters += 1;
 	}
 	else {
-		$this->status['Number of sequences classified by you'] = $leagueTable[$userPos]['num_classified'];
+		$this->status[$this->translations['num_you']['translation_text']] = $leagueTable[$userPos]['num_classified'];
 	}
 	
-	$userPos += 1;
-	
-	$th = 'th';
-	
-	$finalDigit = $userPos - 10*intval($userPos/10);
-	if ( $finalDigit == 1 ) $th = 'st';
-	if ( $finalDigit == 2 ) $th = 'nd';
-	if ( $finalDigit == 3 ) $th = 'rd';
-	
-	// Set back to th for 11, 12 and 13, 111, 112, 113, etc
-	if ( ($userPos - 11)%100 == 0 ) $th = 'th';
-	if ( ($userPos - 12)%100 == 0 ) $th = 'th';
-	if ( ($userPos - 13)%100 == 0 ) $th = 'th';
-	$this->status['Total number of Spotters in the system' ] = $this->totalSpotters;
-	$this->status['You are currently the ' . $userPos . $th . ' highest contributor to Spotting' ] ='';
+	$this->status[$this->translations['tot_spot']['translation_text']] = $this->totalSpotters;
+	$this->status[$this->translations['you_curr']['translation_text'] . ' ' . getOrdinal($userPos + 1) . ' ' . $this->translations['contrib']['translation_text'] ] ='';
 		
 	// call new biodiv.php function instead of myProjects()
 	// Changed back argument to check redirect issue  

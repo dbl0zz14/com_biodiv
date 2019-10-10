@@ -17,16 +17,19 @@ jimport('joomla.application.component.view');
 */
 class BioDivViewUpload extends JViewLegacy
 {
-        /**
-         *
-         * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
-         *
-         * @return  void
-         */
+    /**
+     *
+     * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
+     *
+     * @return  void
+     */
 
-        public function display($tpl = null) 
-        {
+    public function display($tpl = null) 
+    {
 	  $app = JFactory::getApplication();
+	  
+	  // Get all the text snippets for this view in the current language
+	  $this->translations = getTranslations("upload");
 
 	  $this->root = JURI::root() . "?option=com_biodiv";
 	  $this->site_id = $app->getUserStateFromRequest('com_biodiv.site_id', 'site_id',0);
@@ -51,7 +54,7 @@ class BioDivViewUpload extends JViewLegacy
 
 
 	  parent::display($tpl);
-        }
+    }
 }
 
 

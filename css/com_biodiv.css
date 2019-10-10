@@ -159,7 +159,7 @@
 }
 
 
-#you-uploaded { color: #00ba8a; text-align: center; vertical-align: middle; font-size: 1.4em; }
+#you-uploaded { color: #00ba8a; text-align: center; vertical-align: middle; font-size: 1.3em; }
 
 .highlighted { background-color: #b4d0d0; }
 
@@ -475,6 +475,14 @@
 /* Mark the steps that are finished and valid: */
 .step.finish {
   background-color: #4CAF50;
+}
+
+
+@media (min-width: 768px) {
+  .modal .modal-xl {
+    width: 90%;
+   max-width:1200px;
+  }
 }
 
 
