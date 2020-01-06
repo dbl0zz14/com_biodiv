@@ -63,14 +63,14 @@ foreach($this->lcontrols as $control_id => $control){
      </div> <!-- /.col-md-4 -->
 <?php
 	if($this->photoDetails['person_id'] == userID()){
-		print "<div class='col-md-5'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
+		print "<div class='col-md-4'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
 	}
 	else {
-		print "<div class='col-md-5'></div>";
+		print "<div class='col-md-4'></div>";
 	}
 ?>
 	
-     <div class='col-md-4'>
+     <div class='col-md-5'>
 	<div class='btn-group pull-right' role='group'>
   <?php
   foreach($this->rcontrols as $control_id => $control){
@@ -80,7 +80,7 @@ foreach($this->lcontrols as $control_id => $control){
   print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-4 -->
+     </div> <!-- /.col-md-5 -->
 
      <div class='col-md-4'>
   <?php

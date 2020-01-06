@@ -340,6 +340,9 @@ function biodiv_label_icons($type, $str, $what=""){
   case "human":
     return "$str <span class='fa fa-male'/>";
 	break;
+  case "help":
+    return "<i class='fa fa-question'></i> $str $what";
+    break;
   default:
     return $str;
 	break;
@@ -3931,6 +3934,9 @@ function getOrdinal ( $num ) {
 		$finalDigit = $num - 10*intval($num/10);
 		if ( $finalDigit == 1 ) $th = 'er';
 		// may need this for tercer   if ( $finalDigit == 3 ) $th = 'er';
+	}
+	else if ( $lang == "hu-HU" ) {
+		$th = '.';
 	}
 	return ( "" . $num . $th );
 }

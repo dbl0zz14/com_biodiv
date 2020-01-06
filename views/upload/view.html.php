@@ -30,6 +30,37 @@ class BioDivViewUpload extends JViewLegacy
 	  
 	  // Get all the text snippets for this view in the current language
 	  $this->translations = getTranslations("upload");
+	  
+	  // Set the help article - HARDCODED - CHANGE THIS
+	  $help_option = codes_getCode("upload", "help");
+	  //print("help_option: " . $help_option );
+	  $help_details = codes_getDetails($help_option, "help");
+	  $article_id = $help_details["article_id"];
+	  $article = JTable::getInstance("content");
+	  
+	  
+	  $associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $article_id);
+
+	  $langObject = JFactory::getLanguage();
+	  //print ("Tag = " . $langObject->getTag() );
+	  
+	  // If there's an associated article in this language, set the article id to the associated one.
+	  if (array_key_exists($langObject->getTag(), $associations)) {
+		  $article_id = $associations[$langObject->getTag()]->id;
+	  }
+	  
+	  
+	  $article->load($article_id); 
+  //	  print_r($article);
+	  
+	  // Default the title and introtext
+	  $this->title = "Help";
+	  $this->introtext = 0;
+	  
+      if ( $article_id ) {
+		$this->title = $article->title;
+		$this->introtext = $article->introtext;
+	  }
 
 	  $this->root = JURI::root() . "?option=com_biodiv";
 	  $this->site_id = $app->getUserStateFromRequest('com_biodiv.site_id', 'site_id',0);

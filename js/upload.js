@@ -1,4 +1,27 @@
 jQuery(document).ready(function(){
+	
+	// Get the browser timezone name
+	const tzid = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	console.log("Timezone: " + tzid);
+	
+	// Default the camera timezone to the browser timezone
+	//let zoneOptions = document.getElementById("timezone").options;
+	let tzIndex = -1;
+	let tzEl = document.getElementById(tzid);
+	if ( tzEl ) {
+		tzIndex = tzEl.index;
+	}
+	
+	if ( tzIndex > -1 ) {
+		document.getElementById("timezone").selectedIndex = tzIndex;
+	}
+	
+	jQuery('.mw_help').click(function (){
+		console.log("Display help");
+		jQuery('#help_modal').modal('show');		
+	});
+	
+	
 	var pickerOptions = {"format": "yyyy-mm-dd",
 			     "startDate": BioDiv.min_date,
 			     "endDate": BioDiv.max_date};

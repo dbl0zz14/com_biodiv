@@ -16,7 +16,14 @@ showMessages();
 
 <h1><?php print $this->translations['upload_im']['translation_text'] . ' ' . $this->site_name . ' ' . $this->translations['id']['translation_text'] . ' ' . $this->site_id; ?></h1>
 
-<?php if ($this->previous_upload_id){
+
+
+<?php 
+
+print "<button type='button' class='btn btn-danger mw_help' style='margin-top:10px' data-dismiss='modal'>".biodiv_label_icons("help", $this->translations['help']['translation_text'])."</button>";
+
+
+if ($this->previous_upload_id){
   print "<h3>" . $this->translations['last_up']['translation_text'] . "</h3>\n";
   print "<p>" . $this->translations['last_at']['translation_text'] . " ". $this->previous_upload_date;
   if($this->previous_collection_date){
@@ -32,9 +39,47 @@ showMessages();
 
 <h1><?php print $this->translations['start_new']['translation_text'] ?></h1>
 
+
 <form role='form' action='<?php print $this->root . "&task=add_upload";?>&site_id=<?php print $this->site_id;?>'
  method='post' class='form-inline'>
 <div class='container'>
+<div class='row' style="margin-top:10px;">
+  <div class='col-sm-6 col-md-8'>
+    <div class='form-group'>
+    <?php  
+      $timezone_text = $this->translations['timezone']['translation_text'];
+	  $dst_text = $this->translations['dst']['translation_text'];
+	  $dst_yes = $this->translations['dst_yes']['translation_text'];
+	  $dst_no = $this->translations['dst_no']['translation_text'];
+	  $timezone_abbreviations = DateTimeZone::listAbbreviations();
+	  $timezone_ids = DateTimeZone::listIdentifiers();
+	  
+	  print  "<label for='timezone' style='width:30em'>$timezone_text</label>";
+	  
+	  print  "<select id='timezone' name ='timezone' class='form-control'/>\n";
+	  print  "<option value='' disabled selected hidden>".$this->translations['pls_select']['translation_text']."</option>";
+	  
+	  // Make UTC the first option:
+	  $utc = array_pop($timezone_ids);
+	  print "<option id='UTC'>$utc</option>\n"; // - UTC+00:00</option>\n";
+	  foreach ($timezone_ids as $zone_id) {
+		print "<option id='$zone_id'>" . $zone_id . "</option>\n";
+	  }
+	  print "</select>";
+	  
+	  print  "<label for='dst' style='width:30em; margin-top:10px;'>$dst_text</label>\n";
+	  
+	  print  "<div><input type='radio' id='dst_yes' name ='dst' value='1'> " . $dst_yes . "</div>";
+	  
+	  print  "<div><input type='radio' id='dst_no' name ='dst' value='0' checked> " . $dst_no . "</div>";
+	  
+	?>
+
+    </div> <!-- /.form-group -->
+  </div> <!-- /.col -->
+  
+
+</div>  <!--div class='row' -->
 
 <?php
 
@@ -70,20 +115,20 @@ foreach(array("Deployment", "Collection") as $field){
   
   }
   
+  
 ?>
-<div class='row'>
-
+<div class="row" style="margin-top:10px;">
 <div class='col-sm-6 col-md-2'>
    <div class='form-group'>
   <?php print  "<label for='${lfield}_date' style='width: 10em'>$date_text</label>\n";?>
   <?php print "<input type='text' size='10' class='form-control' name='${lfield}_date' id='${lfield}_date'/>";?>
   </div>
-</div> 
+</div> <!-- /.col -->
 
-<div class='col-sm-6 col-md-2'>
+<div class='col-sm-6 col-md-6'>
       <div class='form-group'>
       <?php  
-      print  "<label for='${lfield}_time' style='width:10em'>$time_text</label>\n";
+      print  "<label for='${lfield}_time' style='width:30em'>$time_text</label>\n";
 
 
   //$hours = $defaultHours[$lfield];
@@ -130,10 +175,43 @@ foreach(array("Deployment", "Collection") as $field){
 
 
 
-  <div><button type='submit' id='add_upload' class='btn btn-primary'><?php print biodiv_label_icons("upload", $this->translations['upload']['translation_text']);?></button></div>
+  <div style="margin-top:15px;">
+	<button type='submit' id='add_upload' class='btn btn-primary'><?php print biodiv_label_icons("upload", $this->translations['upload']['translation_text']);?></button>
+	
+  </div>
+
+    
 
 </div> <!-- /.container -->  
 </form>
+
+<div id="help_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><?php print $this->translations['help_title']['translation_text']; ?> </h4>
+      </div>
+      <div class="modal-body">
+<?php
+		if($this->title ){
+			print "<div class='well'>\n";
+			if ( $this->introtext ) {
+				print "<div class='help-article'>".$this->introtext."</div>"; 
+			}
+			print "</div>\n";
+		}
+ ?>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <?php
 JHTML::script("com_biodiv/upload.js", true, true);

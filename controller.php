@@ -688,7 +688,25 @@ class BioDivController extends JControllerLegacy
     $site_id = JRequest::getInt('site_id');
     $site_id or die("No site_id");
     canEdit($site_id, "site") or die("Cannot edit site_id $site_id");
-    
+	
+	$camera_tz = JRequest::getString('timezone');
+	$tz = 0;
+	$utc_offset = 0;
+	$is_dst = 0;
+	if(!strlen($camera_tz)){
+		addMsg('error', "No camera timezone specified");
+    }
+	// Get the offset
+	$tz = IntlTimeZone::createTimeZone($camera_tz);
+	$utc_offset = $tz->getRawOffset()/60000;
+	
+	$is_dst = JRequest::getInt('dst');
+	if ($is_dst == 1 ) {
+		// Adjust the offset from UTC for daylight saving time
+		$utc_offset += $tz->getDSTSavings()/60000;
+	}
+	
+	    
     foreach(array("deployment", "collection") as $dt){
       $date = JRequest::getString("${dt}_date");
       if(!strlen($date)){
@@ -712,6 +730,9 @@ class BioDivController extends JControllerLegacy
       $fields = new StdClass();
       $fields->person_id = userID();
       $fields->site_id = $site_id;
+      $fields->camera_tz = $camera_tz;
+      $fields->is_dst = $is_dst;
+      $fields->utc_offset = $utc_offset;
       $fields->deployment_date = $datetime['deployment'];
       $fields->collection_date = $datetime['collection'];
       $upload_id = codes_insertObject($fields, 'upload');

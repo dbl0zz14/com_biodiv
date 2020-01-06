@@ -88,7 +88,7 @@ foreach ( $this->projects as $project ) {
 		$article->load($assoc_id); 
 		
 		// Truncate in case its long..
-		$project->project_description = substr($article->introtext, 0, 300);
+		$project->project_description = substr($article->introtext, 0, 315);
 	}
 	print '<p>'.$project->project_description.'</p>';
 	print '</div>';
