@@ -1214,6 +1214,98 @@ function projectDetails ( $project_id ) {
   return $projectdetails;
 }
 
+
+
+// Calculate the number of sequences uploaded and the number of sequences with at least one classification for every site for end date given or end of this month
+// Keep it simple by removing all enries for this end date then insert new.
+function calculateSiteStats ( $end_date = null ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$endDatePlus1 = strtotime("first day of next month" );
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	if ( $end_date ) {
+		$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+		$endDate = date('Ymd', strtotime($end_date));
+	}
+	
+	$dateToUse = date('Ymd', $endDatePlus1);
+	
+	$query = $db->getQuery(true)
+		->select("site_id, count(distinct sequence_id) as num from Photo P")
+		->where("uploaded < " . $dateToUse )
+		->group("site_id");
+		
+	$db->setQuery($query);
+	
+	$uploaded = $db->loadAssocList("site_id", "num");
+	
+	$query = $db->getQuery(true)
+		->select("P.site_id, count(distinct P.sequence_id) as num from Photo P")
+		->innerJoin("Animal A on A.photo_id = P.photo_id")
+		->where("A.species != 97")
+		->where("A.timestamp < " . $dateToUse )
+		->group("site_id");
+		
+	$db->setQuery($query);
+	
+	$classified = $db->loadAssocList("site_id", "num");
+	
+	$query = $db->getQuery(true)
+		->delete("SiteStatistics")
+		->where("end_date = " . $endDate);
+		
+	$db->setQuery($query);
+	$result = $db->execute();
+	
+	// Insert using the uploaded sites.
+	foreach ($uploaded as $site_id=>$numLoaded) {
+		$query = $db->getQuery(true)
+			->insert("SiteStatistics")
+			->columns($db->quoteName(array('site_id', 'end_date', 'num_uploaded')))
+			->values("" . $site_id . ", '" . $endDate . "', " . $numLoaded  );
+			
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+	
+	// And update with the num classified
+	foreach ($classified as $site_id=>$numClassified) {
+		$query = $db->getQuery(true)
+			->update("SiteStatistics")
+			->set("num_classified = " . $numClassified )
+			->where("site_id = " . $site_id)
+			->where("end_date = '" . $endDate . "'" );
+			
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+}
+
+// Recalculate site statistics for all sites
+// Use with care this will overwrite existing figures.
+function calculateSiteStatsHistory ( $num_months = null) {
+	
+	$endDate = strtotime("last day of this month");
+	$endDatePlus1 = strtotime("first day of next month" );
+
+	$datesArray = array();
+	
+	// Default to 3 years of data.
+	$numDisplayedMonths = 13;
+	if ( $num_months ) {
+		$numDisplayedMonths = $num_months + 3;
+	}
+  
+	for ( $i=$numDisplayedMonths; $i>=0; $i-- ) {
+		$minusMonths = "-" . $i . " months";
+		$firstOfMonth = strtotime($minusMonths, $endDatePlus1);
+		error_log("calculating for end date " . date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+		calculateSiteStats(date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+	}
+}
+
+
 // Calculate the number of sequences uploaded and the number of sequences with at least one classification for the project given (and children)
 // or for all projects.  Store the results in the Statistics table.  Overwrite a row if it already exists.
 function calculateStats ( $project_id = null, $end_date = null ) {
@@ -1536,6 +1628,495 @@ function calculateAnimalStatistics () {
   
   
 }
+
+
+// Update the SiteAnimals table with count of sightings by site and species where a sighting is at least one classification on a sequence
+function calculateSiteAnimalStatistics () {
+
+  $db = JDatabase::getInstance(dbOptions());
+  
+  print "<br>Inserting new data";
+  
+  $query = $db->getQuery(true);
+  
+  // Call the stored procedure to calculate the stats and populate the SiteAnimals table.
+  $query->call("CalculateSiteAnimals");
+  $db->setQuery($query);
+  $result = $db->execute();
+  
+  // Truncate the FeatureSites table as we're about to recalculate 
+  $db->truncateTable('FeatureSites');
+  
+  // get all the sites we are displaying data for
+  // Don't include any which have ever been in a private project
+  $query = $db->getQuery(true)
+             ->select('S.site_id as site_id, S.latitude as lat, S.longitude as lon')
+			 ->from('Site S')
+			 ->where('S.site_id not in (select PSM.site_id from ProjectSiteMap PSM inner join Project P on P.project_id = PSM.project_id and P.access_level = 3)');
+  $db->setQuery($query);		 
+  $sites = $db->loadAssocList('site_id');
+  
+    // For each site, work out which feature it is in and store in the FeatureSites table
+	// Currently only have display_type "site" but this could be extended for different zoom levels or other types of display eg by country
+  foreach ($sites as $site_id=>$coords) {
+	  print ("<br>site_id: " . $site_id . "coords: " . $coords['lat'] . "," . $coords['lon'] );
+	  
+	  // Get zoom as well
+	  $query = $db->getQuery(true)
+            ->select("F.feature_id")
+			->from("Features F")
+			->where("(".$coords['lon']." > F.west and " . $coords['lon'] . " <= F.east)")
+			->where("(".$coords['lat']." > F.south and " . $coords['lat'] . " <= F.north)")
+			->where("F.display_type = 'site'");
+			 
+	  $db->setQuery($query);		 
+	  $feature_ids = $db->loadColumn();
+	  
+	  $num_features = count($feature_ids);
+	  $feature_site_id = null;
+	  
+	  if ( $num_features == 0 ) {
+		  
+		  print("No existing feature for site,creating new one");
+		  
+		   // Use Location class to get ewns
+		  $loc = new Location($coords['lat'],$coords['lon']);
+		  $e = $loc->getEast();
+		  $w = $loc->getWest();
+		  $s = $loc->getSouth();
+		  $n = $loc->getNorth();
+		  
+		  /*
+		  $query = $db->getQuery(true)
+			->insert("Features")
+			->columns($db->quoteName(array('east', 'west', 'south', 'north', 'display_type')))
+			->values("" . $e . ", " . $w . ", " . $s . ", " . $n . ", 'site'" );
+		  $db->setQuery($query);
+		  $feature_site_id = $db->execute();
+		  */
+		  
+		  // Create and populate an object.
+		  $feature = new stdClass();
+		  $feature->feature_id = null;
+		  $feature->east = $e;
+		  $feature->west = $w;
+		  $feature->south = $s;
+		  $feature->north = $n;
+		  $feature->display_type = 'site';
+		  
+		  // Insert the object into the Features table.
+		  $result = $db->insertObject('Features', $feature, 'feature_id');
+		  
+		  $feature_site_id = $feature->feature_id;
+		  
+		  print ( "<br>Inserted new Feature " . $feature_site_id );
+	  }
+	  else if ( $num_features > 1 ) {
+		  print("<br> Site " . $site_id . " appears in more than one site feature!  Just using first in stats." );
+		  print_r($feature_ids);
+		  $feature_site_id = $feature_ids[0];
+	  }
+	  else {
+		  $feature_site_id = $feature_ids[0];
+	  }
+	  
+	  // Now can insert into FeatureSites
+	  print ( "<br>inserting " . $feature_site_id . ", " . $site_id);
+	
+	  $query = $db->getQuery(true)
+		->insert("FeatureSites")
+		->columns($db->quoteName(array('feature_id', 'site_id')))
+		->values("" . $feature_site_id . ", " . $site_id );
+	  $db->setQuery($query);
+	  $result = $db->execute();
+
+  }
+  
+  print "<br>Complete";
+  
+  
+}
+
+
+function getFeatureSpecies() {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	  
+	// return all species which appear in the SiteAnimals table
+	$query = $db->getQuery(true)
+		->select("distinct O.option_name as name, SA.species as id FROM SiteAnimals SA")
+		->innerJoin("Options O on O.option_id = SA.species")
+		->order("name");
+		
+	$db->setQuery($query);
+	$fs = $db->loadAssocList("id", "name");
+	
+	//Update to be the name in correct language
+	foreach ( $fs as $id=>$name ) {
+		error_log("Updating $fs[$id]");
+		$tr_name = codes_getOptionTranslation ( $id );
+		$fs[$id] = $tr_name;
+		error_log(" new name = " . $tr_name . ", in array: " . $fs[$id]);
+	}
+	
+	// Reorder list after translating
+	asort($fs);
+	
+	return $fs;
+}
+
+
+// Return all sites which are in the FeatureSites table - ir they are within a feature and in a non-private project
+function discoverSites () {
+	
+	error_log("discoverSites");
+	
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("discover");
+	 
+	$sites = $translations["sites"]["translation_text"];
+	  
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	  
+	// Want to get a count of sites for each feature
+	$query->select("F.feature_id, F.west, F.east, F.south, F.north, count(FS.site_id) as num_sites from FeatureSites FS")
+		->innerJoin("Features F on FS.feature_id = F.feature_id and F.display_type = 'site'")
+		->group("F.feature_id");
+
+	$db->setQuery($query);
+	  
+	// Include id...
+	$sites_by_feature = $db->loadAssocList();
+	  
+	$features = array();
+	foreach ( $sites_by_feature as $row ) {
+		  $fid = "" . $row["feature_id"];
+		  $num = $row["num_sites"];
+		  $e = $row["east"];
+		  $w = $row["west"];
+		  $s = $row["south"];
+		  $n = $row["north"];
+		  error_log( "row: " . $fid . ", " . $num );
+		  
+		  // New feature each row as summed over years.
+		  error_log( "adding new feature " . $fid . ", " . $num );
+		  $features[$fid] = array();
+		  $features[$fid]["type"] = "Feature";
+		  $features[$fid]["properties"] = array();
+		  $features[$fid]["properties"]["stroke"] = false;
+		  $features[$fid]["properties"]["site_count"] = $num;
+		  $features[$fid]["geometry"] = array();
+		  $features[$fid]["geometry"]["type"] = "Polygon";
+		  $features[$fid]["geometry"]["coordinates"] = [[[$e,$s],[$w,$s],[$w,$n],[$e,$n],[$e,$s]]];
+		  error_log( "added new feature " . $fid . ", " . $num );
+		  
+	}
+	  
+	return array (
+			"features" => array_values($features),
+			"sites" => $sites
+			);
+}
+
+// Return some animal sightings data for the sites within this area
+function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months = 12  ) {
+	
+	error_log("discoverData(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
+	
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("discover");
+	  
+	  
+	//$coords = "(".$lat_start.$translations["s"]["translation_text"].",".$lon_start.$translations["w"]["translation_text"]." to ";
+	//$coords .= $lat_end.$translations["n"]["translation_text"].",".$lon_end.$translations["e"]["translation_text"] . ")";
+	$coords = $translations["lat"]["translation_text"]. " " . $lat_start . " " . $translations["to"]["translation_text"] . " " . $lat_end . ", ";
+	$coords .= $translations["lon"]["translation_text"]. " " . $lon_start . " " . $translations["to"]["translation_text"] . " " . $lon_end ;
+	$title = $translations["up_class"]["translation_text"] . " " . $coords ;
+	
+	//$numDisplayedMonths = 6;
+	$interval_in_months = 1;
+    $numDisplayedMonths = $num_months + $interval_in_months;
+	$end_date = null;
+    if ( $end_date == null ) {
+	  $endDatePlus1 = strtotime("first day of next month" );
+	  $endDate = strtotime("last day of this month");
+    }
+    else {
+	  $endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+	  $endDate = strtotime($end_date);
+    }
+  
+	$datesArray = array();
+	$labelsArray = array();
+	for ( $i=$numDisplayedMonths; $i>0; $i-=$interval_in_months ) {
+	  //$dateStr = "first day of next month -" . $i . " months";
+	  $minusMonths = "-" . $i . " months";
+	  $months = $i-$interval_in_months+1;
+	  $labelStr = "- " . $months . " months";
+	  $dateMinusMonths = strtotime($minusMonths, $endDatePlus1);
+	  //array_push ( $datesArray, date('Y-m-d H:i:s', strtotime($dateStr)) );
+	  array_push ( $datesArray, date('Ymd', strtotime("-1 day", $dateMinusMonths)) );
+	  array_push ( $labelsArray, date('M Y', strtotime($labelStr, $endDatePlus1)) );
+	  //array_push ( $labelsArray, $i-$interval_in_months+1 );
+	}
+	//array_push ( $datesArray, date('Ymd', strtotime("first day of next month")) );
+	array_push ( $datesArray, date('Ymd', strtotime("-1 day", $endDatePlus1)) );
+  
+	// Select number of sequences uploaded and number classified up to each of our dates.
+	$numIntervals = count($datesArray)-1;
+	//print "num intervals = " . $numIntervals;
+  
+	$uploadedArray = array();
+	$classifiedArray = array();
+	$db = JDatabase::getInstance(dbOptions());
+  
+	for ( $j=0; $j<$numIntervals; $j++ ) {
+		$query = $db->getQuery(true)
+			->select("sum(num_uploaded), sum(num_classified) from SiteStatistics SS")
+			->innerJoin("Site S on SS.site_id = S.site_id")
+			->where("S.latitude >= " . $lat_start . " and S.latitude < " . $lat_end )
+			->where("S.longitude >= " . $lon_start . " and S.longitude < " . $lon_end )
+			->where("end_date = " . $datesArray[$j+1] );
+		$db->setQuery($query);
+	
+		$row = $db->loadRow();
+	
+		array_push ( $uploadedArray, $row['0'] );
+		array_push ( $classifiedArray, $row['1'] );
+	}
+
+  
+	$discoverData = array ( 
+		"labels" => $labelsArray,
+		"uploaded" => $uploadedArray,
+		"classified" => $classifiedArray,
+		"cla_label" => $translations["classified"]["translation_text"],
+		"upl_label" => $translations["uploaded"]["translation_text"],
+		"title" => $title
+		
+		);
+  
+  
+	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+	//print implode(",", $projectdetails);
+  
+	return $discoverData;
+}
+
+
+// Return some animal sightings data for the sites within this area
+function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_species = null, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
+	
+	error_log("discoverAnimals(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
+	
+	// Get all the text snippets for this view in the current language
+	  $translations = getTranslations("discover");
+	  
+	  
+	  //$coords = "(".$lat_start.$translations["s"]["translation_text"].",".$lon_start.$translations["w"]["translation_text"]." to ";
+	  //$coords .= $lat_end.$translations["n"]["translation_text"].",".$lon_end.$translations["e"]["translation_text"] . ")";
+	  $coords = $translations["lat"]["translation_text"]. " " . $lat_start . " " . $translations["to"]["translation_text"] . " " . $lat_end . ", ";
+	  $coords .= $translations["lon"]["translation_text"]. " " . $lon_start . " " . $translations["to"]["translation_text"] . " " . $lon_end ;
+	  $title = $translations["sights"]["translation_text"] . " " . $coords ;
+	
+	
+	  // Note that for now we are summing over the years to get total sightings
+	  $db = JDatabase::getInstance(dbOptions());
+	  $query = $db->getQuery(true);
+	  
+	  $query->select("SA.species as option_id, O.option_name as species, sum(num_sightings) as num_sightings FROM SiteAnimals SA")
+		->innerJoin("Options O on SA.species = O.option_id")
+		->innerJoin("Site S on SA.site_id = S.site_id")
+		->where("S.latitude between " . $lat_start . " and " . $lat_end . " and S.longitude between " . $lon_start . " and " . $lon_end)
+		->group("SA.species")
+		->order("num_sightings  DESC");
+		
+	  $db->setQuery($query);
+	  
+	  // Include id...
+	  $animals_w_id = $db->loadAssocList('species');
+	  
+	  $animals = $db->loadAssocList('species', 'num_sightings');
+	  //$animals = array_column($animals_w_id, 'num_animals', 'species');
+	  
+	  // Remove human and nothing if not to be included
+	  if ( !$include_human ) {
+		  unset($animals['Human']);
+		  $array_changed = true;
+	  }
+	  if ( !$include_nothing ) {
+		  unset($animals['Nothing']);
+		  $array_changed = true;
+	  }
+	   if ( !$include_dontknow ) {
+		  unset($animals["Don't Know"]);
+		  $array_changed = true;
+	  }
+	  
+	  // Remove Likes
+	  unset($animals["Like"]);
+	  $array_changed = true;
+	  
+	  // If we had to change the key names we need to re-sort the array
+	  if ( $array_changed ) {
+		  arsort($animals);
+	  }
+	   
+	  $animals_to_return_en = array();
+	  // Finally handle the number of species, if we have more than required
+	  // NB Other is a possible option so combine this with Other Species if we have both
+	  $num_other = 0;
+	  
+	  if ( key_exists("Other", $animals) ) {
+		$num_other = $animals["Other"];
+		$animals = akrem($animals, "Other");
+	  }
+	  
+	  if ( $num_species && (count($animals) > $num_species) ) {
+		  $animals_to_return_en = array_slice($animals, 0, $num_species-1);
+		  $total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
+		  $animals_to_return_en['Other Species'] = "" + $total_other;
+	  }
+	  else {
+		  $animals_to_return_en = $animals;
+	  }
+	  
+	  $animals_to_return = array();
+	  foreach ( $animals_to_return_en as $sp=>$num ) {
+		  error_log( "animal row: " . $sp . ", " . $num );
+		  if ( $sp == "Other Species" ) {
+			  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+		  }
+		  else {
+			  $animals_to_return[codes_getName($animals_w_id[$sp]["option_id"], "speciestran")] = $num;
+		  }
+	  }
+	  
+	  // Quick fix?
+	  if ( count($animals_to_return) == 0 ) {
+		  $animals_to_return["All"] = 0;
+	  }
+	  
+	  return array (
+			"labels" => array_keys($animals_to_return),
+			"animals" => array_values($animals_to_return),
+			"title" => $title
+			);
+
+}
+
+// Return some animal sightings data for the sites within this area
+function discoverSpecies ( $species_id, $year = null  ) {
+	
+	error_log("discoverSpecies(" . $species_id . ", ". $year . ")");
+	
+	// Get all the text snippets for this view in the current language
+	  $translations = getTranslations("discover");
+	  
+	  $tr_sp_name = codes_getOptionTranslation($species_id);
+	  
+	  $title = $translations["species"]["translation_text"] . " - " . $tr_sp_name;
+	
+	  $db = JDatabase::getInstance(dbOptions());
+	  $query = $db->getQuery(true);
+	  
+	  // Let's do each year plus sum over all years
+	  // If no year is specified, sum over all years
+	  $query->select("F.feature_id, F.west, F.east, F.south, F.north, sum(SA.num_sightings) as num_sightings, SA.year_taken from SiteAnimals SA")
+			->innerJoin("FeatureSites FS on FS.site_id = SA.site_id")
+			->innerJoin("Features F on FS.feature_id = F.feature_id and F.display_type = 'site'")
+			->where("SA.species = " . $species_id )
+			->group("F.feature_id, SA.year_taken");
+	  $db->setQuery($query);
+	  
+	  $sightings_by_year = $db->loadAssocList();
+	  
+	  $queryall = $db->getQuery(true)
+	    ->select("F.feature_id, F.west, F.east, F.south, F.north, sum(SA.num_sightings) as num_sightings from SiteAnimals SA")
+		->innerJoin("FeatureSites FS on FS.site_id = SA.site_id")
+		->innerJoin("Features F on FS.feature_id = F.feature_id and F.display_type = 'site'")
+		->where("SA.species = " . $species_id )
+		->group("F.feature_id");
+	  $db->setQuery($queryall);
+	  
+	  $all_sightings = $db->loadAssocList();
+	  
+	  $queryall = $db->getQuery(true)
+	    ->select("SA.year_taken as year, sum(SA.num_sightings) as num_sightings from SiteAnimals SA")
+		->where("SA.species = " . $species_id . " and SA.year_taken != 0" )
+		->group("SA.year_taken");
+  
+	  $db->setQuery($queryall);
+	  
+	  // Include id...
+	  $totals_by_year = $db->loadAssocList();
+	  
+	  //error_log ("Found " . count($all_sightings) . " for all years for species " . $species_id);
+	  
+	  $features = array();
+	  foreach ( $all_sightings as $sighting ) {
+		  $fid = "" . $sighting["feature_id"];
+		  $num = $sighting["num_sightings"];
+		  $e = $sighting["east"];
+		  $w = $sighting["west"];
+		  $s = $sighting["south"];
+		  $n = $sighting["north"];
+		  //error_log( "sighting: " . $fid . ", " . $num );
+		  
+		  // New feature each row as summed over years.
+		  //error_log( "adding new feature " . $fid . ", " . $num );
+		  $features[$fid] = array();
+		  $features[$fid]["type"] = "Feature";
+		  $features[$fid]["properties"] = array();
+		  $features[$fid]["properties"]["stroke"] = false;
+		  $features[$fid]["properties"]["all"] = $num;
+		  $features[$fid]["geometry"] = array();
+		  $features[$fid]["geometry"]["type"] = "Polygon";
+		  $features[$fid]["geometry"]["coordinates"] = [[[$e,$s],[$w,$s],[$w,$n],[$e,$n],[$e,$s]]];
+		  //error_log( "added new feature " . $fid . ", " . $num );
+		  
+	  }
+	  
+	  // By this point should have a feature for all years for all features.  Now add the year by year counts.
+	  foreach ( $sightings_by_year as $sighting ) {
+		  $fid = "" . $sighting["feature_id"];
+		  $num = $sighting["num_sightings"];
+		  $e = $sighting["east"];
+		  $w = $sighting["west"];
+		  $s = $sighting["south"];
+		  $n = $sighting["north"];
+		  $y = $sighting["year_taken"];
+		  //error_log( "sighting: " . $fid . ", " . $num );
+		  
+		  // Just add the year as rest should be there.
+		  //error_log( "adding new year " . $fid . ", " . $num . ", " . $y );
+		  $features[$fid]["properties"]["".$y] = $num;
+		  //error_log( "added new year for feature " . $fid . ", " . $num . ", " . $y);
+		  
+	  }
+	  
+	  $totals = array();
+	  foreach ( $totals_by_year as $total ) {
+		  $year = $total["year"];
+		  $num = $total["num_sightings"];
+		  		  
+		  // New total for each year, ignore zeros for now.
+		  //error_log( "adding new total for year " . $year . ", " . $num );
+		  $totals["" . $year] = $num;
+		  
+	  }
+	  
+	  
+	  //error_log("discoverSpecies about to return "  );
+	  
+	  return array (
+			"features" => array_values($features),
+			"totals" => $totals,
+			"title" => $title
+			);
+}
+
 
 
 // Return some upload and classification data for the project (used in displaying charts)
@@ -3892,12 +4473,12 @@ function getTranslations ( $view ) {
 	$langObject = JFactory::getLanguage();
 	$lang = $langObject->getTag();
 	
-	error_log("language = " . $lang);
+	//error_log("language = " . $lang);
 	
 	// Check language is supported.  If not, default to English.
 	if (!isLanguageSupported($lang)) $lang = "en-GB";
 	
-	error_log ("using language " . $lang );
+	//error_log ("using language " . $lang );
 	$query = $db->getQuery(true);
 	$query->select("translation_key, translation_text")
 		->from("Translation")

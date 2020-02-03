@@ -1,7 +1,14 @@
+# 03/02/20 - Version 3.1.1   #
+* Discover menu item added
+* Some basic data vis added: view stats by map area, view species across whole map, view sites across whole map
+
+# Version 3.1.0   #
+* Timezones
+* Timezone data requested on upload
+
 # 10/10/19 - Version 3.0.0   #
 * Multilingual version of MammalWeb
 * Location button on Spotter screen
-
 
 # 17/7/19 - Version 2.6.3   #
 * New Add Site multi page form to make adding sites less error-prone

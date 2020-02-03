@@ -33,6 +33,15 @@ class BioDivViewCalculatestats extends JViewLegacy
 			$this->calcTotals = JRequest::getInt("calc_totals");
 			$this->calcLeagueTable = JRequest::getInt("calc_leaguetable");
 			$this->calcAnimals = JRequest::getInt("calc_animals");
+			
+			// Calculate animals by site and by year - populates Features, FeatureSites and SiteAnimals tables
+			$this->calcSiteAnimals = JRequest::getInt("site_animals");
+			
+			// Calculate uploads and classifications by site - populates SiteStatistics table
+			$this->calcSiteStats = JRequest::getInt("site_stats");
+			
+			// As site_stats but populates/overwrites historical dates - use with care.
+			$this->calcSiteHistory = JRequest::getInt("site_hist");
 		
 			parent::display($tpl);
         }

@@ -12,8 +12,12 @@ $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
 if ( $this->photo_id ) {
   $document->addScriptDeclaration("BioDiv.curr_photo = ".$this->photo_id.";");
-  $document->addScriptDeclaration("BioDiv.latitude = ".$this->location->getAreaLat().";");
-  $document->addScriptDeclaration("BioDiv.longitude = ".$this->location->getAreaLon().";");
+  //$document->addScriptDeclaration("BioDiv.latitude = ".$this->location->getAreaLat().";");
+  //$document->addScriptDeclaration("BioDiv.longitude = ".$this->location->getAreaLon().";");
+  $document->addScriptDeclaration("BioDiv.south = ".$this->location->getSouth().";");
+  $document->addScriptDeclaration("BioDiv.west = ".$this->location->getWest().";");
+  $document->addScriptDeclaration("BioDiv.north = ".$this->location->getNorth().";");
+  $document->addScriptDeclaration("BioDiv.east = ".$this->location->getEast().";");
 }
 
 if(!$this->photo_id){

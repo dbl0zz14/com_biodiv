@@ -19,6 +19,18 @@ else if ($this->calcAnimals == 1 ) {
 	print "Calculating animal statistics <br>";
 	calculateAnimalStatistics();
 }
+else if ($this->calcSiteStats == 1 ) {
+	print "Calculating site statistics <br>";
+	calculateSiteStats();
+}
+else if ($this->calcSiteHistory == 1 ) {
+	print "Calculating site statistics history<br>";
+	calculateSiteStatsHistory();
+}
+else if ($this->calcSiteAnimals == 1 ) {
+	print "Calculating site animal statistics <br>";
+	calculateSiteAnimalStatistics();
+}
 else if ($this->calcTotals == 1) {
 	print "Calculating totals.<br>";
 	calculateStatsTotals();

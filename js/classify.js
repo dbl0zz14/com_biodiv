@@ -53,26 +53,40 @@ jQuery(document).ready(function(){
 		jQuery('#no_map').hide();
 		
 		try{
-			let lat = parseFloat(BioDiv.latitude);
-			let lng = parseFloat(BioDiv.longitude);
-			//console.log("lat = " + lat);
-			//console.log("lng = " + lng);
 			
-			let myLatlng = new google.maps.LatLng(lat, lng);
+			let south = parseFloat(BioDiv.south);
+			let west = parseFloat(BioDiv.west);
+			let north = parseFloat(BioDiv.north);
+			let east = parseFloat(BioDiv.east);
+			
+			let sw = new google.maps.LatLng(south, west);
+			let ne = new google.maps.LatLng(north, east);
+			
+			let posBounds = new google.maps.LatLngBounds (sw, ne);
 		
-			let myOptions = {
-				zoom: 5,
-				center: myLatlng,
+			let mapOptions = {
+				zoom: 8,
+				center: sw,
 				mapTypeId: google.maps.MapTypeId.TERRAIN
 			}
 			
-			var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+			var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 			
-			var marker = new google.maps.Marker({
-				position: myLatlng, 
+			let rectOptions = {
+				bounds: posBounds,
+				fillColor: "#00ba8a",
+				fillOpacity: 0.5,
+				strokeWeight: 1,
+				//strokeColour: "red",
+				//strokeOpacity: 0.5,
 				map: map,
 				draggable:false
-			});
+			}
+			
+			var rect = new google.maps.Rectangle(
+				rectOptions
+			);
+			
 		}
 		catch(err){
 			console.log("No location given");

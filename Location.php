@@ -22,6 +22,17 @@ class Location {
 		$this->lon = $lon;
 		$this->areaLat = round($lat, 1);
 		$this->areaLon = round($lon, 1);
+		//nb this gives south west corner of the .2 x .1 rectangle the point lies in.
+		$this->south = floor($lat*10)/10;
+		$this->west = floor($lon*5)/5;
+		$this->north = $this->south + 0.1;
+		$this->east = $this->west + 0.2;
+		
+		// Correct for lat/lon falling outside range
+		if ( $this->south < -90 ) $this->south += 90;
+		if ( $this->west < -180 ) $this->west += 360;
+		if ( $this->north > 90 ) $this->north -= 90;
+		if ( $this->east > 180 ) $this->east -= 360;
 	}
 	
 	function getLat () {
@@ -39,6 +50,22 @@ class Location {
 	function getAreaLon () {
 		return $this->areaLon;
 	}
+	
+	function getSouth () {
+		return $this->south;
+	}
+	
+	function getWest () {
+		return $this->west;
+	}
+	function getNorth () {
+		return $this->north;
+	}
+	
+	function getEast () {
+		return $this->east;
+	}
+	
 	
 	
 }
