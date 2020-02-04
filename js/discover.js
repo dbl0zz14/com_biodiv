@@ -2,10 +2,8 @@
 
 jQuery(document).ready(function () {
 	
-	// Should really have all this in an object
-	var areaCovered = {min_lat:35, max_lat:65, min_lon:-15, max_lon:35, lat_spacing:5, lon_spacing:8};
+	const areaCovered = {min_lat:35, max_lat:65, min_lon:-15, max_lon:35, lat_spacing:5, lon_spacing:8, high_zoom:9, min_zoom:4};
 	
-	//var siteGroup;
 	var geojsonAreas;
 	var geojsonSpecies;
 	var legend;
@@ -74,15 +72,18 @@ jQuery(document).ready(function () {
 	showSites = function (){
 		if ( geojsonSites ) {
 			discovermap.addLayer(geojsonSites);
-			discovermap.getPane('sites').style.zIndex = 402;
+			discovermap.getPane('sites').style.zIndex = 403;
 			if ( discovermap.getPane('species') ) {
-				discovermap.getPane('species').style.zIndex = 401;
+				discovermap.getPane('species').style.zIndex = 402;
+			}
+			if ( discovermap.getPane('areas') ) {
+				discovermap.getPane('areas').style.zIndex = 401;
 			}
 			sitesShown = true;
 		}
 		else {
 		
-			url = BioDiv.root + "&view=discoversites&format=raw";
+			let url = BioDiv.root + "&view=discoversites&format=raw";
 			
 			jQuery.ajax(url, {'success': function(data) {
 				// Now get the json data into the chart and display it.
@@ -111,9 +112,12 @@ jQuery(document).ready(function () {
 				discovermap.createPane('sites');
 				
 				// Toggle panes so sites on top
-				discovermap.getPane('sites').style.zIndex = 402;
+				discovermap.getPane('sites').style.zIndex = 403;
 				if ( discovermap.getPane('species') ) {
-					discovermap.getPane('species').style.zIndex = 401;
+					discovermap.getPane('species').style.zIndex = 402;
+				}
+				if ( discovermap.getPane('areas') ) {
+					discovermap.getPane('areas').style.zIndex = 401;
 				}
 
 				geojsonSites = L.geoJson(discoverAreas, {
@@ -143,23 +147,51 @@ jQuery(document).ready(function () {
 		
 		var features = [];
 		
-		var i,j;
-		for ( i = areaCovered.min_lat; i < areaCovered.max_lat; i += areaCovered.lat_spacing ) {
-			for ( j = areaCovered.min_lon; j < areaCovered.max_lon; j += areaCovered.lon_spacing ) {
+		let zoom = discovermap.getZoom();
+		
+		let south = areaCovered.min_lat;
+		let north = areaCovered.max_lat;
+		let west = areaCovered.min_lon;
+		let east = areaCovered.max_lon;
+		
+		if ( zoom > areaCovered.high_zoom ) {
+			
+			console.log("High zoom");
+			
+			// High level of zoom so only consider part of the map
+			let bounds = discovermap.getBounds();
+			let center = bounds.getCenter();
+			
+			south = Math.floor((center.lat - 2)*10)/10;
+			south = Math.max(south, areaCovered.min_lat);
+			north = south + 4;
+			
+			west = Math.floor((center.lng - 4)*5)/5;
+			west = Math.max(west, areaCovered.min_lon);
+			east = west + 8;
+		}
+		
+		console.log("Zoom = " + zoom );
+		console.log("south = " + south + ", north = " + north + ", west = " + west + ", east = " + east ); 
+		let i = 0;
+		let j = 0;
+		for ( i = south; i < north; i += areaCovered.lat_spacing ) {
+			for ( j = west; j < east; j += areaCovered.lon_spacing ) {
 				let s = j;
 				let n = j + areaCovered.lon_spacing;
 				let w = i;
-				let e = i + areaCovered.lat_spacing
+				let e = i + areaCovered.lat_spacing;
 				features.push( {"type": "Feature",  
 								"properties": {
 									"stroke": false,
-									"popuptext": "[" + s + "," + w + "]-[" + n + ", " + e + "]",
+									"popuptext": "[" + s.toFixed(1) + "," + w.toFixed(1) + "]-[" + n.toFixed(1) + ", " + e.toFixed(1) + "]",
 									
 								  },  
 								"geometry": {	"type": "Polygon",	"coordinates": [  [[ s,w],[ n,w],[n,e],[s,e],[s,w]] ] }	
 				});
 			}
 		}
+		
 		
 		var discoverAreas = {
 		  "type": "FeatureCollection",
@@ -184,9 +216,26 @@ jQuery(document).ready(function () {
 				fillOpacity: 0
 			};
 		}
+		
+		if ( !discovermap.getPane('areas') ) {
+			discovermap.createPane('areas');
+		}
+		
+		// Toggle which pane is on top - species
+		discovermap.getPane('areas').style.zIndex = 649;
+		console.log("Set areas zindex to 649");
+		if ( discovermap.getPane('site') ) {
+			console.log("Setting site zindex to 401");
+			discovermap.getPane('site').style.zIndex = 402;
+		}
+		if ( discovermap.getPane('species') ) {
+			console.log("Setting species zindex to 401");
+			discovermap.getPane('species').style.zIndex = 401;
+		}
 
 		geojsonAreas = L.geoJson(discoverAreas, {
 			style: style,
+			pane: 'areas',
 			onEachFeature: onEachFeature
 		}).addTo(discovermap);
 		
@@ -230,7 +279,7 @@ jQuery(document).ready(function () {
 		var speciesId = speciesSelect.options[speciesSelect.selectedIndex].value;
 		
 		if ( speciesId ) {
-			url = BioDiv.root + "&view=discoverspecies&format=raw&species=" + speciesId;
+			let url = BioDiv.root + "&view=discoverspecies&format=raw&species=" + speciesId;
 	
 			jQuery.ajax(url, {'success': function(data) {
 				// Now get the json data into the chart and display it.
@@ -261,10 +310,14 @@ jQuery(document).ready(function () {
 				}
 				
 				// Toggle which pane is on top - species
-				discovermap.getPane('species').style.zIndex = 402;
+				discovermap.getPane('species').style.zIndex = 403;
 				if ( discovermap.getPane('site') ) {
 					console.log("Setting site zindex to 401");
-					discovermap.getPane('site').style.zIndex = 401;
+					discovermap.getPane('site').style.zIndex = 402;
+				}
+				if ( discovermap.getPane('areas') ) {
+					console.log("Setting areas zindex to 401");
+					discovermap.getPane('areas').style.zIndex = 401;
 				}
 
 				geojsonSpecies = L.geoJson(discoverAreas, {
@@ -354,7 +407,7 @@ jQuery(document).ready(function () {
 	}
 	
 	var discovermap = L.map('discovermap').setView([51, 10], 4);
-	discovermap.options.minZoom = 4;
+	discovermap.options.minZoom = areaCovered.min_zoom;
 	
 	
 	discovermap.on('zoomend', function(e) {
@@ -365,7 +418,9 @@ jQuery(document).ready(function () {
 		
 		let bounds = e.target.getBounds();
 		
-		//discovermap.fitBounds(bounds);
+		console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
+		
+		discovermap.fitBounds(bounds);
 		
 		let lat_spacing = 4;
 		let lon_spacing = 8;
@@ -373,9 +428,17 @@ jQuery(document).ready(function () {
 			lat_spacing = 2;
 			lon_spacing = 4;
 		}
-		else if ( zoom > 6 ) {
+		else if ( zoom > 6 && zoom <= 7) {
 			lat_spacing = 1;
 			lon_spacing = 2;
+		}
+		else if ( zoom > 7 && zoom <= 9 ) {
+			lat_spacing = 0.5;
+			lon_spacing = 1;
+		}
+		else if (zoom > 9 ) {
+			lat_spacing = 0.1;
+			lon_spacing = 0.2;
 		}
 		
 		areaCovered.lat_spacing = lat_spacing;
@@ -385,7 +448,61 @@ jQuery(document).ready(function () {
 			showAreas();			
 		}
 	});
+	/*
+	discovermap.on('panend', function(e) {
+		
+		console.log("checking areas after pan");
 	
+		let zoom = discovermap.getZoom();
+		
+		// Only worried if zoom level > 9, in which case we want to reduce the area grid
+		
+		if ( zoom > 9 ) {
+			let bounds = e.target.getBounds();
+		
+			console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
+		
+			discovermap.fitBounds(bounds);
+			
+			area_covered.min_lat = bounds.getCenter() - 
+			
+			areaCovered.lat_spacing = lat_spacing;
+			areaCovered.lon_spacing = lon_spacing;
+		}
+		
+		let bounds = e.target.getBounds();
+		
+		console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
+		
+		discovermap.fitBounds(bounds);
+		
+		let lat_spacing = 4;
+		let lon_spacing = 8;
+		if ( zoom > 5 && zoom <= 6 ) {
+			lat_spacing = 2;
+			lon_spacing = 4;
+		}
+		else if ( zoom > 6 && zoom <= 7) {
+			lat_spacing = 1;
+			lon_spacing = 2;
+		}
+		else if ( zoom > 7 && zoom <= 9 ) {
+			lat_spacing = 0.5;
+			lon_spacing = 1;
+		}
+		else if (zoom > 9 ) {
+			lat_spacing = 0.1;
+			lon_spacing = 0.2;
+		}
+		
+		areaCovered.lat_spacing = lat_spacing;
+		areaCovered.lon_spacing = lon_spacing;
+	
+		if ( areasShown ) {
+			showAreas();			
+		}
+	});
+	*/
 	
 	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 11,
@@ -433,7 +550,17 @@ jQuery(document).ready(function () {
 	function showAreaCharts(e) {
 		let bounds = e.target.getBounds();
 		
-		url = BioDiv.root + "&view=discoveranimals&format=raw&latstart=" + bounds.getSouth() + "&latend=" + bounds.getNorth() + "&lonstart=" + bounds.getWest() + "&lonend=" + bounds.getEast();
+		// Round the coordinates
+		
+		let south = bounds.getSouth().toFixed(1);
+		let north = bounds.getNorth().toFixed(1);
+		let west = bounds.getWest().toFixed(1);
+		let east = bounds.getEast().toFixed(1);
+		
+		
+		let url = BioDiv.root + "&view=discoveranimals&format=raw&latstart=" + south + "&latend=" + north + "&lonstart=" + west + "&lonend=" + east;
+		
+		console.log("Calling server with url: " + url );
 	
 		jQuery.ajax(url, {'success': function(data) {
 			console.log("discover data is " + data);
@@ -489,7 +616,7 @@ jQuery(document).ready(function () {
 			
 		} });
 		
-		url2 = BioDiv.root + "&view=discoverdata&format=raw&latstart=" + bounds.getSouth() + "&latend=" + bounds.getNorth() + "&lonstart=" + bounds.getWest() + "&lonend=" + bounds.getEast();
+		let url2 = BioDiv.root + "&view=discoverdata&format=raw&latstart=" + bounds.getSouth() + "&latend=" + bounds.getNorth() + "&lonstart=" + bounds.getWest() + "&lonend=" + bounds.getEast();
 	
 		jQuery.ajax(url2, {'success': function(data) {
 			

@@ -35,13 +35,13 @@ class BioDivViewDiscoverAnimals extends JViewLegacy
 		
 		$app = JFactory::getApplication();
 		$this->lat_start =
-		(int)$app->getUserStateFromRequest('com_biodiv.latstart', 'latstart');
+		(float)$app->getUserStateFromRequest('com_biodiv.latstart', 'latstart');
 		$this->lat_end =
-		(int)$app->getUserStateFromRequest('com_biodiv.latend', 'latend');
+		(float)$app->getUserStateFromRequest('com_biodiv.latend', 'latend');
 		$this->lon_start =
-		(int)$app->getUserStateFromRequest('com_biodiv.lonstart', 'lonstart');
+		(float)$app->getUserStateFromRequest('com_biodiv.lonstart', 'lonstart');
 		$this->lon_end =
-		(int)$app->getUserStateFromRequest('com_biodiv.lonend', 'lonend');
+		(float)$app->getUserStateFromRequest('com_biodiv.lonend', 'lonend');
 		
 		
 		$this->data = discoverAnimals ( $this->lat_start, $this->lat_end, $this->lon_start, $this->lon_end, 7 );
