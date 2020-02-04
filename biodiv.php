@@ -1218,6 +1218,7 @@ function projectDetails ( $project_id ) {
 
 // Calculate the number of sequences uploaded and the number of sequences with at least one classification for every site for end date given or end of this month
 // Keep it simple by removing all enries for this end date then insert new.
+// Miss out any sites which have ever been in a private project.
 function calculateSiteStats ( $end_date = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
@@ -1234,6 +1235,7 @@ function calculateSiteStats ( $end_date = null ) {
 	$query = $db->getQuery(true)
 		->select("site_id, count(distinct sequence_id) as num from Photo P")
 		->where("uploaded < " . $dateToUse )
+		->where('site_id not in (select PSM.site_id from ProjectSiteMap PSM inner join Project P on P.project_id = PSM.project_id and P.access_level = 3)')
 		->group("site_id");
 		
 	$db->setQuery($query);
@@ -1245,6 +1247,7 @@ function calculateSiteStats ( $end_date = null ) {
 		->innerJoin("Animal A on A.photo_id = P.photo_id")
 		->where("A.species != 97")
 		->where("A.timestamp < " . $dateToUse )
+		->where('P.site_id not in (select PSM.site_id from ProjectSiteMap PSM inner join Project P on P.project_id = PSM.project_id and P.access_level = 3)')
 		->group("site_id");
 		
 	$db->setQuery($query);
@@ -1300,7 +1303,7 @@ function calculateSiteStatsHistory ( $num_months = null) {
 	for ( $i=$numDisplayedMonths; $i>=0; $i-- ) {
 		$minusMonths = "-" . $i . " months";
 		$firstOfMonth = strtotime($minusMonths, $endDatePlus1);
-		error_log("calculating for end date " . date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+		print("<br>Calculating for end date " . date('Ymd', strtotime("-1 day", $firstOfMonth)) );
 		calculateSiteStats(date('Ymd', strtotime("-1 day", $firstOfMonth)) );
 	}
 }

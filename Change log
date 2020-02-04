@@ -1,4 +1,7 @@
 # 04/02/20 - Version 3.1.3   #
+* Remove sites from private projects from all discover stats.
+
+# 04/02/20 - Version 3.1.3   #
 * Allow small area charts
 * Areas can be displayed on top of sites.
 
