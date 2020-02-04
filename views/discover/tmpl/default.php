@@ -10,19 +10,6 @@ defined('_JEXEC') or die;
 ?>
 
 
-<!-- p>Select a map view:</p>
-
-<div>
-  <input type="radio" id="discoversites" name="discovermapradio" value="sites"
-         checked>
-  <label for="discoversites">Show Sites</label>
-</div>
-
-<div>
-  <input type="radio" id="discoverareas" name="discovermapradio" value="areas">
-  <label for="discoverareas">Show Areas</label>
-</div -->
-
 <div class="row">
 <div class='col-md-2 cls-xs-12 map-column'>
 <?php
@@ -32,9 +19,14 @@ defined('_JEXEC') or die;
 
 <div class='col-md-2 cls-xs-12 map-column'>
 <?php
-  print "<button type='button' class='btn btn-warning' id='discover_sites'>".$this->translations['toggle_sites']['translation_text']."</button>";
-  //print_r ( $this->speciesList );
+  print '<div class="btn-group btn-toggle"> ';
+  print '  <button class="btn btn-warning" id="discover_sites">'.$this->translations['toggle_sites']['translation_text'].'</button> ';
+  print '  <button class="btn btn-warning active disabled" id="hide_sites">'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
+  print '</div>';
+
 ?>
+
+
 </div>
 <div class='col-md-4 cls-xs-12 map-column'>
 <div class="input-group">

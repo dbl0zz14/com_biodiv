@@ -62,15 +62,22 @@ jQuery(document).ready(function () {
 		else {
 			clearSites();
 		}
+		jQuery('#discover_sites').toggleClass('active');
+		jQuery('#hide_sites').toggleClass('active'); 
+		jQuery('#discover_sites').toggleClass('disabled');
+		jQuery('#hide_sites').toggleClass('disabled'); 
+		
 		
 	};
 	
 		
 	showSites = function (){
-		//console.log("showing sites");
-		
 		if ( geojsonSites ) {
 			discovermap.addLayer(geojsonSites);
+			discovermap.getPane('sites').style.zIndex = 402;
+			if ( discovermap.getPane('species') ) {
+				discovermap.getPane('species').style.zIndex = 401;
+			}
 			sitesShown = true;
 		}
 		else {
@@ -78,12 +85,8 @@ jQuery(document).ready(function () {
 			url = BioDiv.root + "&view=discoversites&format=raw";
 			
 			jQuery.ajax(url, {'success': function(data) {
-				//console.log("discover data is " + data);
-			
 				// Now get the json data into the chart and display it.
 				var jsonObject = JSON.parse ( data );
-				
-				//console.log(jsonObject.title);
 				
 				var discoverAreas = {
 				  "type": "FeatureCollection",
@@ -91,7 +94,6 @@ jQuery(document).ready(function () {
 				};
 				
 				function onEachFeature(feature, layer) {
-					//layer.bindPopup("" + feature.properties.site_count + " sites");
 					layer.bindTooltip("" + feature.properties.site_count + " " + jsonObject.sites);
 				}
 				
@@ -106,9 +108,13 @@ jQuery(document).ready(function () {
 					};
 				}
 				
-				// Add this layer to separate pane so can always display on top, but underneath tooltips!
 				discovermap.createPane('sites');
-				discovermap.getPane('sites').style.zIndex = 649;
+				
+				// Toggle panes so sites on top
+				discovermap.getPane('sites').style.zIndex = 402;
+				if ( discovermap.getPane('species') ) {
+					discovermap.getPane('species').style.zIndex = 401;
+				}
 
 				geojsonSites = L.geoJson(discoverAreas, {
 					style: style,
@@ -117,7 +123,6 @@ jQuery(document).ready(function () {
 				}).addTo(discovermap);
 				
 				sitesShown = true;
-				
 				
 			}});
 		}
@@ -132,8 +137,6 @@ jQuery(document).ready(function () {
 	
 	
 	showAreas = function() {
-		
-		//console.log("showAreas called with " + lat_spacing + ", " + lon_spacing);
 		
 		clearSpecies();
 		clearAreas();
@@ -215,8 +218,6 @@ jQuery(document).ready(function () {
 	}
 	
 	showSpecies = function (){
-		//console.log("showing species");
-		
 		// Change display mode
 		clearAreas();
 		clearCharts();
@@ -254,9 +255,21 @@ jQuery(document).ready(function () {
 						fillOpacity: 0.9
 					};
 				}
+				
+				if ( !discovermap.getPane('species') ) {
+					discovermap.createPane('species');
+				}
+				
+				// Toggle which pane is on top - species
+				discovermap.getPane('species').style.zIndex = 402;
+				if ( discovermap.getPane('site') ) {
+					console.log("Setting site zindex to 401");
+					discovermap.getPane('site').style.zIndex = 401;
+				}
 
 				geojsonSpecies = L.geoJson(discoverAreas, {
 					style: style,
+					pane: 'species',
 					onEachFeature: onEachFeature
 				}).addTo(discovermap);
 				
@@ -378,10 +391,13 @@ jQuery(document).ready(function () {
         maxZoom: 11,
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       }).addTo(discovermap);
-	
-	
-	
+	  
+		
 	jQuery('#discover_sites').click(function (){
+		toggleSites();
+	});
+	
+	jQuery('#hide_sites').click(function (){
 		toggleSites();
 	});
 	
@@ -415,13 +431,7 @@ jQuery(document).ready(function () {
 	}
 	
 	function showAreaCharts(e) {
-		//console.log("feature clicked");
-		
 		let bounds = e.target.getBounds();
-		
-		//discovermap.fitBounds(bounds);
-		
-		//console.log("bounds = " + bounds.getEast() + "E, " + bounds.getWest() + "W, " + bounds.getNorth() + "N, " + bounds.getSouth() + "S " );
 		
 		url = BioDiv.root + "&view=discoveranimals&format=raw&latstart=" + bounds.getSouth() + "&latend=" + bounds.getNorth() + "&lonstart=" + bounds.getWest() + "&lonend=" + bounds.getEast();
 	
@@ -482,8 +492,7 @@ jQuery(document).ready(function () {
 		url2 = BioDiv.root + "&view=discoverdata&format=raw&latstart=" + bounds.getSouth() + "&latend=" + bounds.getNorth() + "&lonstart=" + bounds.getWest() + "&lonend=" + bounds.getEast();
 	
 		jQuery.ajax(url2, {'success': function(data) {
-			//console.log("short chart data is " + data);
-		
+			
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
 			
