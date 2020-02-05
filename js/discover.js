@@ -10,8 +10,8 @@ jQuery(document).ready(function () {
 	var geojsonSites;
 	var sitesShown = false;
 	var areasShown = false;
-	var sightingsChart;
-	var uploadsChart;
+	//var sightingsChart;
+	//var uploadsChart;
 	
 	function getSpeciesColor(d) {
     return d > 100 ? '#800026' :
@@ -156,8 +156,6 @@ jQuery(document).ready(function () {
 		
 		if ( zoom > areaCovered.high_zoom ) {
 			
-			console.log("High zoom");
-			
 			// High level of zoom so only consider part of the map
 			let bounds = discovermap.getBounds();
 			let center = bounds.getCenter();
@@ -171,8 +169,6 @@ jQuery(document).ready(function () {
 			east = west + 8;
 		}
 		
-		console.log("Zoom = " + zoom );
-		console.log("south = " + south + ", north = " + north + ", west = " + west + ", east = " + east ); 
 		let i = 0;
 		let j = 0;
 		for ( i = south; i < north; i += areaCovered.lat_spacing ) {
@@ -223,13 +219,10 @@ jQuery(document).ready(function () {
 		
 		// Toggle which pane is on top - species
 		discovermap.getPane('areas').style.zIndex = 649;
-		console.log("Set areas zindex to 649");
 		if ( discovermap.getPane('site') ) {
-			console.log("Setting site zindex to 401");
 			discovermap.getPane('site').style.zIndex = 402;
 		}
 		if ( discovermap.getPane('species') ) {
-			console.log("Setting species zindex to 401");
 			discovermap.getPane('species').style.zIndex = 401;
 		}
 
@@ -251,25 +244,20 @@ jQuery(document).ready(function () {
 	
 	clearCharts = function() {
 		
-		let eleS = jQuery('#sightingschart');
-		if ( eleS ) eleS.empty();
-		let eleU = jQuery('#uploadschart');
-		if ( eleU ) eleU.empty();
-		
-				/*
-		if ( sightingsChart ) {
-			sightingsChart.destroy();
+		if(window.sightingsChart !== undefined && window.sightingsChart !== null){
+            window.sightingsChart.destroy();
 		}
-		if ( uploadsChart ) {
-			uploadsChart.destroy();
-		}	
-		*/
+		if(window.uploadsChart !== undefined && window.uploadsChart !== null){
+            window.uploadsChart.destroy();
+		}
+		jQuery('#sightingschart_message').html("");
+		jQuery('#uploadschart_message').html("");
+
 	}
 	
 	showSpecies = function (){
 		// Change display mode
 		clearAreas();
-		clearCharts();
 		areasShown = false;
 		
 		// For now keep it simple by reloading for new species
@@ -312,11 +300,9 @@ jQuery(document).ready(function () {
 				// Toggle which pane is on top - species
 				discovermap.getPane('species').style.zIndex = 403;
 				if ( discovermap.getPane('site') ) {
-					console.log("Setting site zindex to 401");
 					discovermap.getPane('site').style.zIndex = 402;
 				}
 				if ( discovermap.getPane('areas') ) {
-					console.log("Setting areas zindex to 401");
 					discovermap.getPane('areas').style.zIndex = 401;
 				}
 
@@ -358,8 +344,8 @@ jQuery(document).ready(function () {
 	showSpeciesTotalsChart = function ( totalsObject, title ) {
 		var ele = document.getElementById('sightingschart');
 		var ctx = ele.getContext('2d');
-		
-		sightingsChart = new Chart(ctx, {
+		clearCharts();
+		window.sightingsChart = new Chart(ctx, {
 			// The type of chart we want to create
 			type: 'bar',
 
@@ -412,13 +398,9 @@ jQuery(document).ready(function () {
 	
 	discovermap.on('zoomend', function(e) {
 		
-		console.log("checking areas after zoom");
-	
 		let zoom = discovermap.getZoom();
 		
 		let bounds = e.target.getBounds();
-		
-		console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
 		
 		discovermap.fitBounds(bounds);
 		
@@ -448,64 +430,11 @@ jQuery(document).ready(function () {
 			showAreas();			
 		}
 	});
-	/*
-	discovermap.on('panend', function(e) {
-		
-		console.log("checking areas after pan");
 	
-		let zoom = discovermap.getZoom();
-		
-		// Only worried if zoom level > 9, in which case we want to reduce the area grid
-		
-		if ( zoom > 9 ) {
-			let bounds = e.target.getBounds();
-		
-			console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
-		
-			discovermap.fitBounds(bounds);
-			
-			area_covered.min_lat = bounds.getCenter() - 
-			
-			areaCovered.lat_spacing = lat_spacing;
-			areaCovered.lon_spacing = lon_spacing;
-		}
-		
-		let bounds = e.target.getBounds();
-		
-		console.log("bounds W = " + bounds.getWest() + ", E = " + bounds.getEast() + ", S = " + bounds.getSouth() + ", N = " + bounds.getNorth());
-		
-		discovermap.fitBounds(bounds);
-		
-		let lat_spacing = 4;
-		let lon_spacing = 8;
-		if ( zoom > 5 && zoom <= 6 ) {
-			lat_spacing = 2;
-			lon_spacing = 4;
-		}
-		else if ( zoom > 6 && zoom <= 7) {
-			lat_spacing = 1;
-			lon_spacing = 2;
-		}
-		else if ( zoom > 7 && zoom <= 9 ) {
-			lat_spacing = 0.5;
-			lon_spacing = 1;
-		}
-		else if (zoom > 9 ) {
-			lat_spacing = 0.1;
-			lon_spacing = 0.2;
-		}
-		
-		areaCovered.lat_spacing = lat_spacing;
-		areaCovered.lon_spacing = lon_spacing;
-	
-		if ( areasShown ) {
-			showAreas();			
-		}
-	});
-	*/
 	
 	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 11,
+		crossOrigin: true,
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       }).addTo(discovermap);
 	  
@@ -548,6 +477,9 @@ jQuery(document).ready(function () {
 	}
 	
 	function showAreaCharts(e) {
+		
+		clearCharts();
+		
 		let bounds = e.target.getBounds();
 		
 		// Round the coordinates
@@ -560,56 +492,59 @@ jQuery(document).ready(function () {
 		
 		let url = BioDiv.root + "&view=discoveranimals&format=raw&latstart=" + south + "&latend=" + north + "&lonstart=" + west + "&lonend=" + east;
 		
-		console.log("Calling server with url: " + url );
-	
 		jQuery.ajax(url, {'success': function(data) {
-			console.log("discover data is " + data);
-		
+			
 			// Now get the json data into the chart and display it.
 			var jsonObject = JSON.parse ( data );
 			
 			var ele = document.getElementById('sightingschart');
 			var ctx = ele.getContext('2d');
-			sightingsChart = new Chart(ctx, {
-				// The type of chart we want to create
-				type: 'bar',
+			
+			if ( jsonObject.animals[0] === 0 ) {
+				jQuery('#sightingschart_message').html(jsonObject.title);
+			}
+			else {
+				window.sightingsChart = new Chart(ctx, {
+					// The type of chart we want to create
+					type: 'bar',
 
-				// The data for our dataset
-				data: {
-					labels: jsonObject.labels,
-					datasets: [{
-						label: jsonObject.ani_label, // "Number of classifications",
-						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
-						data: jsonObject.animals
-					}
-					]
-				},
-				
-				// Configuration options go here
-				options: {
-					title: {
-						display: true,
-						text: jsonObject.title // 'All Classifications by Species'
+					// The data for our dataset
+					data: {
+						labels: jsonObject.labels,
+						datasets: [{
+							label: jsonObject.ani_label, // "Number of classifications",
+							backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+							data: jsonObject.animals
+						}
+						]
 					},
-					legend: {
-						display: false,
-					},
-					scales: {
-						yAxes: [{
-							ticks: {
-								beginAtZero:true,
-								autoSkip:false
-							}
-						}],
-						xAxes: [{
-							ticks: {
-								autoSkip:false
-							}
-						}]
-					}
+					
+					// Configuration options go here
+					options: {
+						title: {
+							display: true,
+							text: jsonObject.title // 'All Classifications by Species'
+						},
+						legend: {
+							display: false,
+						},
+						scales: {
+							yAxes: [{
+								ticks: {
+									beginAtZero:true,
+									autoSkip:false
+								}
+							}],
+							xAxes: [{
+								ticks: {
+									autoSkip:false
+								}
+							}]
+						}
 
-				}
-			});
+					}
+				});
+			}
 			
 			
 			
@@ -624,36 +559,44 @@ jQuery(document).ready(function () {
 			var jsonObject = JSON.parse ( data );
 			
 			var ctx = document.getElementById('uploadschart').getContext('2d');
-			uploadsChart = new Chart(ctx, {
-				// The type of chart we want to create
-				type: 'line',
+			
+			// Check whether any uploaded
+			const nonZeroFound = jsonObject.uploaded.some(item => item !== 0);
+			
+			if ( !nonZeroFound ) {
+				jQuery('#uploadschart_message').html(jsonObject.title);
+			}
+			else {
+				window.uploadsChart = new Chart(ctx, {
+					// The type of chart we want to create
+					type: 'line',
 
-				// The data for our dataset
-				data: {
-					labels: jsonObject.labels,
-					datasets: [{
-						label: jsonObject.cla_label, //"Classified",
-						backgroundColor: '#00ba8a',
-						borderColor: '#00ba8a',
-						data: jsonObject.classified
-					},{
-						label: jsonObject.upl_label, //"Uploaded",
-						backgroundColor: '#32553f',
-						borderColor: '#32553f',
-						data: jsonObject.uploaded
-					}
-					]
-				},
+					// The data for our dataset
+					data: {
+						labels: jsonObject.labels,
+						datasets: [{
+							label: jsonObject.cla_label, //"Classified",
+							backgroundColor: '#00ba8a',
+							borderColor: '#00ba8a',
+							data: jsonObject.classified
+						},{
+							label: jsonObject.upl_label, //"Uploaded",
+							backgroundColor: '#32553f',
+							borderColor: '#32553f',
+							data: jsonObject.uploaded
+						}
+						]
+					},
 
-				// Configuration options go here
-				options: {
-					title: {
-						display: true,
-						text: jsonObject.title //'Sequences Uploaded and Classified (6 months)'
+					// Configuration options go here
+					options: {
+						title: {
+							display: true,
+							text: jsonObject.title //'Sequences Uploaded and Classified (6 months)'
+						}
 					}
-				}
-			});
-	
+				});
+			}
 		}});
 	}
 	

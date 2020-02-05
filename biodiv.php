@@ -1664,12 +1664,11 @@ function calculateSiteAnimalStatistics () {
   foreach ($sites as $site_id=>$coords) {
 	  print ("<br>site_id: " . $site_id . "coords: " . $coords['lat'] . "," . $coords['lon'] );
 	  
-	  // Get zoom as well
 	  $query = $db->getQuery(true)
             ->select("F.feature_id")
 			->from("Features F")
-			->where("(".$coords['lon']." > F.west and " . $coords['lon'] . " <= F.east)")
-			->where("(".$coords['lat']." > F.south and " . $coords['lat'] . " <= F.north)")
+			->where("(".$coords['lon']." >= F.west and " . $coords['lon'] . " < F.east)")
+			->where("(".$coords['lat']." >= F.south and " . $coords['lat'] . " < F.north)")
 			->where("F.display_type = 'site'");
 			 
 	  $db->setQuery($query);		 
@@ -1884,9 +1883,14 @@ function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months 
 		$db->setQuery($query);
 	
 		$row = $db->loadRow();
+		
+		array_push ( $uploadedArray, $row['0'] ? $row['0'] : 0 );
+		array_push ( $classifiedArray, $row['1'] ? $row['1'] : 0 );
+	}
 	
-		array_push ( $uploadedArray, $row['0'] );
-		array_push ( $classifiedArray, $row['1'] );
+	// If all uploaded entries are 0 there are no uploads so reflect in title
+	if ( array_sum($uploadedArray) == 0 ) {
+		$title = $translations["no_up_class"]["translation_text"] . " " . $coords ;
 	}
 
   
@@ -1999,6 +2003,8 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  // Quick fix?
 	  if ( count($animals_to_return) == 0 ) {
 		  $animals_to_return["All"] = 0;
+		  $title = $translations["no_sights"]["translation_text"] . " " . $coords ;
+	
 	  }
 	  
 	  return array (

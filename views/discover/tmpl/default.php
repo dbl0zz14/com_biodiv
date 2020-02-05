@@ -51,7 +51,8 @@ defined('_JEXEC') or die;
 <div id="discovermap" style="height:500px;"></div>
 </div>
 <div class='col-md-4 cls-xs-12'>
-  
+<div id="sightingschart_message"></div>
+<div id="uploadschart_message"></div>
 <div class="table-responsive discover-chart">
   <canvas id="sightingschart" class="table"></canvas>
 </div>
@@ -66,7 +67,8 @@ defined('_JEXEC') or die;
 
 <?php
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", array('cross_origin' => ''));
 JHTML::stylesheet("https://unpkg.com/leaflet@1.6.0/dist/leaflet.css", array('integrity' => 'sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==', 'cross_origin' => ''));
 JHTML::script("https://unpkg.com/leaflet@1.6.0/dist/leaflet.js", array('integrity' => 'sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==', 'cross_origin' => ''));
 JHTML::script("com_biodiv/discover.js", true, true);
