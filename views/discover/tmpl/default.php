@@ -13,13 +13,13 @@ defined('_JEXEC') or die;
 <div class="row">
 <div class='col-md-2 cls-xs-12 map-column'>
 <?php
-  print "<p><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></p>";
+  print "<p data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></p>";
 ?>
 </div>
 
 <div class='col-md-2 cls-xs-12 map-column'>
 <?php
-  print '<div class="btn-group btn-toggle"> ';
+  print '<div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
   print '  <button class="btn btn-warning" id="discover_sites">'.$this->translations['toggle_sites']['translation_text'].'</button> ';
   print '  <button class="btn btn-warning active disabled" id="hide_sites">'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
   print '</div>';
@@ -29,7 +29,7 @@ defined('_JEXEC') or die;
 
 </div>
 <div class='col-md-4 cls-xs-12 map-column'>
-<div class="input-group">
+<div class="input-group" <?php print "data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."'"?> >
 <select name = 'species_id' id="species_select">
   <option value="" disabled selected hidden><?php print $this->translations['sel_sp']['translation_text']?>...</option>
 
@@ -41,7 +41,7 @@ defined('_JEXEC') or die;
   ?>
 </select>
 <span class="input-group-btn">
-<button  class='btn btn-warning' id='discover_species'> <?php print $this->translations['show_sp']['translation_text']?></button>
+<button  class='btn btn-warning' id='discover_species'><?php print $this->translations['show_sp']['translation_text']?></button>
 </span>
 </div>
 </div>
