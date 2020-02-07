@@ -2053,7 +2053,7 @@ function discoverSpecies ( $species_id, $year = null  ) {
 	  
 	  $queryall = $db->getQuery(true)
 	    ->select("SA.year_taken as year, sum(SA.num_sightings) as num_sightings from SiteAnimals SA")
-		->where("SA.species = " . $species_id . " and SA.year_taken != 0" )
+		->where("SA.species = " . $species_id )
 		->group("SA.year_taken");
   
 	  $db->setQuery($queryall);
@@ -2101,8 +2101,7 @@ function discoverSpecies ( $species_id, $year = null  ) {
 		  // Just add the year as rest should be there.
 		  //error_log( "adding new year " . $fid . ", " . $num . ", " . $y );
 		  $features[$fid]["properties"]["".$y] = $num;
-		  //error_log( "added new year for feature " . $fid . ", " . $num . ", " . $y);
-		  
+		  //error_log( "added new year for feature " . $fid . ", " . $num . ", " . $y);		  
 	  }
 	  
 	  $totals = array();
@@ -2110,10 +2109,14 @@ function discoverSpecies ( $species_id, $year = null  ) {
 		  $year = $total["year"];
 		  $num = $total["num_sightings"];
 		  		  
-		  // New total for each year, ignore zeros for now.
+		  // New total for each year, add zeros as unknown
 		  //error_log( "adding new total for year " . $year . ", " . $num );
-		  $totals["" . $year] = $num;
-		  
+		  if ( $year == 0 ) {
+			$totals["unknown"] = $num;
+		  }
+		  else {
+			$totals["" . $year] = $num;
+		  }
 	  }
 	  
 	  

@@ -11,13 +11,13 @@ defined('_JEXEC') or die;
 
 
 <div class="row">
-<div class='col-md-2 cls-xs-12 map-column'>
+<div class='col-md-3 cls-xs-12 map-column'>
 <?php
   print "<p data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></p>";
 ?>
 </div>
 
-<div class='col-md-2 cls-xs-12 map-column'>
+<div class='col-md-3 cls-xs-12 map-column'>
 <?php
   print '<div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
   print '  <button class="btn btn-warning" id="discover_sites">'.$this->translations['toggle_sites']['translation_text'].'</button> ';
@@ -53,12 +53,12 @@ defined('_JEXEC') or die;
 <div class='col-md-4 cls-xs-12'>
 <div id="sightingschart_message"></div>
 <div id="uploadschart_message"></div>
-<div class="table-responsive discover-chart">
-  <canvas id="sightingschart" class="table"></canvas>
+<div class="table-responsive discover-chart" style="padding: 0;">
+  <canvas id="sightingschart" class="table" height='270px'></canvas>
 </div>
 
-<div class="table-responsive discover-chart">
-<canvas id="uploadschart" class="table"></canvas>
+<div class="table-responsive discover-chart" style="padding: 0;">
+<canvas id="uploadschart" class="table" height='200px'></canvas>
 </div>
 
 </div>
