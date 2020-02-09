@@ -361,6 +361,7 @@ jQuery(document).ready(function () {
 			
 			// Configuration options go here
 			options: {
+				maintainAspectRatio: false,
 				title: {
 					display: true,
 					text: title // 'All Classifications by Species'
@@ -521,6 +522,7 @@ jQuery(document).ready(function () {
 					
 					// Configuration options go here
 					options: {
+						maintainAspectRatio: false,
 						title: {
 							display: true,
 							text: jsonObject.title // 'All Classifications by Species'
@@ -590,6 +592,7 @@ jQuery(document).ready(function () {
 
 					// Configuration options go here
 					options: {
+						maintainAspectRatio: false,
 						title: {
 							display: true,
 							text: jsonObject.title //'Sequences Uploaded and Classified (6 months)'

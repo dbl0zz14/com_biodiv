@@ -1,3 +1,6 @@
+# 08/02/20 - Version 3.1.3   #
+* Chart heights, widths and options to correct display on Edge
+
 # 07/02/20 - Version 3.1.3   #
 * Add unknown year for species by year display - these are for sequences with taken = 0
 

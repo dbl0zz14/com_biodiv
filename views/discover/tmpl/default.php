@@ -49,16 +49,17 @@ defined('_JEXEC') or die;
 <div class="row">
 <div class='col-md-8 cls-xs-12 map-column'>
 <div id="discovermap" style="height:500px;"></div>
+<?php print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['data_warn']['translation_text']."</h5>";?>
 </div>
 <div class='col-md-4 cls-xs-12'>
 <div id="sightingschart_message"></div>
 <div id="uploadschart_message"></div>
-<div class="table-responsive discover-chart" style="padding: 0;">
-  <canvas id="sightingschart" class="table" height='270px'></canvas>
+<div class="table-responsive discover-chart" style="padding: 0; height:340px; width:310px; overflow:hidden;">
+  <canvas id="sightingschart" class="table"></canvas>
 </div>
 
-<div class="table-responsive discover-chart" style="padding: 0;">
-<canvas id="uploadschart" class="table" height='200px'></canvas>
+<div class="table-responsive discover-chart" style="padding: 0; height:230px; overflow:hidden;">
+<canvas id="uploadschart" class="table"></canvas>
 </div>
 
 </div>
