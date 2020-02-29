@@ -567,75 +567,79 @@ class BioDivController extends JControllerLegacy
     }
     if(!$fail){
       foreach($tmpNames as $index => $tmpName){
-	$clientName = $clientNames[$index];
-	$fileSize = $fileSizes[$index];
-	$fileType = $fileTypes[$index];
-	if($fileSize > BIODIV_MAX_FILE_SIZE){
-	  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
-	  continue;
-	} 
-	//	$tmpName = JFile::makeSafe($tmpName);
-	// NB can get this error if PHP max dilsize and upload size are too small:
-	if(!is_uploaded_file($tmpName)){
-	  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits, or there may be a network problem");
-	  continue;
-	}
-	//	JHelperMedia::isImage($tmpName) or die("Not an image");
+		$clientName = $clientNames[$index];
+		$fileSize = $fileSizes[$index];
+		$fileType = $fileTypes[$index];
+		if($fileSize > BIODIV_MAX_FILE_SIZE){
+		  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
+		  continue;
+		} 
+		//	$tmpName = JFile::makeSafe($tmpName);
+		// NB can get this error if PHP max dilsize and upload size are too small:
+		if(!is_uploaded_file($tmpName)){
+		  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits, or there may be a network problem");
+		  continue;
+		}
+		//	JHelperMedia::isImage($tmpName) or die("Not an image");
 
-	$ext = strtolower(JFile::getExt($clientName));
-	$newName = md5_file($tmpName) . "." . $ext;
-	
-	$dirName = siteDir($site_id);
-	$newFullName = "$dirName/$newName";
-	if(JFile::exists($newFullName)){
-	  addMsg("warning", "File already uploaded: $clientName");
-	  continue;
-	}
-	
-	// Check whether video. Assume image if not.
-	$exif_extract = null;
-	$taken = null;
-	$manufacturer = null;
-	$exif = null;
-	if ( !strcmp( strtolower($ext), "mp4") ) {
-		error_log ( "Found mp4 video file, ext is " . $ext );
-		$exif_extract = getVideoMeta ( $tmpName );  // Assumes quicktime format
-		$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
-		$taken = date('Y-m-d H:i:s', $creation_time_unix);
-		$exif = serialize($exif_extract);
-	}
-	else {
-		error_log ( "Found non mp4 file, ext is " . $ext );
-		$exif_extract = exif_read_data($tmpName);
-		$taken = $exif_extract['DateTimeOriginal'];
-		$manufacturer = $exif_extract['Manufacturer'];
-		$exif = serialize($exif_extract);
-		// check exif headers for camera type?
-		// check dates defined and photos in range
-	}
+		$ext = strtolower(JFile::getExt($clientName));
+		$newName = md5_file($tmpName) . "." . $ext;
+		
+		$dirName = siteDir($site_id);
+		$newFullName = "$dirName/$newName";
+		if(JFile::exists($newFullName)){
+		  addMsg("warning", "File already uploaded: $clientName");
+		  continue;
+		}
+		
+		// Check whether video. Assume image if not.
+		$exif_extract = null;
+		$taken = null;
+		$manufacturer = null;
+		$exif = null;
+		if ( !strcmp( strtolower($ext), "mp4") ) {
+			error_log ( "Found mp4 video file, ext is " . $ext );
+			$exif_extract = getVideoMeta ( $tmpName );  // Assumes quicktime format
+			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
+			$taken = date('Y-m-d H:i:s', $creation_time_unix);
+			$exif = serialize($exif_extract);
+		}
+		else {
+			error_log ( "Found non mp4 file, ext is " . $ext );
+			$exif_extract = exif_read_data($tmpName);
+			$taken = $exif_extract['DateTimeOriginal'];
+			$manufacturer = $exif_extract['Manufacturer'];
+			$exif = serialize($exif_extract);
+			// check exif headers for camera type?
+			// check dates defined and photos in range
+		}
 
-	$exists = JFile::exists($tmpName);
-	$success=	JFile::upload($tmpName, $newFullName);
-	if(!$success){
-		addMsg("error","File upload unsuccessful for $clientName");
-		return;
-	}	
-		if(userID()==179){
-	  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
-	}
-	$photoFields = new stdClass();
-	$photoFields->filename = $newName;
-	$photoFields->upload_filename = $clientName;
-	$photoFields->dirname = $dirName;
-	$photoFields->site_id = $site_id;
-	$photoFields->upload_id = $upload_id;
-	$photoFields->person_id = userID();
-	$photoFields->taken = $taken;
-	$photoFields->size = $fileSize;
-	$photoFields->exif = $exif;
-	if(codes_insertObject($photoFields, 'photo')){
-	  addMsg('success', "Uploaded $clientName");
-	}
+		$exists = JFile::exists($tmpName);
+		$success=	JFile::upload($tmpName, $newFullName);
+		if(!$success){
+			addMsg("error","File upload unsuccessful for $clientName");
+			return;
+		}	
+			if(userID()==179){
+		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
+		}
+		$photoFields = new stdClass();
+		$photoFields->filename = $newName;
+		$photoFields->upload_filename = $clientName;
+		$photoFields->dirname = $dirName;
+		$photoFields->site_id = $site_id;
+		$photoFields->upload_id = $upload_id;
+		$photoFields->person_id = userID();
+		$photoFields->taken = $taken;
+		$photoFields->size = $fileSize;
+		$photoFields->exif = $exif;
+		if(codes_insertObject($photoFields, 'photo')){
+		  addMsg('success', "Uploaded $clientName");
+		}
+		else {
+			// Remove files if the database insert failed
+			JFile::delete($newFullName);
+		}
       }
     }
 

@@ -63,22 +63,86 @@ codes_parameters_addTable("StructureMeta", $dbOptions['database']);
 
 
 function codes_insertObject($fields, $struc){
-  if(!canCreate($struc, $fields)){
-  print "Cannot create $struc";
-    return false;
-  }
-  $table = codes_getTable($struc);
+	if(!canCreate($struc, $fields)){
+	print "Cannot create $struc";
+		return false;
+	}
+  
+	$success = false;
+	$db = JDatabase::getInstance(dbOptions());
+  
+	// photo is handled as special case as split over two tables
+	if ( $struc == "photo" ) {
+		// Move and store the exif field as this is in second table
+		$exif = $fields->exif;
+		unset($fields->exif);
+	  
+		// Use a transaction as we want to update two tables, and need 
+		// both these operations to succeed or fail.
+		try
+		{
+			$db->transactionStart();
+			
+			$table = codes_getTable($struc);
+			$id = null;
 
-  $db = JDatabase::getInstance(dbOptions());
-  $success = $db->insertObject($table, $fields);
-  if($success){
-    $id = $db->insertid();
-    return $id;
-  }
-else{
-  print "Insert failed";
-}
-  return $success;
+			$success = $db->insertObject($table, $fields);
+			
+			if($success){
+				$id = $db->insertid();
+			}
+			else{
+				print "Insert failed";
+			}
+			
+			if ( $success ) {
+				$exifFields = new stdClass();
+				$exifFields->photo_id = $id;
+				$exifFields->exif = $exif;
+				$table = codes_getTable($struc);
+
+				$success = $db->insertObject("PhotoExif", $exifFields);
+				if($success){
+					print "Insert succeeded";
+					error_log("Insert succeeded, id = " . $id );
+				}
+				else{
+					print "Insert failed";
+					error_log("Photo insert failed due to " . $e);
+					$db->transactionRollback();
+					$success = false;
+				}
+			}
+		
+			$db->transactionCommit();
+			
+			return $id;
+		}
+		catch (Exception $e)
+		{
+			error_log("Photo insert failed due to " . $e);
+			
+			// catch any database errors.
+			$db->transactionRollback();
+			
+			$success = false;
+		}
+	  
+	}
+	else {
+		$table = codes_getTable($struc);
+
+		$success = $db->insertObject($table, $fields);
+		if($success){
+			$id = $db->insertid();
+			return $id;
+		}
+		else{
+			print "Insert failed";
+		}
+	}
+  
+	return $success;
 }
 
 function codes_updateObject($fields, $struc){
@@ -3132,7 +3196,7 @@ function chooseMultiple ( $project_ids, $classify_own ) {
   
 		$db = JDatabase::getInstance(dbOptions());
 		$q1 = $db->getQuery(true);
-		    
+		    /*
 		$q1->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
@@ -3148,11 +3212,57 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 			->order("rand()");
 		
 		$db->setQuery($q1, 0, 1); // LIMIT 1
+		*/
+		
+		$q1->select("count(*)")
+			->from("Photo P")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("P.status = 1")
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+		
+		$db->setQuery($q1); 
+		$num_rows = $db->loadResult();
+		
+		error_log("chooseMultiple: num rows = " . $num_rows);
+		
+		// Get a random integer between 0 and $num_rows-1
+		$row_num = rand(0, $num_rows - 1);
+		
+		error_log("chooseMultiple: chosen row = " . $row_num);
+		
+		$q2 = $db->getQuery(true);
+		$q2->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			->where("P.status = 1")
+			->where("A.photo_id IS NULL")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+			
+		$db->setQuery($q2, $row_num, 1); // LIMIT 1 sarting at the n = $row_num
+		
 		$photo = $db->loadObject();
 		if ( $photo ) {
+			
 			$photo_id = $photo->photo_id;
 			//print "<br>chooseMultiple, photo found with id " . $photo_id . " <br>";
+			error_log("chooseMultiple: got photo = " . $photo_id);
 		}	
+		else {
+			error_log("chooseMultiple: no photo ");
+		}
 	}
 	
 	return $photo_id;
@@ -3173,7 +3283,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
   
 	$db = JDatabase::getInstance(dbOptions());
 	$q1 = $db->getQuery(true);
-	        
+	/* order by rand() is inefficient  
 	$q1->select("P.photo_id, P.sequence_id")
         ->from("Photo P")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
@@ -3190,10 +3300,55 @@ function chooseSingle ( $project_ids, $classify_own ) {
 	
 	
 	$db->setQuery($q1, 0, 1); // LIMIT 1
+	*/
+
+	$q1->select("count(*)")
+        ->from("Photo P")
+        ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        ->where("P.status = 1")
+		->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0" . $own_string )
+	    ->where("P.sequence_id > 0")
+		->where("P.sequence_num = 1" )
+		->where("P.photo_id >= PSM.start_photo_id")
+		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)");
+		
+	$db->setQuery($q1); 
+	$num_rows = $db->loadResult();
+		
+	error_log("chooseSingle: num rows = " . $num_rows);
+		
+	// Get a random integer between 0 and $num_rows-1
+	$row_num = rand(0, $num_rows - 1);
+		
+	error_log("chooseSingle: chosen row = " . $row_num);
+		
+	$q2 = $db->getQuery(true);
+	$q2->select("P.photo_id, P.sequence_id")
+        ->from("Photo P")
+        ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+        ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        ->where("P.status = 1")
+		->where("A.photo_id IS NULL")
+        ->where("P.contains_human =0" . $own_string )
+	    ->where("P.sequence_id > 0")
+		->where("P.sequence_num = 1" )
+		->where("P.photo_id >= PSM.start_photo_id")
+		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)");
+	
+	$db->setQuery($q2, $row_num, 1); // LIMIT 1 sarting at the n = $row_num
+	
 	$photo = $db->loadObject();
 	if ( $photo ) {
 		$photo_id = $photo->photo_id;
+		error_log("chooseSingle: got photo = " . $photo_id);
 	}	
+	else {
+		error_log("chooseSingle: no photo = ");
+	}
 	
 	return $photo_id;
 }
@@ -3291,7 +3446,7 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 		$db = JDatabase::getInstance(dbOptions());
 		$q1 = $db->getQuery(true);
 		$q2 = $db->getQuery(true);
-            
+        /*    
 		$q1->select("P.photo_id, P.sequence_id")
 			->from("Photo P")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
@@ -3305,6 +3460,44 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 			->order("rand()");
 		
 		$db->setQuery($q1, 0, 1); // LIMIT 1
+		
+		*/
+		
+		$q1->select("count(*)")
+			->from("Photo P")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			->where("P.status = 1")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+			
+		$db->setQuery($q1); 
+		$num_rows = $db->loadResult();
+			
+		error_log("chooseSingle: num rows = " . $num_rows);
+			
+		// Get a random integer between 0 and $num_rows-1
+		$row_num = rand(0, $num_rows - 1);
+			
+		error_log("chooseSingle: chosen row = " . $row_num);
+			
+		$q2 = $db->getQuery(true);
+		$q2->select("P.photo_id, P.sequence_id")
+			->from("Photo P")
+			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			->where("P.status = 1")
+			->where("P.contains_human =0" . $own_string )
+			->where("P.sequence_id > 0")
+			->where("P.sequence_num = 1" )
+			->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+		
+		$db->setQuery($q2, $row_num, 1); // LIMIT 1 sarting at the n = $row_num	
+			
 		$photo = $db->loadObject();
 		if ( $photo ) {
 			$photo_id = $photo->photo_id;

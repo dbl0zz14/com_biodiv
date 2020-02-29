@@ -17,7 +17,7 @@ defined('_JEXEC') or die;
 ?>
 </div>
 
-<div class='col-md-3 cls-xs-12 map-column'>
+<div class='col-md-4 cls-xs-12 map-column'>
 <?php
   print '<div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
   print '  <button class="btn btn-warning" id="discover_sites">'.$this->translations['toggle_sites']['translation_text'].'</button> ';
@@ -30,7 +30,7 @@ defined('_JEXEC') or die;
 </div>
 <div class='col-md-4 cls-xs-12 map-column'>
 <div class="input-group" <?php print "data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."'"?> >
-<select name = 'species_id' id="species_select">
+<select class='form-control form-control-sm' name = 'species_id' id="species_select">
   <option value="" disabled selected hidden><?php print $this->translations['sel_sp']['translation_text']?>...</option>
 
   <?php
