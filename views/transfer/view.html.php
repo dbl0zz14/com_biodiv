@@ -33,7 +33,10 @@ class BioDivViewTransfer extends JViewLegacy
 				->from("Photo")
 				->where("s3_status = 0");
 
-			$db->setQuery($query);
+			//$db->setQuery($query);
+			$max_num = 500;
+			$db->setQuery($query, 0, $max_num); // LIMIT $max_num
+   
 			$this->photos = $db->loadAssocList("photo_id");
 		}
 		else {

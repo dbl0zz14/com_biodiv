@@ -529,6 +529,8 @@ function codes_getRadiobuttons($input_name, $type, $features=array()){
 	$thiscode=$features[$input_name];
 	
 	$options = "";
+	
+	$isfirst = true;
 
 	foreach(codes_getList($type,$features) as $listitem){
 		list($lcode,$lname)=$listitem;
@@ -537,8 +539,15 @@ function codes_getRadiobuttons($input_name, $type, $features=array()){
 		if($lcode==$thiscode){
 			$options.= " checked='checked'";
 		}
+		// If no default is set, then default to the first item.
+		else if ( !$thiscode && $isfirst ) {
+			$options.= " checked='checked'";
+		}
+	
 		//$options.= " />".substr($lname,0,$width)."<br />\n";
 		$options .= " /><label for='".$id."'>".substr($lname,0,$width)."</label></div>\n";
+		
+		$isfirst = false;
 	}
 	return $options;
 }

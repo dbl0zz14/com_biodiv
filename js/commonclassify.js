@@ -1,4 +1,8 @@
 jQuery(document).ready(function(){
+	
+	checkRadioDefault = function ( name ) {
+		jQuery("input[name='"+name+"']:first").prop('checked', true);
+	}
 
 
 	BioDiv.likeActions = function (){
@@ -60,25 +64,7 @@ jQuery(document).ready(function(){
 			}}
 			);
 	});
-	/* move to kiosk and classify as kiosk has to remove hyperlinks	
-	jQuery('.species_select').click(function (){
-		id = jQuery(this).attr("id");
-		idbits = id.split("_");
-		species_id = idbits.pop();
-		jQuery('.species_header').hide();
-		jQuery('#species_value').attr('value', species_id);
-		jQuery('#classify_number').attr('value', 1);
-		jQuery('#classify_gender').val(84);
-		jQuery('#classify_age').val(85);
-		
-		
-		jQuery('#species_helplet').empty();
-		jQuery('.species_classify').show();
-		var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
-		jQuery('#species_helplet').load(url);
-		
-	    });
-	*/
+	
 
 	jQuery('#fullscreen-button').click(function (){
 		var photos = document.getElementById('photoCarousel');

@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.1.3</version>
+  <version>3.1.4</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images from camera traps</description>
  
@@ -33,6 +33,9 @@
 	<filename>controller.php</filename>
 	<filename>Project.php</filename>
 	<filename>Location.php</filename>
+	<filename>Sequence.php</filename>
+	<filename>MediaCarousel.php</filename>
+	<filename>SpeciesCarousel.php</filename>
 	<folder>views</folder>
 	<folder>libraries</folder>
 <!--

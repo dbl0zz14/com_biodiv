@@ -31,19 +31,13 @@ if(!$this->photo_id){
 if ( $this->isVideo === true ) {
 	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
 }
+else if ( $this->isAudio === true ) {
+	print "<h2>" . $this->translations['what_hear']['translation_text'] . "</h2>";
+}
 else {
 	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
     //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
 }
-?>
-
-<?php
-// h2 was just above here.
-/*
-	      if($this->photoDetails['person_id'] == userID()){
-    print "<div class='lead alert-info'>You uploaded this!</div>";
-  }
-*/
 ?>
 
 
@@ -104,8 +98,18 @@ foreach($this->lcontrols as $control_id => $control){
 <!-- either do photo carousel or video here -->
 <?php 
 
+/* Should refactor this as below to use a Sequence created in the view and the MediaCarousel object but no time now...
+$mediaCarousel = new MediaCarousel();
+$sequence_id = $this->sequence[0]['sequence_id'];
+$mediaCarousel->generateMediaCarousel($sequence_id, etc);
+*/
+
+
 if ( $this->isVideo === true ) {
 	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+}
+if ( $this->isAudio === true ) {
+	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="audio/mp3">' . $this->translations['no_aud']['translation_text'] . '</video></div>';
 }
 else {
 	
@@ -167,6 +171,7 @@ foreach($this->sequence as $photo_details  ){
   
 print '</div> <!-- /.photoCarousel -->';
 }
+
 ?>
 
 </div> <!-- /.col-md-12 carousel-->

@@ -28,6 +28,15 @@ class BioDivViewAjax extends JViewLegacy
 	{
 	  $this->person_id = (int)userID();
 	  
+	  $option_id = JRequest::getInt("option_id");
+	  
+	  $article = getArticle ( $option_id );
+	  
+	  $this->title = $article->title;
+	  
+	  $this->introtext = $article->introtext;
+	  
+	  /*
 	  $article = JTable::getInstance("content");
 	  $option_id = JRequest::getInt("option_id");
 	  $option = codes_getDetails($option_id, "optiontran");
@@ -54,6 +63,7 @@ class BioDivViewAjax extends JViewLegacy
 	  if ( !$this->title ) {
 		$this->title = $option['option_name'];
 	  }
+	  */
 	  
 	  parent::display($tpl);
     }

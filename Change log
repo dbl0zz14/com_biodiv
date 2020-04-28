@@ -1,3 +1,12 @@
+# 29/02/20 - Version 3.1.4   #
+* Add ability to upload and classify audio files (no sonogram yet)
+* On upload, if file is correct format (eg myfile_YYYYMMDD_hhmmss.mp3) taken datetime will be from filename
+* Added training test yourself module.
+* Limit S3 transfer to 500.
+
+# 29/02/20 - Version 3.1.3   #
+* Optimised chooseMultiple, Single and Repeat db queries so no order by rand()
+
 # 08/02/20 - Version 3.1.3   #
 * Chart heights, widths and options to correct display on Edge
 

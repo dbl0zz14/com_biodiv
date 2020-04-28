@@ -83,7 +83,6 @@ foreach ( $this->projects as $project ) {
 	if ( $project->article_id ) {
 		// Get the associated article (ie depending which langage we are in)
 		$assoc_id = getAssociatedArticleId($project->article_id);
-		
 		$article = JTable::getInstance("content");
 		$article->load($assoc_id); 
 		

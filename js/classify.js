@@ -101,9 +101,13 @@ jQuery(document).ready(function(){
 		species_id = idbits.pop();
 		jQuery('.species_header').hide();
 		jQuery('#species_value').attr('value', species_id);
+		
+		// Reset the defaults
 		jQuery('#classify_number').attr('value', 1);
-		jQuery('#classify_gender').val(84);
-		jQuery('#classify_age').val(85);
+		checkRadioDefault ('gender');
+		checkRadioDefault ('age');
+		checkRadioDefault ('sure');
+		jQuery('#classify_notes').val('');
 		
 		
 		jQuery('#species_helplet').empty();

@@ -226,8 +226,13 @@
 /* end of discover stuff */
 
 
+/* Start of training secifics */
 
+.training-result-row {
+	margin-top: 10px;
+}
 
+/* end of training specifics */
 
 #jform_profileMW_wherehear > li > a:hover, #jform_profileMW_wherehear > li > a:focus,  { background: #fff; color: #000; }
 
@@ -333,6 +338,20 @@
 		/* max-width: 1200px; /* img src width (if known) */
 		/*height: 14em;*/
 		height: 190px;
+		overflow: hidden; 
+	}
+	
+	.crop-width-col6 {
+		/* max-width: 1200px; /* img src width (if known) */
+		/*height: 14em;*/
+		height: 400px;
+		overflow: hidden; 
+	}
+	
+	.crop-width-col4 {
+		/* max-width: 1200px; /* img src width (if known) */
+		/*height: 14em;*/
+		height: 260px;
 		overflow: hidden; 
 	}
 	
@@ -679,22 +698,23 @@
 	font-weight: normal;
 }
 
-.view-kiosk #classify_number {
+#classify_number {
 	display: inline;
 	vertical-align: bottom;
 }
-
+/*
 #classify_how_many {
 	margin-top: 10px;
 	margin-left: 5px;
 }
+*/
 
-.view-kiosk #classify_number::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+#classify_number::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
  
-.view-kiosk #classify_number {
+#classify_number {
     -moz-appearance: textfield;
 }
 

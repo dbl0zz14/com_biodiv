@@ -150,12 +150,15 @@ class BioDivViewClassify extends JViewLegacy
 		 $this->photoDetails = $this->sequence[0];
 		
 		 // Check for video
+		 $this->isVideo = isVideo($this->photo_id);
+		 $this->isAudio = isAudio($this->photo_id);
+		 /*
 		 $this->isVideo = false;
 		 $filename = $this->photoDetails['filename'];
 		 if ( strpos(strtolower($filename), '.mp4') !== false ) {
 			 $this->isVideo = true;
 		 }
-		 
+		 */
 		// Get the general location of the site to help spotters
 		$site_id = $this->photoDetails['site_id'];
 		$this->location = getSiteLocation($site_id);
@@ -213,6 +216,8 @@ class BioDivViewClassify extends JViewLegacy
 		$this->showmap = $this->translations['show_map']['translation_text'] . " <span class='fa fa-map-marker'/>";
 		$this->nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
 
+		$this->classifyInputs = getClassifyInputs();
+/*
 		$this->classifyInputs = array();
 		foreach(array("gender", "age") as $struc){
 			$title_tran = $this->translations[codes_getTitle($struc)]['translation_text'];
@@ -228,7 +233,16 @@ class BioDivViewClassify extends JViewLegacy
 		$number = "<label for ='classify_number'>" . $this->translations['how_many']['translation_text'] . "</label>\n";
 		$number .= "<input id='classify_number' type='number' min='1' value='1' name='number'/>\n";
 		$this->classifyInputs[] = $number;
-	  
+		
+		$sure = "<label for ='classify_sure'>" . $this->translations['sure']['translation_text'] . "</label>\n";
+		// See what happens if we don;t specify what to check - want it to default to first option
+		$sure .= codes_getRadioButtons("sure", "suretran", null);
+		$this->classifyInputs[] = $sure;
+		
+		$notes = "<label for ='classify_sure'>" . $this->translations['notes']['translation_text'] . "</label>\n";
+		$notes .= "<input id='classify_sure' type='text' maxlength='100' name='notes'/>\n";
+		$this->classifyInputs[] = $notes;
+*/	  
 	  }
 
 	  // Display the view

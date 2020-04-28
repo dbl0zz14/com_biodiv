@@ -360,10 +360,12 @@ class BioDivController extends JControllerLegacy
 	if ( $fields->person_id ) {
 		// Now set the photo_id from the form value, but check it is in the same sequence as the "current" one.
 		//$fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
-		$formFields = array("photo_id", "species", "gender", "age", "number");
+		$formFields = array("photo_id", "species", "gender", "age", "number", "sure");
 		foreach($formFields as $formField){
 		  $fields->$formField = JRequest::getInt($formField, 0);
 		}
+		// Notes is a text field
+		$fields->notes = JRequest::getString("notes", 0);
 		// If no photo_id, add it from the request:
 		if ( !$fields->photo_id ) $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
 		
@@ -602,6 +604,20 @@ class BioDivController extends JControllerLegacy
 			$exif_extract = getVideoMeta ( $tmpName );  // Assumes quicktime format
 			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
 			$taken = date('Y-m-d H:i:s', $creation_time_unix);
+			$exif = serialize($exif_extract);
+		}
+		else if ( !strcmp( strtolower($ext), "mp3") ) {
+			error_log ( "Found mp3 audio file, ext is " . $ext );
+			$exif_extract = getVideoMeta ( $tmpName );  
+			$exif = print_r($exif_extract, true);
+			//$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
+			//$taken = date('Y-m-d H:i:s', $creation_time_unix);
+			//$taken = date($uploadDetails['deployment_date']); // TEMPORARY UNTIL WE USE FILENAME TO GET DATE - NOT STORED IN EXIF
+			$no_extension = basename($clientName, '.mp3');
+			$file_bits = explode('_', $no_extension);
+			$filetime = array_pop($file_bits);
+			$filedate = array_pop($file_bits);
+			$taken = date('Y-m-d H:i:s', strtotime($filedate.' '.$filetime));
 			$exif = serialize($exif_extract);
 		}
 		else {

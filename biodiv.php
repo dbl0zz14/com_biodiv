@@ -11,6 +11,9 @@ defined('_JEXEC') or die;
 include "local.php";
 include "Project.php";
 include "Location.php";
+include "Sequence.php";
+include "MediaCarousel.php";
+include "SpeciesCarousel.php";
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
 
@@ -302,10 +305,7 @@ function codes_getOptionName ( $option_id ) {
   
 function codes_getOptionTranslation ( $option_id ) {
 	
-	$langObject = JFactory::getLanguage();
-	$lang = $langObject->getTag();
-		
-	if (!isLanguageSupported($lang)) $lang = "en-GB";
+	$lang = langTag();
 	
 	if ( $lang == "en-GB" ) {
 		return codes_getName ( $option_id, "option" );
@@ -322,6 +322,16 @@ function codes_getOptionTranslation ( $option_id ) {
 		// Default to the english name is there's no translation
 		return $name_tl ? $name_tl : codes_getName ( $option_id, "option" );
 	}
+}
+
+function langTag() {
+	
+	$langObject = JFactory::getLanguage();
+	$lang = $langObject->getTag();
+	
+	if (!isLanguageSupported($lang)) $lang = "en-GB";
+	
+	return $lang;
 }
   
 function update_siteLatLong ( $site_id, $lat, $lon ) {
@@ -579,8 +589,17 @@ function isVideo($photo_id) {
 		return true;
 	}
 	return false;
-	
 }
+
+function isAudio($photo_id) {
+	$details = codes_getDetails($photo_id, 'photo');
+	$filename = $details['filename'];
+	if ( strpos(strtolower($filename), '.mp3') !== false ) {
+		return true;
+	}
+	return false;	
+}
+
 
 function helpVideoURL() {
 	return JURI::root()."/images/video/HowTo.mp4";
@@ -609,6 +628,21 @@ function projectImageURL($proj_id) {
   $row = $db->loadAssoc();
 
   return JURI::root().$row['dirname']."/".$row['image_file'];
+}
+
+function imageURL($option_id) {
+  
+  	// Find logos for this project
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("OD.value")->from("OptionData OD")
+		->innerJoin("Options O on O.option_id = OD.option_id and O.option_id = " . $option_id )
+		->where("OD.data_type = 'image'" );
+		
+	$db->setQuery($query);
+	$image = $db->loadResult();
+
+	return JURI::root().$image;
 }
 
 function classifications($restrictions){
@@ -765,41 +799,6 @@ function removeAnimalId ( $animal_id ) {
 	}
 }
 
-// Helper function to add child projects.
-/*
-function findSubProjects ($projects, $pairs) {
-
-  //echo "findSubProjects called<br>";
-  //print "<br/>Got " . count($projects) . " projects.<br/>";
-  
-  // Start by adding the projects we know about to a new array
-  $allProjects = array();
-  foreach ($projects as $proj_id=>$proj_prettyname){
-	  $allProjects += [ $proj_id=>$proj_prettyname ];
-  }
-  
-  foreach ($allProjects as $proj_id=>$proj_prettyname){	
-	//print "proj_id, proj_prettyname = " . $proj_id . ", " . $proj_prettyname . "<br>";
-	$project_id = null;
-	$parent_project_id = null;
-	$project_prettyname = null;
-	$childAdded = false;
-	foreach ($pairs as $allpairsline){
-	  extract($allpairsline);
-	  //echo "all pairs: parent_project_id, project_id = " . $parent_project_id . ", " . $project_id . "<br>";
-      if ( $parent_project_id == $proj_id ) {
-	    if ( !array_key_exists($project_id, $allProjects) ) {
-		  //print "<br/>Not there yet so adding " . $project_id . "=>" . $project_prettyname . " to allProjects<br/>\n";
-		  // need to watch this - new project must be added at the end...
-		  $allProjects += [ $project_id => $project_prettyname ];
-		  $childAdded = true;
-	    }
-	  }
-	}
-  }
-  return $allProjects;
-}*/
-
 function addSubProjects (&$projects, &$pairs) {
 
   //echo "addSubProjects called<br>";
@@ -832,41 +831,6 @@ function addSubProjects (&$projects, &$pairs) {
   }
 }
 
-/*
-function myProjects(){
-  //print "<br/>myProjects called<br/>";
-  // what user am I?
-  $person_id = (int)userID();
-  
-  // first select all project/parent pairs into memory
-  $db = JDatabase::getInstance(dbOptions());
-  $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
-  $db->setQuery($query);
-  $allpairs = $db->loadAssocList();
-  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
-  
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("PUM.person_id = " . $person_id . " or P.access_level = 0");
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $myprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
-
-  // add to project list by working through $allpairs to find the children, repeatedly
-  //print "<br/>Calling addSubProjects<br/>";
-  addSubProjects( $myprojects, $allpairs );
-  
-  //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
-  //print implode(",", $myprojects);
-  
-  return $myprojects;
-}
-*/
-
 function myTrappingProjects () {
   //print "<br/>myTrappingProjects called<br/>";
   // what user am I?
@@ -888,22 +852,6 @@ function myTrappingProjects () {
   $allpairsincpriv = $db->loadAssocList();
   
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
-  
-  /*
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("(P.access_level = 0) or (PUM.person_id = " . $person_id . ") ");
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $myprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
-
-  // add to project list by working through $allpairs to find the children, repeatedly
-  //print "<br/>Calling addSubProjects<br/>";
-  addSubProjects( $myprojects, $allpairs );
-  */
   
   // First, public projects
   $query = $db->getQuery(true);
@@ -1057,97 +1005,6 @@ function mySpottingProjects ($reduce = false) {
   
   
 }
-/*
-// If $reduce is True, return only the private projects and the top level listed ones.
-function oldSpottingProjects ( $reduce = false ) {
-  //print "<br/>myTrappingProjects called<br/>";
-  // what user am I?
-  $person_id = (int)userID();
-  
-  // first select all project/parent pairs into memory, exclude private ones.
-  $db = JDatabase::getInstance(dbOptions());
-  $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
-	->where("access_level < 3");
-  $db->setQuery($query);
-  $allpairs = $db->loadAssocList();
-  
-  $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project");
-  $db->setQuery($query);
-  $allpairsincpriv = $db->loadAssocList();
-  
-  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
-  
-  // First, public and hybrid projects
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("P.access_level in (0,1)");
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $publicandhybridprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  //print "<br>Public and hybrid projects<br>";
-  //print_r ( $publicandhybridprojects );
-  
-  // Next all private projects I am a member of
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("P.access_level = 3 and PUM.person_id = " . $person_id);
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $privateprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  // add to private project list by working through $allpairs to find the children, repeatedly
-  //print "<br/>Calling addSubProjects<br/>";
-  addSubProjects( $privateprojects, $allpairsincpriv );
-  
-  // Next get any restricted projects I am a member of, and get subprojects of those
-  $query = $db->getQuery(true);
-  $query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-  $query->leftJoin("ProjectUserMap PUM ON P.project_id = PUM.project_id");
-  $query->where("P.access_level = 2 and PUM.person_id = " . $person_id );
-  $query->order("P.project_id" );
-  $db->setQuery($query);
-  $myprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  //print "<br/>Got " . count($myprojects) . " top level projects user is registered for<br/>\n";
-
-  // add to restricted project list by working through $allpairs to find the children, repeatedly
-  //print "<br/>Calling addSubProjects<br/>";
-  addSubProjects( $myprojects, $allpairs );
-  
-  //print "<br>Pre mergerd restricted and hybrid projects: <br>";
-  //print_r ( $myprojects );
-  
-  // Add in the public, hybrid and private projects
-  $myprojects = $myprojects + $publicandhybridprojects + $privateprojects;
-  
-  //print "<br>Mergerd projects: <br>";
-  //print_r ( $myprojects );
-  
-  
-  if ( $reduce ) {
-	  // Only want the private projects plus the projects that don't have a parent already in the list.
-	
-	$query = $db->getQuery(true);
-	$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
-	//$query->where("P.access_level = 3 or (P.access_level < 2 and P.parent_project_id is null) or (P.access_level < 2 and P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2))");
-	$query->where("P.access_level = 3 or (P.access_level < 3 and P.parent_project_id is null) or (P.access_level < 3 and P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2))");
-	$db->setQuery($query);
-	$allreduced = $db->loadAssocList('proj_id', 'proj_prettyname');
-	$myprojects = array_intersect_key ( $myprojects, $allreduced );
-  }
-  
-  //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
-  //print implode(",", $myprojects);
-  
-  asort($myprojects);
-  return $myprojects;
-}
-*/
 
 // Get all options for a single project by project id or just a particular option type if set
 function getSingleProjectOptions ( $project_id, $option_type ) {
@@ -1278,6 +1135,36 @@ function projectDetails ( $project_id ) {
   return $projectdetails;
 }
 
+
+// Return the API details for a single user id as an object
+function userDetails ( $person_id ) {
+  
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("UE.person_id as id, O.option_name as topic, UE.score as level")->from("UserExpertise UE")
+	->innerJoin("Options O on O.option_id = UE.topic_id and O.struc = 'topic'")
+	->where("person_id = " . $person_id );
+  $db->setQuery($query);
+  $userDetails = $db->loadObjectList();
+  
+  return $userDetails;
+}
+
+
+function userExpertise( $person_id ) {
+	
+	// Use language directly to get translated option names for speed.
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("O.option_id as topic_id, AVG(UE.score) as level")->from("Options O")
+		->leftJoin("UserExpertise UE on O.option_id = UE.topic_id and UE.person_id = " . $person_id)
+		->where( "O.struc = 'topic'" )
+		->group( "O.option_id" );
+	$db->setQuery($query);
+	$userDetails = $db->loadObjectList("topic_id");
+  
+	return $userDetails;
+}
 
 
 // Calculate the number of sequences uploaded and the number of sequences with at least one classification for every site for end date given or end of this month
@@ -2511,46 +2398,6 @@ function getProjectTree ( $project_id ) {
 }
 
 
-// Return a list of this project and all its children.
-// Called with proj prettyname for now.  Refactor later if necessary.
-/*  Refactoring now - see below, use project_id
-function getSubProjects($project_prettyname, $exclude_private = false){
-  //print "<br/>getSubProjects called<br/>";
-  
-  // first select all project/parent pairs into memory
-  $db = JDatabase::getInstance(dbOptions());
-  $query = $db->getQuery(true);
-  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
-		->where("parent_project_id is not NULL");
-  // exclude private projects
-  if ( $exclude_private ) {
-	  $query->where("access_level < 3");
-  }
-  $db->setQuery($query);
-  $allpairs = $db->loadAssocList();
-  //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
-  //print_r($allpairs);
-  
-  // Need to get the proj id and name of the top level project
-  $query = $db->getQuery(true);
-  $query->select("project_id AS proj_id, project_prettyname AS proj_prettyname")->from("Project");
-  $query->where("project_prettyname = '" . $project_prettyname . "'");
-  $db->setQuery($query);
-  $subprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-  
-  
-  // add to project list by working through $allpairs to find the children, repeatedly
-  addSubProjects( $subprojects, $allpairs );
-  
-  //print "<br/>Got " . count($subprojects) . " sub projects.<br/>They are:<br>";
-  //print implode(",", $subprojects);
-  
-  return $subprojects;
-  
-}
-*/
-
-
 function getSubProjectsById($project_id, $exclude_private = false){
 	/*
   $db = JDatabase::getInstance(dbOptions());
@@ -2672,76 +2519,7 @@ function projectProgress ( $project_id ) {
 	$sequences = $row['0'];
 	$classifications = $row['1'];
  
- /*
-	$query = $db->getQuery(true);
-	$query->select("A.photo_id")->from("Animal A");
-	$query->innerJoin("Photo P on A.photo_id = P.photo_id");
-	$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
-	$query->where("P.sequence_num = 1");
-	$query->where("PSM.project_id in (" . $id_string . ")" );
-	$query->where("P.photo_id >= PSM.start_photo_id" );
-	$query->where("PSM.end_photo_id is NULL" );
-	$query->where("A.species != 97" );
-	
-	// Next the number of classifications for sites that have left the project, when they were part of the project!
-	$query2 = $db->getQuery(true);
-	$query2->select("A.photo_id")->from("Animal A");
-	$query2->innerJoin("Photo P on A.photo_id = P.photo_id");
-	$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
-	$query2->where("P.sequence_num = 1");
-	$query2->where("PSM.project_id in (" . $id_string . ")" );
-	$query2->where("P.photo_id >= PSM.start_photo_id" );
-	$query2->where("P.photo_id <= PSM.end_photo_id" );
-	$query2->where("A.species != 97" );
-	
-	$q3 = $db->getQuery(true)
-             ->select('count( distinct a.photo_id)')
-             ->from('(' . $query->union($query2) . ') a');
-	$db->setQuery($q3);
-	
-	$classifications = $db->loadResult();
-*/             
-/*
-SELECT count(*) from photo P 
-inner Join ProjectSiteMap PSM on P.site_id = PSM.site_id
-where P.photo_id >= PSM.start_photo_id
-and P.photo_id <= PSM.end_photo_id
-and P.sequence_num = 1
-and PSM.project_id = 1
-UNION
-SELECT count(*) from photo P 
-inner Join ProjectSiteMap PSM2 on P.site_id = PSM2.site_id
-and P.photo_id >= PSM2.start_photo_id 
-and PSM2.end_photo_id is null
-and P.sequence_num = 1
-where PSM2.project_id = 1
-*/
-/*
-	$query3 = $db->getQuery(true);
-	$query3->select("P.photo_id")->from("Photo P");
-	$query3->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
-	$query3->where("P.sequence_num = 1");
-	$query3->where("PSM.project_id in (" . $id_string . ")" );
-	$query3->where("P.photo_id >= PSM.start_photo_id" );
-	$query3->where("PSM.end_photo_id is NULL" );
-	
-	// And the total number of sequences uploaded, for sites that are have left the project
-	$query4 = $db->getQuery(true);
-	$query4->select("P.photo_id")->from("Photo P");
-	$query4->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
-	$query4->where("P.sequence_num = 1");
-	$query4->where("PSM.project_id in (" . $id_string . ")" );
-	$query4->where("P.photo_id >= PSM.start_photo_id" );
-	$query4->where("P.photo_id <= PSM.end_photo_id" );
-	
-	$q4 = $db->getQuery(true)
-             ->select('count(distinct a.photo_id)')
-             ->from('(' . $query3->union($query4) . ') a');
-	$db->setQuery($q4);
-	$sequences = $db->loadResult();
-*/    
-		
-	$percentComplete = 0;
+ 	$percentComplete = 0;
 	if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
   
 	return array("numClassifications"=>$classifications, "numSequences"=>$sequences, "percentComplete"=>$percentComplete);
@@ -2794,6 +2572,7 @@ function getProjectUsers($project_id){
   
   return $users;
 }
+
 function isFavourite($photo_id){
   if ( count(myLikes($photo_id)) > 0 ) {
 	  return true;
@@ -2803,144 +2582,6 @@ function isFavourite($photo_id){
   }
 }
 
-
-// New version of nextSequence which considers the classify priority mode of each project.
-// At the time of writing this could be:
-// Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
-/*
-function nextSequenceSlow(){
-  
-  //print "<br/>nextSequence called<br/>";
-	
-  $db = JDatabase::getInstance(dbOptions());
-  $app = JFactory::getApplication();
-  
-  // Initialise photo_id and sequence_id to null
-  $photo_id = null;
-  $sequence_id = null;
-  
-  // First find out which classify button was pressed.
-  $classify_project = $app->getUserState("com_biodiv.classify_only_project");
-  $classify_own = $app->getUserState("com_biodiv.classify_self");
-  $last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
-  
-  $my_project = null;
-  
-  if ( $classify_project ) $my_project = $app->getUserState("com_biodiv.my_project");
-  
-  //print "<br>nextSequence, my_project: " . $my_project . "<br>" ;
-  
-  // Get a list of projects over which we are working and their priority mode (an assoc list keyed on project_id)
-  // If we are doing a "classify all" then exclude some projects
-  $exclude_flag = true;
-  if ( $classify_project or $classify_own ) $exclude_flag = false;
-  $project_options = getProjectOptions ( $my_project, "priority", $exclude_flag );
-  
-  //print "<br>nextSequence, got project options: <br>" ;
-  //print_r ( $project_options );
-  
-  // Get all the priority option names indexed on project_id
-  $priority_array = array_column ( $project_options, "option_name", "project_id" );
-  
-  //print "<br>nextSequence, got priority_array: <br>" ;
-  //print_r ( $priority_array );
-  
-  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered");
-  
-  // which priorities do we have projects for?
-  $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
-  
-  //print "<br>nextSequence, got distinct_priorities: <br>" ;
-  //print_r ( $distinct_priorities );
-  
-  //error_log ( "distinct priorities: " . implode ( ',', $distinct_priorities ) );
-  
-  $photo_id_candidates = array();
-  
-  // THere may be no photos left to classify.
-  $num_candidates = 0;
-  
-  if ( count($distinct_priorities) > 0 ) {
-	//print "distinct priorities are:<br>";
-	//print_r($distinct_priorities);
-	if ( in_array("Single", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Single" );
-	  $ph_id = chooseSingle ( $project_ids, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Single"] = $ph_id;
-	}
-	if ( in_array("Multiple", $distinct_priorities ) ) {
-	  //print "<br>nextSequence, about to ChooseMultiple <br>" ;
-	  $project_ids = array_keys ( $priority_array, "Multiple" );
-	  $ph_id = chooseMultiple ( $project_ids, $classify_own );
-	  //print "<br>nextSequence, chooseMultiple chose ph_id " . $ph_id . " <br>" ;
-	  if ( $ph_id ) $photo_id_candidates["Multiple"] = $ph_id;
-	}
-	if ( in_array("Single to multiple", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Single to multiple" );
-	  $ph_id = chooseSingle ( $project_ids, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
-	  else {
-		  $ph_id = chooseMultiple ( $project_ids, $classify_own );
-		  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
-	  }
-	}
-	if ( in_array("Site time ordered", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Site time ordered" );
-	  $ph_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Site time ordered"] = $ph_id;
-	}
-  
-	$num_candidates = count($photo_id_candidates);
-  
-	//print "<br>nextSequence, num_candidates = " . $num_candidates . " <br>" ;
-  
-	//$chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
-	if ( $num_candidates > 0 ) {
-		$chosen_priority = array_keys($photo_id_candidates)[0];
-	}
-  
-	// If only one priority type we are done, but if more than one we have to pick.
-	if ( $num_candidates > 1 ) {
-	
-		// Determine which priority type we're using.  Take a weighted choice from each priority type that this user has 
-		// access to.  For now use these hardcoded values but this needs to be taken out and put in the database, then updated daily based 
-		// on what photos/projects there are...
-		$all_weightings = getPriorityWeightings ();
-	
-		$reqd_weightings = array_intersect_key ( $all_weightings, $photo_id_candidates );
-		//print "<br>nextSequence, got reqd_weightings: <br>" ;
-		//print_r ( $reqd_weightings );
-  
-		$total_weighting = array_sum($reqd_weightings);
-  
-		// Choose a random integer between 0 and $total_weightings.
-		$choice = rand ( 1, $total_weighting );
-	
-		//print "<br>nextSequence, choice:" . $choice . " <br>" ;
-	
-		// check through the accumulated weightings to see where the choice lies..
-		$count = 0;
-		foreach ( $reqd_weightings as $priority=>$weighting ) {
-			$count += $weighting;
-			if ( $choice <= $count ) {
-				$chosen_priority = $priority;
-				break;
-			}
-		}
-	}
-  
-	//print "<br>nextSequence, chosen priority is:" . $chosen_priority . " <br>" ;
-	//error_log ( "nextSequence, chosen priority is:" . $chosen_priority );
-	
-	if ( $num_candidates > 0 ) {
-		$photo_id = $photo_id_candidates[$chosen_priority];
-	}
-  }
-  //print "<br/> returning at end of nextSequence, photo_id = " . $photo_id;
-  //return getSequence($photo_id);
-  return getSequenceDetails($photo_id);
-}
-*/
 
 // New version of nextSequence which considers the classify priority mode of each project.
 // At the time of writing this could be:
@@ -3601,233 +3242,6 @@ function updateSequence($photo_id){
 	return true;
 }
 
-/* NO LONGER USED
-function nextPhoto($prev_photo_id){
-	
-  //print "<br/>nextPhoto called<br/>";
-	
-  $db = JDatabase::getInstance(dbOptions());
-  $app = JFactory::getApplication();
-  
-  // Initialise photo_id to null
-  $photo_id = null;
-
-  $pdetails = codes_getDetails($prev_photo_id, 'photo');
-  $next_photo = $pdetails['next_photo'];
-  if($next_photo){
-	//print "<br/>Have a next_photo<br/>";
-	
-    $nextDetails = codes_getDetails($next_photo, 'photo');
-    $photo_id = $next_photo;
-    if(!$nextDetails['contains_human'] and !haveClassified($next_photo)){
-      // copy across classification
-      $query = $db->getQuery(true);
-      $query->select("person_id, species, gender, age, number")
-	->from("Animal")
-	->where("photo_id = ".(int)$prev_photo_id)
-	->where("person_id = " . (int)userID())
-	->order("animal_id");
-      $db->setQuery($query);
-      foreach($db->loadObjectList() as $animal){
-	$speciesDetails = codes_getDetails($animal->species, 'content');
-	$speciesGroup = $speciesDetails['struc'];
-	if(!in_array($speciesGroup, array('noanimal','like'))){
-	  $animal->photo_id = $photo_id;
-	  codes_insertObject($animal, "animal");
-	}
-      }
-    }
-  }
-  if($prev_photo_id && !$photo_id){
-    // find next photo sequence on same trap usually
-	// continue causes error when used in included file so avoid this..
-    //if(rand(0,10)>7){
-    //  continue;
-    //}
-	
-	if(rand(0,10)<=7){
-	  //print "<br/>rand < 7<br/>";
-	
-      $site_id = $pdetails['site_id'];
-      $taken = $pdetails['taken'];
-    
-      $query = $db->getQuery(true);
-      $query->select("P.photo_id")
-        ->from("Photo P")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-        ->where("A.photo_id IS NULL")
-        ->where("P.contains_human = 0")
-        ->where("P.site_id = " . (int)$site_id)
-        ->where("taken > '$taken'")
-        ->order("taken");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo_id = $db->loadResult();
-	}
-  }
-  if (!$photo_id) {
-	//print "<br/>no photo_id, testing for classify own project<br/>";
-  
-    if($app->getUserState("com_biodiv.classify_only_project")){
-      //print "<br/>classifying current project only<br/>";
-	  // NB need to include all sub projects too
-      $my_project = $app->getUserState("com_biodiv.my_project");
-	  $allsubs = getSubProjects($my_project);
-	  //print "<br/>Got " . count($allsubs) . " sub projects.<br/>They are:<br>";
-	  //print implode(",", $allsubs);
-	  $id_string = implode(',', array_keys($allsubs));
-	  
-	  //print "id_string = ".$id_string;
-	  $query = $db->getQuery(true);
-      $query->select("P.photo_id, P.sequence_id")
-        ->from("Photo P")
-        ->innerJoin("Site S ON P.site_id = S.site_id")
-        ->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
-        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
-        ->where("A.photo_id IS NULL")
-        ->where("P.contains_human =0")
-		->order("rand()");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo = $db->loadObject();
-	  if ( $photo ) {
-		  $photo_id = $photo->photo_id;
-	  }
-	  // Classifying my project only so return here even if no photo_id.
-	  // find first unclassified picture in this sequence
-	  // Copied from end of function as need to return for my project ONLY
-	  // Really need to do this more neatly
-	  if ( $photo_id ) {
-        //print "photo found = ".$photo_id;
-	    $sequence_id = $photo->sequence_id;
-        //print "sequence id = ".$sequence_id;
-	    $sequence = codes_getDetails($sequence_id, 'sequence');
-        $photo_id = $sequence['start_photo_id'];
-        //print "start photo = ".$photo_id;
-	    while($photo_id && haveClassified($photo_id)){
-          $photoDetails = codes_getDetails($photo_id, 'photo');
-          $photo_id = $photoDetails['next_photo'];
-        }
-		//print "after checking classified, photo_id = ".$photo_id;
-	  }
-	  return $photo_id;
-    }
-  }
-  if(!$photo_id){
-	//print "<br/>no photo_id, testing for classify self first<br/>";
-  
-    // choose random picture
-    //$app = JFactory::getApplication();
-    if($app->getUserState("com_biodiv.classify_self")){
-	  //print "<br/>classifying self<br/>";
-	
-      $query = $db->getQuery(true);
-      $query->select("P.photo_id, P.sequence_id")
-	->from("Photo P")
-	->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-	->where("A.photo_id IS NULL")
-	->where("P.contains_human =0")
-	->where("P.person_id = " . (int)userID())
-	->order("rand()");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo = $db->loadObject();
-      $photo_id = $photo->photo_id;
-    }
-    if ( !$photo_id ) {
-		//print "<br/>no photo_id, testing for classify project first<br/>";
-  
-	if($app->getUserState("com_biodiv.classify_project")){
-      //print "<br/>classifying project first<br/>";
-	  $my_project = $app->getUserState("com_biodiv.my_project");
-	  $query = $db->getQuery(true);
-      $query->select("P.photo_id, P.sequence_id")
-        ->from("Photo P")
-        ->innerJoin("Site S ON P.site_id = S.site_id")
-        ->innerJoin("Project PROJ ON PROJ.project_prettyname = '".$my_project."'")
-        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id")
-        ->where("A.photo_id IS NULL")
-        ->where("P.contains_human =0")
-		->order("rand()");
-      $db->setQuery($query, 0, 1); // LIMIT 1
-      $photo = $db->loadObject();
-	  if ( $photo ) {
-		  $photo_id = $photo->photo_id;
-	  }
-    }
-	//print "<br/>photo_id = " . $photo_id . " after classify_project check<br/>";
-	}
-		
-	if (!$photo_id) {
-		//print "<br/>No photo so looking at all my projects<br/>";
-		// only display photos from projects the user has access to.
-		$projects = myProjects();
-		//print "<br/>Got " . count($projects) . " all projects user has access to<br/>They are:<br>";
-		//print implode(",", $projects);
-  
-		$id_string = implode(',', array_keys($projects));
-		
-		$query = $db->getQuery(true);
-		$query->select("P.photo_id, P.sequence_id")
-			->from("Photo P")
-			->innerJoin("Site S ON P.site_id = S.site_id")
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$id_string.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = S.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0")
-			->order("rand()");
-		$db->setQuery($query, 0, 1); // LIMIT 1
-		$photo = $db->loadObject();
-		if ( $photo ) {
-		  $photo_id = $photo->photo_id;
-		}
-	}
-	  
-    //if(!$photo_id){
-    //  $query = $db->getQuery(true);
-    //  $query->select("P.photo_id, P.sequence_id")
-	//->from("Photo P")
-	//->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-	//->where("A.photo_id IS NULL")
-	//->where("P.contains_human =0")
-    //  ->order("rand()");
-    //  $db->setQuery($query, 0, 1); // LIMIT 1
-    //  $photo = $db->loadObject();
-    //  $photo_id = $photo->photo_id;
-    //}
-	
-
-    // find first unclassified picture in this sequence
-	$sequence_id = $photo->sequence_id;
-	$sequence = codes_getDetails($sequence_id, 'sequence');
-	$photo_id = $sequence['start_photo_id'];
-	
-	//echo "sequence_id = ".$sequence_id;
-	//echo "photo_id = ".$photo_id;
-	//echo "photo->photo_id = ".$photo->photo_id;
-	//if ( $sequence_id != -1 ) {
-	  //$sequence = codes_getDetails($sequence_id, 'sequence');
-	  //echo "sequence = ".$sequence;
-    
-      //$photo_id = $sequence['start_photo_id'];
-	  //echo "photo_id = ".$photo_id;
-	//}
-	
-	//echo "photo_id = ".$photo_id;
-	
-    while($photo_id && haveClassified($photo_id)){
-      $photoDetails = codes_getDetails($photo_id, 'photo');
-      $photo_id = $photoDetails['next_photo'];
-    }
-  }
-  
-  //print "<br/> returning at end of nextPhoto, photo_id = " . $photo_id;
-
-  return $photo_id;
-}
-
-*/
-
 function prevPhoto($last_photo_id){
   $photoDetails = codes_getDetails($last_photo_id, 'photo');
   $photo_id = $photoDetails['prev_photo'];
@@ -3875,10 +3289,14 @@ function sequencePhotos($upload_id){
     $dateTime = new DateTime($taken);
     //print "photo_id $photo_id ";
 	
+	$isAudio = isAudio($photo_id);
+	$isVideo = isVideo($photo_id);
+	
 	if($prev_dateTime !== null){
       $diff = $dateTime->diff($prev_dateTime);
       print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
-      if((abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
+      //if((abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
+	  if(!$isAudio && !$isVideo && (abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
 	    print "<br/> photos are close<br/>\n";
 		if($sequence_id>0){
 	      print "Existing sequence $sequence_id<br/>";	
@@ -4107,13 +3525,7 @@ function getFilters () {
 // Get project specific filters, either based on project_id or photo_id given
 function getProjectFilters ( $project_id, $photo_id = null ) {
 	
-	//print "<br>getProjectFilters called, project_id = " . $project_id . ", photo_id = " . $photo_id;
-	$langObject = JFactory::getLanguage();
-	$lang = $langObject->getTag();
-	
-	// Check language is supported.  If not, default to English.
-	if (!isLanguageSupported($lang)) $lang = "en-GB";
-	
+	$lang = langTag();
 	
 	$projectFilters = array();
 	// First get the ENglish version
@@ -4170,8 +3582,151 @@ function getProjectFilters ( $project_id, $photo_id = null ) {
 	return $returnFilters;
 }
 
-function extractLabel ( $v )
-{
+// Get project specific filters for the topic given
+function getTopicFilters ( $topic_id ) {
+	
+	$lang = langTag();
+	
+	$topicFilters = array();
+	
+	// First get the English version
+	if ( $topic_id ) {
+		// Find filter for this topic
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->select("O.option_id, O.option_name")->from("Options O")
+			->innerJoin("OptionData OD on OD.value = O.option_id and OD.data_type = 'topicfilter'")
+			->where("OD.option_id = " . $topic_id )
+			->order("O.seq");
+		$db->setQuery($query);
+		$topicFilters = $db->loadRowList();
+	}
+	
+	// if we are not in English, use the translated filter names if they exist
+	if ( $lang != "en-GB" ) {
+		for ( $i = 0; $i < count($topicFilters); $i++ ) {
+			list($id, $name) = $topicFilters[$i];
+			$translatedName = codes_getName($id, 'projectfiltertran');
+			$topicFilters[$i][1] = $translatedName;
+		}
+	}
+	//print ( "<br> projectFilters: <br>" );
+	//print_r ( $projectFilters );
+		
+	$returnFilters = array();
+	
+	foreach ($topicFilters as $filter) {
+		$returnFilters[$filter[0]] = array('label'=>$filter[1]);
+	}
+	
+	return $returnFilters;
+}
+
+
+function getTrainingSequences( $topic_id, $max_number=10 ) {
+	
+	$seq_ids = array();
+	
+	if ( $topic_id ) {
+		// Find sequences for this topic
+		$db = JDatabase::getInstance(dbOptions());
+		$query = $db->getQuery(true);
+		$query->select("distinct OD.value as sequence_id")->from("OptionData OD")
+			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
+			->order("rand()");
+		$db->setQuery($query, 0, $max_number);
+		$seq_ids = $db->loadColumn();
+	}
+	return $seq_ids;
+}
+
+function getSequenceById($sequence_id) {
+  
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$seq = new Sequence ( $sequence_id );
+  
+	$query = $db->getQuery(true);
+	$query->select("P.sequence_id, P.photo_id, P.site_id")->from("Photo P")
+		->where("P.sequence_id = ".$sequence_id )
+		->order("sequence_num");
+	$db->setQuery($query);
+	$photos = $db->loadObjectList();
+	
+	$seq->setLocation ( getSiteLocation ($photos[0]->site_id ) );
+	
+	foreach ( $photos as $photo ) {
+		$photo_id = $photo->photo_id;
+		$photo_url = photoURL($photo_id);
+		
+		error_log("photo url: " . $photo_url );
+		
+		if ( isVideo($photo_id) ) {
+			$ext = strtolower(JFile::getExt($photo_url));
+			error_log ( "Found video file, ext = " . $ext );
+			$seq->setMedia("video", $ext);
+		}
+		else if ( isAudio ($photo_id) ){
+			$ext = strtolower(JFile::getExt($photo_url));
+			error_log ( "Found audio file, ext = " . $ext );
+			$seq->setMedia("audio", $ext);
+		}
+				
+		$seq->addMediaFile ( $photo_id, $photo_url );
+	}
+	
+	return $seq;
+  
+}
+
+function getTrainingSequence( $sequence_id ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$seq = getSequenceById ( $sequence_id );
+	
+	$query = $db->getQuery(true);
+	$query->select("ES.species_id as id, ES.gender, ES.age, sum(ES.number) as number")->from("ExpertSequences ES")
+		->where("ES.sequence_id = ".$sequence_id )
+		->group("ES.sequence_id, ES.species_id, ES.gender, ES.age");
+	$db->setQuery($query);
+	$esObjects = $db->loadObjectList();
+	
+	foreach ( $esObjects as $es ) {
+		$seq->addSpecies ( $es );
+	}
+/*
+	$query = $db->getQuery(true);
+	$query->select("P.sequence_id, P.photo_id")->from("Photo P")
+		->where("P.sequence_id = ".$sequence_id );
+	$db->setQuery($query);
+	$photos = $db->loadObjectList();
+
+	//$photostr = print_r($photos);
+	//error_log("getTrainingSequences, photostr = " . $photostr);
+
+	foreach ( $photos as $photo ) {
+		$photo_id = $photo->photo_id;
+		$photo_url = photoURL($photo_id);
+		
+		if ( isVideo($photo_id) ) {
+			$ext = strtolower(JFile::getExt($photo_url));
+			$seq->setMedia("audio", $ext);
+		}
+		else if ( isAudio ($photo_id) ){
+			$ext = strtolower(JFile::getExt($photo_url));
+			$seq->setMedia("audio", $ext);
+		}
+		
+		$seq->addMediaFile ( $photo_id, $photo_url );
+	}
+*/			
+		
+	return $seq;
+}
+
+
+function extractLabel ( $v ){
 	return $v['label'];
 }
 
@@ -4264,6 +3819,43 @@ function getSpecies ( $filterid, $onePage ) {
 	return $speciesList;
 }
 
+function getClassifyInputs () {
+	
+	$translations = getTranslations("classify");
+	$classifyInputs = array();
+	
+	foreach(array("gender", "age") as $struc){
+		$title_tran = $translations[codes_getTitle($struc)]['translation_text'];
+		$input = "<label for ='classify_$struc'>" . $title_tran . "</label><br />\n";
+		//$input .= "<select id='classify_$struc' name='$struc'>\n";
+		//$input .= codes_getOptions(1, $struc);
+		// set default to be unknown:
+		$features = array("gender"=>84, "age"=>85);
+		$input .= codes_getRadioButtons($struc, $struc."tran", $features);
+		//$input .= "\n</select>\n";
+		$classifyInputs[] = $input;	    
+	}
+	$number = "<label for ='classify_number'>How many?</label>\n";
+	$number .= "<div id='classify_how_many'><button type='button' class='btn' id='classify_decrease'><span class='fa fa-minus'/></button>";
+	$number .= "<input id='classify_number' type='number' min='1' max='99' value='1' name='number'/><button type='button' class='btn' id='classify_increase'><span class='fa fa-plus'/></button></div>\n";
+	$classifyInputs[] = $number;
+		
+	//$number = "<label for ='classify_number'>" . $translations['how_many']['translation_text'] . "</label>\n";
+	//$number .= "<input id='classify_number' type='number' min='1' value='1' name='number'/>\n";
+	//$classifyInputs[] = $number;
+	
+	$sure = "<label for ='classify_sure'>" . $translations['sure']['translation_text'] . "</label>\n";
+	// See what happens if we don;t specify what to check - want it to default to first option
+	$sure .= codes_getRadioButtons("sure", "suretran", null);
+	$classifyInputs[] = $sure;
+	
+	$notes = "<label for ='classify_notes'>" . $translations['notes']['translation_text'] . "</label>\n";
+	$notes .= "<input id='classify_notes' type='text' maxlength='100' name='notes'/>\n";
+	$classifyInputs[] = $notes;
+		
+	return $classifyInputs;
+}
+
 function makeControlButton($control_id, $control, $extraClasses=''){
   $disabled = strpos($control, "disabled");
   if($disabled !== false){
@@ -4283,8 +3875,6 @@ function makeControlButton($control_id, $control, $extraClasses=''){
   //print "<button type='button' class='btn btn-warning btn-block $extraText $extraClasses' id='$control_id'>$control</button>";
   print "<button type='button' class='btn btn-primary $extraText $extraClasses' id='$control_id'>$control</button>";
 }
-
-
 
 
 //$useSeq is flag if true uses page numbers given, if false, works pages out alphabetically
@@ -4586,6 +4176,7 @@ function getVideoMeta ( $filename ) {
 
 }
 
+
 function getClassificationButton ( $id, $animalArray ) {
 	$label = codes_getName($animalArray[$id]->species, 'contenttran');
      $contentDetails = codes_getDetails($animalArray[$id]->species, 'content');
@@ -4729,8 +4320,7 @@ function getOrdinal ( $num ) {
 
 function getAssociatedArticleId ( $article_id ) {
 	
-	$langObject = JFactory::getLanguage();
-	$lang = $langObject->getTag();
+	$lang = langTag();
 	
 	$assoc_id = null;
 
@@ -4739,13 +4329,51 @@ function getAssociatedArticleId ( $article_id ) {
 		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $article_id);
 		
 		//print_r($associations);
-		$assoc_id = $associations[$lang]->id;
+		if ( $associations ) {
+			$assoc_id = $associations[$lang]->id;
+		}
 	}
 	
 	// If no associated article (for this language) return the original one
 	if ( $assoc_id == null ) $assoc_id = $article_id;
 	
 	return $assoc_id;
+}
+
+
+// Get the article associated with this option, in the correct language if available.
+function getArticle ( $option_id ) {
+	
+	$option = codes_getDetails($option_id, "optiontran");
+	
+	//Set up the defaults
+	$article_id = $option['article_id'];
+	$title = $option['option_name'];
+	$introtext = null;
+	$fulltext = null;
+	
+	if( $article_id != 0 ) {
+		
+		$assoc_id = getAssociatedArticleId ( $article_id );
+		
+		$jarticle = JTable::getInstance("content");
+
+		$jarticle->load($assoc_id); 
+	
+		$title = $jarticle->title;
+		$introtext = $jarticle->introtext;
+		$fulltext = $jarticle->fulltext;
+		
+	}
+
+	$article = new stdClass();
+	$article->id = $article_id;
+	$article->title = $title;
+	$article->introtext = $introtext;
+	$article->fulltext = $fulltext;
+	
+	return $article;
+
 }
 
 
@@ -4756,27 +4384,6 @@ function getSiteLocation($site_id) {
 
 }
 
-
-/*
-function makeControlButton($control_id, $control){
-  $disabled = strpos($control, "disabled");
-  if($disabled !== false){
-    $extras = array('disabled');
-  }
-  else{
-    $extras = array('classify_control');
-  }
-
-  $confirm = strpos($control, "biodiv-confirm");
-
-  if($confirm !== false){
-    $extras[] = "biodiv-confirm";
-  }
-
-  $extraText = implode(" ", $extras);
-  print "<button type='button' class='btn btn-primary $extraText' id='$control_id'>$control</button>";
-}
-*/
 
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');

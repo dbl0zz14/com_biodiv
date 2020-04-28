@@ -64,14 +64,15 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	$this->project = codes_getDetails($this->project_id, "project");
 	
-	// Check whether there's an article in current language
+	// Get the associated article, if there is one, in the urrent language if possible
 	$article_id = getAssociatedArticleId($this->project['article_id']);
-	
-	
 	$article->load($article_id); 
+	
   	$this->title = $article->title;
 	$this->introtext = $article->introtext;
 	$this->fulltext = $article->fulltext;
+	
+	
 	$this->access_level = $this->project['access_level'];
 		
 
