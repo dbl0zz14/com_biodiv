@@ -128,7 +128,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 		$seq = $this->sequences[$i];
 		$correct = $seq->getSpecies();
 		
-		if ( count($this->classifications) > $i + 1 ) {
+		if ( count($this->classifications) > $i ) {
 			$useranimals = $this->classifications[$i];
 			
 			if ( $this->detail == 1 ) {

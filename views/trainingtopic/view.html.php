@@ -69,7 +69,7 @@ class BioDivViewTrainingTopic extends JViewLegacy
 	//error_log("TrainingTopic view - about to get sequences");
 	
 	// Get the gold standard sequences for this topic
-	$this->sequences = getTrainingSequences($this->topic_id, 3);
+	$this->sequences = getTrainingSequences($this->topic_id, 8);
 	
 	//error_log("first seq id = " . $this->sequences[0]);
 	
