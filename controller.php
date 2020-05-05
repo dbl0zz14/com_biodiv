@@ -615,9 +615,31 @@ class BioDivController extends JControllerLegacy
 			//$taken = date($uploadDetails['deployment_date']); // TEMPORARY UNTIL WE USE FILENAME TO GET DATE - NOT STORED IN EXIF
 			$no_extension = basename($clientName, '.mp3');
 			$file_bits = explode('_', $no_extension);
-			$filetime = array_pop($file_bits);
-			$filedate = array_pop($file_bits);
-			$taken = date('Y-m-d H:i:s', strtotime($filedate.' '.$filetime));
+			// Check we have at least 3 bits
+			$format_error = false;
+			if ( count($file_bits) > 2 ) {
+				$filetime = array_pop($file_bits);
+				$filedate = array_pop($file_bits);
+				if ( is_numeric($filetime) && is_numeric($filedate) ) {
+					$taken = date('Y-m-d H:i:s', strtotime($filedate.' '.$filetime));
+					// Check format was ok
+					$date_errors = date_get_last_errors();
+					if ( $date_errors['warning_count'] > 0 || $date_errors['error_count'] > 0 ) {
+						error_log("Errors or warnings when creating date");
+						$format_error = true;
+					}
+				}
+				else {
+					$format_error = true;
+				}
+			}
+			else {
+				$format_error = true;
+			}
+			if ( $format_error ) {
+				addMsg("error","File upload unsuccessful for $clientName. Incorrect filename format.  Should be similar to myfile_YYYYMMDD_HHmmss.mp3");
+				return;
+			}
 			$exif = serialize($exif_extract);
 		}
 		else {
