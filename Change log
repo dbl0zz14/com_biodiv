@@ -4,6 +4,7 @@
 * Added training test yourself module.
 * Limit S3 transfer to 500.
 * Fail if audio file does not have date time in format
+* Allow up to 20 classifications for audio, up to 6 for images and video
 
 # 29/02/20 - Version 3.1.3   #
 * Optimised chooseMultiple, Single and Repeat db queries so no order by rand()
