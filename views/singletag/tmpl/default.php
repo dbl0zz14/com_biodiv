@@ -25,11 +25,6 @@ else if(!$this->animal){
      }
      if($type == 'noanimal'){
        $btnClass = 'btn-primary';
-	   /*
-	   if ( $label != 'Nothing' ) {
-		   $nothingDisabled = true;
-	   }
-	   */
 	   if ( $this->animal->species != 86 ) {
 		   $nothingDisabled = true;
 	   }

@@ -131,19 +131,6 @@ class BioDivViewClassify extends JViewLegacy
 	  $app->setUserState('com_biodiv.photo_id', $this->photo_id);
 	  $app->setUserState('com_biodiv.prev_photo_id', $this->photo_id);
 	  
-	  
-	  //print "<br>Got the following sequence:<br>";
-	  //print_r($this->sequence);
-	  
-	  /* now sequence contains the details
-	  $this->sequence_details = array();
-	  foreach ($this->sequence as $next_photo_id) {
-		  //print "<br>Adding photo " . $next_photo_id->photo_id . "<br>";
-		  $this->sequence_details[] = codes_getDetails($next_photo_id, 'photo');
-	  }
-	  //print "<br>Got the following ". count($this->sequence_details) . " sequence details:<br>";
-	  //print_r($this->sequence_details);
-	  */
 	  $this->photoDetails = null;
 	  // There might be nothing to classify...
 	  if ( count($this->sequence) > 0 ) {
@@ -152,13 +139,10 @@ class BioDivViewClassify extends JViewLegacy
 		 // Check for video
 		 $this->isVideo = isVideo($this->photo_id);
 		 $this->isAudio = isAudio($this->photo_id);
-		 /*
-		 $this->isVideo = false;
-		 $filename = $this->photoDetails['filename'];
-		 if ( strpos(strtolower($filename), '.mp4') !== false ) {
-			 $this->isVideo = true;
-		 }
-		 */
+		 
+		 $this->maxClassifications = 6;
+		 if ( $this->isAudio ) $this->maxClassifications = 20;
+		 
 		// Get the general location of the site to help spotters
 		$site_id = $this->photoDetails['site_id'];
 		$this->location = getSiteLocation($site_id);
@@ -166,26 +150,14 @@ class BioDivViewClassify extends JViewLegacy
 		// Get the filter ids and filter labels for this photo. 
 		//$project_id = codes_getCode($this->my_project, 'project');
 	  
-		/* Moving to only project filters, no default ones
-		$this->filters = getFilters ();
-	  
-		foreach ( $this->filters as $filterId=>$filter ) {
-		  $isCommon = $filter['label'] == 'Common' or $filter['label'] == 'Common Species';
-		  $this->filters[$filterId]['species'] = getSpecies ( $filterId, $isCommon );
-		}
-		*/
-	  
 		$this->projectFilters = getProjectFilters ( $this->project_id, $this->photo_id );
 	  
 		foreach ( $this->projectFilters as $filterId=>$filter ) {
 		  $this->projectFilters[$filterId]['species'] = getSpecies ( $filterId, false );
 		}
 	  
-	  
 		$this->allSpecies = array();
 		$this->allSpecies = codes_getList ( "speciestran" );
-	  
-	 
 
 		$this->lcontrols = array();
 		$this->rcontrols = array();
@@ -212,37 +184,11 @@ class BioDivViewClassify extends JViewLegacy
 			$this->sequenceProgress = 0;
 		}
 	  
-		//$this->showmap = $this->translations['show_map']['translation_text'] . " <i class='fa fa-map-marker'/>";
 		$this->showmap = $this->translations['show_map']['translation_text'] . " <span class='fa fa-map-marker'/>";
 		$this->nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
 
 		$this->classifyInputs = getClassifyInputs();
-/*
-		$this->classifyInputs = array();
-		foreach(array("gender", "age") as $struc){
-			$title_tran = $this->translations[codes_getTitle($struc)]['translation_text'];
-			$input = "<label for ='classify_$struc'>" . $title_tran . "</label><br />\n";
-			//$input .= "<select id='classify_$struc' name='$struc'>\n";
-			//$input .= codes_getOptions(1, $struc);
-			// set default to be unknown:
-			$features = array("gender"=>84, "age"=>85);
-			$input .= codes_getRadioButtons($struc, $struc."tran", $features);
-			//$input .= "\n</select>\n";
-			$this->classifyInputs[] = $input;	    
-		}
-		$number = "<label for ='classify_number'>" . $this->translations['how_many']['translation_text'] . "</label>\n";
-		$number .= "<input id='classify_number' type='number' min='1' value='1' name='number'/>\n";
-		$this->classifyInputs[] = $number;
-		
-		$sure = "<label for ='classify_sure'>" . $this->translations['sure']['translation_text'] . "</label>\n";
-		// See what happens if we don;t specify what to check - want it to default to first option
-		$sure .= codes_getRadioButtons("sure", "suretran", null);
-		$this->classifyInputs[] = $sure;
-		
-		$notes = "<label for ='classify_sure'>" . $this->translations['notes']['translation_text'] . "</label>\n";
-		$notes .= "<input id='classify_sure' type='text' maxlength='100' name='notes'/>\n";
-		$this->classifyInputs[] = $notes;
-*/	  
+	  
 	  }
 
 	  // Display the view

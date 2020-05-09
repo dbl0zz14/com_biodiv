@@ -20,7 +20,7 @@ jQuery(document).ready(function(){
 		}
 		else {
 			let med = jQuery('#videoContainer');
-			if ( med != null ) {
+			if ( med.length > 0 ) {
 				console.log("found video media");
 				console.log(med.find('source:first'));
 				console.log("video: " + med.find('source:first').attr('src'));
@@ -115,13 +115,17 @@ jQuery(document).ready(function(){
 			removeNothing ();		
 		}
 		
+		let isAudio = jQuery('#audioContainer');
+		let maxClass = 6;
+		if ( isAudio.length > 0 ) maxClass = 20;
+			
 			
 		if ( classifications.length < currentSequence + 1 ) {
 			// No classifications for this index yet.
 			classifications[currentSequence] = [];
 			classifications[currentSequence].push(newSpecies);
 		}
-		else if ( classifications[currentSequence].length < 5 ) {
+		else if ( classifications[currentSequence].length < maxClass ) {
 			
 			classifications[currentSequence].push(newSpecies);
 		}
