@@ -24,7 +24,7 @@ defined('_JEXEC') or die;
 		$correct = $seq->getSpecies();
 		
 		$useranimals = array();
-		if ( count($this->classifications) > $i+1) {
+		if ( count($this->classifications) > $i) {
 			$useranimals = $this->classifications[$i];
 		}
 		

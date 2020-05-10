@@ -118,13 +118,12 @@ class BioDivViewTrainingResults extends JViewLegacy
 	$ani_json = $app->getUserStateFromRequest('com_biodiv.animals', 'animals', 0);
 	$this->classifications = json_decode($ani_json);
 	
-	error_log("user classifications: " . $ani_json );
-	
 	// Calculate the score
 	$this->score = 0;
 	$this->marks = array();
 	$num_sequences = count($this->sequences);
 	for ( $i = 0; $i < $num_sequences; $i++ ) {
+		
 		$seq = $this->sequences[$i];
 		$correct = $seq->getSpecies();
 		
@@ -157,12 +156,9 @@ class BioDivViewTrainingResults extends JViewLegacy
 	
 	$score_percent = 100*$this->score/$num_sequences;
 	
-	error_log ( "Writing results score = " . $score_percent );
-	
 	// Check there are sequences - if not we have already written
 	
 	$written = $app->getUserState('com_biodiv.written');
-	error_log ("written from userstate = " . $written );
 	if ( !$written ) {
 		// Write the results to the database
 		$db = JDatabase::getInstance(dbOptions());
