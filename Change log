@@ -1,3 +1,7 @@
+# 19/08/20 - Version 3.2.1   #
+* Updates to test yourself module
+* Introduction of Settings table for site-wide settings as now have two sites
+
 # 29/02/20 - Version 3.1.4   #
 * Add ability to upload and classify audio files (no sonogram yet)
 * On upload, if file is correct format (eg myfile_YYYYMMDD_hhmmss.mp3) taken datetime will be from filename
