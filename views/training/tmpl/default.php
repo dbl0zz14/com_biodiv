@@ -35,7 +35,11 @@ defined('_JEXEC') or die;
 		
 		print "<div class='col-md-4' >";
 		
-		$topic_level = $this->currentScores[$topic_id]->level;
+		$topic_level = null;
+		if ( key_exists($topic_id, $this->currentScores) ) {
+			error_log("topic " . $topic_id . " exists");
+			$topic_level = $this->currentScores[$topic_id]["level"];
+		}
 		$stars = $nostars;
 		if ( $topic_level != null ) {
 			if ( $topic_level >80 ) $stars = $fivestar;

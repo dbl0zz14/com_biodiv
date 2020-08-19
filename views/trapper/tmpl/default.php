@@ -10,6 +10,12 @@ defined('_JEXEC') or die;
 
 print '<h1>' . $this->translations['cam_sites']['translation_text']. '</h1>';
 
+print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['site_warn']['translation_text']."</h5>\n";
+//print "<div class='spacer-1em'></div>\n";
+
+print '<button type="button" id="add_site" class="btn btn-primary">'.$this->translations['add_site']['translation_text'].'</button>';
+
+
 if(count($this->sites) == 0){
   print "<p class='bg-warning'>".$this->translations['no_sites']['translation_text']."</p>\n";
  }
@@ -158,8 +164,6 @@ if(count($this->sites) == 0){
    print "<tbody>\n";
    print "</table>\n";
 }
-print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['site_warn']['translation_text']."</h5>\n";
-print "<div class='spacer-1em'></div>\n";
 
 //print "<form action='". BIODIV_ROOT . "&task=add_site' method='post'>\n";
 //print JHtml::_('form.token');
@@ -170,8 +174,8 @@ print "<div class='spacer-1em'></div>\n";
 </ >
 <?php
 //"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText.
-print '<button type="button" id="add_site" class="btn btn-primary">'.$this->translations['add_site']['translation_text'].'</button>';
-
+$this->siteHelper->generateSiteCreationModal();
+/*
 print '<div id="add_site_modal" class="modal fade" role="dialog" aria-hidden="true" >';
 print '  <div class="modal-dialog modal-sm">';
 
@@ -320,7 +324,7 @@ print '    </div>';
 
 print '  </div>';
 print '</div>';
-
+*/
 
 
 

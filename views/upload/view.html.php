@@ -31,6 +31,9 @@ class BioDivViewUpload extends JViewLegacy
 	  // Get all the text snippets for this view in the current language
 	  $this->translations = getTranslations("upload");
 	  
+	  // Get setting to determine whether camera deployment (or audio)
+	  $this->isCamera = getSetting("camera") == "yes";
+	  
 	  // Set the help article - HARDCODED - CHANGE THIS
 	  $help_option = codes_getCode("upload", "help");
 	  //print("help_option: " . $help_option );

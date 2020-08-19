@@ -37,24 +37,9 @@ else if(!$this->animal){
 	   $nothingDisabled = true;
      }
      else{
-       if($this->animal->number >1){
-	     $features[] = $this->animal->number;
-       }
-	   /*
-       foreach(array("gender", "age") as $struc){
-	     $featureName = codes_getName($this->animal->$struc, $struc . "tran");
-	     if($featureName != "Unknown"){
-	       $features[] = $featureName;
-	     }
-       }
-	   */
-	   // Do this in a specific way using ids.
-	   if ( $this->animal->age != 0 and $this->animal->age != 85 ) {
-		   $features[] = $featureName;
-	   }
-	   if ( $this->animal->gender != 0 and $this->animal->gender != 84 ) {
-		   $features[] = $featureName;
-	   }
+	   // For a bird we just want call or song
+	   $features[] = $this->animal->notes;
+       
 	   
 	   if ( $type == 'mammal' ) {
 			$btnClass = 'btn-warning';

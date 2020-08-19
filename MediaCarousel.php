@@ -77,7 +77,7 @@ class MediaCarousel {
 
 			print '<button  id="fullscreen-button" type="button" class="right" ><span class="fa fa-expand fa-2x"></span></button>';
 			print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-3x"></span></button>';
-			  
+			
 			print '<!-- Wrapper for slides -->';
 			print '<div id="photoCarouselInner" class="carousel-inner contain">';
 

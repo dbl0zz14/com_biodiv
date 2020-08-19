@@ -51,7 +51,7 @@ defined('_JEXEC') or die;
 	
 	print "<form action = '" . BIODIV_ROOT . "' method = 'GET'>";
 	print "<div class='input-group'>";
-    print "<input type='hidden' name='view' value='classify'/>";
+    print "<input type='hidden' name='view' value='".$this->classifyView."'/>";
     print "<input type='hidden' name='option' value='" . BIODIV_COMPONENT . "'/>";
     print "<input type='hidden' name='classify_only_project' value='1'/>";
 	print "<input type='hidden' name='project_id' value='". $project["project_id"] ."'/>";

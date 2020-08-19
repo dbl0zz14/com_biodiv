@@ -28,20 +28,20 @@ class BioDivViewTrapper extends JViewLegacy
     {
 	  // Get all the text snippets for this view in the current language
 	  $this->translations = getTranslations("trapper");
+	  
+	  $isCamera = getSetting("camera") == "yes";
+	  $this->siteHelper = new SiteHelper($isCamera);
+	  
+	  $this->fields = $this->siteHelper->getFieldsArray();
+	  $this->help = $this->siteHelper->getHelpArray();
 	
       // Assign data to the view
+	  /*
 	  $this->fields = array("site_name" => $this->translations['site_name']['translation_text'],
 				"grid_ref" => $this->translations['lat_lon']['translation_text']);
 	  $this->help = array("site_name" => $this->translations['site_help']['translation_text'],
 				"grid_ref" => $this->translations['loc_help']['translation_text']);
 				
-	/* Changing this to be done in same way as other columns, for multilingual
-	  foreach(array("habitat", "purpose", "camera") as $struc){
-		$this->fields[$struc . "_id"] = codes_getTitle($struc);
-		$meta = codes_getMeta($struc);
-		$this->help[$struc . "_id"] = str_replace("'", "&apos;", $meta['helptext']);
-	  }
-	*/
 	  
 	  $this->fields['habitat_id'] = $this->translations['habitat']['translation_text'];
 	  $this->help['habitat_id'] = $this->translations['hab_help']['translation_text'];
@@ -57,6 +57,8 @@ class BioDivViewTrapper extends JViewLegacy
 	  $this->fields["notes"] = $this->translations['notes']['translation_text'];
 	  $this->help["notes"] = "Notes: Please note any other information pertinent to this location, such as \"there is a bird feeder nearby\".";
 	  
+	  */
+	  /*
 	  $db = JDatabase::getInstance(dbOptions());
 	  $query = $db->getQuery(true);
 	  $dbFields = array_keys($this->fields);
@@ -67,7 +69,10 @@ class BioDivViewTrapper extends JViewLegacy
 
 	  $db->setQuery($query);
 	  $this->sites = $db->loadAssocList("site_id");
+	  */
+	  $this->sites = $this->siteHelper->getSites();
 
+	  /*
 	  $this->siteCount = array();
 
 	  foreach($this->sites as $site_id => $site){
@@ -79,16 +84,22 @@ class BioDivViewTrapper extends JViewLegacy
 		$numPhotos = $db->loadResult();
 		$this->siteCount[$site_id] = $numPhotos;
 	  }
+	  */
+	  $this->siteCount = $this->siteHelper->getSitePhotoCount();
 	  
 	  // Projects additions.
 	  $this->projecthelp = "All projects which this site and this user are members of.";
-	  $this->projects = array();
+	  //$this->projects = array();
 	  
-	  $this->userprojects = myTrappingProjects();
+	  $this->userprojects = $this->siteHelper->getUserProjects();
 	  
 	  // For each user project get any additional data required
-	  $this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
+	  //$this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
+	  $this->projectsitedata = $this->siteHelper->getProjectSiteData();
 	  
+	  $this->projectsitedataJSON = $this->siteHelper->getProjectSiteDataJSON();
+	  
+	  /*
 	  $this->projectsitedataJSON = array();
 	  
 	  $project_ids = array_keys($this->userprojects);
@@ -100,7 +111,8 @@ class BioDivViewTrapper extends JViewLegacy
 				$this->projectsitedataJSON[$project_id] = json_encode($strucs);
 			}
 	  }
-		
+	  */
+		/*
 	  foreach($this->sites as $site_id => $site){
 		// Get list of projects this site is part of and which this user is a user of
 		$query = $db->getQuery(true);
@@ -118,7 +130,9 @@ class BioDivViewTrapper extends JViewLegacy
 		$this->projects[$site_id] = array_keys($intersectprojects);
 		
 	  }
-
+	  */
+	  $this->projects = $this->siteHelper->getProjects();
+	  
 	  // Display the view
 	  parent::display($tpl);
 

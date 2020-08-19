@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.1.4</version>
+  <version>3.2.1</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images from camera traps</description>
  
@@ -36,6 +36,9 @@
 	<filename>Sequence.php</filename>
 	<filename>MediaCarousel.php</filename>
 	<filename>SpeciesCarousel.php</filename>
+	<filename>BiodivHelper.php</filename>
+	<filename>BiodivAuth.php</filename>
+	<filename>SiteHelper.php</filename>
 	<folder>views</folder>
 	<folder>libraries</folder>
 <!--

@@ -6,6 +6,7 @@
 */
 
 // This file contains common functions used to work with AWS.
+// We use it for S3 and Cognito.
 
 // No direct access to this file
 defined('_JEXEC') or die;
@@ -38,6 +39,7 @@ function s3(){
 	return $s3;
 }
 
+
 function list_aws_buckets () {
 
 	$s3Client = s3();
@@ -55,12 +57,32 @@ function get_mammalweb_bucket () {
 	return $options['bucket'];
 }
 
+function get_mammalweb_folder () {
+	$options = awsOptions();
+	if ( array_key_exists('folder', $options) ) {
+		return $options['folder'];
+	}
+	else {
+		return null;
+	}
+}
+
 function upload_to_s3 ( $key, $file ) {
+	
+	$folder = get_mammalweb_folder();
+	
+	if ( $folder ) {
+		$full_key = get_mammalweb_folder() . "/" . $key;
+	}
+	else {
+		$full_key = $key;
+	}
+	
 	
 	// Prepare the upload parameters.
 	$uploader = new MultipartUploader(s3(), $file, [
 		'bucket' => get_mammalweb_bucket (),
-		'key'    => $key
+		'key'    => $full_key
 	]);
 
 	// Perform the upload.
@@ -79,13 +101,25 @@ function upload_to_s3 ( $key, $file ) {
 	
 }
 
+function is_wave ( $filename ) {
+	
+	if ( preg_match('/_wave.png$/', $filename) === 1 ) {
+		return true;
+	}
+	return false;
+}
+
 function post_s3_upload_actions ( $photo_id, $filename ) {
 	// update the s3_status to 1 for this photo_id
 	$db = JDatabase::getInstance(dbOptions());	
-	$fields = new stdClass();
-	$fields->photo_id = $photo_id;
-	$fields->s3_status = 1;
-	$db->updateObject('Photo', $fields, 'photo_id');
+	
+	// if file is a waveform do not update s3 status
+	if ( is_wave($filename) === false ) {
+		$fields = new stdClass();
+		$fields->photo_id = $photo_id;
+		$fields->s3_status = 1;
+		$db->updateObject('Photo', $fields, 'photo_id');
+	}
 
 	// remove the file from the fileserver
 	try {
@@ -101,10 +135,38 @@ function post_s3_upload_actions ( $photo_id, $filename ) {
 function s3URL ( $details ) {
 	$options = awsOptions();
 	$urlstem = $options['s3url'];
+	
+	$folder = get_mammalweb_folder();
+	$folder_extra = "";
+	
+	if ( $folder ) {
+		$folder_extra = "/" . $folder;
+	}
+	
 	$person = $details['person_id'];
 	$site = $details['site_id'];
 	$filename = $details['filename'];
-	return $urlstem . '/person_' . $person . '/site_' . $site . '/' . $filename;
+	return $urlstem . $folder_extra . '/person_' . $person . '/site_' . $site . '/' . $filename;
+}
+
+
+function s3WaveURL ( $details ) {
+	$options = awsOptions();
+	$urlstem = $options['s3url'];
+	
+	$folder = get_mammalweb_folder();
+	$folder_extra = "";
+	
+	if ( $folder ) {
+		$folder_extra = "/" . $folder;
+	}
+	
+	$person = $details['person_id'];
+	$site = $details['site_id'];
+	$filename = $details['filename'];
+	$wavefilename = JFile::stripExt($filename) . "_wave.png";
+			
+	return $urlstem . $folder_extra . '/person_' . $person . '/site_' . $site . '/' . $filename;
 }
 
 ?>

@@ -42,6 +42,9 @@ class BioDivViewCalculatestats extends JViewLegacy
 			
 			// As site_stats but populates/overwrites historical dates - use with care.
 			$this->calcSiteHistory = JRequest::getInt("site_hist");
+			
+			// Calculate user expertise based on gold standard
+			$this->calcExpertise = JRequest::getInt("calc_expertise");
 		
 			parent::display($tpl);
         }

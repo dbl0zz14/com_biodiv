@@ -8,12 +8,20 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-include "local.php";
+//print("<br>component path: " . JPATH_COMPONENT);
+// Needed to ensure pick up the correct component files
+set_include_path(JPATH_COMPONENT . get_include_path());
+//print("<br>include path: " . get_include_path());
+//print("<br>component path: " . JPATH_COMPONENT);
+
+include_once "local.php";
 include "Project.php";
 include "Location.php";
 include "Sequence.php";
 include "MediaCarousel.php";
 include "SpeciesCarousel.php";
+include "SiteHelper.php";
+include "BiodivHelper.php";
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
 
@@ -34,6 +42,8 @@ include "codes.php";
 require_once('libraries/getid3/getid3/getid3.php');
 
 include "aws.php";
+
+//include_once "ffmpeg.php";
 
 
 
@@ -333,6 +343,18 @@ function langTag() {
 	
 	return $lang;
 }
+
+function getSetting ( $key ) {
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("s_value")->from("Settings")
+		->where("s_key = " . $db->quote($key) );
+	$db->setQuery($query);
+	$value = $db->loadResult();
+	
+	return $value;
+}
   
 function update_siteLatLong ( $site_id, $lat, $lon ) {
 	if ( !$lat or !$lon ) {
@@ -556,7 +578,8 @@ function canRunScripts(){
 
 function uploadRoot(){
 //  return JPATH_COMPONENT . "/uploads";
-    return "/var/www/html/biodivimages";
+    //return "/var/www/html/biodivimages";
+	return JPATH_SITE."/biodivimages";
 }
 
 // get dir of where images from a given site are stored
@@ -597,6 +620,9 @@ function isAudio($photo_id) {
 	if ( strpos(strtolower($filename), '.mp3') !== false ) {
 		return true;
 	}
+	if ( strpos(strtolower($filename), '.m4a') !== false ) {
+		return true;
+	}
 	return false;	
 }
 
@@ -616,6 +642,22 @@ function photoURL($photo_id){
 	  // echo siteURL($details['site_id']) . "/". $details['filename'];
 	  // debug end
 	  return siteURL($details['site_id']) . "/". $details['filename'];
+  }
+}
+
+function waveURL($photo_id){
+  $details = codes_getDetails($photo_id, 'photo');
+  if ( $details['s3_status'] == 1 ) {
+	  // File has been transferred to s3 so get AWS S3 url
+	  return s3WaveURL($details);
+  }
+  else {
+	  // debug
+	  // echo siteURL($details['site_id']) . "/". $details['filename'];
+	  // debug end
+	  $wavefilename = JFile::stripExt($details['filename']) . "_wave.png";
+			
+	  return siteURL($details['site_id']) . "/". $wavefilename;
   }
 }
 
@@ -1136,36 +1178,204 @@ function projectDetails ( $project_id ) {
 }
 
 
-// Return the API details for a single user id as an object
-function userDetails ( $person_id ) {
-  
-  $db = JDatabase::getInstance(dbOptions());
-  $query = $db->getQuery(true);
-  $query->select("UE.person_id as id, O.option_name as topic, UE.score as level")->from("UserExpertise UE")
-	->innerJoin("Options O on O.option_id = UE.topic_id and O.struc = 'topic'")
-	->where("person_id = " . $person_id );
-  $db->setQuery($query);
-  $userDetails = $db->loadObjectList();
-  
-  return $userDetails;
-}
-
-
+// Use the helper class to get the expertise details
 function userExpertise( $person_id ) {
 	
-	// Use language directly to get translated option names for speed.
-	$db = JDatabase::getInstance(dbOptions());
-	$query = $db->getQuery(true);
-	$query->select("O.option_id as topic_id, AVG(UE.score) as level")->from("Options O")
-		->leftJoin("UserExpertise UE on O.option_id = UE.topic_id and UE.person_id = " . $person_id)
-		->where( "O.struc = 'topic'" )
-		->group( "O.option_id" );
-	$db->setQuery($query);
-	$userDetails = $db->loadObjectList("topic_id");
+	$helper = new BiodivHelper();
   
-	return $userDetails;
+	return $helper->userExpertise($person_id);
 }
 
+
+// Calculate user expertise based on gold standard sequences
+function calculateUserExpertise () {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	// Get all users who have classified (exclude likes)
+	$query = $db->getQuery(true)
+		->select("distinct person_id from Animal")
+		->where("species != 97" );
+		
+	$db->setQuery($query);
+	
+	$users = $db->loadColumn();
+	
+	// Get all the calctopics that are included
+	$query = $db->getQuery(true)
+		->select("distinct O.option_id from Options O")
+		->innerJoin("OptionData OD on O.option_id = OD.option_id and O.struc = 'calctopic'")
+		->where("OD.data_type = 'include' and OD.value = 'yes'" );
+		
+	$db->setQuery($query);
+	
+	$topics = $db->loadColumn();
+	
+	print("<br>Topics:<br>");
+	print_r($topics);
+	
+	// Allow for >1 topics
+	foreach ($topics as $topic_id ) {
+		// For each user, get all their classifications which match an expert sequence
+		// NB we are not taking number into account 
+		foreach ($users as $user ) {
+			
+			print("<br><br>Calculating expertise of user " . $user );
+			
+			$query = $db->getQuery(true)
+				->select("distinct P.sequence_id, A.species from Animal A")
+				->innerJoin("Photo P on A.photo_id = P.photo_id")
+				->innerJoin("OptionData OD on OD.value = P.sequence_id and OD.data_type = 'sequence'")
+				->where("OD.option_id = " . $topic_id)
+				->where("A.species != 97" )
+				->where("A.person_id = " . $user)
+				->order("P.sequence_id, A.species");
+				
+			$db->setQuery($query);
+		
+			$animals = $db->loadAssocList();
+			
+			if ( count($animals) > 0 ) {
+			
+				$user_seqs = array_unique(array_map(function ($a) { return $a['sequence_id']; }, $animals));
+			
+				print("<br>User animals<br>");
+				print_r($animals);
+				print("<br>User sequences<br>");
+				print_r($user_seqs);
+				print("<br>Sequence string = " . implode(',',$user_seqs) . "<br>");
+				// Get the relevant expert sequences
+				$query = $db->getQuery(true)
+					->select("distinct sequence_id, species_id from ExpertSequences where sequence_id in (" . implode(',',$user_seqs) . ")" )
+					->order("sequence_id, species_id");
+					
+				$db->setQuery($query);
+			
+				$expert_animals = $db->loadAssocList();
+				
+				print("<br>Expert animals<br>");
+				print_r($expert_animals);
+				
+				$total_expert = count($expert_animals);
+				$score = 0;
+				$user_index = 0;
+				$prev_seq = null;
+				$seq_score = 0;
+				// For each classification, check whether it's correct.
+				foreach ( $expert_animals as $expert_animal ) {		
+				
+					$seq = $expert_animal['sequence_id'];
+					$species = $expert_animal['species_id'];
+					
+					print("<br>Expert classification: " . $seq . ", " . $species );
+					
+					if ( $seq != $prev_seq ) {
+						print("<br>New sequence: " . $seq );
+						
+						$animal = $animals[$user_index];
+						print("<br>Next user classification: " . $animal['sequence_id'] . ", " . $animal['species'] );
+						
+						// Is the user still on the previous sequence?
+						while ( $animal['sequence_id'] == $prev_seq) {
+							// User must have more classifications than expert, so prev seq was not correctly classified
+							// Wind	forward until pass that sequence
+							$seq_score = 0;
+							$user_index += 1;
+							print("<br>user index = " . $user_index);
+							$animal = $animals[$user_index];
+						
+						}
+						
+						$score += $seq_score;
+						$seq_score = 0;
+						if ( $animal['sequence_id'] == $seq ) {
+							// User now has a new sequence which matches, can update score with prev sequence
+							print ( "<br>Sequence matches");
+							if ( $animal['species'] == $species ) {
+								print("<br>Species matches");
+								// species matches
+								$seq_score = 1;
+								$user_index += 1;
+							}
+						}
+						$prev_seq = $seq;
+					}
+					else {
+						print("<br>Same sequence, new classification: " . $species);
+						
+						// Only need to check if user is correct so far
+						if ( $seq_score == 1 ) {
+							
+							// Check we're not finished with user classifications
+							if ( $user_index < count($animals) ) {
+						
+								$animal = $animals[$user_index];
+								print("<br>Next user classification: " . $animal['sequence_id'] . ", " . $animal['species'] );
+								
+								if ( ($animal['sequence_id'] != $seq) || ($animal['species'] != $species) ) { 
+									print ( "<br>Sequence and species don't both match" );
+									$seq_score = 0;
+								}
+								else { 
+									print ( "<br>Sequence and species match");
+									// both correct - move user index on
+									$user_index += 1;
+								}
+							}
+							else {
+								print("<br>Missing a classification");
+								// Missing a classification so incorrect
+								$seq_score = 0;
+							}
+						}
+					}
+					
+				}
+				// Add the score for the last sequence
+				$score += $seq_score;
+				
+				$score_percent = 100 * $score/count($user_seqs);
+				print("<br>User score = " . $score_percent);
+				
+				// Do we need to update or delete
+				$query = $db->getQuery(true)
+					->select("ue_id from UserExpertise")
+					->where("person_id = " . $user )
+					->where("topic_id = " . $topic_id );
+					
+				$db->setQuery($query);
+				
+				$ue_id = $db->loadResult();
+				
+				if ( $ue_id != null ) {
+					$fields = new stdClass();
+					$fields->ue_id = $ue_id;
+					$fields->num_sequences = count($user_seqs);
+					$fields->score = $score_percent;
+					$success = $db->updateObject('UserExpertise', $fields, 'ue_id');
+					if(!$success){
+						error_log ( "UserExpertise update failed" );
+					}
+				}
+				else {
+					$fields = new StdClass();
+					$fields->person_id = $user;
+					$fields->topic_id = $topic_id;
+					$fields->num_sequences = count($user_seqs);
+					$fields->score = $score_percent;
+					$success = $db->insertObject("UserExpertise", $fields);
+					if(!$success){
+						error_log ( "UserExpertise insert failed" );
+					}
+				}
+				
+			}
+			else {
+				print("<br>User has not classified any gold standard sequences for topic " . $topic_id);
+			}
+		}	
+	}
+}
 
 // Calculate the number of sequences uploaded and the number of sequences with at least one classification for every site for end date given or end of this month
 // Keep it simple by removing all enries for this end date then insert new.
@@ -2276,7 +2486,7 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   
   $animals_to_return = array();
   foreach ( $animals_to_return_en as $sp=>$num ) {
-	  error_log( "animal row: " . $sp . ", " . $num );
+	  //error_log( "animal row: " . $sp . ", " . $num );
 	  if ( $sp == "Other Species" ) {
 		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
 		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
@@ -3266,6 +3476,7 @@ function sequencePhotos($upload_id){
   $query->select("photo_id, taken")
     ->from("Photo")
     ->where("upload_id = " . (int)$upload_id)
+	->where("sequence_id = 0")
     ->order("taken");
   
   $db->setQuery($query);
@@ -3628,15 +3839,103 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 	$seq_ids = array();
 	
 	if ( $topic_id ) {
-		// Find sequences for this topic
+		
 		$db = JDatabase::getInstance(dbOptions());
+		
+		
+		// Get a list of distinct species for this topic so we can ensure we have a range 
 		$query = $db->getQuery(true);
-		$query->select("distinct OD.value as sequence_id")->from("OptionData OD")
+		$query->select("ES.species_id, COUNT(*) as num_seqs, GROUP_CONCAT(ES.sequence_id) as seqs")->from("ExpertSequences ES")
+			->innerJoin("OptionData OD on OD.value = ES.sequence_id")
 			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
-			->order("rand()");
-		$db->setQuery($query, 0, $max_number);
-		$seq_ids = $db->loadColumn();
+			->group("species_id");
+		$db->setQuery($query);
+		$sequences_by_species = $db->loadAssocList('species_id');
+		
+		$err_str = print_r($sequences_by_species, true);
+		error_log("sequences by species: " . $err_str);
+
+		$num_species = count($sequences_by_species);
+		
+		$num_seqs = 0;
+		foreach ( $sequences_by_species as $sp ) {
+			$num_seqs += $sp['num_seqs'];
+		}
+		
+		// Need at least one species and at least max_number of sequences
+		if ( $num_species > 0 && $num_seqs >= $max_number ) {
+		
+			$species = array_keys ( $sequences_by_species );
+			
+			shuffle( $species );
+			
+			$err_str = print_r($species, true);
+			error_log("species: " . $err_str);
+			
+			$species_to_use = null;
+			
+			if ( $num_species >= $max_number ) {
+				$species_to_use = array_slice ( $species, 0, $max_number );
+			}
+			else {
+				$species_to_use = array_merge ( $species  );
+				
+				// Now we need to pad the array with repeating species.
+				// However we have to make sure there are enough sequences in the padding species.
+				while ( count($species_to_use) < $max_number ) {
+					$try = array_rand ( $species );
+					$try_key = $species[$try];
+					
+					$num_already = array_count_values ( $species_to_use )[$try_key];
+					
+					$num_seqs_for_species = $sequences_by_species[$try_key]['num_seqs'];
+					
+					if ( $num_already < $num_seqs_for_species ) {
+						$species_to_use[] = $try_key;
+					}
+				}
+			}
+			
+			$err_str = print_r($species_to_use, true);
+			error_log("species to use: " . $err_str);
+			
+			// Set up an assoc array with species and sequence count required
+			$species_with_count = array_count_values($species_to_use);
+			$err_str = print_r($species_with_count, true);
+			error_log("species with count: " . $err_str);
+
+			
+			foreach ( $species_with_count as $species_id=>$seq_count ) {
+				$seqs = $sequences_by_species[$species_id];
+				$ids = explode ( ',', $seqs['seqs'] );
+				
+				// randomise the ids
+				shuffle($ids);
+				
+				// and take the first one(s)
+				$seq_ids = array_merge ( $seq_ids, array_slice($ids, 0, $seq_count) );
+				
+							
+				$err_str = print_r($seq_ids, true);
+				error_log("seq_ids: " . $err_str);
+				
+			}
+
+
+			/*
+			// Find sequences for this topic
+			$query = $db->getQuery(true);
+			$query->select("distinct OD.value as sequence_id")->from("OptionData OD")
+				->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
+				->order("rand()");
+			$db->setQuery($query, 0, $max_number);
+			$seq_ids = $db->loadColumn();
+			*/
+		}
 	}
+	
+	shuffle($seq_ids);
+	
 	return $seq_ids;
 }
 
@@ -3856,6 +4155,30 @@ function getClassifyInputs () {
 	return $classifyInputs;
 }
 
+function getClassifyBirdInputs () {
+	
+	$translations = getTranslations("classify");
+	$classifyInputs = array();
+	
+	// The song/call is actually stored in notes for now.
+	// Possibly should have a column for this and a struc or even a separate table for bird classifications
+	// but maybe do as part of project specific data..
+	$songcall = "<label for ='classify_songcall'>" . $translations['songcall']['translation_text'] . "</label>\n";
+	
+	$songcall .= "<div class='species-radio'><input name='notes' type='radio' value='song' id='songcall_0' checked='checked'/><label for='songcall_0'>Song</label></div>";
+	$songcall .= "<div class='species-radio'><input name='notes' type='radio' value='call' id='songcall_1' /><label for='songcall_1'>Call</label></div>";
+	
+	$classifyInputs[] = $songcall;
+	
+	$sure = "<label for ='classify_sure'>" . $translations['sure']['translation_text'] . "</label>\n";
+	// See what happens if we don;t specify what to check - want it to default to first option
+	$sure .= codes_getRadioButtons("sure", "suretran", null);
+	$classifyInputs[] = $sure;
+	
+	
+	return $classifyInputs;
+}
+
 function makeControlButton($control_id, $control, $extraClasses=''){
   $disabled = strpos($control, "disabled");
   if($disabled !== false){
@@ -3879,7 +4202,8 @@ function makeControlButton($control_id, $control, $extraClasses=''){
 
 //$useSeq is flag if true uses page numbers given, if false, works pages out alphabetically
 //if $largeButtons then use image buttons with larger size as for kiosk mode
-function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButtons=false, $includeExtraControls = false, $extraControls = null ) {
+// if dataToggle is false then classify modal is not shown - needed for quickclassify
+function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButtons=false, $includeExtraControls = false, $extraControls = null, $dataToggle = true ) {
 	
 	// Should store this in the Options table as a system option.
 	$numPerPage = 36;
@@ -3940,6 +4264,13 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 				$largeButtonImage = false;
 				break;
 			}
+			
+			$toggleExtras = "";
+			if ( $dataToggle == true ) {
+				$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
+			}
+			
+			//error_log ( "toggleExtras = " . $toggleExtras );
 	
 			if ( $largeButtons ) {
 				if ( $largeButtonImage ) {
@@ -3951,24 +4282,24 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 					}
 					if ( $isLongSpeciesName ) {
 						$carouselItems[$page][] =
-						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText."<div><div class='long-species-name'>$name</div></div></button>";
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select'".$toggleExtras.">".$imageText."<div><div class='long-species-name'>$name</div></div></button>";
 					
 					}
 					else {
 						$carouselItems[$page][] =
-						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText."<div>$name</div></button>";
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select'".$toggleExtras.">".$imageText."<div>$name</div></button>";
 						//"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'><div><img width='50px' src='http://localhost/rhombus/images/thumbnails/Stoat.png'></div><div>$name</div></button>";
 					}
 				}
 				else {
 					$carouselItems[$page][] =
-						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'><div>$name</div></button>";
+						"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' ".$toggleExtras."><div>$name</div></button>";
 				
 				}
 			}
 			else {
 				$carouselItems[$page][] =
-				"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn species_select' data-toggle='modal' data-target='#classify_modal'>$name</button>";
+				"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn species_select' ".$toggleExtras.">$name</button>";
 			}
 			$speciesCount++;
 		}
@@ -4081,15 +4412,12 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 		$widthClass = 'col-md-6';
 		if ( $largeButtons ) { $widthClass = 'col-md-3'; }
 		foreach ( $carouselItems[-1] as $item ) {
-				print "<div class='" . $widthClass . " species-carousel-col'>";
-				print $item;
-				print "</div>";
-			}
+			print "<div class='" . $widthClass . " species-carousel-col'>";
+			print $item;
+			print "</div>";
+		}
 		if ( $includeExtraControls and $extraControls ) {
 			$extraClasses = '';
-			if ( $largeButtons ) { 
-				$extraClasses = 'btn-block species-btn-large';
-			}
 			foreach($extraControls as $control_id => $control){
 				print "<div class='" . $widthClass . " species-carousel-col'>";
 				makeControlButton($control_id, $control, $extraClasses);
@@ -4117,6 +4445,205 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 			print "</div> <!-- /species-row -->\n";
 		}
 		*/
+		print "</div> <!-- / item -->\n";
+
+	}
+
+	print "</div> <!-- /carousel-inner--> \n";
+
+	print "<!-- Controls -->";
+	if ( $numPages > 1 ) {
+		print "<a class='left carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='prev'>";
+		print "<span class='fa fa-chevron-left'></span>";
+		print "</a>";
+		print "<a class='right carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='next'>";
+		print "<span class='fa fa-chevron-right'></span>";
+		print "</a>";
+	}
+
+	//print "</div> <!-- /carousel-species carousel--> \n";
+}
+
+// This version prints column of species 
+function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataToggle = true ) {
+	
+	// Should store this in the Options table as a system option. 
+	$numPerPage = 36;
+	
+	//print "<div id='carousel-species' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
+
+    $carouselItems = array(); // 2D array [page][item]
+	$speciesCount = 0;
+	foreach ($speciesList as $type=>$all_this_type) {
+		foreach($all_this_type as $species_id => $species){
+			//print "speciesCount = " . $speciesCount . "<br>";
+			$page = $species['page'];
+			// Any -1 pages should stay the same - notinlist 
+			if ( !$useSeq and $page > 0 ) {
+				//print "calculating page.. ";
+				$page = intval($speciesCount/$numPerPage) + 1;
+			}
+			//print ( "page = " . $page . "<br>" );
+			// Any page < -1 should be ignored.
+			if ( $page < -1 ) continue;
+			
+			if(!in_array($page, array_keys($carouselItems))){
+				//print "creating array for page " . $page . "<br>";
+				$carouselItems[$page] = array();
+			}
+			
+			$toggleExtras = "";
+			if ( $dataToggle == true ) {
+				$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
+			}
+  
+			$name = $species['name'];
+			$isLongSpeciesName = false;
+			if ( strlen($name) > 20 ) $isLongSpeciesName = true;
+			
+			//print ( "name = " . $name . "<br>" );
+			switch($species['type']){
+			case 'mammal':
+				// Mammals not allowed here so no buttons
+				$btnClass = 'btn-warning';
+				break;
+
+			case 'bird':  
+				$btnClass = 'btn-info';
+				
+				// For birds have a button to view the article and a song and call quick classify button
+				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
+				
+				$carouselItems[$page][] = "<button type='button' id='song_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn song_select' >Song</button>";
+				$carouselItems[$page][] = "<button type='button' id='call_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn call_select' >Call</button>";
+				
+				break;
+
+			case 'notinlist':
+				$btnClass = 'btn-primary';
+				$largeButtonImage = false;
+				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass  btn-sm btn-block btn-wrap-text species-btn species_select' >$name</button>";
+				break;
+			}
+			
+			$speciesCount++;
+		}
+	}
+	
+	//print_r ( $carouselItems );
+
+	// Determine how many pages of species we have - remember there will be a "-1" page for notinlist items, could be other - ones too which should be ignored
+	$numPages = max(array_keys($carouselItems));
+	//print "numPages = " . $numPages . "<br>";
+	if ( $numPages > 1 ) {
+		print "<ol id='species-indicators' class='carousel-indicators spb'>";
+		for ( $i = 0; $i < $numPages; $i++ ) {
+			//print "i = " . $i . ", numPages = " . $numPages . "<br>";
+			if ( $i == 0 ) {
+				print "<li title='' class='active spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
+			}
+			else {
+				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
+			}
+		}
+		print "</ol>";
+	}
+
+	//print_r ( $carouselItems[-1] );
+
+	$adjust = "";
+	if ( $numPages > 1 ) $adjust = " species-carousel-lower";
+	print "<div id='species-carousel-inner' class='carousel-inner" . $adjust . "'>";
+
+	foreach($carouselItems as $pageNum => $carouselPage){
+		if($pageNum<0){
+			continue;
+		}
+		
+		// Count number of items to organise into columns
+		$numSpeciesButtons = count($carouselPage);
+  
+		$numCols = 6;
+		  
+		$numRows = intval(($numSpeciesButtons + $numCols - 1)/$numCols);
+		//print "numRows = " . $numRows . "<br>";
+		//print "numCols = " . $numCols . "<br>";
+  
+		$cols = array();
+  
+		$carouselPageIndex = 0;
+		
+		// Read across for bird buttons.
+		/* for birds just want the buttons in order
+		for ( $i = 0; $i < $numRows; $i++ ) {
+			//print "col = ". $j . "<br>";
+			$cols[] = array();
+			for ( $j = 0; $j < $numCols; $j++ ) {
+				//print "row = " . $i . "<br>";
+				if ( $carouselPageIndex < count($carouselPage) ) {
+					//print "setting next value to be " . $carouselPage[$carouselPageIndex] . "<br>";
+					$cols[$j][] = $carouselPage[$carouselPageIndex];
+					$carouselPageIndex++;
+				}
+			}
+		}
+		*/
+  
+		//print_r ( $cols );
+  
+		$active = ($pageNum==1)?" active":"";
+		print "<div class='item $active'>\n";
+	
+		//print "Making buttons<br>";
+		
+		$column0Class = "col-xs-8 col-sm-8 col-md-4";
+		$songCallClass = "col-xs-2 col-sm-2 col-md-1";
+		$columnClass = $column0Class;
+		print "<div class='row species-row'>";
+		
+		/* works, reading across but non alphabetical for small screen so let's try different.
+		for ( $i = 0; $i < $numCols; $i++ ) {
+			if ( $i%3 == 0 ) $columnClass = $column0Class;
+			else $columnClass = $songCallClass;
+			print "<div class='" . $columnClass . " species-carousel-col'>";
+			//print "col = ". $i . " count = " . count($cols[$i]) . "<br>";
+			for ( $j = 0; $j < $numRows; $j++ ) {
+				if ( $i < count($cols) and $j < count($cols[$i]) ) {
+					print $cols[$i][$j];			
+				}
+			}
+			print "</div> <!-- /species-carousel-col -->\n";
+		}
+		*/
+		
+		for ( $i = 0; $i < $numPerPage*3; $i++ ) {
+			if ( $i%3 == 0 ) $columnClass = $column0Class;
+			else $columnClass = $songCallClass;
+			
+			if ( $i < $numSpeciesButtons ) {
+				print "<div class='" . $columnClass . " species-carousel-col'>";
+				print $carouselPage[$i];	
+				print "</div> <!-- /species-carousel-col -->\n";				
+			}
+			
+		}
+				
+		print "</div> <!-- /species-row -->\n";
+  
+		// Separate row for notinlist items
+		print "<div class='row species-row'>";
+		
+		$widthClass = 'col-md-6';
+		foreach ( $carouselItems[-1] as $item ) {
+				print "<div class='" . $widthClass . " species-carousel-col'>";
+				print $item;
+				print "</div>";
+			}
+		
+		
+		print "</div> <!-- /species-row -->\n";
+		
+		
 		print "</div> <!-- / item -->\n";
 
 	}
@@ -4220,6 +4747,52 @@ function getClassificationButton ( $id, $animalArray ) {
        }
 	   $nothingDisabled = true;
      }
+	$retString = "<button id='remove_animal_". $id."' type='button' class='remove_animal btn $btnClass'>$label <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button>\n";
+	if ( $nothingDisabled == true ) {
+		$retString .= "<div id='nothingDisabled'></div>\n";
+	}
+	else {
+		$retString .= "<div id='nothingEnabled'></div>\n";
+	}
+	return $retString;
+}
+
+function getBirdClassificationButton ( $id, $animalArray ) {
+	$label = codes_getName($animalArray[$id]->species, 'contenttran');
+     $contentDetails = codes_getDetails($animalArray[$id]->species, 'content');
+     $type = $contentDetails['struc'];
+     $features = array();
+	 $nothingDisabled=false;
+     if($type == 'like'){
+       // do nothing
+     }
+     if($type == 'noanimal'){
+       $btnClass = 'btn-primary';
+	   if ( $animalArray[$id]->species != 86 ) {
+		   $nothingDisabled = true;
+	   }
+	   else {
+		   $btnClass .= ' nothing-classification';
+	   }
+	 }
+     else if($type== 'notinlist'){
+       $btnClass = 'btn-primary';
+	   $nothingDisabled = true;
+     }
+     else{
+		$features[] = $animalArray[$id]->notes;
+
+		if ( $type == 'mammal' ) {
+			$btnClass = 'btn-warning';
+		}
+		else {
+		   $btnClass = 'btn-info';
+		}
+		if(count($features) >0){
+		 $label .= " (" . implode(",", $features) . ")";
+		}
+		$nothingDisabled = true;
+    }
 	$retString = "<button id='remove_animal_". $id."' type='button' class='remove_animal btn $btnClass'>$label <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button>\n";
 	if ( $nothingDisabled == true ) {
 		$retString .= "<div id='nothingDisabled'></div>\n";
@@ -4374,6 +4947,65 @@ function getArticle ( $option_id ) {
 	
 	return $article;
 
+}
+
+
+function addSite () {
+	// Get all the data
+	$fields = new stdClass();
+    $fields->person_id = userID();
+	$fields->site_name = JRequest::getString('site_name');
+	
+	// Validate on person and sitename - don't add if already exists - add message
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("site_id")
+		->from("Site")
+		->where("person_id = " . $fields->person_id . " and site_name = '" . $fields->site_name . "'" );
+	
+	$db->setQuery($query);
+	$result = $db->loadRow();
+	
+	$site_id = null;
+	
+	if ( count($result) > 0 ) {
+		// Trying to insert site with same name as another site belonging to this person
+		JFactory::getApplication()->enqueueMessage('Sorry, you already have a site with that name, could not add the site.');
+	}
+	else {
+		$fields->latitude = JRequest::getString('latitude');
+		$fields->longitude = JRequest::getString('longitude');
+		$fields->grid_ref = JRequest::getString('grid_ref');
+		$fields->habitat_id = JRequest::getInt('habitat_id');
+		$fields->water_id = JRequest::getInt('water_id');
+		$fields->purpose_id = JRequest::getInt('purpose_id');
+		$fields->camera_id = JRequest::getInt('camera_id');
+		$fields->camera_height = JRequest::getInt('camera_height');
+		$fields->notes = JRequest::getString('notes');
+		
+		// Insert into the Site table
+		$site_id = codes_insertObject($fields, 'site');
+		
+		//Update the ProjectSiteMap table with the projects this site is in
+		$project_ids = JRequest::getVar('project_ids');  
+		$fields2 = new stdClass();
+		$fields2->site_id = $site_id;
+		$fields2->projects = implode(',', $project_ids);
+		codes_updateSiteProjects($fields2, 'site');
+		
+		// Get any project specific data
+		$projectsitedata = getSiteDataStrucs($project_ids);
+		$unique_strucs = array_unique(array_column($projectsitedata, 'struc'));
+		foreach ( $unique_strucs as $struc ) {
+			$fields = new stdClass();
+			$fields->person_id = userID();
+			$fields->site_id = $site_id;
+			$fields->option_id = JRequest::getInt($struc."_id");
+			// Insert into the SiteData table
+			$sitedata_id = codes_insertObject($fields, 'sitedata');
+		}
+	}
+	return $site_id;
 }
 
 

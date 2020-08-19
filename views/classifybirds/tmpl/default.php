@@ -50,10 +50,10 @@ else {
 </div>
 
 <div class="container-fluid" id="photo-container">
-	<div class='col-md-9 cls-xs-12'>
+	<div class='col-md-8 cls-xs-12'>
 	
 	<div class='row'>
-     <div class='col-md-3 photo-col'>
+     <div class='col-md-4 photo-col'>
 	<div class='btn-group pull-left' role='group'>
 <?php
 foreach($this->lcontrols as $control_id => $control){
@@ -64,10 +64,10 @@ foreach($this->lcontrols as $control_id => $control){
      </div> <!-- /.col-md-4 -->
 <?php
 	if($this->photoDetails['person_id'] == userID()){
-		print "<div class='col-md-4'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
+		print "<div class='col-md-3'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
 	}
 	else {
-		print "<div class='col-md-4'></div>";
+		print "<div class='col-md-2'></div>";
 	}
 ?>
 	
@@ -112,6 +112,10 @@ if ( $this->isVideo === true ) {
 	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
 }
 if ( $this->isAudio === true ) {
+	// Show the waveform
+	//print '<div id="waveContainer" data-photo-id="'.$this->photo_id.'">'.JHTML::image(waveURL($this->photo_id), 'Photo ' . $this->photo_id, array('class' =>'img-responsive contain')).'</div>';
+	print '<div id="waveContainer"></div>';
+	
 	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</video></div>';
 }
 else {
@@ -193,7 +197,7 @@ if ( $this->animal_ids ) {
 if ( $animals ) {
 	foreach ( $animals as $next_id ) {
 		print "<div class='tagcontainer singletag-classification'>";
-		$button_code = getClassificationButton ( $next_id, $this->animals );
+		$button_code = getBirdClassificationButton ( $next_id, $this->animals );
 		print $button_code;
 		print "</div>";
 	}
@@ -228,7 +232,7 @@ if ( $animals ) {
 </div> <!-- /.col-md-9 -->
 
 
-<div class='col-md-3 cls-xs-12 species-carousel-col'>
+<div class='col-md-4 cls-xs-12 species-carousel-col'>
 <!-- only needed if header in column div class='spacer-4em'></div -->
 	
 <?php	
@@ -255,7 +259,7 @@ foreach ( $this->projectFilters as $filterId=>$filter ) {
 	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
 	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 	//printSpeciesList ( $this->species, true );
-	printSpeciesList ( $filterId, $filter['species'], false );
+	printBirdSpeciesList ( $filterId, $filter['species'] );
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
 	$extra = "";
@@ -416,7 +420,8 @@ JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NO
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
-JHTML::script("com_biodiv/classify.js", true, true);
+JHTML::script("com_biodiv/classifybirds.js", true, true);
+JHTML::script("https://unpkg.com/wavesurfer.js",true,true);
 ?>
 
 

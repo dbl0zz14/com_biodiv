@@ -38,6 +38,11 @@ class BioDivViewProjecthome extends JViewLegacy
 	// Get all the text snippets for this view in the current language
 	$this->translations = getTranslations("project");
 	
+	// Determine whether audio site
+	$isCamera = getSetting("camera") == "yes";
+	$this->classifyView = $isCamera ? "classify" : "classifybirds";
+
+	
 	// Remove any stored photo id on project load.
 	$app->setUserState('com_biodiv.photo_id', null);
 	
@@ -66,6 +71,11 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	// Get the associated article, if there is one, in the urrent language if possible
 	$article_id = getAssociatedArticleId($this->project['article_id']);
+	
+	//error_log("article_id = " . $article_id);
+	//error_log("article = " . $article);
+	
+	
 	$article->load($article_id); 
 	
   	$this->title = $article->title;

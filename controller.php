@@ -87,6 +87,26 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
   
+  function add_site_and_upload(){
+    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+	
+	$site_id = addSite();
+	
+	if ( $site_id ) {		
+	    error_log("Setting view to upload, site = ". $site_id);
+		$this->input->set('view', 'upload');
+		$this->input->set('site_id', $site_id);
+	}
+	else {
+		JFactory::getApplication()->enqueueMessage('Sorry, there was a problem adding the site.');
+		$this->input->set('view', 'trapper');
+	}
+
+
+    parent::display();
+  }
+  
+
   // User has slid to a different photo - update classification to be same
   // NB now using carousel so photo_id is on JRequest - update com_biodiv with this.
   function next_photo(){
@@ -430,6 +450,87 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
 
+  function add_bird_single_tag(){
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+
+    $fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		// Now set the photo_id from the form value, but check it is in the same sequence as the "current" one.
+		//$fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+		$formFields = array("photo_id", "species", "gender", "age", "number", "sure");
+		foreach($formFields as $formField){
+		  $fields->$formField = JRequest::getInt($formField, 0);
+		}
+		// Notes is a text field
+		$fields->notes = JRequest::getString("notes", 0);
+		// If no photo_id, add it from the request:
+		if ( !$fields->photo_id ) $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
+		
+		$animal_id = codes_insertObject($fields, 'animal');
+		
+		$app->setUserState('com_biodiv.animal_id', $animal_id);
+		
+		// add new control classification (nothing or human)
+		//	$fields = new stdClass();
+		//	$fields->person_id = userID();
+		//	$fields->photo_id = $photo_id;
+		//	$fields->species = $content_id;
+		//	codes_insertObject($fields, 'animal');
+
+		// if human then update the photo to say so
+		if($fields->species == 87){
+			$db = JDatabase::getInstance(dbOptions());	
+			$fields2 = new stdClass();
+			$fields2->photo_id = $fields->photo_id;
+			$fields2->contains_human = 1;
+			// we do note own this object so access db directly
+			$db->updateObject('Photo', $fields2, 'photo_id');
+		}
+		
+		$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+		
+		// Sometimes we store all the animal ids spotted by the user.
+		// In original classify mode this is set to 0 on each load of the page
+		// In kiosk mode we keep track of the animals in order to give feedback.
+		$all_animal_ids = $app->getUserState('com_biodiv.all_animal_ids', 0);
+		
+		// If anything other than nothing, remove any existing Nothing classification
+		// And if there is an animal_id for a nothing classification delete this too.
+		if ( $fields->species != 86 ) {
+			$deleted_id = deleteNothingClassification($fields->photo_id, $animal_ids);
+			//error_log ( "Found deleted nothing id = " . $deleted_id );
+			if ( $deleted_id ) removeAnimalId ($deleted_id);
+			$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+		}
+		
+		// And add the new animal_id
+		if ( !$animal_ids ) {
+			//error_log("Setting animal_ids to " . $animal_id);
+			$app->setUserState('com_biodiv.animal_ids', $animal_id);
+		}
+		else {
+			//error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
+			$app->setUserState('com_biodiv.animal_ids', $animal_ids . "_" . $animal_id);
+		}
+		
+		// And add the new animal_id
+		if ( !$all_animal_ids ) {
+			//error_log("Setting all_animal_ids to " . $animal_id);
+			$app->setUserState('com_biodiv.all_animal_ids', $animal_id);
+		}
+		else {
+			//error_log("Setting all_animal_ids to " . $all_animal_ids . "_" . $animal_id);
+			$app->setUserState('com_biodiv.all_animal_ids', $all_animal_ids . "_" . $animal_id);
+		}
+    }
+	$this->input->set('view', 'birdtag');
+    parent::display();
+  }
+  
   function remove_animal(){
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $app = JFactory::getApplication();
@@ -511,6 +612,36 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
   
+  function add_challenge(){
+	  
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+	
+	$fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		
+		$db = JDatabase::getInstance(dbOptions());
+				
+		$fields->sequence_id = JRequest::getInt("sequence_id", 0);
+		$fields->expert_species = JRequest::getString("expert_species", 0);
+		$fields->user_species = JRequest::getString("user_species", 0);
+		$fields->notes = JRequest::getString("notes", 0);
+		
+		$success = $db->insertObject("Challenge", $fields);
+		
+		if(!$success){
+			error_log ( "Challenge insert failed" );
+		}
+				
+    }
+		
+	$this->input->set('view', 'challenge');
+    parent::display();
+  }
+  
   function kiosk_timeout() {
 	
 	$app = JFactory::getApplication();
@@ -589,25 +720,43 @@ class BioDivController extends JControllerLegacy
 		
 		$dirName = siteDir($site_id);
 		$newFullName = "$dirName/$newName";
+		
+		error_log("tmpName = " . $tmpName );
+		error_log("newFullName = " . $newFullName );
 		if(JFile::exists($newFullName)){
 		  addMsg("warning", "File already uploaded: $clientName");
 		  continue;
 		}
+		
+		error_log("About to get exif");
 		
 		// Check whether video. Assume image if not.
 		$exif_extract = null;
 		$taken = null;
 		$manufacturer = null;
 		$exif = null;
+		$is_audio = false;
 		if ( !strcmp( strtolower($ext), "mp4") ) {
 			error_log ( "Found mp4 video file, ext is " . $ext );
-			$exif_extract = getVideoMeta ( $tmpName );  // Assumes quicktime format
+			$exif_extract = getVideoMeta ( $tmpName );  
+			// Assumes quicktime format
 			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
 			$taken = date('Y-m-d H:i:s', $creation_time_unix);
 			$exif = serialize($exif_extract);
 		}
+		else if ( !strcmp( strtolower($ext), "m4a") ) {
+			error_log ( "Found m4a audio file, ext is " . $ext );
+			$is_audio = true;
+			$exif_extract = getVideoMeta ( $tmpName );  
+			// Format same as MP4?
+			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
+			$taken = date('Y-m-d H:i:s', $creation_time_unix);
+			print_r($exif_extract);
+			$exif = serialize($exif_extract);
+		}
 		else if ( !strcmp( strtolower($ext), "mp3") ) {
 			error_log ( "Found mp3 audio file, ext is " . $ext );
+			$is_audio = true;
 			$exif_extract = getVideoMeta ( $tmpName );  
 			$exif = print_r($exif_extract, true);
 			//$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
@@ -643,7 +792,7 @@ class BioDivController extends JControllerLegacy
 			$exif = serialize($exif_extract);
 		}
 		else {
-			error_log ( "Found non mp4 file, ext is " . $ext );
+			error_log ( "Found non mp3/mp4/m4a file, ext is " . $ext );
 			$exif_extract = exif_read_data($tmpName);
 			$taken = $exif_extract['DateTimeOriginal'];
 			$manufacturer = $exif_extract['Manufacturer'];
@@ -658,6 +807,28 @@ class BioDivController extends JControllerLegacy
 			addMsg("error","File upload unsuccessful for $clientName");
 			return;
 		}	
+		
+		// If it's an audio file, generate a sonogram.
+		/* not yet
+		if ( $is_audio ) {
+			error_log("Got audio file - generating waveform");
+			
+			$wavename = JFile::stripExt($newName) . "_wave";
+			$waveFullName = "$dirName/$wavename.png";
+			generate_waveform ( $newFullName, $waveFullName );
+			error_log("waveform generated");
+			
+			$subname = JFile::stripExt($newName) . "_sub";
+			$subFullName = "$dirName/$subname.$ext";
+			generate_subfiles ( $newFullName, $subFullName );
+			error_log("subfiles generated");
+			
+			$soname = JFile::stripExt($newName) . "_sono";
+			$sonoFullName = "$dirName/$soname.mp4";
+			generate_sonogram ( $newFullName, $sonoFullName );
+			error_log("sonogram generated");
+		}
+		*/
 			if(userID()==179){
 		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
 		}
@@ -726,61 +897,75 @@ class BioDivController extends JControllerLegacy
   // add new upload
   function add_upload(){
     $app = JFactory::getApplication();
+	
+	// Get setting that shows whether this is camera deployment site (eg MammalWeb) or audio (eg NaturesAudio)
+	$isCamera = getSetting("camera") == "yes";	  
 
     $site_id = JRequest::getInt('site_id');
     $site_id or die("No site_id");
     canEdit($site_id, "site") or die("Cannot edit site_id $site_id");
 	
-	$camera_tz = JRequest::getString('timezone');
-	$tz = 0;
-	$utc_offset = 0;
-	$is_dst = 0;
-	if(!strlen($camera_tz)){
-		addMsg('error', "No camera timezone specified");
-    }
-	// Get the offset
-	$tz = IntlTimeZone::createTimeZone($camera_tz);
-	$utc_offset = $tz->getRawOffset()/60000;
-	
-	$is_dst = JRequest::getInt('dst');
-	if ($is_dst == 1 ) {
-		// Adjust the offset from UTC for daylight saving time
-		$utc_offset += $tz->getDSTSavings()/60000;
-	}
-	
-	    
-    foreach(array("deployment", "collection") as $dt){
-      $date = JRequest::getString("${dt}_date");
-      if(!strlen($date)){
-	addMsg('error', "No $dt date specified");
-      }
-      $hours = JRequest::getString("${dt}_hours");
-      if(!strlen($hours)){
-	addMsg('error', "No $dt hours specified");
-      }
-      $mins = JRequest::getString("${dt}_mins");
-      if(!strlen($mins)){
-	addMsg('error', "No $dt mins specified: $mins ");
-      }
-      $datetime[$dt] = $date . " " . $hours . ":" . $mins;
-    }
+	if ( $isCamera ) {
+		$camera_tz = JRequest::getString('timezone');
+		$tz = 0;
+		$is_dst = 0;
+		$utc_offset = 0;
+		if(!strlen($camera_tz)){
+			addMsg('error', "No camera timezone specified");
+		}
+		// Get the offset
+		$tz = IntlTimeZone::createTimeZone($camera_tz);
+		$utc_offset = $tz->getRawOffset()/60000;
+		
+		$is_dst = JRequest::getInt('dst');
+		if ($is_dst == 1 ) {
+			// Adjust the offset from UTC for daylight saving time
+			$utc_offset += $tz->getDSTSavings()/60000;
+		}
+		
+			
+		foreach(array("deployment", "collection") as $dt){
+		  $date = JRequest::getString("${dt}_date");
+		  if(!strlen($date)){
+		addMsg('error', "No $dt date specified");
+		  }
+		  $hours = JRequest::getString("${dt}_hours");
+		  if(!strlen($hours)){
+		addMsg('error', "No $dt hours specified");
+		  }
+		  $mins = JRequest::getString("${dt}_mins");
+		  if(!strlen($mins)){
+		addMsg('error', "No $dt mins specified: $mins ");
+		  }
+		  $datetime[$dt] = $date . " " . $hours . ":" . $mins;
+		}
 
-    if(someMsgs("error")){
-      $this->input->set('view', 'upload');
-    }
-    else{
-      $fields = new StdClass();
-      $fields->person_id = userID();
-      $fields->site_id = $site_id;
-      $fields->camera_tz = $camera_tz;
-      $fields->is_dst = $is_dst;
-      $fields->utc_offset = $utc_offset;
-      $fields->deployment_date = $datetime['deployment'];
-      $fields->collection_date = $datetime['collection'];
-      $upload_id = codes_insertObject($fields, 'upload');
-      $app->setUserState('com_biodiv.upload_id', $upload_id);
-      $this->input->set('view', 'uploadm');
-    }
+		if(someMsgs("error")){
+		  $this->input->set('view', 'upload');
+		}
+		else{
+		  $fields = new StdClass();
+		  $fields->person_id = userID();
+		  $fields->site_id = $site_id;
+		  $fields->camera_tz = $camera_tz;
+		  $fields->is_dst = $is_dst;
+		  $fields->utc_offset = $utc_offset;
+		  $fields->deployment_date = $datetime['deployment'];
+		  $fields->collection_date = $datetime['collection'];
+		  $upload_id = codes_insertObject($fields, 'upload');
+		  $app->setUserState('com_biodiv.upload_id', $upload_id);
+		  $this->input->set('view', 'uploadm');
+		}
+	}
+	else {
+		// No deployment details needed for audio-only website
+		$fields = new StdClass();
+		$fields->person_id = userID();
+		$fields->site_id = $site_id;
+		$upload_id = codes_insertObject($fields, 'upload');
+		$app->setUserState('com_biodiv.upload_id', $upload_id);
+		$this->input->set('view', 'uploadm');
+	}
 
     parent::display();
 

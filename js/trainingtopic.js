@@ -69,6 +69,54 @@ jQuery(document).ready(function(){
 		});
 	};
 	
+	addFullScreenFnly = function () {
+		jQuery('#fullscreen-button').click(function (){
+			var photos = document.getElementById('photoCarousel');
+			if("requestFullscreen" in photos) 
+			{
+				photos.requestFullscreen();
+			} 
+			else if ("webkitRequestFullscreen" in photos) 
+			{
+				photos.webkitRequestFullscreen();
+			} 
+			else if ("mozRequestFullScreen" in photos) 
+			{
+				photos.mozRequestFullScreen();
+			} 
+			else if ("msRequestFullscreen" in photos) 
+			{
+				photos.msRequestFullscreen();
+			}
+					
+		});
+		
+		jQuery('#fullscreen-exit-button').click(function (){
+			
+			if(document.exitFullscreen) 
+			{
+				document.exitFullscreen();
+			} 
+			else if (document.webkitExitFullscreen) 
+			{
+				document.webkitExitFullscreen();
+			} 
+			else if (document.mozCancelFullScreen) 
+			{
+				document.mozCancelFullScreen();
+			} 
+			else if (document.msExitFullscreen) 
+			{
+				document.msExitFullscreen();
+			}
+			else {
+				console.log("No exit found");
+				
+			}		
+		});
+	}
+		
+		
 	updateProgressBar = function () {
 		let currnum = currentSequence + 1;
 		let newtext = "" + currnum + "/" + sequences.length;
@@ -319,6 +367,11 @@ jQuery(document).ready(function(){
 	});
 	jQuery('#control_nextseq').click(function (){
 		
+		// If no species selected add a blank
+		if ( jQuery('.remove_animal').length == 0 ) {
+			addSpecies (0, "0", 0, 0, 0);
+		}
+		
 		// Clear species buttons
 		jQuery('.remove_animal').remove();
 	
@@ -335,10 +388,17 @@ jQuery(document).ready(function(){
 				jQuery('#audioContainer').replaceWith(data);
 				if (jQuery('#photoCarousel').find('img').length == 1 ) {
 					jQuery('#control_nextseq').prop('disabled', false);
+					
+					// Need to change to Show Results if this is the final sequence and just one image as there is no slid event
+					if ( currentSequence == sequences.length - 1 ) {
+						jQuery('#control_nextseq').hide();
+						jQuery('#control_finish').show();
+					}
 				}
 				else {
 					jQuery('#control_nextseq').prop('disabled', true);
 				}
+				addFullScreenFnly();
 				updateProgressBar();
 				setNext();
 				addResultImage();
@@ -355,6 +415,8 @@ jQuery(document).ready(function(){
 		jQuery('#user_animals').val(JSON.stringify(classifications));
 	
 	});
+	
+	addFullScreenFnly();
 	
 	// Only allow for the detail in classifications if there is a parameter requesting it, otherwise just remove notes and certainty flag
 	if ( !detail ) {

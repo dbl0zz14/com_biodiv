@@ -40,10 +40,16 @@ class BioDivViewTraining extends JViewLegacy
 	$this->translations = getTranslations("training");
 	
 	// Get training topics
-	$this->topics = codes_getList('topictran');
+	$features = array();
+	$features['restriction'] = "seq > 0";
+	$this->topics = codes_getList( 'topictran', $features );
 	
 	// Get this users scores
-	$this->currentScores = userExpertise($person_id);
+	$scores = userExpertise($person_id);
+	
+	$topics = array_column($scores, 'topic_id');
+	
+	$this->currentScores = array_combine($topics, $scores);
 	
 	// Display the view
     parent::display($tpl);

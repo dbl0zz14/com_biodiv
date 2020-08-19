@@ -31,6 +31,10 @@ else if ($this->calcSiteAnimals == 1 ) {
 	print "Calculating site animal statistics <br>";
 	calculateSiteAnimalStatistics();
 }
+else if ($this->calcExpertise == 1 ) {
+	print "Calculating user expertise <br>";
+	calculateUserExpertise();
+}
 else if ($this->calcTotals == 1) {
 	print "Calculating totals.<br>";
 	calculateStatsTotals();

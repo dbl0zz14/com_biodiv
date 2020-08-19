@@ -17,29 +17,32 @@ defined('_JEXEC') or die;
 foreach($this->status as $msg => $count){
   print "<tr><td>$msg</td><td>$count</td></tr>\n";
  }
+ 
+ $isCamera = getSetting("camera") == "yes";
+ $classifyView = $isCamera ? "classify" : "classifybirds";
 ?>
 </table>
 </p>
 <p>
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
-    <input type='hidden' name='view' value='classify'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></a></button>
+<?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
 </form>
 </p>
 <p>
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
-    <input type='hidden' name='view' value='classify'/>
+<?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></a></button>
+    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
     
 </form>
 </p>
 <p>
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
 <div class="input-group">
-    <input type='hidden' name='view' value='classify'/>
+<?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_only_project' value='1'/>
 	<select name = 'project_id' class = 'form-control'>
@@ -52,7 +55,7 @@ foreach($this->status as $msg => $count){
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></a></button>
+      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
 	</span>
 	
 </div>
