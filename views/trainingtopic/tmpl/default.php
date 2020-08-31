@@ -133,9 +133,8 @@ defined('_JEXEC') or die;
 $mapOptions = mapOptions();
 $key = $mapOptions['key'];
 
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY");
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
-JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
+//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/trainingtopic.js", true, true);
