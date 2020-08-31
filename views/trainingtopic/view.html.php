@@ -37,6 +37,8 @@ class BioDivViewTrainingTopic extends JViewLegacy
 	
 	$this->topic_id = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.topic_id', 'topic_id', 0);
+		
+	$this->topicName = codes_getName($this->topic_id, 'topictran');
 	
 	$this->detail = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.detail', 'detail', 0);

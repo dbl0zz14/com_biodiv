@@ -13,7 +13,7 @@ defined('_JEXEC') or die;
 
 	$num_sequences = count($this->sequences);
 
-	print "<h4 class='modal-title' id='resultsTitle'>".$this->translations['you_scored']['translation_text']." " . $this->score . "/" . $this->totalSpecies . " </h4>";
+	print "<h4 class='modal-title' id='resultsTitle'>".$this->topicName . " - " . $this->translations['you_scored']['translation_text']." " . $this->score . "/" . $this->totalSpecies . " </h4>";
 	print "<p></p>";
 	
 	print "<div class='row'>";	

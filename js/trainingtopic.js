@@ -249,10 +249,10 @@ jQuery(document).ready(function(){
 		
 		try{
 			
-			let south = parseFloat(BioDiv.south);
-			let west = parseFloat(BioDiv.west);
-			let north = parseFloat(BioDiv.north);
-			let east = parseFloat(BioDiv.east);
+			let south = parseFloat(jQuery('#mediaLocation').attr('data-south'));
+			let west = parseFloat(jQuery('#mediaLocation').attr('data-west'));
+			let north = parseFloat(jQuery('#mediaLocation').attr('data-north'));
+			let east = parseFloat(jQuery('#mediaLocation').attr('data-east'));
 			
 			let sw = new google.maps.LatLng(south, west);
 			let ne = new google.maps.LatLng(north, east);

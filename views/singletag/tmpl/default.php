@@ -7,7 +7,7 @@
  
 // No direct access to this file
 defined('_JEXEC') or die;
-//print "<div>\n";
+
 $nothingDisabled = false;
 if ( !$this->person_id ) {
 	print "<div id='no_user_id'></div>";
@@ -40,20 +40,12 @@ else if(!$this->animal){
        if($this->animal->number >1){
 	     $features[] = $this->animal->number;
        }
-	   /*
-       foreach(array("gender", "age") as $struc){
-	     $featureName = codes_getName($this->animal->$struc, $struc . "tran");
-	     if($featureName != "Unknown"){
-	       $features[] = $featureName;
-	     }
-       }
-	   */
-	   // Do this in a specific way using ids.
+	  // Do this in a specific way using ids.
 	   if ( $this->animal->age != 0 and $this->animal->age != 85 ) {
-		   $features[] = $featureName;
+		   $features[] = codes_getName($this->animal->age, "agetran");
 	   }
 	   if ( $this->animal->gender != 0 and $this->animal->gender != 84 ) {
-		   $features[] = $featureName;
+		   $features[] = codes_getName($this->animal->gender, "gendertran");
 	   }
 	   
 	   if ( $type == 'mammal' ) {
@@ -72,7 +64,6 @@ else if(!$this->animal){
  
    
  }
-//print "</div> \n";
 if ( $nothingDisabled == true ) {
 	print "<div id='nothingDisabled'></div>\n";
 }

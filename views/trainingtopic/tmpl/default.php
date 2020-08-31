@@ -42,6 +42,8 @@ defined('_JEXEC') or die;
 		print "<h1>".$this->translations["what_see"]["translation_text"]."</h1>";
 		print "</div>";
 		print "<div class='col-md-4' >";
+		print "<h4>".$this->topicName."</h4>";
+		
 		print "<div class='progress'>";
 		print "  <div id='seq_progress_bar' class='progress-bar progress-bar-info' role='progressbar' aria-valuenow='".$prog_width."' aria-valuemin='0' aria-valuemax='100' style='width:".$prog_width."%'>";
 		print "  1/" . $num_sequences;
@@ -84,7 +86,7 @@ defined('_JEXEC') or die;
 		print "<div class='row'>";
 		print "<div class='col-md-12'>"; // To get the indent back?
 		
-		$this->mediaCarousel->generateMediaCarousel($this->currentSequence->getId(), $this->currentSequence->getMediaFiles(), $this->currentSequence->getMedia(), $this->currentSequence->getMediaType());
+		$this->mediaCarousel->generateMediaCarousel($this->currentSequence);
 		
 		print "</div>"; // col-12
 		print "</div>"; // row
@@ -132,8 +134,8 @@ $mapOptions = mapOptions();
 $key = $mapOptions['key'];
 
 //JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY");
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+//JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
+JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/trainingtopic.js", true, true);

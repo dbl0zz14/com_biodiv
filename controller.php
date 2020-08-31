@@ -721,14 +721,14 @@ class BioDivController extends JControllerLegacy
 		$dirName = siteDir($site_id);
 		$newFullName = "$dirName/$newName";
 		
-		error_log("tmpName = " . $tmpName );
-		error_log("newFullName = " . $newFullName );
+		//error_log("tmpName = " . $tmpName );
+		//error_log("newFullName = " . $newFullName );
 		if(JFile::exists($newFullName)){
 		  addMsg("warning", "File already uploaded: $clientName");
 		  continue;
 		}
 		
-		error_log("About to get exif");
+		//error_log("About to get exif");
 		
 		// Check whether video. Assume image if not.
 		$exif_extract = null;
@@ -737,7 +737,7 @@ class BioDivController extends JControllerLegacy
 		$exif = null;
 		$is_audio = false;
 		if ( !strcmp( strtolower($ext), "mp4") ) {
-			error_log ( "Found mp4 video file, ext is " . $ext );
+			//error_log ( "Found mp4 video file, ext is " . $ext );
 			$exif_extract = getVideoMeta ( $tmpName );  
 			// Assumes quicktime format
 			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
@@ -745,7 +745,7 @@ class BioDivController extends JControllerLegacy
 			$exif = serialize($exif_extract);
 		}
 		else if ( !strcmp( strtolower($ext), "m4a") ) {
-			error_log ( "Found m4a audio file, ext is " . $ext );
+			//error_log ( "Found m4a audio file, ext is " . $ext );
 			$is_audio = true;
 			$exif_extract = getVideoMeta ( $tmpName );  
 			// Format same as MP4?
@@ -755,7 +755,7 @@ class BioDivController extends JControllerLegacy
 			$exif = serialize($exif_extract);
 		}
 		else if ( !strcmp( strtolower($ext), "mp3") ) {
-			error_log ( "Found mp3 audio file, ext is " . $ext );
+			//error_log ( "Found mp3 audio file, ext is " . $ext );
 			$is_audio = true;
 			$exif_extract = getVideoMeta ( $tmpName );  
 			$exif = print_r($exif_extract, true);

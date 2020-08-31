@@ -112,6 +112,8 @@ class BioDivViewTrainingResults extends JViewLegacy
 	
 	$this->topic_id = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.topic_id', 'topic_id', 0);
+		
+	$this->topicName = codes_getName($this->topic_id, 'topictran');
 	
 	$this->detail = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.detail', 'detail', 0);
@@ -122,7 +124,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 	// Get a set of sequences and correct answers for this topic.
 	$seq_json = $app->getUserStateFromRequest('com_biodiv.sequences', 'sequences', 0);
 	
-	error_log("seq_json = " . $seq_json );
+	//error_log("seq_json = " . $seq_json );
 	
 	$sequence_ids = json_decode($seq_json);
 	
@@ -133,7 +135,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 		
 	$ani_json = $app->getUserStateFromRequest('com_biodiv.animals', 'animals', 0);
 	
-	error_log("ani_json = " . $ani_json);
+	//error_log("ani_json = " . $ani_json);
 	
 	$this->classifications = json_decode($ani_json);
 	
@@ -238,7 +240,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 			$ue_id = $db->loadResult();
 			
 			if ( $ue_id ) {
-				error_log("expertise exists - updating ue_id " . $ue_id);
+				//error_log("expertise exists - updating ue_id " . $ue_id);
 				$avfields = new StdClass();
 				$avfields->ue_id = $ue_id;
 				$avfields->num_sequences = $num_seqs;
@@ -249,7 +251,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 				}
 			}
 			else {
-				error_log("enew expertise - inserting");
+				//error_log("enew expertise - inserting");
 				$avfields = new StdClass();
 				$avfields->person_id = $person_id;
 				$avfields->topic_id = $this->topic_id;

@@ -3845,7 +3845,7 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 		
 		// Get a list of distinct species for this topic so we can ensure we have a range 
 		$query = $db->getQuery(true);
-		$query->select("ES.species_id, COUNT(*) as num_seqs, GROUP_CONCAT(ES.sequence_id) as seqs")->from("ExpertSequences ES")
+		$query->select("ES.species_id, COUNT(*) as num_seqs, GROUP_CONCAT(ES.sequence_id order by rand()) as seqs")->from("ExpertSequences ES")
 			->innerJoin("OptionData OD on OD.value = ES.sequence_id")
 			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
 			->group("species_id");
@@ -3853,7 +3853,7 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 		$sequences_by_species = $db->loadAssocList('species_id');
 		
 		$err_str = print_r($sequences_by_species, true);
-		error_log("sequences by species: " . $err_str);
+		//error_log("sequences by species: " . $err_str);
 
 		$num_species = count($sequences_by_species);
 		
@@ -3870,7 +3870,7 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			shuffle( $species );
 			
 			$err_str = print_r($species, true);
-			error_log("species: " . $err_str);
+			//error_log("species: " . $err_str);
 			
 			$species_to_use = null;
 			
@@ -3897,12 +3897,12 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			}
 			
 			$err_str = print_r($species_to_use, true);
-			error_log("species to use: " . $err_str);
+			//error_log("species to use: " . $err_str);
 			
 			// Set up an assoc array with species and sequence count required
 			$species_with_count = array_count_values($species_to_use);
 			$err_str = print_r($species_with_count, true);
-			error_log("species with count: " . $err_str);
+			//error_log("species with count: " . $err_str);
 
 			
 			foreach ( $species_with_count as $species_id=>$seq_count ) {
@@ -3958,16 +3958,16 @@ function getSequenceById($sequence_id) {
 		$photo_id = $photo->photo_id;
 		$photo_url = photoURL($photo_id);
 		
-		error_log("photo url: " . $photo_url );
+		//error_log("photo url: " . $photo_url );
 		
 		if ( isVideo($photo_id) ) {
 			$ext = strtolower(JFile::getExt($photo_url));
-			error_log ( "Found video file, ext = " . $ext );
+			//error_log ( "Found video file, ext = " . $ext );
 			$seq->setMedia("video", $ext);
 		}
 		else if ( isAudio ($photo_id) ){
 			$ext = strtolower(JFile::getExt($photo_url));
-			error_log ( "Found audio file, ext = " . $ext );
+			//error_log ( "Found audio file, ext = " . $ext );
 			$seq->setMedia("audio", $ext);
 		}
 				

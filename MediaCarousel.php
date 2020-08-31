@@ -9,7 +9,6 @@ defined('_JEXEC') or die;
 
 class MediaCarousel {
 	
-	// An array of the children of this project.
 	var $translations;
 	
 	function __construct()
@@ -45,23 +44,35 @@ class MediaCarousel {
 		}
 	}
 	
-	// photoUrls is an array of the Urls indexed by photo_id but in the order of the sequence
-	// sequenceId is here for future use really.
-	function generateMediaCarousel($sequenceId, $photoUrls, $media, $type = null ) {
+	function generateMediaCarousel($sequence) {
+		
+		$sequenceId = $sequence->getId();
+		$photoUrls = $sequence->getMediaFiles();
+		$media = $sequence->getMedia();
+		$type = $sequence->getMediaType();
+		
+		$loc = $sequence->getLocation();
+		
 		//print "Media Carousel, media = " . $media;
 		if ( $media === "video" ) {
 			$photoId = array_keys($photoUrls)[0];
 			$mediaUrl = $photoUrls[$photoId];
-			print '<div id="videoContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+			print '<div id="videoContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
+			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
+			print '<video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
 		}
 		else if ( $media === "audio" ) {
 			$photoId = array_keys($photoUrls)[0];
 			$mediaUrl = $photoUrls[$photoId];
-			print '<div id="audioContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'"><audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</audio></div>';
+			print '<div id="audioContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
+			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
+			print '<audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</audio></div>';
 		}
 		else if ( $media === "photo" ) {
 			
 			print '<div id="photoCarousel" data-seq-id="'.$sequenceId.'" class="carousel slide carousel-fade contain" data-ride="carousel" data-interval="false" data-wrap="false">';
+			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
+			
 			print '<!-- Indicators -->';
 			print '<ol id="photo-indicators" class="carousel-indicators">';
 			  

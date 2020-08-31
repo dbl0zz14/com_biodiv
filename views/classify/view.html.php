@@ -107,7 +107,7 @@ class BioDivViewClassify extends JViewLegacy
 		
 		// Only check for existing classifications if we are refreshing...
 		if ( $this->animal_ids ) {
-			error_log("classify view, animal ids found: " . $this->animal_ids );
+			//error_log("classify view, animal ids found: " . $this->animal_ids );
 			$animals_csv = implode(",", explode("_", $this->animal_ids));
 			$db = JDatabase::getInstance(dbOptions());
 			$query = $db->getQuery(true);
