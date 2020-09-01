@@ -166,14 +166,17 @@ class SiteHelper {
 
 	}
 	
-	public function generateSiteCreationModal( $isCamera = true, $defaultProjectId = 1 ) {
+	public function generateSiteCreationModal( $withUpload = false , $defaultProjectId = 1 ) {
 		
 		
 		// Set up the meta data needed for the modal
-		$help = $this->getHelpArray( $isCamera );
+		$help = $this->getHelpArray( $this->isCamera );
 
 		$projectsitedataJSON = $this->getProjectSiteDataJSON();
-
+		
+		$task = 'add_site';
+		if ( $withUpload ) $task = 'add_site_and_upload';
+		
 		print '<div id="add_site_modal" class="modal fade" role="dialog" aria-hidden="true" >';
 		print '  <div class="modal-dialog modal-sm">';
 
@@ -182,7 +185,7 @@ class SiteHelper {
 		print '      <div class="modal-header">';
 		print '      </div>';
 		print '      <div class="modal-body">';
-		print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=add_site_and_upload" method="post">';
+		print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . '" method="post">';
 		print JHtml::_('form.token');
 
 		print '        <div class="tab"><h2>'.$this->translations['enter_site']['translation_text'].'</h2>';
@@ -285,7 +288,12 @@ class SiteHelper {
 				print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
 				foreach ( codes_getList($struc."tran") as $thing ) {
 					list($code, $name) = $thing;
-					print "<option value='$code'>$name</option>";
+					if ( $code == $defaultProjectId ) {
+						print "<option value='$code' selected>$name</option>";
+					}
+					else {
+						print "<option value='$code'>$name</option>";
+					}
 				}
 				print '          </select>';
 				print '</div>';
@@ -331,7 +339,7 @@ class SiteHelper {
 	}
 
 
-public function generateSiteSelectionModal( $isCamera = true, $defaultProjectId = 1 ) {
+public function generateSiteSelectionModal( $defaultProjectId = 1 ) {
 		
 		
 		// Set up the meta data needed for the modal

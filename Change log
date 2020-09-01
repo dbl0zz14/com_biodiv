@@ -1,4 +1,7 @@
 # 31/08/20 - Version 3.2.2   #
+* Fix SiteHelper bug so add_site or add_site_with_upload possible
+
+# 31/08/20 - Version 3.2.2   #
 * Fix map location in test yourself module
 
 # 19/08/20 - Version 3.2.1   #

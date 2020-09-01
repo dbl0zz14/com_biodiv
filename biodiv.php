@@ -4951,7 +4951,8 @@ function getArticle ( $option_id ) {
 
 
 function addSite () {
-	// Get all the data
+	
+// Get all the data
 	$fields = new stdClass();
     $fields->person_id = userID();
 	$fields->site_name = JRequest::getString('site_name');

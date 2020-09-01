@@ -29,6 +29,9 @@ class BioDivController extends JControllerLegacy
   function add_site(){
     JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
 	
+	$site_id = addSite();
+	
+	/*
 	// Get all the data
 	$fields = new stdClass();
     $fields->person_id = userID();
@@ -49,6 +52,8 @@ class BioDivController extends JControllerLegacy
 		JFactory::getApplication()->enqueueMessage('Sorry, you already have a site with that name, could not add the site.');
 	}
 	else {
+		
+		error_log ("About to set fields");
 		$fields->latitude = JRequest::getString('latitude');
 		$fields->longitude = JRequest::getString('longitude');
 		$fields->grid_ref = JRequest::getString('grid_ref');
@@ -58,6 +63,8 @@ class BioDivController extends JControllerLegacy
 		$fields->camera_id = JRequest::getInt('camera_id');
 		$fields->camera_height = JRequest::getInt('camera_height');
 		$fields->notes = JRequest::getString('notes');
+		
+		error_log ("About to insert site");
 		
 		// Insert into the Site table
 		$site_id = codes_insertObject($fields, 'site');
@@ -81,6 +88,7 @@ class BioDivController extends JControllerLegacy
 			$sitedata_id = codes_insertObject($fields, 'sitedata');
 		}
 	}
+	*/
 	
     $this->input->set('view', 'trapper');
 

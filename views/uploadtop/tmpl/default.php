@@ -53,7 +53,7 @@ print '</div>'; // row
 </ >
 <?php
 //"<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-block btn-wrap-text species-btn-large species_select' data-toggle='modal' data-target='#classify_modal'>".$imageText.
-$this->siteHelper->generateSiteCreationModal();
+$this->siteHelper->generateSiteCreationModal(true);
 
 $this->siteHelper->generateSiteSelectionModal();
 
