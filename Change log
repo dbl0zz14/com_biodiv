@@ -1,3 +1,6 @@
+# 06/09/20 - Version 3.2.3   #
+* Split large audio files when split_audio setting is yes.  Uses ffmpeg and ffprobe so working installations required.
+
 # 31/08/20 - Version 3.2.2   #
 * Fix SiteHelper bug so add_site or add_site_with_upload possible
 
