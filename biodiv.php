@@ -82,7 +82,7 @@ function codes_insertObject($fields, $struc){
 	$db = JDatabase::getInstance(dbOptions());
   
 	// photo is handled as special case as split over two tables, as is tosplit
-	if ( ($struc == "photo") || ($struc == "tosplit") ) {
+	if ( ($struc == "photo") || ($struc == "splitaudio") || ($struc == "tosplit") ) {
 		// Move and store the exif field as this is in second table
 		$exif = $fields->exif;
 		unset($fields->exif);
@@ -495,7 +495,7 @@ function canEdit($id, $struc, $allow = 0){
 
 
 function canCreate($struc, $fields){
-	 if($struc=="sequence"){
+	 if($struc=="sequence" || $struc=="splitaudio"){
 	 return true;
 }
   if(!userID()){
@@ -515,6 +515,7 @@ function canCreate($struc, $fields){
     break;
 
   case 'sequence':
+  case 'splitaudio':
     //    return canEdit($fields->upload_id, 'upload');
     return true;
     break;
@@ -629,6 +630,9 @@ function isAudio($photo_id) {
 		return true;
 	}
 	if ( strpos(strtolower($filename), '.m4a') !== false ) {
+		return true;
+	}
+	if ( strpos(strtolower($filename), '.wav') !== false ) {
 		return true;
 	}
 	return false;	
@@ -4729,7 +4733,7 @@ function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 	$db->setQuery($query);
 	$orig = $db->loadAssoc();
 	
-	$struc = 'photo';
+	$struc = 'splitaudio';
 	
 	$dirName = dirname($newFile);
 	$fileName = basename($newFile);

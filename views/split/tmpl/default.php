@@ -33,7 +33,12 @@ foreach ( $this->files as $bigFile ) {
 	// If file less than 30 secs, leave complete and copy details to upload table.
 	if ( $duration <= $oneFile ) {
 		print "<h4>Just one file</h4>";
-		writeSplitFile($tsId, $fullfilename, 0);
+		$photoId = writeSplitFile($tsId, $fullfilename, 0);
+		print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+		if ( !$photoId ) {
+			print "<p>Write to Photo table failed< for file " . $fullfilename . "/p>";
+			$problem = true;
+		}
 	}
 	
 	// If file > 30 secs, create 30 sec clips until have less than 60 secs left, then create the last two files with duration half of that
@@ -56,7 +61,12 @@ foreach ( $this->files as $bigFile ) {
 			
 			if ( $success ) {
 				print "<p>Writing to Photo table</p>";
-				writeSplitFile($tsId, $newFile, $start);
+				$photoId = writeSplitFile($tsId, $newFile, $start);
+				print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+				if ( !$photoId ) {
+					print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+					$problem = true;
+				}
 			}
 			else {
 				$problem = true;
@@ -75,7 +85,12 @@ foreach ( $this->files as $bigFile ) {
 			
 		if ( $success ) {
 			print "<p>Writing to Photo table</p>";
-				writeSplitFile($tsId, $newFile, $start);
+				$photoId = writeSplitFile($tsId, $newFile, $start);
+				print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+				if ( !$photoId ) {
+					print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+					$problem = true;
+				}
 		}
 		else {
 			$problem = true;
@@ -90,8 +105,12 @@ foreach ( $this->files as $bigFile ) {
 			
 		if ( $success ) {
 			print "<p>Writing to Photo table</p>";
-			writeSplitFile($tsId, $newFile, $start);
-						
+			$photoId = writeSplitFile($tsId, $newFile, $start);
+			print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+			if ( !$photoId ) {
+				print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+				$problem = true;
+			}			
 		}
 		else {
 			$problem = true;
