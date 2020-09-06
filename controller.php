@@ -738,7 +738,6 @@ class BioDivController extends JControllerLegacy
 		
 		//error_log("About to get exif");
 		
-		// Check whether video. Assume image if not.
 		$exif_extract = null;
 		$taken = null;
 		$manufacturer = null;
@@ -840,6 +839,9 @@ class BioDivController extends JControllerLegacy
 			if(userID()==179){
 		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
 		}
+		
+		$struc = 'photo';
+		
 		$photoFields = new stdClass();
 		$photoFields->filename = $newName;
 		$photoFields->upload_filename = $clientName;
@@ -850,7 +852,18 @@ class BioDivController extends JControllerLegacy
 		$photoFields->taken = $taken;
 		$photoFields->size = $fileSize;
 		$photoFields->exif = $exif;
-		if(codes_insertObject($photoFields, 'photo')){
+		
+		// If we have file splitting for audio, then write to different table.
+		$splitAudio = getSetting("split_audio") == "yes";
+		
+		error_log ( "split_audio setting = " . $splitAudio );
+		error_log ( "is_audio = " . $is_audio );
+		if ( $is_audio && $splitAudio ) {
+			$struc = 'tosplit';
+		}
+		
+		error_log ( "Inserting object for struc " . $struc );
+		if(codes_insertObject($photoFields, $struc)){
 		  addMsg('success', "Uploaded $clientName");
 		}
 		else {

@@ -39,6 +39,7 @@
 	<filename>BiodivHelper.php</filename>
 	<filename>BiodivAuth.php</filename>
 	<filename>SiteHelper.php</filename>
+	<filename>BiodivFFMpeg.php</filename>
 	<folder>views</folder>
 	<folder>libraries</folder>
 <!--

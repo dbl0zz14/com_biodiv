@@ -8,20 +8,19 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-//print("<br>component path: " . JPATH_COMPONENT);
 // Needed to ensure pick up the correct component files
 set_include_path(JPATH_COMPONENT . get_include_path());
-//print("<br>include path: " . get_include_path());
-//print("<br>component path: " . JPATH_COMPONENT);
 
 include_once "local.php";
-include "Project.php";
-include "Location.php";
-include "Sequence.php";
-include "MediaCarousel.php";
-include "SpeciesCarousel.php";
-include "SiteHelper.php";
-include "BiodivHelper.php";
+include_once "Project.php";
+include_once "Location.php";
+include_once "Sequence.php";
+include_once "MediaCarousel.php";
+include_once "SpeciesCarousel.php";
+include_once "SiteHelper.php";
+include_once "BiodivHelper.php";
+include_once "BiodivFFMpeg.php";
+
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
 
@@ -33,7 +32,6 @@ BioDiv.root = "'. BIODIV_ROOT . '";');
 
 JHtml::_('bootstrap.framework');
 JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", array(), true);
-//JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", true, true);
 JHTML::script("bootstrap3-editable/bootstrap-editable.js", true, true);
 JHTML::script("com_biodiv/biodiv.js", true, true);
 
@@ -43,7 +41,6 @@ require_once('libraries/getid3/getid3/getid3.php');
 
 include "aws.php";
 
-//include_once "ffmpeg.php";
 
 
 
@@ -84,8 +81,8 @@ function codes_insertObject($fields, $struc){
 	$success = false;
 	$db = JDatabase::getInstance(dbOptions());
   
-	// photo is handled as special case as split over two tables
-	if ( $struc == "photo" ) {
+	// photo is handled as special case as split over two tables, as is tosplit
+	if ( ($struc == "photo") || ($struc == "tosplit") ) {
 		// Move and store the exif field as this is in second table
 		$exif = $fields->exif;
 		unset($fields->exif);
@@ -110,11 +107,18 @@ function codes_insertObject($fields, $struc){
 			
 			if ( $success ) {
 				$exifFields = new stdClass();
-				$exifFields->photo_id = $id;
 				$exifFields->exif = $exif;
-				$table = codes_getTable($struc);
+				if ( $struc == "tosplit" ) {
+					$table = "ToSplitExif" ;
+					$exifFields->ts_id = $id;
+				}
+				else {
+					$table = "PhotoExif";
+					$exifFields->photo_id = $id;
+				
+				}
 
-				$success = $db->insertObject("PhotoExif", $exifFields);
+				$success = $db->insertObject($table, $exifFields);
 				if($success){
 					print "Insert succeeded";
 					error_log("Insert succeeded, id = " . $id );
@@ -144,6 +148,8 @@ function codes_insertObject($fields, $struc){
 	}
 	else {
 		$table = codes_getTable($struc);
+		
+		error_log ( "codes_insertObject, struc = " . $struc . ", got table " . $table );
 
 		$success = $db->insertObject($table, $fields);
 		if($success){
@@ -151,6 +157,7 @@ function codes_insertObject($fields, $struc){
 			return $id;
 		}
 		else{
+			error_log ("Insert failed for struc " . $struc );
 			print "Insert failed";
 		}
 	}
@@ -503,6 +510,7 @@ function canCreate($struc, $fields){
   case 'photo':
   case 'classification':
   case 'animal':
+  case 'tosplit':
     return $fields->person_id == userID();   
     break;
 
@@ -4703,6 +4711,73 @@ function getVideoMeta ( $filename ) {
 
 }
 
+function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
+	
+	// Can we get the exif data
+	$fileinfo = getVideoMeta ( $newFile );
+	$exif = serialize($fileinfo);
+	
+	// Note that the original exif will be stored in ToSplitExif.
+	
+	// Get the data from the original file
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("*")
+		->from("ToSplit")
+		->where("ts_id = " . $tsId);
+	$db->setQuery($query);
+	$orig = $db->loadAssoc();
+	
+	$struc = 'photo';
+	
+	$dirName = dirname($newFile);
+	$fileName = basename($newFile);
+	//$taken = $orig['taken'] + $delay;
+	$unixTime = strtotime ( $orig['taken'] );
+	$newTime = $unixTime + $delay;
+	$taken = date('Y-m-d H:i:s', $newTime);
+	$fileSize = filesize($newFile);
+	$exif_extract = getVideoMeta ( $newFile );  
+	$exif = serialize($exif_extract);
+		
+	$photoFields = new stdClass();
+	$photoFields->filename = $fileName;
+	$photoFields->upload_filename = $orig['upload_filename'];
+	$photoFields->dirname = $dirName;
+	$photoFields->site_id = $orig['site_id'];
+	$photoFields->upload_id = $orig['upload_id'];
+	$photoFields->person_id = $orig['person_id'];
+	$photoFields->taken = $taken;
+	$photoFields->size = $fileSize;
+	$photoFields->exif = $exif;
+	
+	$photoId = codes_insertObject($photoFields, $struc);
+	
+	if($photoId){
+		error_log("Success writing split file " . $newFile . ", photo_id = " . $photoId );
+	}
+	else {
+		error_log("Failed writing split file " . $newFile );
+	}
+	
+	return $photoId;
+	
+}
+
+
+function setSplitStatus ($tsId, $success) {
+	
+	$status = $success ? 1 : 2;
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$fields = new stdClass();
+	$fields->ts_id = $tsId;
+	$fields->status = $status;
+	$db->updateObject('ToSplit', $fields, 'ts_id');
+	
+}
 
 function getClassificationButton ( $id, $animalArray ) {
 	$label = codes_getName($animalArray[$id]->species, 'contenttran');
