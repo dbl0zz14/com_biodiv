@@ -1,3 +1,10 @@
+# 11/09/20 - Version 3.2.4   #
+* Test Yourself primary and secondary species
+* Expert species now linked to topic via es_id rather than sequence_id
+* Test Yourself fix so can't get same sequence twice (when >1 species this was a possibility)
+* Bug fix so classify audio from projects page goes to Login if not logged in
+* Add upload filename to split output
+
 # 06/09/20 - Version 3.2.3   #
 * Split large audio files when split_audio setting is yes.  Uses ffmpeg and ffprobe so working installations required.
 

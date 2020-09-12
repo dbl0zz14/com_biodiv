@@ -51,6 +51,18 @@ class BioDivViewUploaded extends JViewLegacy
 
 	  $db->setQuery($query);
 	  $this->photos = $db->loadAssocList();
+	  
+	  $query = $db->getQuery(true);
+	  $query->select("upload_filename, taken")
+	    ->from($db->quoteName("ToSplit"))
+	    ->where("site_id = " .(int)$this->site_id)
+	    ->where("person_id = " .(int)userID())
+	    ->order("upload_filename");
+
+
+	  $db->setQuery($query);
+	  $this->tosplit = $db->loadAssocList();
+	  
 
 	  // Display the view
 

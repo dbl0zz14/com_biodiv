@@ -21,7 +21,8 @@ defined('_JEXEC') or die;
 	for ( $i = 0; $i < $num_sequences; $i++ ) {
 		$seq = $this->sequences[$i];
 		$mediafile = array_values($seq->getMediaFiles())[0];
-		$correct = $seq->getSpecies();
+		$correctPrimary = $seq->getPrimarySpecies();
+		$correctSecondary = $seq->getSecondarySpecies();
 		
 		$useranimals = array();
 		if ( count($this->classifications) > $i) {
@@ -42,13 +43,16 @@ defined('_JEXEC') or die;
 		if ( $isCorrect ) {
 			$yn = $meh;
 		}
-		$allCorrect = ($this->wrong[$i] == 0) && ($this->marks[$i] == count($correct));
+		
+		$allCorrect = ($this->wrong[$i] == 0) && ($this->correctPrimary[$i] >= count($correctPrimary));
 		if ( $allCorrect ) {
 			$yn = $smile;
 		}
 		
 		$correct_names = array();
-		foreach ($correct as $animal) {
+		$correct_names_sec = array();
+		
+		foreach ($correctPrimary as $animal) {
 			$animal_id = $animal->id;
 			$animal_name = codes_getOptionTranslation($animal_id);
 			if ( $this->detail && $animal_id != 86 && $animal_id != 87 ) {
@@ -61,6 +65,20 @@ defined('_JEXEC') or die;
 				$animal_name .= ")";
 			}
 			$correct_names[] = $animal_name;
+		}
+		foreach ($correctSecondary as $animal) {
+			$animal_id = $animal->id;
+			$animal_name = codes_getOptionTranslation($animal_id);
+			if ( $this->detail && $animal_id != 86 && $animal_id != 87 ) {
+				$animal_name .= " (" . $animal->number;
+				$animal_age = $animal->age;
+				if ( $animal_age != 85 ) $animal_name .= " " . codes_getOptionTranslation($animal_age);
+				
+				$animal_gender = $animal->gender;
+				if ( $animal_gender != 84 ) $animal_name .= " " . codes_getOptionTranslation($animal_gender);
+				$animal_name .= ")";
+			}
+			$correct_names_sec[] = $animal_name . " " . $this->translations['sec']['translation_text'];
 		}
 		
 		$user_names = array();
@@ -83,6 +101,7 @@ defined('_JEXEC') or die;
 		// Sort the species
 		sort($user_names);
 		sort($correct_names);
+		sort($correct_names_sec);
 		
 		print "<div class='col-md-4'>";
 		print "<div class='well'>";
@@ -115,7 +134,7 @@ defined('_JEXEC') or die;
 			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><video src = '" . $mediafile . "' width='100%'></video></button>";
 		}
 		else if ( $seq->getMedia() == "audio" ) {
-			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><audio src = '" . $mediafile . "' width='100%'></audio></button>";
+			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . $this->translations['review']['translation_text'] . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
 		}
 		
 		print "<div class='row'>";
@@ -131,6 +150,7 @@ defined('_JEXEC') or die;
 		
 		print "<h4>" . "  " . $this->translations['exp_sel']['translation_text'] . "</h4>";
 		print "<p id='expert_" . $seq->getId() . "'>" . implode(', <br>', $correct_names) . "</p>";
+		print "<p id='expert_" . $seq->getId() . "'>" . implode(', <br>', $correct_names_sec) . "</p>";
 		
 		print "</div>"; // col 6
 		

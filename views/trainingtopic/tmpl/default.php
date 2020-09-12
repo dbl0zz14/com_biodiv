@@ -15,6 +15,7 @@ defined('_JEXEC') or die;
 	
 	$seq_json = json_encode($this->sequences);
 	$document->addScriptDeclaration("BioDiv.sequences = '".$seq_json."';");
+	$document->addScriptDeclaration("BioDiv.topic = '".$this->topic_id."';");
 	
 	if ( $this->detail == 1 ) {
 		$document->addScriptDeclaration("BioDiv.detail = ".$this->detail.";");
@@ -31,9 +32,6 @@ defined('_JEXEC') or die;
 		$document->addScriptDeclaration("BioDiv.north = ".$loc->getNorth().";");
 		$document->addScriptDeclaration("BioDiv.east = ".$loc->getEast().";");
 		
-		//$species_json = json_encode( $this->correctSpecies );
-		//$document->addScriptDeclaration("BioDiv.species = '".$species_json."';");
-
 		$prog_width = 100/$num_sequences;
 		
 		print "<div class='row' >";

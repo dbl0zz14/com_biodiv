@@ -36,6 +36,9 @@ class BioDivViewMediaCarousel extends JViewLegacy
 
     $app = JFactory::getApplication();
 	
+	$this->topic_id = 
+	    (int)$app->getUserStateFromRequest('com_biodiv.topic_id', 'topic_id', 0);
+	
 	$this->sequence_id = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.sequence_id', 'sequence_id', 0);
 	
@@ -46,7 +49,7 @@ class BioDivViewMediaCarousel extends JViewLegacy
 	$this->mediaCarousel = new MediaCarousel();
 	
 	// Get the gold standard sequences for this topic
-	$this->sequence = getTrainingSequence($this->sequence_id);
+	$this->sequence = getTrainingSequence($this->sequence_id, $this->topic_id);
 	
     // Display the view
     parent::display($tpl);

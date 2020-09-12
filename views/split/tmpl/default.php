@@ -17,6 +17,7 @@ foreach ( $this->files as $bigFile ) {
 	
 	$tsId = $bigFile['ts_id'];
 	
+	print "<h2>Splitting file " . $bigFile['upload_filename'] . "</h2>";
 	print "<h2>File id = " . $tsId . ", filename = " . $bigFile['filename'] . "</h2>";
 	
 	// get the duration.
@@ -30,8 +31,8 @@ foreach ( $this->files as $bigFile ) {
 	$twoFiles = $oneFile * 2;
 	$problem = false;
 	
-	// If file less than 30 secs, leave complete and copy details to upload table.
-	if ( $duration <= $oneFile ) {
+	// If file less than 30 secs, leave complete and copy details to upload table.  Add a 1 second tolerance
+	if ( $duration < $oneFile + 1 ) {
 		print "<h4>Just one file</h4>";
 		$photoId = writeSplitFile($tsId, $fullfilename, 0);
 		print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";

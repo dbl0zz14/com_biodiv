@@ -3856,25 +3856,64 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 		
 		
 		// Get a list of distinct species for this topic so we can ensure we have a range 
+		// Check they have a primary species otherwise leave out
 		$query = $db->getQuery(true);
 		$query->select("ES.species_id, COUNT(*) as num_seqs, GROUP_CONCAT(ES.sequence_id order by rand()) as seqs")->from("ExpertSequences ES")
-			->innerJoin("OptionData OD on OD.value = ES.sequence_id")
-			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
+			->innerJoin("OptionData OD on OD.value = ES.es_id")
+			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'expertsequence'" )
+			->where("ES.is_primary = 1" )
 			->group("species_id");
 		$db->setQuery($query);
 		$sequences_by_species = $db->loadAssocList('species_id');
 		
 		$err_str = print_r($sequences_by_species, true);
-		//error_log("sequences by species: " . $err_str);
+		error_log("sequences by species: " . $err_str);
 
-		$num_species = count($sequences_by_species);
+		$used_ids = array();
 		
 		$num_seqs = 0;
-		foreach ( $sequences_by_species as $sp ) {
-			$num_seqs += $sp['num_seqs'];
+		foreach ( $sequences_by_species as $sp_id=>$sp ) {
+			
+			$sp_count = $sp['num_seqs'];
+			
+			// At this point make sure each sequence_id only appears once.  If there is more than one species in a sequence it will be on more than one row
+			$ids = explode ( ',', $sp['seqs'] );
+			
+			$already_used = array_intersect($used_ids, $ids);
+			
+			if ( count($already_used) > 0 ) {
+				error_log ("Got already used sequence(s) for species " . $sp_id );
+				foreach ( $already_used as $used_id ) {
+					$id_key = array_search($used_id, $ids);
+					unset($ids[$id_key]);
+					$sp_count -= 1;
+				}
+			}
+			
+			// If no sequences left, remove this species from the list.
+			if ( $sp_count <= 0 ) {
+				error_log ("Got no sequences left for species " . $sp_id );
+				unset($sequences_by_species[$sp_id]);
+			}
+			else {
+				// Only change if necessary
+				if ( $sp_count != $sp['num_seqs'] ) {
+					error_log ("Removed sequence(s) so resetting list for species " . $sp_id );
+				
+					$sp['num_seqs'] = $sp_count;
+					$sp['seqs'] = implode ( ',', $ids );
+				}
+				$used_ids = array_merge ( $used_ids, $ids );
+				$num_seqs += $sp_count;
+			}
+			
 		}
 		
+		$err_str = print_r($sequences_by_species, true);
+		error_log("sequences by species: " . $err_str);
+
 		// Need at least one species and at least max_number of sequences
+		$num_species = count($sequences_by_species);
 		if ( $num_species > 0 && $num_seqs >= $max_number ) {
 		
 			$species = array_keys ( $sequences_by_species );
@@ -3932,17 +3971,6 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 				error_log("seq_ids: " . $err_str);
 				
 			}
-
-
-			/*
-			// Find sequences for this topic
-			$query = $db->getQuery(true);
-			$query->select("distinct OD.value as sequence_id")->from("OptionData OD")
-				->where("OD.option_id = " . $topic_id . " and OD.data_type = 'sequence'" )
-				->order("rand()");
-			$db->setQuery($query, 0, $max_number);
-			$seq_ids = $db->loadColumn();
-			*/
 		}
 	}
 	
@@ -3950,6 +3978,8 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 	
 	return $seq_ids;
 }
+
+
 
 function getSequenceById($sequence_id) {
   
@@ -3990,48 +4020,43 @@ function getSequenceById($sequence_id) {
   
 }
 
-function getTrainingSequence( $sequence_id ) {
+function getTrainingSequence( $sequence_id, $topic_id = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
 	$seq = getSequenceById ( $sequence_id );
 	
-	$query = $db->getQuery(true);
-	$query->select("ES.species_id as id, ES.gender, ES.age, sum(ES.number) as number")->from("ExpertSequences ES")
-		->where("ES.sequence_id = ".$sequence_id )
-		->group("ES.sequence_id, ES.species_id, ES.gender, ES.age");
-	$db->setQuery($query);
-	$esObjects = $db->loadObjectList();
+	$esObjects = null;
+	
+	// If no topic, then get for all topics
+	if ( !$topic_id ) {
+		$query = $db->getQuery(true);
+		$query->select("distinct ES.species_id as id, ES.gender, ES.age, sum(ES.number) as number, is_primary")->from("ExpertSequences ES")
+			->where("ES.sequence_id = ".$sequence_id )
+			->group("ES.sequence_id, ES.species_id, ES.gender, ES.age, ES.is_primary");
+		$db->setQuery($query);
+		$esObjects = $db->loadObjectList();
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("ES.species_id as id, ES.gender, ES.age, sum(ES.number) as number, is_primary")->from("ExpertSequences ES")
+			->innerJoin("OptionData OD on OD.value = ES.es_id")
+			->where("OD.option_id = " . $topic_id . " and OD.data_type = 'expertsequence'" )
+			->where("ES.sequence_id = ".$sequence_id )
+			->group("ES.sequence_id, ES.species_id, ES.gender, ES.age, ES.is_primary");
+		$db->setQuery($query);
+		$esObjects = $db->loadObjectList();
+	}
 	
 	foreach ( $esObjects as $es ) {
-		$seq->addSpecies ( $es );
-	}
-/*
-	$query = $db->getQuery(true);
-	$query->select("P.sequence_id, P.photo_id")->from("Photo P")
-		->where("P.sequence_id = ".$sequence_id );
-	$db->setQuery($query);
-	$photos = $db->loadObjectList();
-
-	//$photostr = print_r($photos);
-	//error_log("getTrainingSequences, photostr = " . $photostr);
-
-	foreach ( $photos as $photo ) {
-		$photo_id = $photo->photo_id;
-		$photo_url = photoURL($photo_id);
-		
-		if ( isVideo($photo_id) ) {
-			$ext = strtolower(JFile::getExt($photo_url));
-			$seq->setMedia("audio", $ext);
+		if ( $es->is_primary == 1 ) {
+			$seq->addPrimarySpecies ( $es );
 		}
-		else if ( isAudio ($photo_id) ){
-			$ext = strtolower(JFile::getExt($photo_url));
-			$seq->setMedia("audio", $ext);
+		else {
+			$seq->addSecondarySpecies ( $es );
 		}
-		
-		$seq->addMediaFile ( $photo_id, $photo_url );
+	
 	}
-*/			
 		
 	return $seq;
 }

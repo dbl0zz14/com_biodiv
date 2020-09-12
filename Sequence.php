@@ -15,7 +15,8 @@ class Sequence {
 	protected $type; 
 	protected $location;
 	protected $mediaFiles;
-	protected $species;
+	protected $primarySpecies;
+	protected $secondarySpecies;
 	
 	function __construct($id)
 	{
@@ -23,7 +24,8 @@ class Sequence {
 		$this->media = "photo"; // Default to photo
 		$this->type = null;
 		$this->mediaFiles = array();
-		$this->species = array();
+		$this->primarySpecies = array();
+		$this->secondarySpecies = array();
 	}
 	
 	function getId() {
@@ -61,12 +63,20 @@ class Sequence {
 		return $this->mediaFiles;
 	}
 	
-	function addSpecies ( $species ) {
-		$this->species[] = $species;
+	function addPrimarySpecies ( $species ) {
+		$this->primarySpecies[] = $species;
 	}
 	
-	function getSpecies () {
-		return $this->species;
+	function addSecondarySpecies ( $species ) {
+		$this->secondarySpecies[] = $species;
+	}
+	
+	function getPrimarySpecies () {
+		return $this->primarySpecies;
+	}
+	
+	function getSecondarySpecies () {
+		return $this->secondarySpecies;
 	}
 
 

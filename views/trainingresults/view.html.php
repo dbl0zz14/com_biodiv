@@ -130,7 +130,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 	
 	$this->sequences = array();
 	foreach ( $sequence_ids as $sequence_id ) {
-		$this->sequences[] = getTrainingSequence($sequence_id);
+		$this->sequences[] = getTrainingSequence($sequence_id, $this->topic_id);
 	}
 		
 	$ani_json = $app->getUserStateFromRequest('com_biodiv.animals', 'animals', 0);
@@ -142,20 +142,31 @@ class BioDivViewTrainingResults extends JViewLegacy
 	// Calculate the score
 	$this->score = 0;
 	$this->marks = array();
+	$this->primaryCorrect = array();
 	$this->wrong = array();
 	$num_sequences = count($this->sequences);
 	$this->totalSpecies = 0;
 	for ( $i = 0; $i < $num_sequences; $i++ ) {
 		
 		$seq = $this->sequences[$i];
-		$correct = $seq->getSpecies();
-		$numExpertSpecies = count($correct);
-		$this->totalSpecies += $numExpertSpecies;
+		
+		//$correct = $seq->getSpecies();
+		
+		//$numExpertSpecies = count($correct);
+		//$this->totalSpecies += $numExpertSpecies;
+		
+		$correctPrimary = $seq->getPrimarySpecies();
+		$correctSecondary = $seq->getSecondarySpecies();
+		$numExpertPrimary = count($correctPrimary);
+		$numExpertSecondary = count($correctSecondary);
+		$this->totalSpecies += $numExpertPrimary;
+		$numExpertSpecies = $numExpertPrimary + $numExpertSecondary;
 		
 		if ( count($this->classifications) > $i ) {
 			$useranimals = $this->classifications[$i];
 			
 			if ( $this->detail == 1 ) {
+				// NB not tested as never used
 				if ( $this->compareSpeciesDetail ( $correct, $useranimals ) ) {
 					$this->score += 1;
 					$this->marks[] = 1;
@@ -165,16 +176,68 @@ class BioDivViewTrainingResults extends JViewLegacy
 				}
 			}
 			else {
-				$numCorrect = $this->countCorrectSpecies ( $correct, $useranimals );
-				$this->score += $numCorrect;
+				// Note need to keep hold of all the detail so do here instead of calling function
+				//$numCorrect = $this->countCorrectSpecies ( $correct, $useranimals );
+				//$this->score += $numCorrect;
 				
-				$numUserAnimals = count($useranimals);
+				$correctPrimaryIds = array_unique (array_map ( function($x) { return $x->id; } , $correctPrimary ) );
+				$correctSecondaryIds = array_unique (array_map ( function($x) { return $x->id; } , $correctSecondary ) );
 				
-				$numWrong = $numUserAnimals - $numCorrect;
+				$userIds = array_unique (array_map ( function($x) { return $x->id; } , $useranimals ) );
+				  
+				error_log("userIds:");
+				$str = print_r($userIds, true);
+				error_log($str);
+				
+				// Compare the sets of species.
+				$userCorrectPrimary = array_intersect ( $userIds, $correctPrimaryIds );
+				
+				error_log("userCorrectPrimary:");
+				$str = print_r($userCorrectPrimary, true);
+				error_log($str);
+				
+				$numCorrectPrimary = count($userCorrectPrimary);
+				
+				$userSecondary = array_diff ( $userIds, $userCorrectPrimary );
+				
+				error_log("userSecondary:");
+				$str = print_r($userSecondary, true);
+				error_log($str);
+				
+				$userCorrectSecondary = array_intersect ( $correctSecondaryIds, $userSecondary );
+				$numCorrectSecondary = count($userCorrectSecondary);
+				
+				error_log("userCorrectSecondary:");
+				$str = print_r($userCorrectSecondary, true);
+				error_log($str);
+				
+				$userRemaining = array_diff ( $userSecondary, $userCorrectSecondary );
+				
+				error_log("userRemaining:");
+				$str = print_r($userRemaining, true);
+				error_log($str);
+				
+				$numWrong = count($userRemaining);
+				
+				$this->score += $numCorrectPrimary;
+				
+				// Only add secondary to total if the user has got it
+				if ( $numCorrectSecondary > 0 ) {
+					$this->score += $numCorrectSecondary;
+					$this->totalSpecies += $numCorrectSecondary;
+				}
 				
 				$this->wrong[] = $numWrong;
 				
-				$this->marks[] = $numCorrect;
+				error_log("Num wrong for " . $seq->getId() . " is " . $numWrong);
+				
+				$marks = $numCorrectPrimary + $numCorrectSecondary;
+				$this->marks[] = $marks;
+				$this->correctPrimary[] = $numCorrectPrimary;
+				
+				error_log("Marks for " . $seq->getId() . " is " . $marks);
+				
+				$numUserAnimals = count($useranimals);
 				
 				$extraAnimals = $numUserAnimals - $numExpertSpecies;
 				
@@ -186,6 +249,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 		}
 		else {
 			$this->marks[] = 0;
+			$this->correctPrimary[] = 0;
 			$this->wrong[] = 0;
 		}
 	}

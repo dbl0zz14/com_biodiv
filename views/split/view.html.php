@@ -33,7 +33,7 @@ class BioDivViewSplit extends JViewLegacy
 	  // Limit to x number of files at a time...
 	  
 	  $query = $db->getQuery(true);
-	  $query->select("ts_id, dirname, filename")
+	  $query->select("ts_id, dirname, filename, upload_filename")
 	    ->from($db->quoteName("ToSplit"))
 	    ->where("status = 0");
 		

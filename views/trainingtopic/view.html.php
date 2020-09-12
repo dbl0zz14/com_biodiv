@@ -78,14 +78,7 @@ class BioDivViewTrainingTopic extends JViewLegacy
 	// And set up the first one
 	$this->currentSequence = null;
 	if ( count($this->sequences) > 0 ) {
-		$this->currentSequence = getTrainingSequence($this->sequences[0]);
-	}
-	
-	
-	$this->correctSpecies = array();
-	// Get all the sequences and results so we can set up the view with correct answers.
-	foreach ( $this->sequences as $seq_id ) {
-		$this->correctSpecies[] = getTrainingSequence($seq_id)->getSpecies();
+		$this->currentSequence = getTrainingSequence($this->sequences[0], $this->topic_id);
 	}
 	
 	//error_log("TrainingTopic view - about to call parent display");

@@ -65,11 +65,10 @@ class BioDivViewClassifyBirds extends JViewLegacy
 	  
 	
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
-	  /* will making a mnu item sort this out?
 	  if ( !userID() ) {
 		$app = JFactory::getApplication();
 		$message = $this->translations['log_class']['translation_text'];  //"Please log in before classifying.";
-		$url = "".BIODIV_ROOT."&view=classify";
+		$url = "".BIODIV_ROOT."&view=classifybirds";
 		if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
 		if ( $this->self ) $url .= "&classify_self=" . $this->self;
@@ -77,7 +76,6 @@ class BioDivViewClassifyBirds extends JViewLegacy
 		$url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
 		$app->redirect($url, $message);
 	  }
-	  */
 
 	  
 	  // Check the user can access this project, if a project is specified.

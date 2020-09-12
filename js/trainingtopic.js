@@ -1,6 +1,7 @@
 jQuery(document).ready(function(){
 	
 	const sequences = JSON.parse(BioDiv.sequences);
+	const topic = parseInt(BioDiv.topic);
 	
 	const detail = BioDiv.detail == 1;
 	
@@ -378,7 +379,7 @@ jQuery(document).ready(function(){
 		currentSequence++;
 		if ( currentSequence < sequences.length ) {
 			let sequence_id = sequences[currentSequence];
-			var url = BioDiv.root + "&view=mediacarousel&format=raw&sequence_id=" + sequence_id;
+			var url = BioDiv.root + "&view=mediacarousel&format=raw&topic_id=" + topic + "&sequence_id=" + sequence_id;
 			
 			jQuery.ajax(url, {'success': function(data) {
 				//window.location.reload(true);

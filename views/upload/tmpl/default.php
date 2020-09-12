@@ -25,8 +25,8 @@ if ($this->previous_upload_id){
   print "<p>" . $this->translations['last_at']['translation_text'] . " ". $this->previous_upload_date;
   if($this->isCamera && $this->previous_collection_date){
     print " " . $this->translations['with_coll']['translation_text'] . " ". $this->previous_collection_date;
+	print ".</p> <p><a class='btn btn-primary btn-lg active' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>" . $this->translations['up_more']['translation_text'] . "</a></p>";
   }
-  print ".</p> <p><a class='btn btn-primary btn-lg active' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>" . $this->translations['up_more']['translation_text'] . "</a></p>";
  }
 
 

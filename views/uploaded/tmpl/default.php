@@ -29,10 +29,39 @@ $action = $this->root . "&view=uploadm";
   print "</tr>\n";
 }
 
+
 ?>
 
 </tbody>
 </table>
+
+<?php
+if ( count($this->tosplit) > 0 ) {
+print "<h3>" . $this->translations['before_proc']['translation_text'] . "</h3>";
+print "<table class='table'>";
+print "<thead>";
+print "<tr>";
+print "<th>".$this->translations['file_name']['translation_text']."</th>";
+print "<th>".$this->translations['date']['translation_text']."</th>";
+print "</tr> ";
+print "</thead>";
+print "<tbody>";
+
+ 
+
+  foreach($this->tosplit as $photoLine){
+  print "<tr>";
+  print "<td>" . $photoLine['upload_filename'] . "</td>";
+  print "<td>" . $photoLine['taken'] . "</td>";
+  print "</tr>\n";
+}
+
+
+
+print "</tbody>";
+print "</table>";
+}
+?>
 
   <div class='lead'><a href='<?php print BIODIV_ROOT."&view=upload&site_id=". $this->site_id;?>'><?php print $this->translations['more_ph']['translation_text'];?></a></p>
 
