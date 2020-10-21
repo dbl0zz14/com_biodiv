@@ -13,6 +13,9 @@ jQuery(document).ready(function(){
 		if ( !activeId ) {
 			activeId = jQuery('#videoContainer').attr("data-photo-id");
 		}
+		if ( !activeId ) {
+			activeId = jQuery('#audioContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=like_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
@@ -23,6 +26,9 @@ jQuery(document).ready(function(){
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
 		if ( !activeId ) {
 			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
+		if ( !activeId ) {
+			activeId = jQuery('#audioContainer').attr("data-photo-id");
 		}
 		var url = BioDiv.root + "&task=unlike_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
@@ -131,6 +137,9 @@ jQuery(document).ready(function(){
 		if ( !activeId ) {
 			activeId = jQuery('#videoContainer').attr("data-photo-id");
 		}
+		if ( !activeId ) {
+			activeId = jQuery('#audioContainer').attr("data-photo-id");
+		}
 		var url = BioDiv.root + "&task=like_photo&photo_id=" + activeId;
 		jQuery.ajax(url);
 	    });
@@ -143,6 +152,9 @@ jQuery(document).ready(function(){
 		var activeId = jQuery('#photoCarouselInner').find(".active").attr("data-photo-id");
 		if ( !activeId ) {
 			activeId = jQuery('#videoContainer').attr("data-photo-id");
+		}
+		if ( !activeId ) {
+			activeId = jQuery('#audioContainer').attr("data-photo-id");
 		}
 		var url = BioDiv.root + "&task=unlike_photo&photo_id=" + activeId;
 		jQuery.ajax(url);

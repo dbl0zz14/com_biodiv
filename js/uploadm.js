@@ -11,7 +11,7 @@ jQuery(document).ready(function(){
 	var checkUploadUrl = BioDiv.root + "&task=verify_upload&upload_id=" + BioDiv.upload_id + "&guid=" + guid
 	var uploadObj = jQuery('#fileuploader').uploadFile({
 		sequential: true,
-		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A",
+		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A,wav,WAV,avi,AVI",
 
 		url:BioDiv.root + "&task=uploadm&upload_id=" + BioDiv.upload_id,
 		    multiple: true,

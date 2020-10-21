@@ -20,6 +20,7 @@ include_once "SpeciesCarousel.php";
 include_once "SiteHelper.php";
 include_once "BiodivHelper.php";
 include_once "BiodivFFMpeg.php";
+include_once "BiodivFile.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
@@ -2120,6 +2121,9 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  $animals = $db->loadAssocList('species', 'num_sightings');
 	  //$animals = array_column($animals_w_id, 'num_animals', 'species');
 	  
+	  // Ensure there is a variable - getting errors here
+	  if ( !$animals ) $animals = array();
+	  
 	  // Remove human and nothing if not to be included
 	  if ( !$include_human ) {
 		  unset($animals['Human']);
@@ -2156,7 +2160,7 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  if ( $num_species && (count($animals) > $num_species) ) {
 		  $animals_to_return_en = array_slice($animals, 0, $num_species-1);
 		  $total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
-		  $animals_to_return_en['Other Species'] = "" + $total_other;
+		  $animals_to_return_en['Other Species'] = "" . $total_other;
 	  }
 	  else {
 		  $animals_to_return_en = $animals;
@@ -2509,87 +2513,6 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
 	  }
   }
   
-  
-  /*
-  $animals = $db->loadAssocList('species', 'num_animals');
-  
-  // Little fix to remove the additional text on Nothing and Human.
-  $array_changed = false;
-  if (isset($animals["Human <span class='fa fa-male'/>"])) {
-    $animals['Human'] = $animals["Human <span class='fa fa-male'/>"];
-    unset($animals["Human <span class='fa fa-male'/>"]);
-	$array_changed = true;
-  }
-  if (isset($animals["Nothing <span class='fa fa-ban'/>"])) {
-    $animals['Nothing'] = $animals["Nothing <span class='fa fa-ban'/>"];
-    unset($animals["Nothing <span class='fa fa-ban'/>"]);
-	$array_changed = true;
-  }
-  
-  // Remove human and nothing if not to be included
-  if ( !$include_human ) {
-	  unset($animals['Human']);
-	  $array_changed = true;
-  }
-  if ( !$include_nothing ) {
-	  unset($animals['Nothing']);
-	  $array_changed = true;
-  }
-   if ( !$include_dontknow ) {
-	  unset($animals["Don't Know"]);
-	  $array_changed = true;
-  }
-  
-  // Remove Likes
-  unset($animals["Like"]);
-  $array_changed = true;
-  
-  // If we had to change the key names we need to re-sort the array
-  if ( $array_changed ) {
-	  arsort($animals);
-  }
-   
-  $animals_to_return = array();
-  // Finally handle the number of species, if we have more than required
-  // NB Other is a possible option so combine this with Other Species if we have both
-  $num_other = 0;
-  
-  if ( key_exists("Other", $animals) ) {
-	$num_other = $animals["Other"];
-	$animals = akrem($animals, "Other");
-  }
-  
-  if ( $num_species && (count($animals) > $num_species) ) {
-	  $animals_to_return = array_slice($animals, 0, $num_species-1);
-	  $total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
-	  $animals_to_return['Other Species'] = "" + $total_other;
-  }
-  else {
-	  $animals_to_return = $animals;
-  }
-  */
-  
-  /*
-  $labelsArray = array('Badger','Rabbit','Mouse','Blackbird','Other');
-  $animalsArray = array(120,103,76,56,30);
-  $projectData = array ( 
-		"labels" => $labelsArray,
-		"animals" => $animalsArray
-		);
-  */
-  
-  //print "<br/>Got " . count($animals_to_return) . " species to return from projectanimals <br/>They are:<br>";
-  //print_r ($animals_to_return);
-  
-  //$final_array = array ();
-  /*
-  $final_array["labels"] = array_keys($animals_to_return);
-  $final_array["animals"] = array_values($animals_to_return);
-  $final_array["title"] = $title;
-  */
-  //return $final_array;
-
-
   return array (
 		"labels" => array_keys($animals_to_return),
 		"animals" => array_values($animals_to_return),
@@ -2621,16 +2544,6 @@ function getProjectTree ( $project_id ) {
 
 
 function getSubProjectsById($project_id, $exclude_private = false){
-	/*
-  $db = JDatabase::getInstance(dbOptions());
-  $query = $db->getQuery(true);
-  $query->select("project_prettyname")->from("Project");
-  $query->where("project_id = '" . $project_id . "'");
-  $db->setQuery($query);
-  $prettyname = $db->loadResult();
-  
-  return getSubProjects($prettyname);
-  */
   
   // first select all project/parent pairs into memory
   $db = JDatabase::getInstance(dbOptions());
@@ -2949,90 +2862,6 @@ function nextSequence(){
 	  }
   }
   
-  /*
-  $photo_id_candidates = array();
-  
-  // THere may be no photos left to classify.
-  $num_candidates = 0;
-  
-  if ( count($distinct_priorities) > 0 ) {
-	//print "distinct priorities are:<br>";
-	//print_r($distinct_priorities);
-	if ( in_array("Single", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Single" );
-	  $ph_id = chooseSingle ( $project_ids, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Single"] = $ph_id;
-	}
-	if ( in_array("Multiple", $distinct_priorities ) ) {
-	  //print "<br>nextSequence, about to ChooseMultiple <br>" ;
-	  $project_ids = array_keys ( $priority_array, "Multiple" );
-	  $ph_id = chooseMultiple ( $project_ids, $classify_own );
-	  //print "<br>nextSequence, chooseMultiple chose ph_id " . $ph_id . " <br>" ;
-	  if ( $ph_id ) $photo_id_candidates["Multiple"] = $ph_id;
-	}
-	if ( in_array("Single to multiple", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Single to multiple" );
-	  $ph_id = chooseSingle ( $project_ids, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
-	  else {
-		  $ph_id = chooseMultiple ( $project_ids, $classify_own );
-		  if ( $ph_id ) $photo_id_candidates["Single to multiple"] = $ph_id;
-	  }
-	}
-	if ( in_array("Site time ordered", $distinct_priorities ) ) {
-	  $project_ids = array_keys ( $priority_array, "Site time ordered" );
-	  $ph_id = chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own );
-	  if ( $ph_id ) $photo_id_candidates["Site time ordered"] = $ph_id;
-	}
-  
-	$num_candidates = count($photo_id_candidates);
-  
-	//print "<br>nextSequence, num_candidates = " . $num_candidates . " <br>" ;
-  
-	//$chosen_priority = reset(array_keys($photo_id_candidates)); // the first one
-	
-	if ( $num_candidates > 0 ) {
-		$chosen_priority = array_keys($photo_id_candidates)[0];
-	}
-  
-	// If only one priority type we are done, but if more than one we have to pick.
-	if ( $num_candidates > 1 ) {
-	
-		// Determine which priority type we're using.  Take a weighted choice from each priority type that this user has 
-		// access to.  For now use these hardcoded values but this needs to be taken out and put in the database, then updated daily based 
-		// on what photos/projects there are...
-		$all_weightings = getPriorityWeightings ();
-	
-		$reqd_weightings = array_intersect_key ( $all_weightings, $photo_id_candidates );
-		//print "<br>nextSequence, got reqd_weightings: <br>" ;
-		//print_r ( $reqd_weightings );
-  
-		$total_weighting = array_sum($reqd_weightings);
-  
-		// Choose a random integer between 0 and $total_weightings.
-		$choice = rand ( 1, $total_weighting );
-	
-		//print "<br>nextSequence, choice:" . $choice . " <br>" ;
-	
-		// check through the accumulated weightings to see where the choice lies..
-		$count = 0;
-		foreach ( $reqd_weightings as $priority=>$weighting ) {
-			$count += $weighting;
-			if ( $choice <= $count ) {
-				$chosen_priority = $priority;
-				break;
-			}
-		}
-	}
-    
-	//print "<br>nextSequence, chosen priority is:" . $chosen_priority . " <br>" ;
-	//error_log ( "nextSequence, chosen priority is:" . $chosen_priority );
-	
-	if ( $num_candidates > 0 ) {
-		$photo_id = $photo_id_candidates[$chosen_priority];
-	}
-  }
-  */
   //print "<br/> returning at end of nextSequence, photo_id = " . $photo_id;
   //return getSequence($photo_id);
   return getSequenceDetails($photo_id);
@@ -4236,6 +4065,28 @@ function makeControlButton($control_id, $control, $extraClasses=''){
   print "<button type='button' class='btn btn-primary $extraText $extraClasses' id='$control_id'>$control</button>";
 }
 
+/* half changed...??
+function makeControlButton($control_id, $control, $extraClasses='', $dataToggle = false){
+  $disabled = strpos($control, "disabled");
+  if($disabled !== false){
+    $extras = array('disabled');
+  }
+  else{
+    $extras = array('classify_control');
+  }
+
+  $confirm = strpos($control, "biodiv-confirm");
+
+  if($confirm !== false){
+    $extras[] = "biodiv-confirm";
+  }
+
+  $extraText = implode(" ", $extras);
+  
+  //print "<button type='button' class='btn btn-warning btn-block $extraText $extraClasses' id='$control_id'>$control</button>";
+  print "<button type='button' class='btn btn-primary $extraText $extraClasses' id='$control_id' >$control</button>";
+}
+*/
 
 //$useSeq is flag if true uses page numbers given, if false, works pages out alphabetically
 //if $largeButtons then use image buttons with larger size as for kiosk mode
@@ -4559,7 +4410,7 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 			case 'notinlist':
 				$btnClass = 'btn-primary';
 				$largeButtonImage = false;
-				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass  btn-sm btn-block btn-wrap-text species-btn species_select' >$name</button>";
+				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass  btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
 				break;
 			}
 			
@@ -4720,31 +4571,12 @@ function getLogos ( $project_id ) {
 	return $logos;
 }
 
-function getVideoMeta ( $filename ) {
-	// Initialize getID3 engine
-	$getID3 = new getID3;
-	// Analyze file and store returned data in $ThisFileInfo
-	$fileinfo = $getID3->analyze($filename);
-	
-	/*
-	$videoMeta = Array();
-	
-	$creation_time_unix = $fileinfo['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
-	$creation_time = $fileinfo['quicktime']['moov']['subatoms'][0]['creation_time'];
-	print_r ($creation_time_unix);
-	print ("<br>As date (from Unix): " . date('Y-m-d', $creation_time_unix) . "<br>");
-	print_r ($creation_time);
-	print ("<br>As date: " . date('Y-m-d', $creation_time - 2082844800) . "<br>");
-	*/
-	return $fileinfo;
-
-}
 
 function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 	
 	// Can we get the exif data
-	$fileinfo = getVideoMeta ( $newFile );
-	$exif = serialize($fileinfo);
+	//$fileinfo = getVideoMeta ( $newFile );
+	//$exif = serialize($fileinfo);
 	
 	// Note that the original exif will be stored in ToSplitExif.
 	
@@ -5073,7 +4905,7 @@ function addSite () {
 	
 	$site_id = null;
 	
-	if ( count($result) > 0 ) {
+	if ( $result && count($result) > 0 ) {
 		// Trying to insert site with same name as another site belonging to this person
 		JFactory::getApplication()->enqueueMessage('Sorry, you already have a site with that name, could not add the site.');
 	}

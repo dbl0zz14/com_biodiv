@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 <?php
 	print "<div class='col-md-12' >";
-	print "<h1>Choose a topic to get started</h1>";
+	print "<h1>".$this->translations['choose_topic']['translation_text']."</h1>";
 	print "</div>";
 		
 	

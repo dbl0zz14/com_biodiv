@@ -707,6 +707,7 @@ class BioDivController extends JControllerLegacy
       $fileTypes = array($fileTypes);
     }
     if(!$fail){
+	
       foreach($tmpNames as $index => $tmpName){
 		$clientName = $clientNames[$index];
 		$fileSize = $fileSizes[$index];
@@ -722,9 +723,11 @@ class BioDivController extends JControllerLegacy
 		  continue;
 		}
 		//	JHelperMedia::isImage($tmpName) or die("Not an image");
-
+		
 		$ext = strtolower(JFile::getExt($clientName));
 		$newName = md5_file($tmpName) . "." . $ext;
+		
+		error_log ( "Uploading file " . $clientName . ", extension is " . $ext );
 		
 		$dirName = siteDir($site_id);
 		$newFullName = "$dirName/$newName";
@@ -736,83 +739,28 @@ class BioDivController extends JControllerLegacy
 		  continue;
 		}
 		
-		//error_log("About to get exif");
 		
-		$exif_extract = null;
-		$taken = null;
-		$manufacturer = null;
-		$exif = null;
-		$is_audio = false;
-		if ( !strcmp( strtolower($ext), "mp4") ) {
-			//error_log ( "Found mp4 video file, ext is " . $ext );
-			$exif_extract = getVideoMeta ( $tmpName );  
-			// Assumes quicktime format
-			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
-			$taken = date('Y-m-d H:i:s', $creation_time_unix);
-			$exif = serialize($exif_extract);
+		// Create a BiodivFile object
+		$biodivFile = new BiodivFile ( $tmpName, $clientName );
+		
+		$taken = $biodivFile->takenDate();
+		$exif = $biodivFile->exif();
+		$is_audio = $biodivFile->isAudio();
+		
+		error_log ( "Values from BiodivFile: ");
+		error_log ( "taken = " . $taken );
+		error_log ( "is_audio = " . $is_audio );
+		
+		if ( $taken == null ) {
+			addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
+			continue;
 		}
-		else if ( !strcmp( strtolower($ext), "m4a") ) {
-			//error_log ( "Found m4a audio file, ext is " . $ext );
-			$is_audio = true;
-			$exif_extract = getVideoMeta ( $tmpName );  
-			// Format same as MP4?
-			$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
-			$taken = date('Y-m-d H:i:s', $creation_time_unix);
-			print_r($exif_extract);
-			$exif = serialize($exif_extract);
-		}
-		else if ( !strcmp( strtolower($ext), "mp3") ) {
-			//error_log ( "Found mp3 audio file, ext is " . $ext );
-			$is_audio = true;
-			$exif_extract = getVideoMeta ( $tmpName );  
-			$exif = print_r($exif_extract, true);
-			//$creation_time_unix = $exif_extract['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
-			//$taken = date('Y-m-d H:i:s', $creation_time_unix);
-			//$taken = date($uploadDetails['deployment_date']); // TEMPORARY UNTIL WE USE FILENAME TO GET DATE - NOT STORED IN EXIF
-			$no_extension = basename($clientName, '.mp3');
-			$file_bits = explode('_', $no_extension);
-			// Check we have at least 3 bits
-			$format_error = false;
-			if ( count($file_bits) > 2 ) {
-				$filetime = array_pop($file_bits);
-				$filedate = array_pop($file_bits);
-				if ( is_numeric($filetime) && is_numeric($filedate) ) {
-					$taken = date('Y-m-d H:i:s', strtotime($filedate.' '.$filetime));
-					// Check format was ok
-					$date_errors = date_get_last_errors();
-					if ( $date_errors['warning_count'] > 0 || $date_errors['error_count'] > 0 ) {
-						error_log("Errors or warnings when creating date");
-						$format_error = true;
-					}
-				}
-				else {
-					$format_error = true;
-				}
-			}
-			else {
-				$format_error = true;
-			}
-			if ( $format_error ) {
-				addMsg("error","File upload unsuccessful for $clientName. Incorrect filename format.  Should be similar to myfile_YYYYMMDD_HHmmss.mp3");
-				return;
-			}
-			$exif = serialize($exif_extract);
-		}
-		else {
-			error_log ( "Found non mp3/mp4/m4a file, ext is " . $ext );
-			$exif_extract = exif_read_data($tmpName);
-			$taken = $exif_extract['DateTimeOriginal'];
-			$manufacturer = $exif_extract['Manufacturer'];
-			$exif = serialize($exif_extract);
-			// check exif headers for camera type?
-			// check dates defined and photos in range
-		}
-
+		
 		$exists = JFile::exists($tmpName);
 		$success=	JFile::upload($tmpName, $newFullName);
 		if(!$success){
 			addMsg("error","File upload unsuccessful for $clientName");
-			return;
+			continue;
 		}	
 		
 		// If it's an audio file, generate a sonogram.
@@ -836,7 +784,8 @@ class BioDivController extends JControllerLegacy
 			error_log("sonogram generated");
 		}
 		*/
-			if(userID()==179){
+		
+		if(userID()==179){
 		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
 		}
 		
@@ -871,7 +820,8 @@ class BioDivController extends JControllerLegacy
 			JFile::delete($newFullName);
 		}
       }
-    }
+    
+	}
 
     $this->input->set('view', 'trapper');
     parent::display();
@@ -926,25 +876,10 @@ class BioDivController extends JControllerLegacy
     $site_id or die("No site_id");
     canEdit($site_id, "site") or die("Cannot edit site_id $site_id");
 	
+	$fields = new StdClass();
+	
+	// For audio no need for deployment start and end times, camera only
 	if ( $isCamera ) {
-		$camera_tz = JRequest::getString('timezone');
-		$tz = 0;
-		$is_dst = 0;
-		$utc_offset = 0;
-		if(!strlen($camera_tz)){
-			addMsg('error', "No camera timezone specified");
-		}
-		// Get the offset
-		$tz = IntlTimeZone::createTimeZone($camera_tz);
-		$utc_offset = $tz->getRawOffset()/60000;
-		
-		$is_dst = JRequest::getInt('dst');
-		if ($is_dst == 1 ) {
-			// Adjust the offset from UTC for daylight saving time
-			$utc_offset += $tz->getDSTSavings()/60000;
-		}
-		
-			
 		foreach(array("deployment", "collection") as $dt){
 		  $date = JRequest::getString("${dt}_date");
 		  if(!strlen($date)){
@@ -960,35 +895,47 @@ class BioDivController extends JControllerLegacy
 		  }
 		  $datetime[$dt] = $date . " " . $hours . ":" . $mins;
 		}
-
-		if(someMsgs("error")){
-		  $this->input->set('view', 'upload');
-		}
-		else{
-		  $fields = new StdClass();
-		  $fields->person_id = userID();
-		  $fields->site_id = $site_id;
-		  $fields->camera_tz = $camera_tz;
-		  $fields->is_dst = $is_dst;
-		  $fields->utc_offset = $utc_offset;
-		  $fields->deployment_date = $datetime['deployment'];
-		  $fields->collection_date = $datetime['collection'];
-		  $upload_id = codes_insertObject($fields, 'upload');
-		  $app->setUserState('com_biodiv.upload_id', $upload_id);
-		  $this->input->set('view', 'uploadm');
-		}
+		$fields->deployment_date = $datetime['deployment'];
+		$fields->collection_date = $datetime['collection'];
+		  
+		
 	}
-	else {
-		// No deployment details needed for audio-only website
-		$fields = new StdClass();
-		$fields->person_id = userID();
-		$fields->site_id = $site_id;
-		$upload_id = codes_insertObject($fields, 'upload');
-		$app->setUserState('com_biodiv.upload_id', $upload_id);
-		$this->input->set('view', 'uploadm');
+	
+	// These are the common fields
+	$camera_tz = JRequest::getString('timezone');
+	$tz = 0;
+	$is_dst = 0;
+	$utc_offset = 0;
+	if(!strlen($camera_tz)){
+		addMsg('error', "No camera timezone specified");
 	}
-
-    parent::display();
+	// Get the offset
+	$tz = IntlTimeZone::createTimeZone($camera_tz);
+	$utc_offset = $tz->getRawOffset()/60000;
+	
+	$is_dst = JRequest::getInt('dst');
+	if ($is_dst == 1 ) {
+		// Adjust the offset from UTC for daylight saving time
+		$utc_offset += $tz->getDSTSavings()/60000;
+	}
+	
+		
+	if(someMsgs("error")){
+	  $this->input->set('view', 'upload');
+	}
+	else{
+	  $fields = new StdClass();
+	  $fields->person_id = userID();
+	  $fields->site_id = $site_id;
+	  $fields->camera_tz = $camera_tz;
+	  $fields->is_dst = $is_dst;
+	  $fields->utc_offset = $utc_offset;
+	  $upload_id = codes_insertObject($fields, 'upload');
+	  $app->setUserState('com_biodiv.upload_id', $upload_id);
+	  $this->input->set('view', 'uploadm');
+	}
+	
+	parent::display();
 
   }
   

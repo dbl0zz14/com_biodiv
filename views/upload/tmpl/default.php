@@ -44,6 +44,7 @@ print " method='post' class='form-inline'>";
 print "<div class='container'>";
 
 // Deployment date and times only relevant for camera deployments, as opposed to recordings on phones etc.
+// However timezone is relevant for all media types
 if ( $this->isCamera ) {
 	print "<div class='row' style='margin-top:10px;'>";
 	print "  <div class='col-sm-6 col-md-8'>";
@@ -171,7 +172,44 @@ if ( $this->isCamera ) {
 
 }
 
+else {
+	print "<div class='row' style='margin-top:10px;'>";
+	print "  <div class='col-sm-6 col-md-8'>";
+	print "    <div class='form-group'>";
+		 
+		  $timezone_text = $this->translations['timezone']['translation_text'];
+		  $dst_text = $this->translations['dst']['translation_text'];
+		  $dst_yes = $this->translations['dst_yes']['translation_text'];
+		  $dst_no = $this->translations['dst_no']['translation_text'];
+		  $timezone_abbreviations = DateTimeZone::listAbbreviations();
+		  $timezone_ids = DateTimeZone::listIdentifiers();
+		  
+		  print  "<label for='timezone' style='width:30em'>$timezone_text</label>";
+		  
+		  print  "<select id='timezone' name ='timezone' class='form-control'/>\n";
+		  print  "<option value='' disabled selected hidden>".$this->translations['pls_select']['translation_text']."</option>";
+		  
+		  // Make UTC the first option:
+		  $utc = array_pop($timezone_ids);
+		  print "<option id='UTC'>$utc</option>\n"; // - UTC+00:00</option>\n";
+		  foreach ($timezone_ids as $zone_id) {
+			print "<option id='$zone_id'>" . $zone_id . "</option>\n";
+		  }
+		  print "</select>";
+		  
+		  print  "<label for='dst' style='width:30em; margin-top:10px;'>$dst_text</label>\n";
+		  
+		  print  "<div><input type='radio' id='dst_yes' name ='dst' value='1'> " . $dst_yes . "</div>";
+		  
+		  print  "<div><input type='radio' id='dst_no' name ='dst' value='0' checked> " . $dst_no . "</div>";
+		  
 
+	print "    </div> <!-- /.form-group -->";
+	print "  </div> <!-- /.col -->";
+	  
+
+	print "</div>  <!--div class='row' -->";
+}
 
 print " <div style='margin-top:15px;'>";
 print "	<button type='submit' id='add_upload' class='btn btn-primary'>".biodiv_label_icons('upload', $this->translations['upload']['translation_text'])."</button>";

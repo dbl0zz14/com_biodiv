@@ -132,8 +132,12 @@ jQuery(document).ready(function(){
 		
 		let expertSpecies = jQuery('#expert_' + sequence_id).text();
 		
+		if ( jQuery('#expert_sec_' + sequence_id).text().length > 0 ) {
+			expertSpecies += ", " + jQuery('#expert_sec_' + sequence_id).text();
+		}
+		
 		jQuery('#challenge_expert').val(expertSpecies);
-	
+		
 		let userSpecies = jQuery('#user_' + sequence_id).text();
 		
 		jQuery('#challenge_suggestion').val(userSpecies);

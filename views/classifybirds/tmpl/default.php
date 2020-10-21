@@ -415,13 +415,15 @@ foreach($this->classifyInputs as $formInput){
 </div>
 
 <?php
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY");
+$mapOptions = mapOptions();
+$key = $mapOptions['key'];
+
+JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
 //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/classifybirds.js", true, true);
-JHTML::script("https://unpkg.com/wavesurfer.js",true,true);
 ?>
 
 

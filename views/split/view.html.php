@@ -37,7 +37,7 @@ class BioDivViewSplit extends JViewLegacy
 	    ->from($db->quoteName("ToSplit"))
 	    ->where("status = 0");
 		
-	  $db->setQuery($query, 0, 10);
+	  $db->setQuery($query, 0, 500);
 	  $this->files = $db->loadAssocList();
 	  
 	  // What is the ideal file length

@@ -111,7 +111,7 @@ $mediaCarousel->generateMediaCarousel($sequence_id, etc);
 if ( $this->isVideo === true ) {
 	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
 }
-if ( $this->isAudio === true ) {
+else if ( $this->isAudio === true ) {
 	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</video></div>';
 }
 else {

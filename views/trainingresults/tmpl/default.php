@@ -150,7 +150,7 @@ defined('_JEXEC') or die;
 		
 		print "<h4>" . "  " . $this->translations['exp_sel']['translation_text'] . "</h4>";
 		print "<p id='expert_" . $seq->getId() . "'>" . implode(', <br>', $correct_names) . "</p>";
-		print "<p id='expert_" . $seq->getId() . "'>" . implode(', <br>', $correct_names_sec) . "</p>";
+		print "<p id='expert_sec_" . $seq->getId() . "'>" . implode(', <br>', $correct_names_sec) . "</p>";
 		
 		print "</div>"; // col 6
 		

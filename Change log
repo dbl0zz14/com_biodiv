@@ -1,3 +1,14 @@
+# 11/09/20 - Version 3.2.5   #
+* New BiodivFile class for uploading
+* Handle wav files from various recording devices (Songmeters with wamd chunk or guan chunk, AudioMoth, Solo (filename), Edirol (filename)
+* Allow two formats of datetime in audio filename: myfile_YYYYMMDD_HHmmss.ext and myfileYYY-MM-DD_HH-mm-ss.ext
+* Allow AVI video files with taken datetime in filename.
+* Require timezone information for audio site
+* Bug fix to check exists before counting array biodiv.php line 5076
+* Bug fix to concatenate correctly using . rather than + when creating discover animal chart - biodiv.php discoverAnimals
+* Bug fix where tried to show image as well as video
+* Bug fix missing translation in training template
+
 # 11/09/20 - Version 3.2.4   #
 * Test Yourself primary and secondary species
 * Expert species now linked to topic via es_id rather than sequence_id
