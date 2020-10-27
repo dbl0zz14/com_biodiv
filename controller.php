@@ -932,21 +932,21 @@ class BioDivController extends JControllerLegacy
 		foreach(array("deployment", "collection") as $dt){
 		  $date = JRequest::getString("${dt}_date");
 		  if(!strlen($date)){
-		addMsg('error', "No $dt date specified");
+			addMsg('error', "No $dt date specified");
 		  }
 		  $hours = JRequest::getString("${dt}_hours");
 		  if(!strlen($hours)){
-		addMsg('error', "No $dt hours specified");
+			addMsg('error', "No $dt hours specified");
 		  }
 		  $mins = JRequest::getString("${dt}_mins");
 		  if(!strlen($mins)){
-		addMsg('error', "No $dt mins specified: $mins ");
+			addMsg('error', "No $dt mins specified: $mins ");
 		  }
 		  $datetime[$dt] = $date . " " . $hours . ":" . $mins;
 		}
+		
 		$fields->deployment_date = $datetime['deployment'];
 		$fields->collection_date = $datetime['collection'];
-		  
 		
 	}
 	
@@ -973,7 +973,6 @@ class BioDivController extends JControllerLegacy
 	  $this->input->set('view', 'upload');
 	}
 	else{
-	  $fields = new StdClass();
 	  $fields->person_id = userID();
 	  $fields->site_id = $site_id;
 	  $fields->camera_tz = $camera_tz;
