@@ -33,4 +33,7 @@ jQuery(document).ready(function(){
 	jQuery('#deployment_hours').val(BioDiv.min_hours);
 	jQuery('#deployment_mins').val(BioDiv.min_mins);
 	jQuery('#collection_date').datepicker(pickerOptions);
-    });
+    jQuery('#collection_date').datepicker('setDate', BioDiv.max_date);
+	jQuery('#collection_hours').val(BioDiv.max_hours);
+	jQuery('#collection_mins').val(BioDiv.max_mins);
+	});

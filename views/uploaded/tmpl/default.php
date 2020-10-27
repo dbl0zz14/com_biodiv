@@ -61,7 +61,8 @@ print "<tbody>";
 print "</tbody>";
 print "</table>";
 }
+
+
+print "  <a class='btn btn-primary' role='button' href='".BIODIV_ROOT."&view=upload&site_id=". $this->site_id."'>".biodiv_label_icons('upload', $this->translations['more_ph']['translation_text'])."</a>";
+
 ?>
-
-  <div class='lead'><a href='<?php print BIODIV_ROOT."&view=upload&site_id=". $this->site_id;?>'><?php print $this->translations['more_ph']['translation_text'];?></a></p>
-

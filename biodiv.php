@@ -447,6 +447,9 @@ function biodiv_label_icons($type, $str, $what=""){
   case "help":
     return "<i class='fa fa-question'></i> $str $what";
     break;
+  case "list":
+    return "<i class='fa fa-list'></i> $str $what";
+    break;
   default:
     return $str;
 	break;
@@ -4599,8 +4602,12 @@ function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 	$newTime = $unixTime + $delay;
 	$taken = date('Y-m-d H:i:s', $newTime);
 	$fileSize = filesize($newFile);
-	$exif_extract = getVideoMeta ( $newFile );  
-	$exif = serialize($exif_extract);
+	
+	$biodivFile = new BiodivFile($newFile, $newFile);
+	$exif = $biodivFile->exif();
+	
+	//$exif_extract = getVideoMeta ( $newFile );  
+	//$exif = serialize($exif_extract);
 		
 	$photoFields = new stdClass();
 	$photoFields->filename = $fileName;

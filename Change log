@@ -4,6 +4,7 @@
 * Allow two formats of datetime in audio filename: myfile_YYYYMMDD_HHmmss.ext and myfileYYY-MM-DD_HH-mm-ss.ext
 * Allow AVI video files with taken datetime in filename.
 * Require timezone information for audio site
+* Bug fix default values for deployment and collection datetimes
 * Bug fix to check exists before counting array biodiv.php line 5076
 * Bug fix to concatenate correctly using . rather than + when creating discover animal chart - biodiv.php discoverAnimals
 * Bug fix where tried to show image as well as video

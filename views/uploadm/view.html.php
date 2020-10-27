@@ -32,7 +32,11 @@ class BioDivViewUploadM extends JViewLegacy
 	  $this->translations = getTranslations("upload");
 	
 	  $this->root = JURI::root() . "?option=com_biodiv";
-	  $this->upload_id = $app->getUserStateFromRequest('com_biodiv.upload_id', 'upload_id', 0);
+	  
+	  $this->upload_id = $app->getUserState('com_biodiv.upload_id');
+	  
+	  error_log ( "Uploadm upload id is " . $this->upload_id );
+	  
 	  if(!$this->upload_id){
 	    die("No upload_id");
 	  }

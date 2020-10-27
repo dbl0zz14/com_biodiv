@@ -478,6 +478,9 @@ class BioDivController extends JControllerLegacy
 		// If no photo_id, add it from the request:
 		if ( !$fields->photo_id ) $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
 		
+		// Default the sure column to certain
+		$fields->sure = codes_getCode ();
+		
 		$animal_id = codes_insertObject($fields, 'animal');
 		
 		$app->setUserState('com_biodiv.animal_id', $animal_id);
@@ -863,6 +866,52 @@ class BioDivController extends JControllerLegacy
       sequencePhotos($upload_id);
       print "Sequenced photos for $upload_id";
     }
+  }
+  
+  // upload more files with same deployment, collection dates as those given
+  function upload_more () {
+	  $app = JFactory::getApplication();
+	  $upload_id = JRequest::getInt('upload_id');
+	  
+	  // Get the upload details
+	  $db = JDatabase::getInstance(dbOptions());
+	  $query = $db->getQuery(true);
+	  $query->select("site_id, person_id, camera_tz, is_dst, utc_offset, deployment_date, collection_date")
+	    ->from($db->quoteName("Upload"))
+	    ->where("upload_id = " .(int)$upload_id)
+	    ->where("person_id = " .(int)userID());
+	  $db->setQuery($query); 
+	  $uploadDetails = $db->loadAssoc();
+	  
+	  canEdit($uploadDetails['site_id'], "site") or die("Cannot edit site_id $site_id");
+	
+	  if ( $uploadDetails && count($uploadDetails) > 0 ) {
+	  
+		$fields = new StdClass();
+	  
+		$fields->site_id = $uploadDetails['site_id'];
+		$fields->person_id = $uploadDetails['person_id'];
+		$fields->camera_tz = $uploadDetails['camera_tz'];
+		$fields->is_dst = $uploadDetails['is_dst'];
+		$fields->utc_offset = $uploadDetails['utc_offset'];
+		$fields->deployment_date = $uploadDetails['deployment_date'];
+		$fields->collection_date = $uploadDetails['collection_date'];
+		
+		$new_upload_id = codes_insertObject($fields, 'upload');
+		
+		error_log ( "new_upload_id = " . $new_upload_id );
+		
+		//$app->getUserStateFromRequest('com_biodiv.upload_id', $new_upload_id);
+	    $app->setUserState('com_biodiv.upload_id', $new_upload_id);
+	    $this->input->set('view', 'uploadm');
+	  }
+	  else {
+		  addMsg('error', "Can't use previous upload");
+		  $this->input->set('view', 'upload');
+	  }
+	  
+	  parent::display();
+	
   }
 
   // add new upload

@@ -73,7 +73,7 @@ class BioDivViewUpload extends JViewLegacy
 
 	  $db = JDatabase::getInstance(dbOptions());
 	  $query = $db->getQuery(true);
-	  $query->select("upload_id, collection_date, timestamp")
+	  $query->select("upload_id, deployment_date, collection_date, timestamp")
 	    ->from($db->quoteName("Upload"))
 	    ->where("site_id = " .(int)$this->site_id)
 	    ->where("person_id = " .(int)userID())
@@ -81,6 +81,7 @@ class BioDivViewUpload extends JViewLegacy
 	  $db->setQuery($query, 0, 1); // LIMIT 1
 	  $uploadDetails = $db->loadAssoc();
 	  $this->previous_upload_id = $uploadDetails['upload_id'];
+	  $this->previous_deployment_date = new Jdate($uploadDetails['deployment_date']);
 	  $this->previous_collection_date = new Jdate($uploadDetails['collection_date']);
 	  $this->previous_upload_date = new JDate($uploadDetails['timestamp']);
 
