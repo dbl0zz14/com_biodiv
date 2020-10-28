@@ -479,7 +479,7 @@ class BioDivController extends JControllerLegacy
 		if ( !$fields->photo_id ) $fields->photo_id = $app->getUserState('com_biodiv.photo_id', 0);
 		
 		// Default the sure column to certain
-		$fields->sure = codes_getCode ();
+		$fields->sure = codes_getCode ( 'Confident', 'sure');
 		
 		$animal_id = codes_insertObject($fields, 'animal');
 		
