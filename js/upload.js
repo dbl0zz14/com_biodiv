@@ -21,9 +21,7 @@ jQuery(document).ready(function(){
 		jQuery('#help_modal').modal('show');		
 	});
 	
-	
 	var pickerOptions = {"format": "yyyy-mm-dd",
-			     "startDate": BioDiv.min_date,
 			     "endDate": BioDiv.max_date};
 
 	var deploymentOptions = jQuery.extend({"todayHighlight": true}, pickerOptions);
