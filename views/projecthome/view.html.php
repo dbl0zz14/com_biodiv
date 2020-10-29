@@ -43,8 +43,10 @@ class BioDivViewProjecthome extends JViewLegacy
 	$this->classifyView = $isCamera ? "classify" : "classifybirds";
 
 	
-	// Remove any stored photo id on project load.
+	// Remove any stored photo id or animal ids on project load.
 	$app->setUserState('com_biodiv.photo_id', null);
+	$app->setUserState('com_biodiv.animal_ids', 0);
+    
 	
 	$this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
