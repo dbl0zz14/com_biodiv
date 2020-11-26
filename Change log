@@ -1,7 +1,9 @@
-# 26/11/20 - Version 3.2.6   #
+# 26/11/20 - Version 3.3.0   #
+* NaturesAudio pilot launch version
 * Generate sonograms from audio files (triggered by setting split_files = yes and generate_sonograms = yes
 * Configurable survey pages, triggered before classifying and at configured periods after first classifying
 * Use local.php for extra API environment specific options
+* Formalised API changes
 
 # 28/10/20 - Version 3.2.5   #
 * New BiodivFile class for uploading
