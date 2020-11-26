@@ -41,6 +41,7 @@
 	<filename>SiteHelper.php</filename>
 	<filename>BiodivFFMpeg.php</filename>
 	<filename>BiodivFile.php</filename>
+	<filename>BiodivSurvey.php</filename>
 	<folder>views</folder>
 	<folder>libraries</folder>
 <!--

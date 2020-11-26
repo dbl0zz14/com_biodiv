@@ -21,6 +21,7 @@ include_once "SiteHelper.php";
 include_once "BiodivHelper.php";
 include_once "BiodivFFMpeg.php";
 include_once "BiodivFile.php";
+include_once "BiodivSurvey.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
@@ -82,8 +83,8 @@ function codes_insertObject($fields, $struc){
 	$success = false;
 	$db = JDatabase::getInstance(dbOptions());
   
-	// photo is handled as special case as split over two tables, as is tosplit
-	if ( ($struc == "photo") || ($struc == "splitaudio") || ($struc == "tosplit") ) {
+	// photo is handled as special case as split over two tables, as is origfile
+	if ( ($struc == "photo") || ($struc == "splitaudio") || ($struc == "origfile") ) {
 		// Move and store the exif field as this is in second table
 		$exif = $fields->exif;
 		unset($fields->exif);
@@ -109,9 +110,9 @@ function codes_insertObject($fields, $struc){
 			if ( $success ) {
 				$exifFields = new stdClass();
 				$exifFields->exif = $exif;
-				if ( $struc == "tosplit" ) {
-					$table = "ToSplitExif" ;
-					$exifFields->ts_id = $id;
+				if ( $struc == "origfile" ) {
+					$table = "OriginalFilesExif" ;
+					$exifFields->of_id = $id;
 				}
 				else {
 					$table = "PhotoExif";
@@ -514,7 +515,7 @@ function canCreate($struc, $fields){
   case 'photo':
   case 'classification':
   case 'animal':
-  case 'tosplit':
+  case 'origfile':
     return $fields->person_id == userID();   
     break;
 
@@ -4574,22 +4575,18 @@ function getLogos ( $project_id ) {
 	return $logos;
 }
 
-
+// Used to write details of a generated file (eg split or sonogram) to Photo table.
 function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 	
-	// Can we get the exif data
-	//$fileinfo = getVideoMeta ( $newFile );
-	//$exif = serialize($fileinfo);
-	
-	// Note that the original exif will be stored in ToSplitExif.
+	// Note that the original exif will be stored in OriginalFilesExif.
 	
 	// Get the data from the original file
 	$db = JDatabase::getInstance(dbOptions());
 	
 	$query = $db->getQuery(true);
 	$query->select("*")
-		->from("ToSplit")
-		->where("ts_id = " . $tsId);
+		->from("OriginalFiles")
+		->where("of_id = " . $tsId);
 	$db->setQuery($query);
 	$orig = $db->loadAssoc();
 	
@@ -4634,16 +4631,16 @@ function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 }
 
 
-function setSplitStatus ($tsId, $success) {
+function setOriginalFileStatus ($tsId, $success) {
 	
 	$status = $success ? 1 : 2;
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
 	$fields = new stdClass();
-	$fields->ts_id = $tsId;
+	$fields->of_id = $tsId;
 	$fields->status = $status;
-	$db->updateObject('ToSplit', $fields, 'ts_id');
+	$db->updateObject('OriginalFiles', $fields, 'of_id');
 	
 }
 
@@ -4891,6 +4888,38 @@ function getArticle ( $option_id ) {
 	return $article;
 
 }
+
+// Get the article associated with this option, in the correct language if available.
+function getArticleById ( $article_id ) {
+	
+	$title = null;
+	$introtext = null;
+	$fulltext = null;
+	
+	if( $article_id != 0 ) {
+		
+		$assoc_id = getAssociatedArticleId ( $article_id );
+		
+		$jarticle = JTable::getInstance("content");
+
+		$jarticle->load($assoc_id); 
+	
+		$title = $jarticle->title;
+		$introtext = $jarticle->introtext;
+		$fulltext = $jarticle->fulltext;
+		
+	}
+
+	$article = new stdClass();
+	$article->id = $article_id;
+	$article->title = $title;
+	$article->introtext = $introtext;
+	$article->fulltext = $fulltext;
+	
+	return $article;
+
+}
+
 
 
 function addSite () {

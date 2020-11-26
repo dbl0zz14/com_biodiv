@@ -1,4 +1,9 @@
-# 11/09/20 - Version 3.2.5   #
+# 26/11/20 - Version 3.2.6   #
+* Generate sonograms from audio files (triggered by setting split_files = yes and generate_sonograms = yes
+* Configurable survey pages, triggered before classifying and at configured periods after first classifying
+* Use local.php for extra API environment specific options
+
+# 28/10/20 - Version 3.2.5   #
 * New BiodivFile class for uploading
 * Handle wav files from various recording devices (Songmeters with wamd chunk or guan chunk, AudioMoth, Solo (filename), Edirol (filename)
 * Allow two formats of datetime in audio filename: myfile_YYYYMMDD_HHmmss.ext and myfileYYY-MM-DD_HH-mm-ss.ext

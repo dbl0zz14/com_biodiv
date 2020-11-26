@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 
-print '<h1>Transferring ' . count($this->photos) . ' files to S3 bucket ' . get_mammalweb_bucket() . '</h1>';
+print '<h1>Transferring ' . count($this->photos) . ' files from Photo table to S3 bucket ' . get_mammalweb_bucket() . '</h1>';
 
 if ( !$this->photos ) {
 	print "<h2>No photo list - perhaps you don't have permission for this or have not logged in</h2>";
@@ -33,6 +33,31 @@ else {
 	}
 }
 print '<h1>Transfer complete</h1>';
+
+print '<h1>Transferring ' . count($this->originalFiles) . ' files from OriginalFiles table to S3 bucket ' . get_mammalweb_bucket() . '</h1>';
+
+if ( !$this->originalFiles ) {
+	print "<h2>No original files list - perhaps you don't have permission for this or have not logged in</h2>";
+}
+else {
+	foreach ( $this->originalFiles as $of_id=>$of_details ) {
+		print ( "<br>Putting original file " . $of_id );
+		$key = "person_" . $of_details['person_id'] . "/site_" . $of_details['site_id'] . "/" . $of_details['filename'] ;
+		print ( "<br>Key = " . $key );
+		$file = $of_details['dirname'] . "/" . $of_details['filename'];
+		print ( "<br>File = " . $file );
+		try {
+			upload_to_s3 ($key, $file);
+			print ( "<br>Original file " . $of_id . " transferred successfully" );
+			post_s3_upload_actions_orig ( $of_id, $file );
+			print ( "<br>Original file " . $of_id . " post transfer actions complete (s3_status update plus file removal)" );
+		}
+		catch(Exception $e) {
+			print ( "br>" . $e->getMessage() );
+		}
+	}
+}
+print '<h1>Transfer of OriginalFiles complete</h1>';
 
 ?>
 

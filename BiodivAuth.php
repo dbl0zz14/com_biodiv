@@ -50,12 +50,20 @@ class BiodivAuth {
 		
 		$jwt = $auth_array[1];
 		
-		$kid = "FpJJK3gpNSW3Nh7H6gXK1zi0i2OOsLslqMXAT39B/dk=";
-		
+		// Pick up some environment options:
+		$apiOpts = apiOptions();
+		$kid = $apiOpts['kid'];
+		$region = $apiOpts['region'];
+		$userPoolId = $apiOpts['userpool'];
+        
+		// Live needs:  $kid = "eHWahEQ0JRDIT80Sa409+OlIHvMtQ0OsdGQPPJ14XvA=";
+		//$kid = "FpJJK3gpNSW3Nh7H6gXK1zi0i2OOsLslqMXAT39B/dk=";
 		//Get jwks from URL, because the jwks may change.
-		$region = "eu-west-1";
-		$userPoolId = "eu-west-1_n1w24hxK0";
-        $jwksUrl = sprintf('https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json', $region, $userPoolId);
+		//$region = "eu-west-1";
+		// $userPoolId = "eu-west-1_n1w24hxK0";
+		
+		
+		$jwksUrl = sprintf('https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json', $region, $userPoolId);
 		
 		//$jwksUrl = "https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_n1w24hxK0/.well-known/jwks.json";
 		

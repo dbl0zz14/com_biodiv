@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
 *
 * @since 0.0.1
 */
-class BioDivViewSplit extends JViewLegacy
+class BioDivViewSonogram extends JViewLegacy
 {
 	/**
 	 *
@@ -33,20 +33,15 @@ class BioDivViewSplit extends JViewLegacy
 	  // Limit to x number of files at a time...
 	  
 	  $query = $db->getQuery(true);
-	  $query->select("of_id, dirname, filename, upload_filename")
-	    ->from($db->quoteName("OriginalFiles"))
-	    ->where("status = 0");
+	  $query->select("photo_id, dirname, filename, upload_filename")
+	    ->from($db->quoteName("Photo"))
+	    ->where("status = -1")
+		->where("sequence_id != 0");
 		
-	  $db->setQuery($query, 0, 500);
+	  $db->setQuery($query, 0, 20);
 	  $this->files = $db->loadAssocList();
 	  
-	  // What is the ideal file length
-	  $this->fileLength = getSetting("max_clip_length");
-	  
-	  // set a default just in case - use 20 seconds so it's obvious
-	  if ( !$this->fileLength ) $this->fileLength = 20;
-	  
-	  // Are we generating sonograms?
+	  // Are we generating sonograms?  If not then we'll do nothing
 	  $this->sonograms = getSetting("generate_sonograms") == "yes";
 	  
 	  

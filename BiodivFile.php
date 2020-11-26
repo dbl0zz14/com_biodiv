@@ -62,7 +62,7 @@ class BiodivFile {
 	// Return the serialized exif for this image/video/audio
 	function exif () {
 		if ( $this->exif == null ) {
-			$this->generateMeta();
+			$this->generateExif();
 		}
 		if ( $this->exif ) {
 			return serialize($this->exif);
@@ -79,6 +79,15 @@ class BiodivFile {
 	
 	function isImage () {
 		return $this->type == self::IMAGE;
+	}
+	
+	function generateExif () {
+		if ( $this->isImage() ) {
+			$this->exif = exif_read_data($this->filename);
+		}
+		else {
+			$this->exif = $this->getVideoMeta();
+		}
 	}
 	
 	function generateMeta () {

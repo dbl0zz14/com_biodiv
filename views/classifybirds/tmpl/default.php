@@ -111,12 +111,12 @@ $mediaCarousel->generateMediaCarousel($sequence_id, etc);
 if ( $this->isVideo === true ) {
 	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
 }
-if ( $this->isAudio === true ) {
+else if ( $this->isAudio === true ) {
 	// Show the waveform
 	//print '<div id="waveContainer" data-photo-id="'.$this->photo_id.'">'.JHTML::image(waveURL($this->photo_id), 'Photo ' . $this->photo_id, array('class' =>'img-responsive contain')).'</div>';
 	print '<div id="waveContainer"></div>';
 	
-	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</video></div>';
+	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</audio></div>';
 }
 else {
 	

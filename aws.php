@@ -101,25 +101,14 @@ function upload_to_s3 ( $key, $file ) {
 	
 }
 
-function is_wave ( $filename ) {
-	
-	if ( preg_match('/_wave.png$/', $filename) === 1 ) {
-		return true;
-	}
-	return false;
-}
-
 function post_s3_upload_actions ( $photo_id, $filename ) {
 	// update the s3_status to 1 for this photo_id
 	$db = JDatabase::getInstance(dbOptions());	
 	
-	// if file is a waveform do not update s3 status
-	if ( is_wave($filename) === false ) {
-		$fields = new stdClass();
-		$fields->photo_id = $photo_id;
-		$fields->s3_status = 1;
-		$db->updateObject('Photo', $fields, 'photo_id');
-	}
+	$fields = new stdClass();
+	$fields->photo_id = $photo_id;
+	$fields->s3_status = 1;
+	$db->updateObject('Photo', $fields, 'photo_id');
 
 	// remove the file from the fileserver
 	try {
@@ -129,7 +118,25 @@ function post_s3_upload_actions ( $photo_id, $filename ) {
 		print ("<br>Couldn't delete file: " . $filename);
 		throw $e;
 	}
+}
+
+function post_s3_upload_actions_orig ( $of_id, $filename ) {
+	// update the s3_status to 1 for this of_id
+	$db = JDatabase::getInstance(dbOptions());	
 	
+	$fields = new stdClass();
+	$fields->of_id = $of_id;
+	$fields->s3_status = 1;
+	$db->updateObject('OriginalFiles', $fields, 'of_id');
+
+	// remove the file from the fileserver
+	try {
+		unlink($filename);
+	}
+	catch (Exception $e) {
+		print ("<br>Couldn't delete file: " . $filename);
+		throw $e;
+	}
 }
 
 function s3URL ( $details ) {

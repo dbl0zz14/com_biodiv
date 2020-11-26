@@ -54,7 +54,7 @@ class BioDivViewUploaded extends JViewLegacy
 	  
 	  $query = $db->getQuery(true);
 	  $query->select("upload_filename, taken")
-	    ->from($db->quoteName("ToSplit"))
+	    ->from($db->quoteName("OriginalFiles"))
 	    ->where("site_id = " .(int)$this->site_id)
 	    ->where("person_id = " .(int)userID())
 	    ->order("upload_filename");

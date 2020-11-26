@@ -15,10 +15,10 @@ $ff = new BiodivFFMpeg();
 
 foreach ( $this->files as $bigFile ) {
 	
-	$tsId = $bigFile['ts_id'];
+	$ofId = $bigFile['of_id'];
 	
 	print "<h2>Splitting file " . $bigFile['upload_filename'] . "</h2>";
-	print "<h2>File id = " . $tsId . ", filename = " . $bigFile['filename'] . "</h2>";
+	print "<h2>File id = " . $ofId . ", filename = " . $bigFile['filename'] . "</h2>";
 	
 	// get the duration.
 	$fullfilename = $bigFile['dirname'] . "/" . $bigFile['filename'];
@@ -31,14 +31,41 @@ foreach ( $this->files as $bigFile ) {
 	$twoFiles = $oneFile * 2;
 	$problem = false;
 	
+	// Horrendous repetition in here - should take out as a function...
+	
 	// If file less than 30 secs, leave complete and copy details to upload table.  Add a 1 second tolerance
 	if ( $duration < $oneFile + 1 ) {
 		print "<h4>Just one file</h4>";
-		$photoId = writeSplitFile($tsId, $fullfilename, 0);
-		print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
-		if ( !$photoId ) {
-			print "<p>Write to Photo table failed< for file " . $fullfilename . "/p>";
-			$problem = true;
+		
+		if ( $this->sonograms ) {
+			$filestem = JFile::stripExt($fullfilename);
+			
+			$fname = $filestem . "_sono";
+			$newFile = $fname . ".mp4";
+			print "<p>New file name = " . $newFile . "</p>";
+			
+			$success = $ff->generateSonogram( $fullfilename, $newFile );
+			
+			if ( $success ) {
+				$photoId = writeSplitFile($ofId, $newFile, 0);
+				print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+				if ( !$photoId ) {
+					print "<p>Write to Photo table failed< for file " . $fullfilename . "/p>";
+					$problem = true;
+				}
+			}
+			else {
+				print "<p>Sonogram generation failed< for file " . $fullfilename . "/p>";
+				$problem = true;
+			}
+		}
+		else {
+			$photoId = writeSplitFile($ofId, $fullfilename, 0);
+			print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+			if ( !$photoId ) {
+				print "<p>Write to Photo table failed< for file " . $fullfilename . "/p>";
+				$problem = true;
+			}
 		}
 	}
 	
@@ -61,12 +88,47 @@ foreach ( $this->files as $bigFile ) {
 			$success = $ff->splitFile ( $fullfilename, $newFile, $start, $oneFile );
 			
 			if ( $success ) {
-				print "<p>Writing to Photo table</p>";
-				$photoId = writeSplitFile($tsId, $newFile, $start);
-				print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
-				if ( !$photoId ) {
-					print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
-					$problem = true;
+				
+				if ( $this->sonograms ) {
+					$newstem = JFile::stripExt($newFile);
+					
+					$fname = $newstem . "_sono";
+					$newSonoFile = $fname . ".mp4";
+					print "<p>New file name = " . $newSonoFile . "</p>";
+					
+					$success = $ff->generateSonogram( $newFile, $newSonoFile );
+					
+					if ( $success ) {
+						// Remove the intermediate file
+						print "<p>Removing intermediate file " . $newFile . "</p>";
+						try {
+							unlink($newFile);
+						}
+						catch (Exception $e) {
+							print ("<br>Couldn't delete file: " . $newFile);
+							throw $e;
+						}
+						
+						$photoId = writeSplitFile($ofId, $newSonoFile, $start);
+						print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+						if ( !$photoId ) {
+							print "<p>Write to Photo table failed< for file " . $newSonoFile . "/p>";
+							$problem = true;
+						}
+					}
+					else {
+						print "<p>Sonogram generation failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
+				}
+				else {
+					print "<p>Writing to Photo table</p>";
+					$photoId = writeSplitFile($ofId, $newFile, $start);
+					print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+					if ( !$photoId ) {
+						print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
 				}
 			}
 			else {
@@ -77,47 +139,173 @@ foreach ( $this->files as $bigFile ) {
 			$tag += 1;
 		}
 		
-		$firstLength = intVal($lengthLeft/2);
-		$end = $start + $firstLength;
-		$fname = $filestem . "_" . $tag;
-		$newFile = $fname . "." . $ext;
-		print "<p>New file name = " . $newFile . "</p>";
-		$success = $ff->splitFile ( $fullfilename, $newFile, $start, $firstLength );
-			
-		if ( $success ) {
-			print "<p>Writing to Photo table</p>";
-				$photoId = writeSplitFile($tsId, $newFile, $start);
-				print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
-				if ( !$photoId ) {
-					print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
-					$problem = true;
+		// If the last length is only just over a minute, no need to split into two
+		if ( $lengthLeft < $oneFile + 1 ) {
+			$fname = $filestem . "_" . $tag;
+			$newFile = $fname . "." . $ext;
+			print "<p>New file name = " . $newFile . "</p>";
+			$success = $ff->splitFile ( $fullfilename, $newFile, $start );
+				
+			if ( $success ) {
+				if ( $this->sonograms ) {
+					$newstem = JFile::stripExt($newFile);
+					
+					$fname = $newstem . "_sono";
+					$newSonoFile = $fname . ".mp4";
+					print "<p>New file name = " . $newSonoFile . "</p>";
+					
+					$success = $ff->generateSonogram( $newFile, $newSonoFile );
+					
+					if ( $success ) {
+						// Remove the intermediate file
+						print "<p>Removing intermediate file " . $newFile . "</p>";
+						try {
+							unlink($newFile);
+						}
+						catch (Exception $e) {
+							print ("<br>Couldn't delete file: " . $newFile);
+							throw $e;
+						}
+						
+						$photoId = writeSplitFile($ofId, $newSonoFile, $start);
+						print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+						if ( !$photoId ) {
+							print "<p>Write to Photo table failed< for file " . $newSonoFile . "/p>";
+							$problem = true;
+						}
+					}
+					else {
+						print "<p>Sonogram generation failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
 				}
-		}
-		else {
-			$problem = true;
-		}
-		
-		$tag += 1;
-		$start = $end;
-		$fname = $filestem . "_" . $tag;
-		$newFile = $fname . "." . $ext;
-		print "<p>New file name = " . $newFile . "</p>";
-		$success = $ff->splitFile ( $fullfilename, $newFile, $start );
-			
-		if ( $success ) {
-			print "<p>Writing to Photo table</p>";
-			$photoId = writeSplitFile($tsId, $newFile, $start);
-			print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
-			if ( !$photoId ) {
-				print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+				else {
+					print "<p>Writing to Photo table</p>";
+					$photoId = writeSplitFile($ofId, $newFile, $start);
+					print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+					if ( !$photoId ) {
+						print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
+				}
+			}
+			else {
 				$problem = true;
-			}			
+			}
 		}
 		else {
-			$problem = true;
+			$firstLength = intVal($lengthLeft/2);
+			$end = $start + $firstLength;
+			$fname = $filestem . "_" . $tag;
+			$newFile = $fname . "." . $ext;
+			print "<p>New file name = " . $newFile . "</p>";
+			$success = $ff->splitFile ( $fullfilename, $newFile, $start, $firstLength );
+				
+			if ( $success ) {
+				if ( $this->sonograms ) {
+					$newstem = JFile::stripExt($newFile);
+					
+					$fname = $newstem . "_sono";
+					$newSonoFile = $fname . ".mp4";
+					print "<p>New file name = " . $newSonoFile . "</p>";
+					
+					$success = $ff->generateSonogram( $newFile, $newSonoFile );
+					
+					if ( $success ) {
+						// Remove the intermediate file
+						print "<p>Removing intermediate file " . $newFile . "</p>";
+						try {
+							unlink($newFile);
+						}
+						catch (Exception $e) {
+							print ("<br>Couldn't delete file: " . $newFile);
+							throw $e;
+						}
+						
+						$photoId = writeSplitFile($ofId, $newSonoFile, $start);
+						print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+						if ( !$photoId ) {
+							print "<p>Write to Photo table failed< for file " . $newSonoFile . "/p>";
+							$problem = true;
+						}
+					}
+					else {
+						print "<p>Sonogram generation failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
+				}
+				else {
+					print "<p>Writing to Photo table</p>";
+					$photoId = writeSplitFile($ofId, $newFile, $start);
+					print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+					if ( !$photoId ) {
+						print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
+				}
+			}
+			else {
+				$problem = true;
+			}
+			
+			$tag += 1;
+			$start = $end;
+			$fname = $filestem . "_" . $tag;
+			$newFile = $fname . "." . $ext;
+			print "<p>New file name = " . $newFile . "</p>";
+			$success = $ff->splitFile ( $fullfilename, $newFile, $start );
+				
+			if ( $success ) {
+				if ( $this->sonograms ) {
+					$newstem = JFile::stripExt($newFile);
+					
+					$fname = $newstem . "_sono";
+					$newSonoFile = $fname . ".mp4";
+					print "<p>New file name = " . $newSonoFile . "</p>";
+					
+					$success = $ff->generateSonogram( $newFile, $newSonoFile );
+					
+					if ( $success ) {
+						// Remove the intermediate file
+						print "<p>Removing intermediate file " . $newFile . "</p>";
+						try {
+							unlink($newFile);
+						}
+						catch (Exception $e) {
+							print ("<br>Couldn't delete file: " . $newFile);
+							throw $e;
+						}
+						
+						$photoId = writeSplitFile($ofId, $newSonoFile, $start);
+						print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+						if ( !$photoId ) {
+							print "<p>Write to Photo table failed< for file " . $newSonoFile . "/p>";
+							$problem = true;
+						}
+					}
+					else {
+						print "<p>Sonogram generation failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}
+				}
+				else {
+					print "<p>Writing to Photo table</p>";
+					$photoId = writeSplitFile($ofId, $newFile, $start);
+					print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
+					if ( !$photoId ) {
+						print "<p>Write to Photo table failed< for file " . $newFile . "/p>";
+						$problem = true;
+					}		
+				}				
+			}
+			else {
+				$problem = true;
+			}
 		}
-		
 		// Remove original file
+		// Decided to keep all original files
+		// Need an archiving process for these and they need to be included in upload
+		/*
 		if ( !$problem ) {
 			print "<p>Removing file " . $fullfilename . "</p>";
 			
@@ -129,17 +317,18 @@ foreach ( $this->files as $bigFile ) {
 				throw $e;
 			}
 		}
+		*/
 	}
 	
 	if ( $problem ) {
 		print "<p>Problem splitting file " . $fullfilename . "</p>";
-		// set ToSplit file to error status
-		setSplitStatus($tsId, false);
+		// set OriginalFiles file to error status
+		setOriginalFileStatus($ofId, false);
 	}
 	else {
 		print "<p>File split successfully " . $fullfilename . "</p>";
 		// set ToSplit file to success
-		setSplitStatus($tsId, true);
+		setOriginalFileStatus($ofId, true);
 		
 		
 	}

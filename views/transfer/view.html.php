@@ -33,14 +33,26 @@ class BioDivViewTransfer extends JViewLegacy
 				->from("Photo")
 				->where("s3_status = 0");
 
-			//$db->setQuery($query);
 			$max_num = 500;
 			$db->setQuery($query, 0, $max_num); // LIMIT $max_num
    
 			$this->photos = $db->loadAssocList("photo_id");
+			
+			// Create a second list of all original files to be copied to AWS S3 storage - nb could be videos too
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true);
+			$query->select("of_id, person_id, site_id, dirname, filename")
+				->from("OriginalFiles")
+				->where("s3_status = 0");
+
+			$max_num = 500;
+			$db->setQuery($query, 0, $max_num); // LIMIT $max_num
+   
+			$this->originalFiles = $db->loadAssocList("of_id");
 		}
 		else {
 			$this->photos = null;
+			$this->originalFiles = null;
 		}
 		
 		parent::display($tpl);
