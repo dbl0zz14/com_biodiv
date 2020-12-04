@@ -985,64 +985,78 @@ class BioDivController extends JControllerLegacy
 		
 		$survey_id = $input->get("survey", 0, 'int');
 		error_log ( "survey id: " . $survey_id );
-
-		// Get the response types and option translations to refer to
-		$responseTypes = BiodivSurvey::getResponseTypes($survey_id);
-		$responseTrns = BiodivSurvey::getResponseTranslations();
-		
-		$err_str = print_r ( $responseTypes, true );
-		error_log ( "Response types: " . $err_str );
-		
-		// get the array of responses
-		$sqArr = $input->get('sq', 'xxx', 'array');
-		
-		$err_str = print_r ( $sqArr, true );
-		error_log ( "sq filtered as array: " . $err_str );
-		
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
-		foreach ( $sqArr as $sq_id => $response ) {
-			
-			$fields = new stdClass();
-			$fields->survey_id = $survey_id;
-			$fields->person_id = $person_id;
-			$fields->sq_id = $sq_id;
-			
-			$responseType = $responseTypes[$sq_id];
-			
-			if ( $responseType == BiodivSurvey::TEXT ) {
-				$fields->response_text = $sqArr[$sq_id];
-			}
-			else if ( $responseType == BiodivSurvey::OPTION ) {
-				$resp_id = $sqArr[$sq_id];
-				$fields->response_id = $resp_id;
-				$fields->response_text = $responseTrns[$resp_id];
-			}
-			else if ( $responseType == BiodivSurvey::SCALE10 ) {
-				$fields->response_num = $sqArr[$sq_id];
-				$fields->response_text = strval($sqArr[$sq_id]); 
-			}			
-			else if ( $responseType == BiodivSurvey::NUMBER ) {
-				$fields->response_num = $sqArr[$sq_id];
-				$fields->response_text = strval($sqArr[$sq_id]);
-			}
-			
-			
-			$success = $db->insertObject("UserResponse", $fields);
+		// Has the user already responded to this survey? - check
+		$query = $db->getQuery(true);
+		$query->select("count(distinct ur_id)")
+			->from( "UserResponse" )
+			->where( "person_id = " . $person_id )
+			->where( "survey_id = " . $survey_id );
+		$db->setQuery($query);
+		$numSurveyResponses = $db->loadResult();
 		
-			if(!$success){
-				$err_str = print_r ( $fields, true );
-				error_log ( "UserResponse insert failed: " . $err_str );
+		if ( $numSurveyResponses == 0 ) {
+		
+
+			// Get the response types and option translations to refer to
+			$responseTypes = BiodivSurvey::getResponseTypes($survey_id);
+			$responseTrns = BiodivSurvey::getResponseTranslations();
+			
+			$err_str = print_r ( $responseTypes, true );
+			error_log ( "Response types: " . $err_str );
+			
+			// get the array of responses
+			$sqArr = $input->get('sq', 'xxx', 'array');
+			
+			$err_str = print_r ( $sqArr, true );
+			error_log ( "sq filtered as array: " . $err_str );
+			
+			
+			foreach ( $sqArr as $sq_id => $response ) {
+				
+				$fields = new stdClass();
+				$fields->survey_id = $survey_id;
+				$fields->person_id = $person_id;
+				$fields->sq_id = $sq_id;
+				
+				$responseType = $responseTypes[$sq_id];
+				
+				if ( $responseType == BiodivSurvey::TEXT ) {
+					$fields->response_text = $sqArr[$sq_id];
+				}
+				else if ( $responseType == BiodivSurvey::OPTION ) {
+					$resp_id = $sqArr[$sq_id];
+					$fields->response_id = $resp_id;
+					$fields->response_text = $responseTrns[$resp_id];
+				}
+				else if ( $responseType == BiodivSurvey::SCALE10 ) {
+					$fields->response_num = $sqArr[$sq_id];
+					$fields->response_text = strval($sqArr[$sq_id]); 
+				}			
+				else if ( $responseType == BiodivSurvey::NUMBER ) {
+					$fields->response_num = $sqArr[$sq_id];
+					$fields->response_text = strval($sqArr[$sq_id]);
+				}
+				
+				
+				$success = $db->insertObject("UserResponse", $fields);
+			
+				if(!$success){
+					$err_str = print_r ( $fields, true );
+					error_log ( "UserResponse insert failed: " . $err_str );
+				}
+				
 			}
 			
 		}
-			
-    }
+	}
 	
 	$this->input->set('view', 'surveydebrief');
   
     parent::display();
+	
   }
 
   

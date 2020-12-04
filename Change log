@@ -1,3 +1,6 @@
+# 4/12/20 - Version 3.3.1   #
+* Generate sonogram as static image with red line indocating time
+
 # 26/11/20 - Version 3.3.0   #
 * NaturesAudio pilot launch version
 * Generate sonograms from audio files (triggered by setting split_files = yes and generate_sonograms = yes

@@ -47,6 +47,7 @@ if ( $this->sonograms ) {
 			$fields = new stdClass();
 			$fields->photo_id = $photoId;
 			$fields->filename = $newFile;
+			$fields->size = filesize($newFullFile);
 			$fields->s3_status = 0;
 			$fields->status = 1;
 			$db->updateObject('Photo', $fields, 'photo_id');

@@ -6,6 +6,7 @@ jQuery(document).ready(function(){
 		jQuery.ajax(url);
 	});
 	
+	
 });
 
 	

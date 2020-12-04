@@ -16,12 +16,12 @@ defined('_JEXEC') or die;
 
 class BiodivFFMpeg {
 	
-	
+	private $redlineFile = null;
 	
 	function __construct()
 	{
-		
-			
+		// Hardcoded
+		$this->redlineFile = JPATH_SITE."/media/com_biodiv/images/redline.jpg";
 	}
 	
 	public function getDuration ( $infile ) {
@@ -90,13 +90,78 @@ class BiodivFFMpeg {
 		// -b:v 700k - set the bitrate of video in output to 700kbit/s
 		// -b:a 360k - set the bitrate of video in output to 360kbit/s
 		
-		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrum=s=720x512:mode=combined:slide=scroll:saturation=0.2:scale=log,format=yuv420p[v]" -map "[v]" -map 0:a -b:v 700k -b:a 360k  ' . $outfile;
+		/* replace with a staged process to get a static sonogram with red line moving across
+		
+		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrum=s=640x512:mode=combined:slide=replace:saturation=0.2:scale=log,format=yuv420p[v]" -map "[v]" -map 0:a -b:v 70k -b:a 360k  ' . $outfile;
 
 		exec($command, $output, $returnVar);
 		
 		if ( $returnVar !== 0 ) {
 			error_log ( "generateSonogram failed" );
 			$success = false;
+		}
+		
+		*/
+		
+		// Use infile name as a base for interim filenames.
+		$ext = JFile::getExt($infile);
+		$inBasename = JFile::stripExt($infile);
+		
+		// First generate the sonogram still
+		$stillFilename = $inBasename . '_pic.jpg';
+		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrumpic=s=720x512:mode=combined:color=channel:saturation=0.2:scale=log:legend=0" ' . $stillFilename;
+
+		exec($command, $output, $returnVar);
+		
+		if ( $returnVar !== 0 ) {
+			error_log ( "generateSonogram failed on showspectrumpic" );
+			$success = false;
+		}
+		
+		// Then create a video of the still with the audio as sound track
+		if ( $success ) {
+			$vidFilename = $inBasename . '_vid.mp4';
+			$command = 'ffmpeg -loop 1 -i ' . $stillFilename . ' -i ' . $infile . ' -c:v libx264 -tune stillimage -c:a aac -b:a 360k -pix_fmt yuv420p -shortest ' . $vidFilename;
+
+			exec($command, $output, $returnVar);
+			
+			if ( $returnVar !== 0 ) {
+				error_log ( "generateSonogram failed on video creation" );
+				$success = false;
+			}
+		
+		}
+		
+		// Finally overlay the red line.
+		if ( $success ) {
+			
+			// Get the audio duration:
+			$duration = $this->getDuration($infile);
+			
+			// Check the redline file exists
+			if ( file_exists ( $this->redlineFile ) ) {
+			
+				$command = 'ffmpeg -i ' . $vidFilename . ' -i ' . $this->redlineFile . '  -filter_complex "overlay=x=\'if(gte(t,0), w+(t)*W/'.$duration.', NAN)\':y=0"  ' . $outfile;
+
+				exec($command, $output, $returnVar);
+				
+				if ( $returnVar !== 0 ) {
+					error_log ( "generateSonogram failed on overlay" );
+					$success = false;
+				}
+			}
+			else {
+				// skip overlay:
+				error_log ( "No redline file ( " . $this->redlineFile . " ), skipping overlay" );
+				JFile::copy ( $vidFilename, $outfile );
+			}
+		
+		}
+		
+		// Remove interim files
+		if ( $success ) {
+			JFile::delete ( $stillFilename );
+			JFile::delete ( $vidFilename );
 		}
 		
 		return $success;

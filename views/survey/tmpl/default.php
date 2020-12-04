@@ -14,7 +14,7 @@ defined('_JEXEC') or die;
 // Survey initial modal - only include if required
 if ( $this->haveConsent ) {
 	
-	print '<form action = "' . BIODIV_ROOT . '" method = "GET">';
+	print '<form action = "' . BIODIV_ROOT . '" method = "GET" id="submit_survey_form">';
 	
 	print '<div class="panel-group">';
 	
@@ -56,7 +56,7 @@ if ( $this->haveConsent ) {
 				
 				foreach ( $reponseOptions as $responseId=>$responseText ) {
 					print '    <label class="btn btn-default">';
-					print '        <input type="radio" name="sq['.$question['sq_id'].']" value="'.$responseId.'" autocomplete="off">' . $responseText;
+					print '        <input type="radio" name="sq['.$question['sq_id'].']" value="'.$responseId.'" autocomplete="off" required>' . $responseText;
 					print '    </label>';
 				}
 				
@@ -71,7 +71,7 @@ if ( $this->haveConsent ) {
 				print '    <div class="survey-buttons likert-buttons" data-toggle="buttons">';
 				for ( $i=0; $i < 11; $i++ ) {
 					print '        <label class="btn btn-default col-1">';
-					print '            <input type="radio" name="sq['.$question['sq_id'].']" value="'.$i.'" autocomplete="off"> '.$i;
+					print '            <input type="radio" name="sq['.$question['sq_id'].']" value="'.$i.'" autocomplete="off" required> '.$i;
 					print '        </label>';
 				}
 				
@@ -82,10 +82,11 @@ if ( $this->haveConsent ) {
 			else if ( $question['response_type'] == 4 ) {
 				
 				$sqStr = "sq[".$question['sq_id']."]";
+				$sqIdStr = "sq_".$question['sq_id'];
 				
 				print '          <div class="question>';
 				print '          <label for="'.$sqStr.'">'.$question['text'].'</label>';
-				print '          <input type="number" id="'.$sqStr.'" class="form-control" name="'.$sqStr.'" >';
+				print '          <input type="number" id="'.$sqIdStr.'" class="form-control" name="'.$sqStr.'" required>';
 				print '          </div>';
 
 			}
@@ -109,7 +110,7 @@ if ( $this->haveConsent ) {
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="task" value="add_response"/>';
     print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-    print '              <button  class="btn btn-warning" type="submit">'.$this->translations['contribute']['translation_text'].'</button>';
+    print '              <button id="take_survey"  class="btn btn-warning" type="submit">'.$this->translations['contribute']['translation_text'].'</button>';
 	print '          </form>';
 	print '          </div';
 	print '          <div class="col-md-2 col-xs-6">';

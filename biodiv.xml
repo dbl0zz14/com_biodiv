@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.3.0</version>
+  <version>3.3.1</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images from camera traps</description>
  
@@ -54,6 +54,7 @@
   <media destination="com_biodiv" folder="media">
     <folder>css</folder>
     <folder>js</folder>
+    <folder>images</folder>
   </media>
   
   <administration>
