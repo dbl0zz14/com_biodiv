@@ -1,5 +1,7 @@
 # 4/12/20 - Version 3.3.1   #
 * Generate sonogram as static image with red line indocating time
+* Add validation to survey form
+* Limit to one set of responses per survey
 
 # 26/11/20 - Version 3.3.0   #
 * NaturesAudio pilot launch version
