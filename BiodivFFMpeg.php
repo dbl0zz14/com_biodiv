@@ -26,6 +26,8 @@ class BiodivFFMpeg {
 	
 	public function getDuration ( $infile ) {
 		
+		error_log ( "getDuration called for file " . $infile );
+		
 		$success = true;
 		
 		$command = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . $infile;
@@ -41,9 +43,10 @@ class BiodivFFMpeg {
 		return $success ? $duration : null;
 	}
 	
+	
 	public function splitFile ( $infile, $outfile, $start, $duration = null ) {
 		
-		error_log("splitFile: infile = " . $infile );
+		error_log("splitFile: infile = " . $infile . ", outfile = " . $outfile . ", start = " . $start . ", duration = " . $duration );
 		
 		$success = true;
 		
@@ -56,6 +59,8 @@ class BiodivFFMpeg {
 		}
 		
 		$command .= " " . $outfile;
+		
+		error_log ( "splitFile: command = " . $command );
 		
 		exec($command, $output, $returnVar);
 		
@@ -71,7 +76,7 @@ class BiodivFFMpeg {
 
 	public function generateSonogram ( $infile, $outfile ) {
 		
-		error_log("generate_sonogram: infile = " . $infile . ", outfile = " . $outfile);
+		error_log("generateSonogram: infile = " . $infile . ", outfile = " . $outfile);
 		
 		$success = true;
 		
@@ -104,44 +109,65 @@ class BiodivFFMpeg {
 		*/
 		
 		// Use infile name as a base for interim filenames.
-		$ext = JFile::getExt($infile);
-		$inBasename = JFile::stripExt($infile);
+		$ext = JFile::getExt($outfile);
+		$outBasename = JFile::stripExt($outfile);
+		
+		error_log ( "generateSonogram: about to generate pic" );
 		
 		// First generate the sonogram still
-		$stillFilename = $inBasename . '_pic.jpg';
+		$stillFilename = $outBasename . '_pic.jpg';
 		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrumpic=s=720x512:mode=combined:color=channel:saturation=0.2:scale=log:legend=0" ' . $stillFilename;
 
+		error_log ( "generate sono pic command = " . $command );
+			
 		exec($command, $output, $returnVar);
+		
+		error_log ( "pic command completed, returnVar = " . $returnVar);
 		
 		if ( $returnVar !== 0 ) {
 			error_log ( "generateSonogram failed on showspectrumpic" );
 			$success = false;
 		}
 		
+		error_log ( "generateSonogram: pic generation complete, success = " . $success );
+		
 		// Then create a video of the still with the audio as sound track
 		if ( $success ) {
-			$vidFilename = $inBasename . '_vid.mp4';
+			
+			error_log ( "About to generate video" );
+			$vidFilename = $outBasename . '_vid.mp4';
 			$command = 'ffmpeg -loop 1 -i ' . $stillFilename . ' -i ' . $infile . ' -c:v libx264 -tune stillimage -c:a aac -b:a 360k -pix_fmt yuv420p -shortest ' . $vidFilename;
 
+			error_log ( "generate video command = " . $command );
+			
 			exec($command, $output, $returnVar);
+			
+			error_log ( "vid command completed, returnVar = " . $returnVar);
 			
 			if ( $returnVar !== 0 ) {
 				error_log ( "generateSonogram failed on video creation" );
 				$success = false;
 			}
+			
+			error_log ( "generateSonogram: video generation complete" );
 		
 		}
 		
 		// Finally overlay the red line.
 		if ( $success ) {
 			
-			// Get the audio duration:
-			$duration = $this->getDuration($infile);
+			error_log ( "generateSonogram: about to overlay" );
 			
+			// Get the audio duration:
+			error_log ( "calling getDuration with file " . $infile );
+			$dur = round($this->getDuration($infile), 2);
+						
 			// Check the redline file exists
 			if ( file_exists ( $this->redlineFile ) ) {
 			
-				$command = 'ffmpeg -i ' . $vidFilename . ' -i ' . $this->redlineFile . '  -filter_complex "overlay=x=\'if(gte(t,0), w+(t)*W/'.$duration.', NAN)\':y=0"  ' . $outfile;
+				$command = 'ffmpeg -i ' . $vidFilename . ' -i ' . $this->redlineFile . '  -filter_complex "overlay=x=\'if(gte(t,0), w+(t)*W/'.$dur.', NAN)\':y=0"  ' . $outfile;
+				
+				error_log ( "overlay command = " . $command );
 
 				exec($command, $output, $returnVar);
 				
@@ -155,14 +181,21 @@ class BiodivFFMpeg {
 				error_log ( "No redline file ( " . $this->redlineFile . " ), skipping overlay" );
 				JFile::copy ( $vidFilename, $outfile );
 			}
+			
+			error_log ( "generateSonogram: overlay complete" );
+			
 		
 		}
+		
+		error_log ( "generateSonogram: success code = " . $success );
 		
 		// Remove interim files
 		if ( $success ) {
 			JFile::delete ( $stillFilename );
 			JFile::delete ( $vidFilename );
 		}
+		
+		error_log("generateSonogram: returning");
 		
 		return $success;
 

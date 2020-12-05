@@ -13,6 +13,9 @@ print "<h1>Splitting files</h1>";
 
 $ff = new BiodivFFMpeg();
 
+$err_msg = print_r ( $this->files, true );
+error_log ( "Files to split: " . $err_msg );
+
 foreach ( $this->files as $bigFile ) {
 	
 	$ofId = $bigFile['of_id'];
@@ -24,6 +27,8 @@ foreach ( $this->files as $bigFile ) {
 	$fullfilename = $bigFile['dirname'] . "/" . $bigFile['filename'];
 	
 	print "<h3>Full filename: " . $fullfilename . "</h3>";
+	error_log ( "Full filename:  " . $fullfilename );
+	error_log ( "calling getDuration with file " . $fullfilename );
 	$duration = $ff->getDuration($fullfilename);
 	print "<h3>Duration: " . $duration . "</h3>";
 	
@@ -73,6 +78,7 @@ foreach ( $this->files as $bigFile ) {
 	else {
 		print "<h4>2 or more files</h4>";
 		$lengthLeft = $duration;
+		error_log ( "Length left = " . $lengthLeft );
 		$tag = 1;
 		$start = 0;
 		$success = true;
@@ -80,11 +86,14 @@ foreach ( $this->files as $bigFile ) {
 		$filestem = JFile::stripExt($fullfilename);
 		
 		while ( $lengthLeft >= $twoFiles ) {
+			error_log ( "Length left = " . $lengthLeft );
+			error_log ( "More than two files left, processing next one" );
 			$fname = $filestem . "_" . $tag;
 			$newFile = $fname . "." . $ext;
 			print "<p>New file name = " . $newFile . "</p>";
 			$end = $start + $oneFile;
 			
+			error_log ( "About to split in >2 files section" );
 			$success = $ff->splitFile ( $fullfilename, $newFile, $start, $oneFile );
 			
 			if ( $success ) {
@@ -134,16 +143,25 @@ foreach ( $this->files as $bigFile ) {
 			else {
 				$problem = true;
 			}
-			$lengthLeft -= $oneFile;
+			
+			error_log ( "oneFile = " . $oneFile );
+			//$lengthLeft -= $oneFile;
+			$lengthLeft = $lengthLeft - $oneFile;
+			error_log ( "Length left = " . $lengthLeft );
 			$start = $end;
 			$tag += 1;
 		}
 		
 		// If the last length is only just over a minute, no need to split into two
 		if ( $lengthLeft < $oneFile + 1 ) {
+			error_log ( "Length left = " . $lengthLeft );
+			error_log ( "Length left is < 31 secs so process as single final file" );
+			
 			$fname = $filestem . "_" . $tag;
 			$newFile = $fname . "." . $ext;
 			print "<p>New file name = " . $newFile . "</p>";
+			
+			error_log ( "About to split final file" );
 			$success = $ff->splitFile ( $fullfilename, $newFile, $start );
 				
 			if ( $success ) {
@@ -194,11 +212,16 @@ foreach ( $this->files as $bigFile ) {
 			}
 		}
 		else {
+			error_log ( "Length left is enough for two files, processing last two.." );
+			error_log ( "Length left = " . $lengthLeft );
 			$firstLength = intVal($lengthLeft/2);
 			$end = $start + $firstLength;
 			$fname = $filestem . "_" . $tag;
 			$newFile = $fname . "." . $ext;
+			
 			print "<p>New file name = " . $newFile . "</p>";
+			error_log ( "About to split first of last two" );
+			error_log ( "New file name: " . $newFile );
 			$success = $ff->splitFile ( $fullfilename, $newFile, $start, $firstLength );
 				
 			if ( $success ) {
@@ -209,10 +232,15 @@ foreach ( $this->files as $bigFile ) {
 					$newSonoFile = $fname . ".mp4";
 					print "<p>New file name = " . $newSonoFile . "</p>";
 					
+					error_log ( "About to call generateSonogram for first of last two files " . $newFile);
+					
 					$success = $ff->generateSonogram( $newFile, $newSonoFile );
+					
+					error_log ( "generateSonogram for first of last two, success = " . $success );
 					
 					if ( $success ) {
 						// Remove the intermediate file
+						error_log ( "Removing intermediate file " . $newFile );
 						print "<p>Removing intermediate file " . $newFile . "</p>";
 						try {
 							unlink($newFile);
@@ -222,6 +250,7 @@ foreach ( $this->files as $bigFile ) {
 							throw $e;
 						}
 						
+						error_log ( "Writing split file " . $newSonoFile );
 						$photoId = writeSplitFile($ofId, $newSonoFile, $start);
 						print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
 						if ( !$photoId ) {
@@ -236,6 +265,7 @@ foreach ( $this->files as $bigFile ) {
 				}
 				else {
 					print "<p>Writing to Photo table</p>";
+					error_log ( "Writing to Photo table " . newFile );
 					$photoId = writeSplitFile($ofId, $newFile, $start);
 					print "<p>Written to Photo table - photo_id = " . $photoId . "</p>";
 					if ( !$photoId ) {
@@ -245,14 +275,19 @@ foreach ( $this->files as $bigFile ) {
 				}
 			}
 			else {
+				error_log ( "Problem writing with call to splitFile "  );
 				$problem = true;
 			}
+			
+			error_log ( "Shifting start" );
 			
 			$tag += 1;
 			$start = $end;
 			$fname = $filestem . "_" . $tag;
 			$newFile = $fname . "." . $ext;
 			print "<p>New file name = " . $newFile . "</p>";
+			
+			error_log ( "About to split second of last two" );
 			$success = $ff->splitFile ( $fullfilename, $newFile, $start );
 				
 			if ( $success ) {

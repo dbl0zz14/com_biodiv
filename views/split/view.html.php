@@ -26,6 +26,9 @@ class BioDivViewSplit extends JViewLegacy
 
 	public function display($tpl = null) 
 	{
+		
+	  error_log ( "BioDivViewSplit display called" );
+	  
 	  $app = JFactory::getApplication();
 
 	  $db = JDatabase::getInstance(dbOptions());
@@ -39,6 +42,15 @@ class BioDivViewSplit extends JViewLegacy
 		
 	  $db->setQuery($query, 0, 500);
 	  $this->files = $db->loadAssocList();
+	  
+	  // Mark all the files as being worked on - so set status to -1
+	  foreach ( $this->files as $origfile ) {
+		$fields = new stdClass();
+		$fields->of_id = $origfile['of_id'];
+		$fields->status = -1;
+		$db->updateObject('OriginalFiles', $fields, 'of_id');
+	  }
+	  
 	  
 	  // What is the ideal file length
 	  $this->fileLength = getSetting("max_clip_length");
