@@ -4465,7 +4465,10 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	if ( $dataToggle == true ) {
 		$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
 	}
-			
+	
+	// Default
+	$btnClass = 'btn-warning';
+		
 	
 	// Now add the birds
 	foreach ($speciesList as $type=>$all_this_type) {
@@ -4781,7 +4784,9 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	if ( $dataToggle == true ) {
 		$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
 	}
-			
+	
+	// Default
+	$btnClass = 'btn-info';
 	
 	// Now add the birds
 	foreach ($speciesList as $type=>$all_this_type) {
