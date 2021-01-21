@@ -259,11 +259,13 @@ class SiteHelper {
 		print '        <div id="projecttab" class="tab"><h2>'.$this->translations['which_prj']['translation_text'].'<h2>';
 		print '        <h5>'.$this->translations['ctrl_cmd']['translation_text'].'<h5>';
 		print '          <select id="projectselect" name = "project_ids[]" class = "form-control" size="15" multiple>';
+		
+		$default_project = getSetting('default_project');
 			
 		foreach($this->userprojects as $proj_id=>$proj_name){
 		  $strucs_attribute = "";
 		  if ( array_key_exists($proj_id, $projectsitedataJSON)) $strucs_attribute = $projectsitedataJSON[$proj_id];
-		  if ( $proj_name == "MammalWeb UK" ) {
+		  if ( $proj_id == $default_project ) {
 			  print "<option id='select_proj_$proj_id' value='$proj_id' data-strucs='". $strucs_attribute ."'selected>$proj_name</option>";
 		  }
 		  else {

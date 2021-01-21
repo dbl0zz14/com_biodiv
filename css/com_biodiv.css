@@ -159,7 +159,7 @@
 }
 
 
-#you-uploaded { color: #00ba8a; text-align: center; vertical-align: middle; font-size: 1.3em; }
+#you-uploaded { color: #00ba8a; display: inline; font-size: 16px;}
 
 .highlighted { background-color: #b4d0d0; }
 

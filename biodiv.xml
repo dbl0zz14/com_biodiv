@@ -9,9 +9,9 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.3.1</version>
+  <version>3.3.2</version>
   <!-- The description is optional and defaults to the name -->
-  <description>Upload and classify images from camera traps</description>
+  <description>Upload and classify images, video and audio from camera traps or other recording devices</description>
  
   <update> <!-- Runs on update; New since J2.5 -->
     <schemas>
@@ -42,6 +42,7 @@
 	<filename>BiodivFFMpeg.php</filename>
 	<filename>BiodivFile.php</filename>
 	<filename>BiodivSurvey.php</filename>
+	<filename>BiodivReport.php</filename>
 	<folder>views</folder>
 	<folder>libraries</folder>
 <!--

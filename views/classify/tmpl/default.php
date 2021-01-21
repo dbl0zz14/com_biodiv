@@ -109,7 +109,14 @@ $mediaCarousel->generateMediaCarousel($sequence_id, etc);
 
 
 if ( $this->isVideo === true ) {
-	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+	$photoUrl = photoURL($this->photoDetails["photo_id"]);
+	$ext = strtolower(JFile::getExt($photoUrl));
+	error_log("Classify View: ext = " . $ext );
+	
+	//print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+	
+	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$photoUrl.'" type="video/'.$ext.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+	
 }
 else if ( $this->isAudio === true ) {
 	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</video></div>';
@@ -230,6 +237,13 @@ if ( $animals ) {
 
 <div class='col-md-3 cls-xs-12 species-carousel-col'>
 <!-- only needed if header in column div class='spacer-4em'></div -->
+
+<!-- div id='select_species' class='col-md-3 cls-xs-12 species-carousel-col' -->
+<div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+    <input id="search_species" type="text" class="form-control" name="speciesfilter" placeholder="Search..">
+</div>
+
 	
 <?php	
 // Use tabs for the filters:
@@ -255,7 +269,9 @@ foreach ( $this->projectFilters as $filterId=>$filter ) {
 	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
 	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 	//printSpeciesList ( $this->species, true );
-	printSpeciesList ( $filterId, $filter['species'], false );
+	//printSpeciesList ( $filterId, $filter['species'], false );
+	printSpeciesListSearch ( $filterId, $filter['species'], false );
+
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
 	$extra = "";

@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
 *
 * @since 0.0.1
 */
-class BioDivViewSonogram extends JViewLegacy
+class BioDivViewConvert extends JViewLegacy
 {
 	/**
 	 *
@@ -26,6 +26,9 @@ class BioDivViewSonogram extends JViewLegacy
 
 	public function display($tpl = null) 
 	{
+		
+	  error_log ( "BioDivViewConvert display called" );
+	  
 	  $app = JFactory::getApplication();
 
 	  $db = JDatabase::getInstance(dbOptions());
@@ -33,18 +36,21 @@ class BioDivViewSonogram extends JViewLegacy
 	  // Limit to x number of files at a time...
 	  
 	  $query = $db->getQuery(true);
-	  $query->select("photo_id, dirname, filename, upload_filename")
-	    ->from($db->quoteName("Photo"))
-	    ->where("status = -1")
-		->where("sequence_id != 0");
+	  $query->select("of_id, dirname, filename, upload_filename, taken")
+	    ->from($db->quoteName("OriginalFiles"))
+	    ->where("status = 0")
+		->where("filename like '%avi'" );
 		
-	  $db->setQuery($query, 0, 10);
+	  $db->setQuery($query, 0, 500);
 	  $this->files = $db->loadAssocList();
 	  
-	  // Are we generating sonograms?  If not then we'll do nothing
-	  $this->sonograms = getSetting("generate_sonograms") == "yes";
-	  
-	  
+	  // Mark all the files as being worked on - so set status to -1
+	  foreach ( $this->files as $origfile ) {
+		$fields = new stdClass();
+		$fields->of_id = $origfile['of_id'];
+		$fields->status = -1;
+		$db->updateObject('OriginalFiles', $fields, 'of_id');
+	  }
 
 	  // Display the view
 	  parent::display($tpl);

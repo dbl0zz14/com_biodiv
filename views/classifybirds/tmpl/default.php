@@ -32,13 +32,25 @@ if(!$this->photo_id){
 
 
 if ( $this->isVideo === true ) {
-	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
+	print "<h2>" . $this->translations['what_vid']['translation_text'];
+	if($this->photoDetails['person_id'] == userID()){
+		print " <div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
+	}
+	print "</h2>";
 }
 else if ( $this->isAudio === true ) {
-	print "<h2>" . $this->translations['what_hear']['translation_text'] . "</h2>";
+	print "<h2>" . $this->translations['what_hear']['translation_text'];
+	if($this->photoDetails['person_id'] == userID()){
+		print "<div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
+	}
+	print "</h2>";
 }
 else {
-	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
+	print "<h2>" . $this->translations['what_see']['translation_text'];
+	if($this->photoDetails['person_id'] == userID()){
+		print "<div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
+	}
+	print  "</h2>";
     //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
 }
 ?>
@@ -53,7 +65,7 @@ else {
 	<div class='col-md-8 cls-xs-12'>
 	
 	<div class='row'>
-     <div class='col-md-4 photo-col'>
+     <div class='col-md-5 col-sm-5 col-xs-5 photo-col'>
 	<div class='btn-group pull-left' role='group'>
 <?php
 foreach($this->lcontrols as $control_id => $control){
@@ -61,17 +73,10 @@ foreach($this->lcontrols as $control_id => $control){
 }
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-4 -->
-<?php
-	if($this->photoDetails['person_id'] == userID()){
-		print "<div class='col-md-3'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
-	}
-	else {
-		print "<div class='col-md-2'></div>";
-	}
-?>
+     </div> <!-- /.col-md-5 -->
+
 	
-     <div class='col-md-5'>
+     <div class='col-md-7 col-sm-7 col-xs-7 '>
 	<div class='btn-group pull-right' role='group'>
   <?php
   foreach($this->rcontrols as $control_id => $control){
@@ -81,12 +86,9 @@ foreach($this->lcontrols as $control_id => $control){
   print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-5 -->
+     </div> <!-- /.col-md-7 -->
 
-     <div class='col-md-4'>
-  <?php
-?>
-     </div> <!-- /.col-md-4 -->
+     
 
   </div> <!-- /.row -->
 
@@ -232,7 +234,12 @@ if ( $animals ) {
 </div> <!-- /.col-md-9 -->
 
 
-<div class='col-md-4 cls-xs-12 species-carousel-col'>
+<div id='select_species' class='col-md-4 cls-xs-12 species-carousel-col'>
+<div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+    <input id="search_species" type="text" class="form-control" name="speciesfilter" placeholder="Search..">
+</div>
+
 <!-- only needed if header in column div class='spacer-4em'></div -->
 	
 <?php	
@@ -257,10 +264,17 @@ print "<div class='tab-content no-padding'>";
 $extra = "active";
 foreach ( $this->projectFilters as $filterId=>$filter ) {
 	print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
+	
+	
+	/* replace this bit with table - ie one per filter tab?
 	print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 	//printSpeciesList ( $this->species, true );
 	printBirdSpeciesList ( $filterId, $filter['species'] );
 	print "</div> <!-- /carousel-species carousel--> \n";
+	*/
+	
+	printBirdSpeciesList( $filterId, $filter['species'] );
+	
 	print "  </div>";
 	$extra = "";
 }

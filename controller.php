@@ -763,28 +763,6 @@ class BioDivController extends JControllerLegacy
 			continue;
 		}	
 		
-		// If it's an audio file, generate a sonogram.
-		/* not yet
-		if ( $is_audio ) {
-			error_log("Got audio file - generating waveform");
-			
-			$wavename = JFile::stripExt($newName) . "_wave";
-			$waveFullName = "$dirName/$wavename.png";
-			generate_waveform ( $newFullName, $waveFullName );
-			error_log("waveform generated");
-			
-			$subname = JFile::stripExt($newName) . "_sub";
-			$subFullName = "$dirName/$subname.$ext";
-			generate_subfiles ( $newFullName, $subFullName );
-			error_log("subfiles generated");
-			
-			$soname = JFile::stripExt($newName) . "_sono";
-			$sonoFullName = "$dirName/$soname.mp4";
-			generate_sonogram ( $newFullName, $sonoFullName );
-			error_log("sonogram generated");
-		}
-		*/
-		
 		if(userID()==179){
 		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
 		}
@@ -808,6 +786,11 @@ class BioDivController extends JControllerLegacy
 		error_log ( "split_audio setting = " . $splitAudio );
 		error_log ( "is_audio = " . $is_audio );
 		if ( $is_audio && $splitAudio ) {
+			$struc = 'origfile';
+		}
+		
+		// For avi files need to convert to MP4
+		if ( $ext == 'avi' ) {
 			$struc = 'origfile';
 		}
 		

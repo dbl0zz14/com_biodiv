@@ -93,6 +93,7 @@ class BiodivFile {
 	function generateMeta () {
 		if ( $this->isImage() ) {
 			$this->exif = exif_read_data($this->filename);
+			
 			$this->taken = $this->exif['DateTimeOriginal'];
 		}
 		else {
@@ -127,6 +128,28 @@ class BiodivFile {
 					if ( $this->taken == null )
 					{
 						error_log ("Unable to get date from wav meta data eg wamd, guan or INFO chunk");
+					}
+					
+					if ( $this->taken == null )
+					{
+						$this->setDateFromFilename( true );
+						if ( !$this->taken ) {
+							addMsg("error","File upload unsuccessful for $this->filename. Incorrect filename format.  Should be similar to myfile_YYYYMMDD_HHmmss.wav or myfileYYYY-MM-DD_HH-mm-ss.wav");
+						}
+					}
+					break;
+				case 'avi':
+					error_log ( "Found avi audio file, ext is " . $this->ext );
+					$date_found = false;
+					
+					// Test for a date in the riff info chunk -  ICRD?
+					$this->setDateFromAviMeta ();
+					
+					error_log ( "generateMeta, taken from meta data = " . $this->taken );
+					
+					if ( $this->taken == null )
+					{
+						error_log ("Unable to get date from avi meta data INFO chunk");
 					}
 					
 					if ( $this->taken == null )
@@ -438,9 +461,79 @@ class BiodivFile {
 					}
 				}
 			}
+			
+			// Some AVI files store the datetime in the ICRD chunk
+			else if ( array_key_exists ( "ICRD", $infoChunk ) ) {
+				error_log ( "Found ICRD comment" );
+				
+				$err_msg = print_r (  $infoChunk['ICRD'], true );
+				error_log ( "ICRD array = " . $err_msg );
+				
+				$icrdData = $infoChunk['ICRD'][0]['data'];
+				
+				error_log ( "ICRD data = " . $icrdData );
+				
+			}
 			else {
 				error_log ( "No ICMT chunk in WAVE INFO chunk" );
 			}
+			
+		}
+		else {
+			error_log ( "INFO chunk: " . $infoChunk );
+		}		
+	}
+	
+	
+	function setDateFromAviMeta () {
+		
+		if ( $this->exif == null ) {
+			$this->generateMeta();
+		}
+		
+		// Look for INFO chunk
+		$infoChunk = null;
+		
+		try {
+			// Id there a riff chunk
+			$riffChunk = $this->exif['riff'];
+			error_log ( "Found riff chunk: " );
+			$err_msg = print_r ( $riffChunk  );
+			error_log ( "riff keys: " . $err_msg );
+			$infoChunk = $this->exif['riff']['AVI']['INFO'];
+			error_log ( "Found info chunk: " );
+			$err_msg = print_r ( $infoChunk );
+			error_log ( "info chunk: " . $err_msg );
+			
+		} 
+		catch ( Exception $e ) {
+			error_log ( "Exception looking for INFO chunk in WAVE" );
+		}
+		
+		if ( !$infoChunk ) {
+			error_log ( "No INFO chunk found" );
+		}
+		else if ( is_array ( $infoChunk ) ) {
+			$err_str = print_r ( $infoChunk, true );
+			error_log ( "INFO chunk: " . $err_str );
+			
+			// Some AVI files store the datetime in the ICRD chunk
+			if ( array_key_exists ( "ICRD", $infoChunk ) ) {
+				error_log ( "Found ICRD chunk" );
+				
+				$err_msg = print_r (  $infoChunk['ICRD'], true );
+				error_log ( "ICRD array = " . $err_msg );
+				
+				$icrdData = $infoChunk['ICRD'][0]['data'];
+				
+				error_log ( "ICRD data = " . $icrdData );
+				
+				$this->taken = null;
+			}
+			else {
+				error_log ( "No ICRD chunk in WAVE INFO chunk" );
+			}
+			
 		}
 		else {
 			error_log ( "INFO chunk: " . $infoChunk );

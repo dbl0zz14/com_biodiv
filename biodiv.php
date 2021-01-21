@@ -22,6 +22,7 @@ include_once "BiodivHelper.php";
 include_once "BiodivFFMpeg.php";
 include_once "BiodivFile.php";
 include_once "BiodivSurvey.php";
+include_once "BiodivReport.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 35000000);
@@ -516,6 +517,7 @@ function canCreate($struc, $fields){
   case 'classification':
   case 'animal':
   case 'origfile':
+  case 'report':
     return $fields->person_id == userID();   
     break;
 
@@ -596,6 +598,12 @@ function uploadRoot(){
 	return JPATH_SITE."/biodivimages";
 }
 
+function reportRoot(){
+//  return JPATH_COMPONENT . "/uploads";
+    //return "/var/www/html/biodivimages";
+	return JPATH_SITE."/biodivimages/reports";
+}
+
 // get dir of where images from a given site are stored
 function siteDir($site_id){
   $site_id = (int)$site_id;
@@ -623,6 +631,9 @@ function isVideo($photo_id) {
 	$details = codes_getDetails($photo_id, 'photo');
 	$filename = $details['filename'];
 	if ( strpos(strtolower($filename), '.mp4') !== false ) {
+		return true;
+	}
+	if ( strpos(strtolower($filename), '.avi') !== false ) {
 		return true;
 	}
 	return false;
@@ -702,6 +713,24 @@ function imageURL($option_id) {
 	$image = $db->loadResult();
 
 	return JURI::root().$image;
+}
+
+function getOptionData($option_id, $data_type) {
+  
+  	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("OD.value")->from("OptionData OD")
+		//->where("OD.data_type = " . $db->quoteName($data_type) )
+		->where("OD.data_type = '" . $data_type . "'"  )
+		->where("OD.option_id = " . $option_id );
+		
+	$db->setQuery($query);
+	$option_data = $db->loadColumn();
+	
+	$err_msg = print_r ( $option_data, true );
+	error_log ( "getOptionData id= " . $option_id . ", type = " . $data_type . ", result = " . $err_msg );
+	return $option_data;
+
 }
 
 function classifications($restrictions){
@@ -964,11 +993,23 @@ function myTrappingProjects () {
   // Add in the public and hybrid projects
   $myprojects = $myprojects + $publicprojects + $privateprojects;
   
-  //print "<br>Mergerd projects: <br>";
-  //print_r ( $myprojects );
+  $err_str = print_r ($myprojects, true);
+  error_log("myTrappingProjects myprojects = " . $err_str );
   
   //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
   //print implode(",", $myprojects);
+  /*
+  usort($myprojects, function ($a, $b) {
+	  $err_str = print_r ($a, true);
+	  error_log("myTrappingProjects usort a = " . $err_str);
+	  $err_str = print_r ($b, true);
+	  error_log("myTrappingProjects usort b = " . $err_str);
+	  
+      return $a['proj_prettyname'] - $b['proj_prettyname'];
+	}
+  );
+  */
+  asort($myprojects);
   
   return $myprojects;
 }
@@ -1062,6 +1103,25 @@ function mySpottingProjects ($reduce = false) {
   asort($myprojects);
   return $myprojects;
   
+  
+}
+
+function myAdminProjects () {
+	
+	$person_id = (int)userID();
+  
+	// for now, user must be specifically admin for all subprojects so the select is simple
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("P.project_id as project_id, P.project_prettyname as project_name")->from("Project P")
+		->innerJoin("ProjectUserMap PUM on P.project_id = PUM.project_id")
+		->where("PUM.role_id = 1")
+		->where("PUM.person_id = " . $person_id)
+		->order("P.project_prettyname");
+	$db->setQuery($query);
+	$projects = $db->loadAssocList();
+	
+	return $projects;
   
 }
 
@@ -4356,8 +4416,123 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 	//print "</div> <!-- /carousel-species carousel--> \n";
 }
 
+// This version is used by non-kiosk MammalWeb
+function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataToggle = true ) {
+	
+	// Should store this in the Options table as a system option. 
+	$numPerPage = 36;
+	
+	$column0Class = "col-xs-12 col-sm-12 col-md-12";
+	$dkOtherClass = "col-xs-12 col-sm-12 col-md-12";
+	
+	// Add pagination
+	$numSpecies = 0;
+	foreach ($speciesList as $type=>$all_this_type) {
+		$numSpecies = $numSpecies + count($all_this_type);
+	}
+	
+	error_log ("printSpeciesListSearch: num per page = " . $numPerPage );
+	error_log ("printSpeciesListSearch: num species = " . $numSpecies );
+	
+	$numPages = ceil($numSpecies/$numPerPage);
+	
+	error_log ("printSpeciesListSearch: num pages = " . $numPages );
+	
+	
+	
+	if ( $numPages > 1 ) {
+		print '<div class="species_pagination col-xs-12 col-sm-12 col-md-12">';
+		print '<nav aria-label="Species pagination">';
+		print '<ul class="pagination btn-group">';
+		print '<li class="btn btn-info prev-page">';
+		print '<i class="fa fa-backward"></i>';
+		print '</li>';
+		for ( $i = 0; $i < $numPages; $i++ ) {	
+			print '    <li class="btn btn-info">';
+			print strVal($i+1);
+			print '   </li>';
+		}
+		print '<li class="btn btn-info next-page">';
+		print '<i class="fa fa-forward"></i>';
+		print '</li>';
+		
+		print '</ul>';
+		print '</nav>';
+		print '</div>';
+	}
+		
+	$toggleExtras = "";
+	if ( $dataToggle == true ) {
+		$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
+	}
+			
+	
+	// Now add the birds
+	foreach ($speciesList as $type=>$all_this_type) {
+		foreach($all_this_type as $species_id => $species){
+			
+			$name = $species['name'];
+			$isLongSpeciesName = false;
+			if ( strlen($name) > 20 ) $isLongSpeciesName = true;
+			
+			//print ( "name = " . $name . "<br>" );
+			switch($species['type']){
+			case 'mammal':  
+				$btnClass = 'btn-warning';
+				
+				// For birds have a button to view the article and a song and call quick classify button
+				$btnText = "<button type='button' id='species_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select species_select_name $column0Class'".$toggleExtras."  >$name</button>";
+				
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				
+				break;
+
+			case 'bird':  
+				$btnClass = 'btn-info';
+				
+				// For birds have a button to view the article and a song and call quick classify button
+				$btnText = "<button type='button' id='species_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select species_select_name $column0Class'".$toggleExtras."  >$name</button>";
+				
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				
+				break;
+
+			default :
+				// Do nothing, handle Don't know and Other separately, no mammals allowed in the bird species lists
+				break;
+			}
+		}
+	}
+	
+	// Add a padding disabled button for when the number of species is odd...
+	$btnText = "<button type='button' id='species_select_blank_${filterId}' class='btn $btnClass btn-sm btn-wrap-text species-btn $dkOtherClass' disabled".$toggleExtras." style='color:transparent;' >Blank</button>";
+	print '<div id="species_group_blank_${filterId}" class="col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	
+	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
+	//Get the option ids  
+	error_log("About to get dk and other ids" );
+	$otherId = codes_getCode("Other",'species');
+	error_log("printBirdSpeciesList: otherId = " . $otherId );
+	$dkId = codes_getCode("Don\'t Know",'species');
+	error_log("printBirdSpeciesList: dkId = " . $dkId );
+	
+	$btnClass = 'btn-primary';
+	
+	$name = codes_getOptionTranslation($dkId);			
+	$btnText = "<button type='button' id='species_select_${filterId}_${dkId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	$name = codes_getOptionTranslation($otherId);			
+	$btnText = "<button type='button' id='species_select_${filterId}_${otherId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	
+	
+}
+
 // This version prints column of species 
-function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataToggle = true ) {
+function printBirdSpeciesListOrig ( $filterId, $speciesList, $useSeq=false, $dataToggle = true ) {
 	
 	// Should store this in the Options table as a system option. 
 	$numPerPage = 36;
@@ -4555,6 +4730,286 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	//print "</div> <!-- /carousel-species carousel--> \n";
 }
 
+
+// This version prints column of species 
+function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataToggle = true ) {
+	
+	// Should store this in the Options table as a system option. 
+	$numPerPage = 36;
+	
+	$column0Class = "col-xs-8 col-sm-8 col-md-8";
+	$songCallClass = "col-xs-2 col-sm-2 col-md-2";
+	$dkOtherClass = "col-xs-12 col-sm-12 col-md-12";
+	
+	// Add pagination
+	$numSpecies = 0;
+	foreach ($speciesList as $type=>$all_this_type) {
+		$numSpecies = $numSpecies + count($all_this_type);
+	}
+	
+	error_log ("printBirdSpeciesList: num per page = " . $numPerPage );
+	error_log ("printBirdSpeciesList: num species = " . $numSpecies );
+	
+	$numPages = ceil($numSpecies/$numPerPage);
+	
+	error_log ("printBirdSpeciesList: num pages = " . $numPages );
+	
+	
+	
+	if ( $numPages > 1 ) {
+		print '<div class="species_pagination col-xs-12 col-sm-12 col-md-12">';
+		print '<nav aria-label="Species pagination">';
+		print '<ul class="pagination btn-group">';
+		print '<li class="btn btn-info prev-page">';
+		print '<i class="fa fa-backward"></i>';
+		print '</li>';
+		for ( $i = 0; $i < $numPages; $i++ ) {	
+			print '    <li class="btn btn-info">';
+			print strVal($i+1);
+			print '   </li>';
+		}
+		print '<li class="btn btn-info next-page">';
+		print '<i class="fa fa-forward"></i>';
+		print '</li>';
+		
+		print '</ul>';
+		print '</nav>';
+		print '</div>';
+	}
+		
+	$toggleExtras = "";
+	if ( $dataToggle == true ) {
+		$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
+	}
+			
+	
+	// Now add the birds
+	foreach ($speciesList as $type=>$all_this_type) {
+		foreach($all_this_type as $species_id => $species){
+			
+			$name = $species['name'];
+			$isLongSpeciesName = false;
+			if ( strlen($name) > 20 ) $isLongSpeciesName = true;
+			
+			//print ( "name = " . $name . "<br>" );
+			switch($species['type']){
+			case 'bird':  
+				$btnClass = 'btn-info';
+				
+				// For birds have a button to view the article and a song and call quick classify button
+				$btn1 = "<button type='button' id='species_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select species_select_name $column0Class'".$toggleExtras."  >$name</button>";
+				
+				$btn2 = "<button type='button' id='song_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn song_select $songCallClass' >Song</button>";
+				$btn3 = "<button type='button' id='call_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn call_select $songCallClass' >Call</button>";
+				
+				$btnText = $btn1.$btn2.$btn3;
+				
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				
+				break;
+
+			default :
+				// Do nothing, handle Don't know and Other separately, no mammals allowed in the bird species lists
+				break;
+			}
+		}
+	}
+	
+	// Add a padding disabled button for when the number of species is odd...
+	$btnText = "<button type='button' id='species_select_blank_${filterId}' class='btn $btnClass btn-sm btn-wrap-text species-btn $dkOtherClass' disabled".$toggleExtras." style='color:transparent;' >Blank</button>";
+	print '<div id="species_group_blank_${filterId}" class="col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	
+	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
+	//Get the option ids  
+	error_log("About to get dk and other ids" );
+	$otherId = codes_getCode("Other",'species');
+	error_log("printBirdSpeciesList: otherId = " . $otherId );
+	$dkId = codes_getCode("Don\'t Know",'species');
+	error_log("printBirdSpeciesList: dkId = " . $dkId );
+	
+	$btnClass = 'btn-primary';
+	
+	$name = codes_getOptionTranslation($dkId);			
+	$btnText = "<button type='button' id='species_select_${filterId}_${dkId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	$name = codes_getOptionTranslation($otherId);			
+	$btnText = "<button type='button' id='species_select_${filterId}_${otherId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	
+	
+			
+/*
+    $carouselItems = array(); // 2D array [page][item]
+	$speciesCount = 0;
+	foreach ($speciesList as $type=>$all_this_type) {
+		foreach($all_this_type as $species_id => $species){
+			//print "speciesCount = " . $speciesCount . "<br>";
+			$page = $species['page'];
+			// Any -1 pages should stay the same - notinlist 
+			if ( !$useSeq and $page > 0 ) {
+				//print "calculating page.. ";
+				$page = intval($speciesCount/$numPerPage) + 1;
+			}
+			//print ( "page = " . $page . "<br>" );
+			// Any page < -1 should be ignored.
+			if ( $page < -1 ) continue;
+			
+			if(!in_array($page, array_keys($carouselItems))){
+				//print "creating array for page " . $page . "<br>";
+				$carouselItems[$page] = array();
+			}
+			
+			$toggleExtras = "";
+			if ( $dataToggle == true ) {
+				$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
+			}
+  
+			$name = $species['name'];
+			$isLongSpeciesName = false;
+			if ( strlen($name) > 20 ) $isLongSpeciesName = true;
+			
+			//print ( "name = " . $name . "<br>" );
+			switch($species['type']){
+			case 'mammal':
+				// Mammals not allowed here so no buttons
+				$btnClass = 'btn-warning';
+				break;
+
+			case 'bird':  
+				$btnClass = 'btn-info';
+				
+				// For birds have a button to view the article and a song and call quick classify button
+				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
+				
+				$carouselItems[$page][] = "<button type='button' id='song_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn song_select' >Song</button>";
+				$carouselItems[$page][] = "<button type='button' id='call_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn call_select' >Call</button>";
+				
+				break;
+
+			case 'notinlist':
+				$btnClass = 'btn-primary';
+				$largeButtonImage = false;
+				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass  btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
+				break;
+			}
+			
+			$speciesCount++;
+		}
+	}
+	
+	//print_r ( $carouselItems );
+
+	// Determine how many pages of species we have - remember there will be a "-1" page for notinlist items, could be other - ones too which should be ignored
+	$numPages = max(array_keys($carouselItems));
+	//print "numPages = " . $numPages . "<br>";
+	if ( $numPages > 1 ) {
+		print "<ol id='species-indicators' class='carousel-indicators spb'>";
+		for ( $i = 0; $i < $numPages; $i++ ) {
+			//print "i = " . $i . ", numPages = " . $numPages . "<br>";
+			if ( $i == 0 ) {
+				print "<li title='' class='active spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
+			}
+			else {
+				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
+			}
+		}
+		print "</ol>";
+	}
+
+	//print_r ( $carouselItems[-1] );
+
+	$adjust = "";
+	if ( $numPages > 1 ) $adjust = " species-carousel-lower";
+	print "<div id='species-carousel-inner' class='carousel-inner" . $adjust . "'>";
+
+	foreach($carouselItems as $pageNum => $carouselPage){
+		if($pageNum<0){
+			continue;
+		}
+		
+		// Count number of items to organise into columns
+		$numSpeciesButtons = count($carouselPage);
+  
+		$numCols = 6;
+		  
+		$numRows = intval(($numSpeciesButtons + $numCols - 1)/$numCols);
+		//print "numRows = " . $numRows . "<br>";
+		//print "numCols = " . $numCols . "<br>";
+  
+		$cols = array();
+  
+		$carouselPageIndex = 0;
+		
+		// Read across for bird buttons.
+		
+  
+		//print_r ( $cols );
+  
+		$active = ($pageNum==1)?" active":"";
+		print "<div class='item $active'>\n";
+	
+		//print "Making buttons<br>";
+		
+		$column0Class = "col-xs-8 col-sm-8 col-md-4";
+		$songCallClass = "col-xs-2 col-sm-2 col-md-1";
+		$columnClass = $column0Class;
+		print "<div class='row species-row'>";
+		
+		
+		
+		for ( $i = 0; $i < $numPerPage*3; $i++ ) {
+			if ( $i%3 == 0 ) $columnClass = $column0Class;
+			else $columnClass = $songCallClass;
+			
+			if ( $i < $numSpeciesButtons ) {
+				print "<div class='" . $columnClass . " species-carousel-col'>";
+				print $carouselPage[$i];	
+				print "</div> <!-- /species-carousel-col -->\n";				
+			}
+			
+		}
+				
+		print "</div> <!-- /species-row -->\n";
+  
+		// Separate row for notinlist items
+		print "<div class='row species-row'>";
+		
+		$widthClass = 'col-md-6';
+		foreach ( $carouselItems[-1] as $item ) {
+				print "<div class='" . $widthClass . " species-carousel-col'>";
+				print $item;
+				print "</div>";
+			}
+		
+		
+		print "</div> <!-- /species-row -->\n";
+		
+		
+		print "</div> <!-- / item -->\n";
+
+	}
+
+	print "</div> <!-- /carousel-inner--> \n";
+
+	print "<!-- Controls -->";
+	if ( $numPages > 1 ) {
+		print "<a class='left carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='prev'>";
+		print "<span class='fa fa-chevron-left'></span>";
+		print "</a>";
+		print "<a class='right carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='next'>";
+		print "<span class='fa fa-chevron-right'></span>";
+		print "</a>";
+	}
+
+	//print "</div> <!-- /carousel-species carousel--> \n";
+	
+	*/
+}
+
+
 function getLogos ( $project_id ) {
 	
 	$logos = array();
@@ -4576,7 +5031,7 @@ function getLogos ( $project_id ) {
 }
 
 // Used to write details of a generated file (eg split or sonogram) to Photo table.
-function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
+function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
 	
 	// Note that the original exif will be stored in OriginalFilesExif.
 	
@@ -4586,11 +5041,11 @@ function writeSplitFile ( $tsId, $newFile, $delay = 0 ) {
 	$query = $db->getQuery(true);
 	$query->select("*")
 		->from("OriginalFiles")
-		->where("of_id = " . $tsId);
+		->where("of_id = " . $ofId);
 	$db->setQuery($query);
 	$orig = $db->loadAssoc();
 	
-	$struc = 'splitaudio';
+	$struc = 'photo';
 	
 	$dirName = dirname($newFile);
 	$fileName = basename($newFile);

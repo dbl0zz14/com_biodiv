@@ -1,3 +1,9 @@
+# 21/1/21 - Version 3.3.2   #
+* Upload AVI files with datetime in filename to OriginalFiles.  COnvert to mp4 for display. 
+* Search in classify and test yourself
+* Project admin page with reports displayed and to download
+* Default project setting used in audio site creation, not used in trapper.
+
 # 4/12/20 - Version 3.3.1   #
 * Generate sonogram as static image with red line indocating time
 * Add validation to survey form

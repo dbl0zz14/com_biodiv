@@ -44,7 +44,7 @@ class SpeciesCarousel {
 			print "  <div id='filter_${filterId}' class='tab-pane fade in $extra'>";
 			print "<div id='carousel-species-${filterId}' class='carousel slide' data-ride='carousel' data-interval='false' data-wrap='false'>";
 			//printSpeciesList ( $this->species, true );
-			printSpeciesList ( $filterId, $filter['species'], false );
+			printSpeciesListSearch ( $filterId, $filter['species'], false );
 			print "</div> <!-- /carousel-species carousel--> \n";
 			print "  </div>";
 			$extra = "";

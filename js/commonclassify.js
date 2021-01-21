@@ -60,6 +60,7 @@ jQuery(document).ready(function(){
 	});
 
 
+	/* Move to classify/classifybirds while the species list is reworked - in fact, in this used..?
 	jQuery('.filter_select').click(function (){
 		id = jQuery(this).attr("id");
 		idbits = id.split("_");
@@ -70,6 +71,7 @@ jQuery(document).ready(function(){
 			}}
 			);
 	});
+	*/
 	
 
 	jQuery('#fullscreen-button').click(function (){

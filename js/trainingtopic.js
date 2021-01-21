@@ -5,6 +5,10 @@ jQuery(document).ready(function(){
 	
 	const detail = BioDiv.detail == 1;
 	
+	const numSpeciesPerPage = 36;
+	
+	
+	
 	let currentSequence = 0; // Always starts as the first one
 	
 	let classifications = [];
@@ -15,26 +19,19 @@ jQuery(document).ready(function(){
 	addResultImage = function () {
 		let imgEls = jQuery('#photoCarousel').find('img');
 		if ( imgEls.length > 0 ) {
-			//s = imgEls[0].src;
-			console.log("photo: " + imgEls[0].src);
 			resultImages.push ( imgEls[0].src );
 		}
 		else {
 			let med = jQuery('#videoContainer');
 			if ( med.length > 0 ) {
-				console.log("found video media");
-				console.log(med.find('source:first'));
-				console.log("video: " + med.find('source:first').attr('src'));
 				resultImages.push(med.find('source:first').attr('src'));
 			}
 			else {
 				med = jQuery('#audioContainer');
-				console.log("found audio media: " + med.find('source:first').attr('src'));
 				resultImages.push(med.find('source:first').attr('src'));
 			}
 		}
-		//console.log( "src found = " . s );
-		//resultImages.push ( s );
+		
 	};
 	
 	// Add the first result image
@@ -142,15 +139,10 @@ jQuery(document).ready(function(){
 	
 	addSpecies = function (id, name, number, age, gender) {
 		
-		console.log ( "addSpecies, name = " + name + ", number = " + number + ", age = " + age + ", gender = " + gender );
-		
 		// Store the classification against the current sequence, check for < 5
 		let maxReached = false;
 		let newSpecies = {"id": id, "number": number, "age": age, "gender": gender};
 		let showExtras = detail;
-		
-		console.log("showExtras = " + showExtras);
-	
 		
 		// If there's already a nothing classification, remove it.
 		if ( id == "86" ) {
@@ -192,13 +184,11 @@ jQuery(document).ready(function(){
 				btnString += number;
 				
 				let ageDefault = jQuery("input[name='age']:first").val();
-				//console.log("age default = " + ageDefault );
 				// Get the text of the label for this radio button!
 				let ageText = jQuery("input[name='age']:checked + label").text();
 				if ( age != ageDefault ) btnString += " " + ageText;
 				
 				let genderDefault = jQuery("input[name='gender']:first").val();
-				//console.log("gender default = " + genderDefault );
 				// Get the text of the label for this radio button!
 				let genderText = jQuery("input[name='gender']:checked + label").text();
 				if ( gender != genderDefault ) btnString += " " + genderText;
@@ -416,6 +406,102 @@ jQuery(document).ready(function(){
 		jQuery('#user_animals').val(JSON.stringify(classifications));
 	
 	});
+	
+	displaySpeciesPage = function ( start, len ) {
+		
+		jQuery(".species_group").hide();
+		
+		let displaySlice = jQuery(".tab-pane.active .match").slice(start, start + len);
+		displaySlice.show();
+		
+		jQuery(".tab-pane.active .alwaysmatch").show();
+		
+		jQuery('.pagination li').removeClass('active');
+		// NB have prev and next buttons too
+		var activeChild = Math.round(start/len) + 2;
+		jQuery('.pagination li:nth-child(' + activeChild + ')').addClass('active');
+		
+		// How many pages are there in the match list?
+		let numMatches = jQuery(".tab-pane.active .match").length;
+		let numPages = Math.ceil(numMatches/len);
+		jQuery('.last-page').removeClass('last-page');
+		
+		if ( numPages == 1 ) {
+			jQuery('.species_pagination').hide();
+		}
+		else {
+			let lastDisplayedChild = parseInt(numPages+1);
+			jQuery('.pagination li:nth-child(' + lastDisplayedChild + ')').addClass('last-page');
+			
+			jQuery('.species_pagination').show();
+		
+			// Show all then hide any pagination controls we don't need.
+			jQuery('.pagination li').show();
+			let formula = 'n + ' + parseInt(numPages+2);
+			jQuery('.pagination li:nth-child(' + formula + ')').hide();
+			jQuery('.next-page').show();
+		}
+		
+		// Hide the blank padding cell if even number of matches
+		let numDisplayed = displaySlice.length;
+		if ( numDisplayed % 2 == 0 ) jQuery('.tab-pane.active .species_group_blank').hide();
+		else jQuery('.tab-pane.active .species_group_blank').show();
+	}
+	
+	// Filter the species list on search
+	jQuery("#search_species").on("keyup", function() {
+		var value = jQuery(this).val().toLowerCase();
+		
+		jQuery(".species_select_name").filter(function() {
+		  toToggle = jQuery(this).text().toLowerCase().indexOf(value) > -1;
+		  //jQuery(this).parent().toggle(toToggle)
+		  // Add class to parent of non matching elements
+		  if ( toToggle ) {
+			  jQuery(this).parent().addClass ('match');
+		  }
+		  else {
+			  jQuery(this).parent().removeClass ('match');
+		  }
+		});
+		
+		displaySpeciesPage( 0, numSpeciesPerPage );
+		
+	});
+	
+	jQuery('.species-tab').on('shown.bs.tab', function (e) {
+		displaySpeciesPage( 0, numSpeciesPerPage );
+  
+	});
+	
+	jQuery('.pagination li').click(function (){
+		let pageText = null;
+		let page = null;
+		let currPage = null;
+		if ( jQuery(this).hasClass('prev-page') ) {
+			pageText = jQuery('.pagination li.active').text();
+			page = parseInt(pageText) -2;
+			if ( page < 0 ) page = 0;
+		}
+		else if ( jQuery(this).hasClass('next-page') ) {
+			pageText = jQuery('.pagination li.active').text();
+			page = parseInt(pageText);
+			
+			let lastPageText = jQuery('.last-page').text();
+			let lastPage = parseInt(lastPageText);
+			if ( page == lastPage ) page = lastPage-1;
+			
+		}
+		else {
+			pageText = jQuery(this).text();
+			page = parseInt(pageText) -1;
+		}
+		displaySpeciesPage( page*numSpeciesPerPage, numSpeciesPerPage );
+	
+	});
+	
+	
+	displaySpeciesPage( 0, numSpeciesPerPage );
+	
 	
 	addFullScreenFnly();
 	

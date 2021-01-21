@@ -74,6 +74,28 @@ class BiodivFFMpeg {
 	}
 
 
+	public function convertAviToMp4 ( $infile, $outfile, $createDate ) {
+		
+		error_log("convertAviToMp4: infile = " . $infile . ", outfile = " . $outfile . ", createDate = " . $createDate  );
+		
+		$success = true;
+		
+		$command = "ffmpeg -i " . $infile . " -metadata creation_time=\"".$createDate."\" -c:av copy  " . $outfile;
+
+		error_log ( "convertAviToMp4: command = " . $command );
+		
+		exec($command, $output, $returnVar);
+		
+		if ( $returnVar !== 0 ) {
+			error_log ( "convertAviToMp4 failed" );
+			$success = false;
+		}
+		
+		return $success;
+
+	}
+
+
 	public function generateSonogram ( $infile, $outfile ) {
 		
 		error_log("generateSonogram: infile = " . $infile . ", outfile = " . $outfile);

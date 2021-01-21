@@ -157,6 +157,26 @@ function s3URL ( $details ) {
 }
 
 
+function s3ReportURL ( $details ) {
+	$options = awsOptions();
+	$urlstem = $options['s3url'];
+	
+	$folder = get_mammalweb_folder();
+	$folder_extra = "";
+	
+	if ( $folder ) {
+		$folder_extra = "/" . $folder;
+	}
+	
+	$person = $details['person_id'];
+	$project = $details['project_id'];
+	$filename = $details['filename'];
+			
+	return $urlstem . $folder_extra . '/reports/person_' . $person . '/project_' . $project . '/' . $filename;
+}
+
+
+
 function s3WaveURL ( $details ) {
 	$options = awsOptions();
 	$urlstem = $options['s3url'];
