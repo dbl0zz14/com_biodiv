@@ -24,6 +24,12 @@ class SpeciesCarousel {
 		//print "Species carousel...";
 		//print_r( $filterIds );
 		
+		// Search box
+		print "<div class='input-group'>";
+		print "	<span class='input-group-addon'><i class='glyphicon glyphicon-search'></i></span>";
+		print "	<input id='search_species' type='text' class='form-control' name='speciesfilter' placeholder='Search..'>";
+		print "</div>";
+		
 		print "<ul id = 'species-nav' class='nav nav-tabs nav-fill'>";
 		$first = true;
 
