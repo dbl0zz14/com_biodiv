@@ -109,6 +109,9 @@ jQuery(document).ready(function(){
 		currentProjectId = jQuery("#project_select").children("option:selected").val();
 		currentReportType = jQuery(this).attr('data-report-type');
 		currentReportId = null;
+		
+		jQuery('#report_display').html("<h4>Generating report...<h4>");
+		
 		displayReport(0);
 		
 	});
@@ -155,7 +158,7 @@ jQuery(document).ready(function(){
 
 				URL.revokeObjectURL(link.href);
 				
-				jQuery('#reportdownload h4').text("Download complete");
+				jQuery('#reportdownload h4').text("Done");
 			});
 			
 		});
@@ -182,7 +185,7 @@ jQuery(document).ready(function(){
 				
 				link.click();
 
-				jQuery('#rptfiledownload h4').text("Download complete");
+				jQuery('#rptfiledownload h4').text("Done");
 			});
 			
 		});
