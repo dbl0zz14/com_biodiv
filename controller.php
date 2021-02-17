@@ -1022,6 +1022,10 @@ class BioDivController extends JControllerLegacy
 					$fields->response_num = $sqArr[$sq_id];
 					$fields->response_text = strval($sqArr[$sq_id]);
 				}
+				else if ( $responseType == BiodivSurvey::SCALE10NA ) {
+					$fields->response_num = $sqArr[$sq_id];
+					$fields->response_text = strval($sqArr[$sq_id]); 
+				}			
 				
 				
 				$success = $db->insertObject("UserResponse", $fields);

@@ -58,9 +58,9 @@ defined('_JEXEC') or die;
 		
 		print "<div class='row'>";
 		print "<div class='col-md-12'>"; // To get the indent back?
-		print "<div class='btn-group pull-left' role='group'>";
-		$this->mediaCarousel->generateLeftControls();
-		print "</div> <!-- /.btn-group -->";
+		//print "<div class='btn-group pull-left' role='group'>";
+		//$this->mediaCarousel->generateLeftControls();
+		//print "</div> <!-- /.btn-group -->";
 		print "<div class='btn-group pull-right' role='group'>";
 		$this->mediaCarousel->generateLocationButton();
 		$this->mediaCarousel->generateNextButton();

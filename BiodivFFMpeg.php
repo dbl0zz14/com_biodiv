@@ -115,7 +115,7 @@ class BiodivFFMpeg {
 		// -map "[v]" - map the created video into the output
 		// -map 0:a - map the audio of the first input into the output
 		// -b:v 700k - set the bitrate of video in output to 700kbit/s
-		// -b:a 360k - set the bitrate of video in output to 360kbit/s
+		// -b:a 360k - set the bitrate of audio in output to 360kbit/s
 		
 		/* replace with a staged process to get a static sonogram with red line moving across
 		
@@ -138,7 +138,8 @@ class BiodivFFMpeg {
 		
 		// First generate the sonogram still
 		$stillFilename = $outBasename . '_pic.jpg';
-		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrumpic=s=720x512:mode=combined:color=channel:saturation=0.2:scale=log:legend=0" ' . $stillFilename;
+		//$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrumpic=s=720x512:mode=combined:color=channel:saturation=0.2:scale=log:legend=0" ' . $stillFilename;
+		$command = 'ffmpeg -i ' . $infile . ' -filter_complex "[0:a]showspectrumpic=s=720x256:mode=combined:color=channel:saturation=0.2:scale=log:stop=8500:legend=0" ' . $stillFilename;
 
 		error_log ( "generate sono pic command = " . $command );
 			

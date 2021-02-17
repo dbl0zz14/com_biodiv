@@ -33,6 +33,20 @@ class BioDivViewDiscover extends JViewLegacy
 	$this->translations = getTranslations("discover");
 	
 	error_log("Discover view got translations");
+	
+	// Get the area covered setting, currently UK or Europe, default to Europe
+	$area = getSetting("area_covered");
+	
+	if ( $area == null ) $area = "europe";
+	
+	// Handle different cases
+	$this->areaCovered = strtolower($area);
+	
+	// Should we display sites when discover page is loaded
+	$show = getSetting("show_sites");
+	
+	$this->showSitesOnLoad = $show == "yes";
+	
 	  
 	// Get the species to include in dropdown.
 	$this->speciesList = getFeatureSpecies();

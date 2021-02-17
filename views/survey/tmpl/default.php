@@ -90,6 +90,27 @@ if ( $this->haveConsent ) {
 				print '          </div>';
 
 			}
+			// SCALE10NA
+			else if ( $question['response_type'] == 5 ) {
+			
+				print '    <div class="question">';
+				print '    <div><label>'.$question['text'].'</label></div>';
+				print '    <div class="survey-buttons likert-buttons" data-toggle="buttons">';
+				for ( $i=0; $i < 11; $i++ ) {
+					print '        <label class="btn btn-default col-1">';
+					print '            <input type="radio" name="sq['.$question['sq_id'].']" value="'.$i.'" autocomplete="off" required> '.$i;
+					print '        </label>';
+				}
+				print '<p></p>';
+				print '        <label class="btn btn-default col-1 na_btn">';
+				print '            <input type="radio" name="sq['.$question['sq_id'].']" value="11" autocomplete="off" required> ';
+				print '        </label> '.$this->translations['not_applic']['translation_text'];;
+				print '        <label class="btn btn-default col-1 na_btn">';
+				print '            <input type="radio" name="sq['.$question['sq_id'].']" value="12" autocomplete="off" required> ';
+				print '        </label> '.$this->translations['prefer_not']['translation_text'];
+				print '    </div>';
+				print '     </div>'; // question
+			}
 			
 
 			

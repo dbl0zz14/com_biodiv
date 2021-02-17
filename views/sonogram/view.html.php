@@ -38,7 +38,7 @@ class BioDivViewSonogram extends JViewLegacy
 	    ->where("status = -1")
 		->where("sequence_id != 0");
 		
-	  $db->setQuery($query, 0, 10);
+	  $db->setQuery($query, 0, 25);
 	  $this->files = $db->loadAssocList();
 	  
 	  // Are we generating sonograms?  If not then we'll do nothing

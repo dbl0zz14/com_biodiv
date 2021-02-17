@@ -30,7 +30,7 @@ if(!$this->photo_id){
  $document->addScriptDeclaration("BioDiv.maxclass = ".$this->maxClassifications.";");
 	
 
-
+/*
 if ( $this->isVideo === true ) {
 	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
 }
@@ -41,6 +41,7 @@ else {
 	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
     //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
 }
+*/
 ?>
 
 
@@ -52,41 +53,54 @@ else {
 <div class="container-fluid" id="photo-container">
 	<div class='col-md-9 cls-xs-12'>
 	
-	<div class='row'>
-     <div class='col-md-3 photo-col'>
-	<div class='btn-group pull-left' role='group'>
 <?php
+	if ( $this->isVideo === true ) {
+	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
+}
+else if ( $this->isAudio === true ) {
+	print "<h2>" . $this->translations['what_hear']['translation_text'] . "</h2>";
+}
+else {
+	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
+    //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
+}
+?>
+	<div class='row'>
+ <?php
+
+/*
+    <div class='col-md-3 photo-col'>
+	<div class='btn-group pull-left' role='group'>
 foreach($this->lcontrols as $control_id => $control){
   makeControlButton($control_id, $control);
 }
-?>
+
+
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-4 -->
+     </div> <!-- /.col-md-3 -->
+*/ 
+?>
 <?php
 	if($this->photoDetails['person_id'] == userID()){
-		print "<div class='col-md-4'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
+		//print "<div class='col-xs-12 col-sm-6 col-md-6'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
+		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info'>" . $this->translations['you_up']['translation_text'] . "</div>";
 	}
 	else {
-		print "<div class='col-md-4'></div>";
+		print "<div class='col-xs-12 col-sm-6 col-md-6'></div>";
 	}
 ?>
 	
-     <div class='col-md-5'>
+     <div class='col-xs-12 col-sm-6 col-md-6'>
 	<div class='btn-group pull-right' role='group'>
   <?php
-  foreach($this->rcontrols as $control_id => $control){
-    makeControlButton($control_id, $control);  
-  }
+  // foreach($this->rcontrols as $control_id => $control){
+    // makeControlButton($control_id, $control);  
+  // }
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
   print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-5 -->
-
-     <div class='col-md-4'>
-  <?php
-?>
-     </div> <!-- /.col-md-4 -->
+     </div> <!-- /.col-md-6 -->
 
   </div> <!-- /.row -->
 

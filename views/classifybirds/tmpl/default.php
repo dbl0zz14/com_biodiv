@@ -27,32 +27,28 @@ if(!$this->photo_id){
   return;
  }
  
- $document->addScriptDeclaration("BioDiv.maxclass = ".$this->maxClassifications.";");
+ $document->addScriptDeclaration("BioDiv.maxclass = ".$this->maxClassifications.";"); 
+ $document->addScriptDeclaration("BioDiv.loadingMsg = '".$this->translations['loading']['translation_text']."';");
 	
 
-
+/*
 if ( $this->isVideo === true ) {
 	print "<h2>" . $this->translations['what_vid']['translation_text'];
-	if($this->photoDetails['person_id'] == userID()){
-		print " <div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
-	}
+	
 	print "</h2>";
 }
 else if ( $this->isAudio === true ) {
 	print "<h2>" . $this->translations['what_hear']['translation_text'];
-	if($this->photoDetails['person_id'] == userID()){
-		print "<div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
-	}
+	
 	print "</h2>";
 }
 else {
 	print "<h2>" . $this->translations['what_see']['translation_text'];
-	if($this->photoDetails['person_id'] == userID()){
-		print "<div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div>";
-	}
+	
 	print  "</h2>";
     //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
 }
+*/
 ?>
 
 
@@ -63,30 +59,67 @@ else {
 
 <div class="container-fluid" id="photo-container">
 	<div class='col-md-8 cls-xs-12'>
+<?php	
+	if ( $this->isVideo === true ) {
+	print "<h2>" . $this->translations['what_vid']['translation_text'];
+	
+	print "</h2>";
+}
+else if ( $this->isAudio === true ) {
+	print "<h2>" . $this->translations['what_hear']['translation_text'];
+	
+	print "</h2>";
+}
+else {
+	print "<h2>" . $this->translations['what_see']['translation_text'];
+	
+	print  "</h2>";
+    //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
+}
+?>
 	
 	<div class='row'>
+	
+<?php
+
+/*
+moving Nothing and Human to species panel
+
      <div class='col-md-5 col-sm-5 col-xs-5 photo-col'>
 	<div class='btn-group pull-left' role='group'>
-<?php
+
 foreach($this->lcontrols as $control_id => $control){
   makeControlButton($control_id, $control);
 }
-?>
+
+
         </div> <!-- /.btn-group -->
      </div> <!-- /.col-md-5 -->
+	 
+	 */
 
 	
-     <div class='col-md-7 col-sm-7 col-xs-7 '>
+?>
+
+<?php
+	if($this->photoDetails['person_id'] == userID()){
+		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info classify_info'><h4>" . $this->translations['you_up']['translation_text'] . "</h4></div>";
+	}
+	else {
+		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info classify_info'></div>";
+	}
+?>
+     <div class='col-xs-12 col-sm-6 col-md-6 '>
 	<div class='btn-group pull-right' role='group'>
   <?php
-  foreach($this->rcontrols as $control_id => $control){
-    makeControlButton($control_id, $control);  
-  }
+  // foreach($this->rcontrols as $control_id => $control){
+    // makeControlButton($control_id, $control);  
+  // }
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
   print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-7 -->
+     </div> <!-- /.col-md-6 -->
 
      
 
@@ -287,6 +320,8 @@ print "</div>";
 </div>
 </div>
 </div>
+
+<div class="loader invisible"></div>
 
 <div id="map_modal" class="modal fade" role="dialog">
   <div class="modal-dialog modal-sm">

@@ -19,10 +19,10 @@ jQuery(document).ready(function(){
 			
 		});
 		if (document.getElementById('nothingDisabled')) {
-			jQuery('#control_content_86').prop('disabled', true);
+			jQuery('.nothing').prop('disabled', true);
 		}
 		else {
-			jQuery('#control_content_86').prop('disabled', false);
+			jQuery('.nothing').prop('disabled', false);
 		}
 	}
 
@@ -189,9 +189,14 @@ jQuery(document).ready(function(){
 	
 	jQuery('.classify_control').click(function (){
 		
-		let id = jQuery(this).attr("id");
+		//let id = jQuery(this).attr("id");
 		
-		addClassificationById (id);
+		//addClassificationById (id);
+		
+		id = jQuery(this).attr("id");
+		idbits = id.split("_");
+		species_id = idbits.pop();
+		addClassificationById(species_id);
 		
 	});
 	

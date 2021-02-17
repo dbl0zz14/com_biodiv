@@ -7,6 +7,27 @@
  
 // No direct access to this file
 defined('_JEXEC') or die;
+
+error_log ("Area covered = " . $this->areaCovered );
+
+$document = JFactory::getDocument();
+if ( $this->areaCovered == "uk" ) {
+	$document->addScriptDeclaration("BioDiv.areaCovered = {min_lat:45, max_lat:65, min_lon:-25, max_lon:15, lat_spacing:5, lon_spacing:8, high_zoom:9, min_zoom:4};");
+	$document->addScriptDeclaration("BioDiv.mapCentre = [55,-5]");
+	$document->addScriptDeclaration("BioDiv.initialZoom = 5;");
+}
+else {
+	$document->addScriptDeclaration("BioDiv.areaCovered = {min_lat:35, max_lat:65, min_lon:-15, max_lon:35, lat_spacing:5, lon_spacing:8, high_zoom:9, min_zoom:4};");
+	$document->addScriptDeclaration("BioDiv.mapCentre = [51,10]");
+	$document->addScriptDeclaration("BioDiv.initialZoom = 4;");
+}
+
+if ( $this->showSitesOnLoad ) {
+	$document->addScriptDeclaration("BioDiv.showSitesOnLoad = true;");
+}
+else {
+	$document->addScriptDeclaration("BioDiv.showSitesOnLoad = false;");
+}
 ?>
 
 

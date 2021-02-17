@@ -2,7 +2,11 @@
 
 jQuery(document).ready(function () {
 	
-	const areaCovered = {min_lat:35, max_lat:65, min_lon:-15, max_lon:35, lat_spacing:5, lon_spacing:8, high_zoom:9, min_zoom:4};
+	//const areaCovered = {min_lat:35, max_lat:65, min_lon:-15, max_lon:35, lat_spacing:5, lon_spacing:8, high_zoom:9, min_zoom:4};
+	const areaCovered = BioDiv.areaCovered;
+	const mapCentre = BioDiv.mapCentre;
+	const initialZoom = BioDiv.initialZoom;
+	const showSitesOnLoad = BioDiv.showSitesOnLoad;
 	
 	var geojsonAreas;
 	var geojsonSpecies;
@@ -393,7 +397,8 @@ jQuery(document).ready(function () {
 		if ( legend ) legend.remove();
 	}
 	
-	var discovermap = L.map('discovermap').setView([51, 10], 4);
+	//var discovermap = L.map('discovermap').setView([51, 10], 4);
+	var discovermap = L.map('discovermap').setView(mapCentre, initialZoom);
 	discovermap.options.minZoom = areaCovered.min_zoom;
 	
 	
@@ -606,6 +611,8 @@ jQuery(document).ready(function () {
 	
 	showAreas();
 	
-			  
+	if ( showSitesOnLoad ) {
+		toggleSites();		  
+	}
 	
 });

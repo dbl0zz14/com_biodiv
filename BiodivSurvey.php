@@ -17,6 +17,7 @@ class BiodivSurvey {
 	const OPTION = 2;
 	const SCALE10 = 3;
 	const NUMBER = 4;
+	const SCALE10NA = 5;
 	
 	private $surveyId;
 	private $surveyDetails;
@@ -91,6 +92,23 @@ class BiodivSurvey {
 		$db->setQuery($query);
 		$firstClassDate = $db->loadResult();
 		
+		// What is the date of their most recent survey?
+		$query = $db->getQuery(true);
+		$query->select("max(timestamp)")
+			->from( "UserResponse" )
+			->where( "person_id=".$personId );
+		$db->setQuery($query);
+		$latestSurveyDate = $db->loadResult();
+		
+		// What is the date of their most recent refusal of consent?
+		$query = $db->getQuery(true);
+		$query->select("max(timestamp)")
+			->from( "UserConsent" )
+			->where( "person_id=".$personId )
+			->where( "consent_given = 0" );
+		$db->setQuery($query);
+		$latestRefuseDate = $db->loadResult();
+		
 		// Which surveys does this user not want to take part in?
 		$query = $db->getQuery(true);
 		$query->select("survey_id")
@@ -115,6 +133,8 @@ class BiodivSurvey {
 			
 			$currSurveyId = $survey['survey_id'];
 			
+			error_log ( "Checking survey id " . $currSurveyId );
+			
 			$topLevelSurvey = BiodivSurvey::topLevelSurvey($currSurveyId);
 			$isTopLevelSurvey = $currSurveyId == $topLevelSurvey;
 			
@@ -133,6 +153,8 @@ class BiodivSurvey {
 					// If type is CLASSIFICATION, compare with how many classifications the user has made.
 					else if ( $survey['type'] == 'CLASSIFICATION' ) {
 						
+						error_log ( "Type is CLASSIFICATION" );
+			
 						if ( $numAnimals >= $survey['number'] ) {
 							
 							// If this isn't the top level survey, ensure the user has done the number of classifications between original consent and now.
@@ -150,6 +172,8 @@ class BiodivSurvey {
 					// If type is DAY get the original survey and see whether we are beyond that number of days.
 					else if ( $survey['type'] == 'DAY' ) {
 						
+						error_log ( "Type is DAY" );
+			
 						
 						$today = date_create("now");
 						$firstDate = date_create($firstClassDate);
@@ -163,6 +187,7 @@ class BiodivSurvey {
 						
 						if ( $numAnimals > 0 && $diffDays >= $survey['number'] ) {
 							// If this isn't the top level survey, ensure the same number of days has passed since consent was given.
+							// If the user has already been presented with a survey today, don;t present them with another.
 							// This makes sure users are not immediately presented with follow up surveys
 							if ( $isTopLevelSurvey ) {
 								return $survey['survey_id'];
@@ -175,7 +200,21 @@ class BiodivSurvey {
 						
 								error_log ( "consent diff days = " . $consentDiffDays );
 								
-								if ( $consentDiffDays >= $survey['number'] ) {
+								error_log ( "Checking days since last survey" );
+								$mostRecentSurveyDate = date_create($latestSurveyDate);
+								$surveyInterval = date_diff($today, $mostRecentSurveyDate);
+								$surveyDiffDays = $surveyInterval->format( '%a' );
+						
+								error_log ( "survey diff days = " . $surveyDiffDays );
+								
+								error_log ( "Checking days since last refusal" );
+								$mostRecentRefuseDate = date_create($latestRefuseDate);
+								$refuseInterval = date_diff($today, $mostRecentRefuseDate);
+								$refuseDiffDays = $refuseInterval->format( '%a' );
+						
+								error_log ( "refuse diff days = " . $refuseDiffDays );
+								
+								if ( $consentDiffDays >= $survey['number'] && $surveyDiffDays > 0 && $refuseDiffDays > 0 ) {
 									return $survey['survey_id'];
 								}
 							}

@@ -159,6 +159,7 @@ class BioDivViewClassify extends JViewLegacy
 		$this->allSpecies = array();
 		$this->allSpecies = codes_getList ( "speciestran" );
 
+/*
 		$this->lcontrols = array();
 		$this->rcontrols = array();
 		foreach(codes_getList("noanimaltran") as $stuff){
@@ -171,7 +172,7 @@ class BioDivViewClassify extends JViewLegacy
 			else
 				$this->lcontrols["control_content_" . $id] = $name;
 		}
-
+*/
 		$this->sequence_id = $this->photoDetails['sequence_id'];
 		$this->sequenceDetails = codes_getDetails($this->sequence_id, "sequence");
 		$this->sequenceLength = $this->sequenceDetails['sequence_length'];

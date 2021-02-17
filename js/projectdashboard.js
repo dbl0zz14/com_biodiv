@@ -1,5 +1,9 @@
 jQuery(document).ready(function(){
 	
+	// Pick up text string variables - could be non-English
+	const waitText = BioDiv.waitText;
+	const doneText = BioDiv.doneText;
+	
 	let currentReportType = null;
 	let currentReportId = null;
 	let currentProjectId = jQuery("#project_select").children("option:selected").val();
@@ -110,6 +114,9 @@ jQuery(document).ready(function(){
 		currentReportType = jQuery(this).attr('data-report-type');
 		currentReportId = null;
 		
+		jQuery('.report-btn h4').removeClass('text-info');
+		jQuery(this).children("h4").addClass('text-info');
+		
 		jQuery('#report_display').html("<h4>Generating report...<h4>");
 		
 		displayReport(0);
@@ -123,7 +130,7 @@ jQuery(document).ready(function(){
 			// ajax call to generate and get url
 			// eventually click the link.
 			jQuery(this).prop('disabled', true);
-			jQuery('#reportdownload h4').text("Please wait...");
+			jQuery('#reportdownload h4').text(waitText);
 			
 			let reportId = jQuery(this).attr("data-report-id");
 			//let url = BioDiv.root + "&view=reportdownload&format=raw&project_id=" + project_id + "&report_id=" + currentReportId;
@@ -158,7 +165,7 @@ jQuery(document).ready(function(){
 
 				URL.revokeObjectURL(link.href);
 				
-				jQuery('#reportdownload h4').text("Done");
+				jQuery('#reportdownload h4').text(doneText);
 			});
 			
 		});
@@ -169,7 +176,7 @@ jQuery(document).ready(function(){
 			// ajax call to generate and get url
 			// eventually click the link.
 			jQuery(this).prop('disabled', true);
-			jQuery('#rptfiledownload h4').text("Please wait...");
+			jQuery('#rptfiledownload h4').text(waitText);
 			
 			let reportId = jQuery(this).attr("data-report-id");
 			//let url = BioDiv.root + "&view=rptfiledownload&format=raw&project_id=" + project_id + "&report_id=" + currentReportId;
@@ -185,12 +192,22 @@ jQuery(document).ready(function(){
 				
 				link.click();
 
-				jQuery('#rptfiledownload h4').text("Done");
+				jQuery('#rptfiledownload h4').text(doneText);
 			});
 			
 		});
+		
+		
 	};
 	
-	
+	jQuery('#project_select').change(function (){
+			
+			// Remove any report as project has been changed
+			jQuery('#report_display').empty();
+			
+			jQuery('.report-btn h4').removeClass('text-info');
+			
+	});
+			
 	
 });

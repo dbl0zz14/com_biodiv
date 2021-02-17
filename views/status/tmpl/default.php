@@ -7,6 +7,10 @@
  
 // No direct access to this file
 defined('_JEXEC') or die;
+
+$document = JFactory::getDocument();
+$document->addScriptDeclaration("BioDiv.loadingMsg = '".$this->translations['loading']['translation_text']."';");
+
 ?>
 <h1><?php print $this->translations['spot_stat']['translation_text'] ?></h1>
 <div class='row'>
@@ -27,7 +31,7 @@ foreach($this->status as $msg => $count){
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
+    <button  class='btn btn-warning btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
 </form>
 </p>
 <p>
@@ -35,7 +39,7 @@ foreach($this->status as $msg => $count){
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-warning btn-block' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
+    <button  class='btn btn-warning btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
     
 </form>
 </p>
@@ -55,13 +59,14 @@ foreach($this->status as $msg => $count){
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
+      <button  class='btn btn-warning classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
 	</span>
 	
 </div>
 </form>
 </p>
 </div>
+<div class="loader invisible"></div>
 <?php
 //print "<p><b>Projects:";
 //foreach($this->projects as $project_name  ){
@@ -159,6 +164,8 @@ if ( $isCameraWebsite ) {
 </div>
 
 </div>
+
+
 
 <?php
 

@@ -139,8 +139,9 @@ class BioDivViewClassifyBirds extends JViewLegacy
 		 $this->isVideo = isVideo($this->photo_id);
 		 $this->isAudio = isAudio($this->photo_id);
 		 
-		 $this->maxClassifications = 6;
-		 if ( $this->isAudio ) $this->maxClassifications = 20;
+		 $this->maxClassifications = 10;
+		 // now should all be video (sonograms)
+		 // if ( $this->isAudio ) $this->maxClassifications = 20;
 		 
 		// Get the general location of the site to help spotters
 		$site_id = $this->photoDetails['site_id'];
@@ -158,6 +159,7 @@ class BioDivViewClassifyBirds extends JViewLegacy
 		$this->allSpecies = array();
 		$this->allSpecies = codes_getList ( "speciestran" );
 
+/*
 		$this->lcontrols = array();
 		$this->rcontrols = array();
 		foreach(codes_getList("noanimaltran") as $stuff){
@@ -170,7 +172,7 @@ class BioDivViewClassifyBirds extends JViewLegacy
 			else
 				$this->lcontrols["control_content_" . $id] = $name;
 		}
-
+*/
 		$this->sequence_id = $this->photoDetails['sequence_id'];
 		$this->sequenceDetails = codes_getDetails($this->sequence_id, "sequence");
 		$this->sequenceLength = $this->sequenceDetails['sequence_length'];

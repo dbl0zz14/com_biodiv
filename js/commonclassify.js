@@ -209,10 +209,10 @@ jQuery(document).ready(function(){
 	jQuery('#photo-carousel-control-right').focus();
 	
 	if (document.getElementById('nothingDisabled')) {
-		jQuery('#control_content_86').prop('disabled', true);
+		jQuery('.nothing').prop('disabled', true);
 	}
 	else {
-		jQuery('#control_content_86').prop('disabled', false);
+		jQuery('.nothing').prop('disabled', false);
 	}
 	
 	

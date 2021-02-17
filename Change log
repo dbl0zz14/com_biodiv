@@ -1,3 +1,13 @@
+# 17/2/21 - Version 3.3.3   #
+* Write split files with no user id (bugfix)
+* Add loading message and loader circle
+* Prevent DAY timed surveys triggering if the user has done a survey today, or refused one
+* Allow UK or Europe setting for the discover map
+* Add optional setting to display sites on loading Discover page
+* Add question type including Not Applicable (11) and Prefer Not To Answer (12)
+* Move Nothing and Human to species panel below Don't Know and Other
+* Handle project dashboard tooltips and wait messages in non-English languages
+
 # 21/1/21 - Version 3.3.2   #
 * Upload AVI files with datetime in filename to OriginalFiles.  COnvert to mp4 for display. 
 * Search in classify and test yourself

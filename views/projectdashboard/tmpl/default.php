@@ -8,12 +8,17 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
+// Set some variables for use in the Javascript, needed for multilingual
+$document = JFactory::getDocument();
+$document->addScriptDeclaration("BioDiv.waitText = '".$this->waitText."';");
+$document->addScriptDeclaration("BioDiv.doneText = '".$this->doneText."';");
+
+
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/project-dash" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
 }
 else {
-
-
+	
 	print "<div class='col-md-12'>";
 
 	print '<h1>'.$this->translations['dash_heading']['translation_text'].'</h1>';
@@ -71,8 +76,9 @@ else {
 			// When page is first loaded 
 			
 			$tooltipText = "";
-			if ( $this->reportText[$reportType] ) {
-				$tooltipText = ' data-toggle="tooltip" title="' . $this->reportText[$reportType][0] . '"';
+			if ( array_key_exists ( $reportType, $this->reportText ) ) {
+				error_log ("Tooltip text = " . $this->reportText[$reportType] );
+				$tooltipText = ' data-toggle="tooltip" title="' . preg_replace( '/[\W]/', ' ', $this->reportText[$reportType]) . '"';
 			}
 			print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'" style="white-space: normal;">';
 			

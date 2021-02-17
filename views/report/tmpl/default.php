@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/project-dash" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
 }
 else {
 

@@ -4486,7 +4486,7 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 				// For birds have a button to view the article and a song and call quick classify button
 				$btnText = "<button type='button' id='species_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select species_select_name $column0Class'".$toggleExtras."  >$name</button>";
 				
-				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-xs-6 col-sm-6 col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 				
 				break;
 
@@ -4496,7 +4496,7 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 				// For birds have a button to view the article and a song and call quick classify button
 				$btnText = "<button type='button' id='species_select_${filterId}_${species_id}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select species_select_name $column0Class'".$toggleExtras."  >$name</button>";
 				
-				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-xs-6 col-sm-6 col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 				
 				break;
 
@@ -4509,7 +4509,7 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	
 	// Add a padding disabled button for when the number of species is odd...
 	$btnText = "<button type='button' id='species_select_blank_${filterId}' class='btn $btnClass btn-sm btn-wrap-text species-btn $dkOtherClass' disabled".$toggleExtras." style='color:transparent;' >Blank</button>";
-	print '<div id="species_group_blank_${filterId}" class="col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_blank_${filterId}" class="col-xs-6 col-sm-6 col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	
 	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
@@ -4524,11 +4524,29 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	
 	$name = codes_getOptionTranslation($dkId);			
 	$btnText = "<button type='button' id='species_select_${filterId}_${dkId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
-	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_'.$filterId.'_'.$dkId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	$name = codes_getOptionTranslation($otherId);			
 	$btnText = "<button type='button' id='species_select_${filterId}_${otherId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
-	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_'.$filterId.'_'.$otherId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	// Add Nothing and Human 
+	error_log("About to get nothing and human ids" );
+	$nothingId = codes_getCode("Nothing",'noanimal');
+	error_log("printBirdSpeciesList: nothingId = " . $nothingId );
+	$humanId = codes_getCode("Human",'noanimal');
+	error_log("printBirdSpeciesList: humanId = " . $humanId );
+	
+	$btnClass = 'btn-primary';
+	
+	$name = codes_getOptionTranslation($nothingId);			
+	$btnText = "<button type='button' id='control_content_${filterId}_${nothingId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control nothing $dkOtherClass'  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$nothingId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	//print "<button type='button' class='btn btn-primary classify_control' id='control_content_$nothingId'>$name</button>";
+	
+	$name = codes_getOptionTranslation($humanId);			
+	$btnText = "<button type='button' id='control_content_${filterId}_${humanId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control $dkOtherClass'  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$humanId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	
 	
@@ -4809,7 +4827,7 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 				
 				$btnText = $btn1.$btn2.$btn3;
 				
-				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+				print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-xs-12 col-sm-12 col-md-6 btn-group species_group match" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 				
 				break;
 
@@ -4822,7 +4840,7 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	
 	// Add a padding disabled button for when the number of species is odd...
 	$btnText = "<button type='button' id='species_select_blank_${filterId}' class='btn $btnClass btn-sm btn-wrap-text species-btn $dkOtherClass' disabled".$toggleExtras." style='color:transparent;' >Blank</button>";
-	print '<div id="species_group_blank_${filterId}" class="col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_blank_${filterId}" class="col-xs-12 col-sm-12 col-md-6 btn-group species_group_blank" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	
 	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
@@ -4837,181 +4855,32 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	
 	$name = codes_getOptionTranslation($dkId);			
 	$btnText = "<button type='button' id='species_select_${filterId}_${dkId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
-	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_'.$filterId.'_'.$dkId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	$name = codes_getOptionTranslation($otherId);			
 	$btnText = "<button type='button' id='species_select_${filterId}_${otherId}' class='btn $btnClass btn-sm btn-wrap-text species-btn species_select $dkOtherClass'".$toggleExtras."  >$name</button>";
-	print '<div id="species_group_'.$filterId.'_'.$species_id.'" class="col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_'.$filterId.'_'.$otherId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	
+	// Add Nothing and Human 
+	error_log("About to get nothing and human ids" );
+	$nothingId = codes_getCode("Nothing",'noanimal');
+	error_log("printBirdSpeciesList: nothingId = " . $nothingId );
+	$humanId = codes_getCode("Human",'noanimal');
+	error_log("printBirdSpeciesList: humanId = " . $humanId );
+	
+	$btnClass = 'btn-primary';
+	
+	$name = codes_getOptionTranslation($nothingId);			
+	$btnText = "<button type='button' id='control_content_${filterId}_${nothingId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control nothing $dkOtherClass'  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$nothingId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	//print "<button type='button' class='btn btn-primary classify_control' id='control_content_$nothingId'>$name</button>";
+	
+	$name = codes_getOptionTranslation($humanId);			
+	$btnText = "<button type='button' id='control_content_${filterId}_${humanId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control $dkOtherClass'  >$name</button>";
+	print '<div id="species_group_'.$filterId.'_'.$humanId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	
 	
-			
-/*
-    $carouselItems = array(); // 2D array [page][item]
-	$speciesCount = 0;
-	foreach ($speciesList as $type=>$all_this_type) {
-		foreach($all_this_type as $species_id => $species){
-			//print "speciesCount = " . $speciesCount . "<br>";
-			$page = $species['page'];
-			// Any -1 pages should stay the same - notinlist 
-			if ( !$useSeq and $page > 0 ) {
-				//print "calculating page.. ";
-				$page = intval($speciesCount/$numPerPage) + 1;
-			}
-			//print ( "page = " . $page . "<br>" );
-			// Any page < -1 should be ignored.
-			if ( $page < -1 ) continue;
-			
-			if(!in_array($page, array_keys($carouselItems))){
-				//print "creating array for page " . $page . "<br>";
-				$carouselItems[$page] = array();
-			}
-			
-			$toggleExtras = "";
-			if ( $dataToggle == true ) {
-				$toggleExtras = " data-toggle='modal' data-target='#classify_modal'";
-			}
-  
-			$name = $species['name'];
-			$isLongSpeciesName = false;
-			if ( strlen($name) > 20 ) $isLongSpeciesName = true;
-			
-			//print ( "name = " . $name . "<br>" );
-			switch($species['type']){
-			case 'mammal':
-				// Mammals not allowed here so no buttons
-				$btnClass = 'btn-warning';
-				break;
-
-			case 'bird':  
-				$btnClass = 'btn-info';
-				
-				// For birds have a button to view the article and a song and call quick classify button
-				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
-				
-				$carouselItems[$page][] = "<button type='button' id='song_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn song_select' >Song</button>";
-				$carouselItems[$page][] = "<button type='button' id='call_select_${species_id}' class='btn $btnClass btn-sm btn-block btn-wrap-text species-btn call_select' >Call</button>";
-				
-				break;
-
-			case 'notinlist':
-				$btnClass = 'btn-primary';
-				$largeButtonImage = false;
-				$carouselItems[$page][] = "<button type='button' id='species_select_${species_id}' class='btn $btnClass  btn-sm btn-block btn-wrap-text species-btn species_select'".$toggleExtras." >$name</button>";
-				break;
-			}
-			
-			$speciesCount++;
-		}
-	}
-	
-	//print_r ( $carouselItems );
-
-	// Determine how many pages of species we have - remember there will be a "-1" page for notinlist items, could be other - ones too which should be ignored
-	$numPages = max(array_keys($carouselItems));
-	//print "numPages = " . $numPages . "<br>";
-	if ( $numPages > 1 ) {
-		print "<ol id='species-indicators' class='carousel-indicators spb'>";
-		for ( $i = 0; $i < $numPages; $i++ ) {
-			//print "i = " . $i . ", numPages = " . $numPages . "<br>";
-			if ( $i == 0 ) {
-				print "<li title='' class='active spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
-			}
-			else {
-				print "<li title='' class='spb' data-original-title='' data-target='#carousel-species-${filterId}' data-slide-to='" . $i . "'></li>";
-			}
-		}
-		print "</ol>";
-	}
-
-	//print_r ( $carouselItems[-1] );
-
-	$adjust = "";
-	if ( $numPages > 1 ) $adjust = " species-carousel-lower";
-	print "<div id='species-carousel-inner' class='carousel-inner" . $adjust . "'>";
-
-	foreach($carouselItems as $pageNum => $carouselPage){
-		if($pageNum<0){
-			continue;
-		}
-		
-		// Count number of items to organise into columns
-		$numSpeciesButtons = count($carouselPage);
-  
-		$numCols = 6;
-		  
-		$numRows = intval(($numSpeciesButtons + $numCols - 1)/$numCols);
-		//print "numRows = " . $numRows . "<br>";
-		//print "numCols = " . $numCols . "<br>";
-  
-		$cols = array();
-  
-		$carouselPageIndex = 0;
-		
-		// Read across for bird buttons.
-		
-  
-		//print_r ( $cols );
-  
-		$active = ($pageNum==1)?" active":"";
-		print "<div class='item $active'>\n";
-	
-		//print "Making buttons<br>";
-		
-		$column0Class = "col-xs-8 col-sm-8 col-md-4";
-		$songCallClass = "col-xs-2 col-sm-2 col-md-1";
-		$columnClass = $column0Class;
-		print "<div class='row species-row'>";
-		
-		
-		
-		for ( $i = 0; $i < $numPerPage*3; $i++ ) {
-			if ( $i%3 == 0 ) $columnClass = $column0Class;
-			else $columnClass = $songCallClass;
-			
-			if ( $i < $numSpeciesButtons ) {
-				print "<div class='" . $columnClass . " species-carousel-col'>";
-				print $carouselPage[$i];	
-				print "</div> <!-- /species-carousel-col -->\n";				
-			}
-			
-		}
-				
-		print "</div> <!-- /species-row -->\n";
-  
-		// Separate row for notinlist items
-		print "<div class='row species-row'>";
-		
-		$widthClass = 'col-md-6';
-		foreach ( $carouselItems[-1] as $item ) {
-				print "<div class='" . $widthClass . " species-carousel-col'>";
-				print $item;
-				print "</div>";
-			}
-		
-		
-		print "</div> <!-- /species-row -->\n";
-		
-		
-		print "</div> <!-- / item -->\n";
-
-	}
-
-	print "</div> <!-- /carousel-inner--> \n";
-
-	print "<!-- Controls -->";
-	if ( $numPages > 1 ) {
-		print "<a class='left carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='prev'>";
-		print "<span class='fa fa-chevron-left'></span>";
-		print "</a>";
-		print "<a class='right carousel-control species-carousel-control' href='#carousel-species-${filterId}' role='button' data-slide='next'>";
-		print "<span class='fa fa-chevron-right'></span>";
-		print "</a>";
-	}
-
-	//print "</div> <!-- /carousel-species carousel--> \n";
-	
-	*/
 }
 
 
@@ -5050,7 +4919,7 @@ function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
 	$db->setQuery($query);
 	$orig = $db->loadAssoc();
 	
-	$struc = 'photo';
+	$struc = 'splitaudio';
 	
 	$dirName = dirname($newFile);
 	$fileName = basename($newFile);
@@ -5077,6 +4946,7 @@ function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
 	$photoFields->size = $fileSize;
 	$photoFields->exif = $exif;
 	
+	//$photoId = $db->insertObject('Photo', $photoFields);
 	$photoId = codes_insertObject($photoFields, $struc);
 	
 	if($photoId){

@@ -1,6 +1,7 @@
 jQuery(document).ready(function(){
 	
 	const maxClassifications = BioDiv.maxclass;
+	const loadingMsg = BioDiv.loadingMsg;
 	
 	const numSpeciesPerPage = 36;
 	
@@ -16,10 +17,10 @@ jQuery(document).ready(function(){
 			
 		});
 		if (document.getElementById('nothingDisabled')) {
-			jQuery('#control_content_86').prop('disabled', true);
+			jQuery('.nothing').prop('disabled', true);
 		}
 		else {
-			jQuery('#control_content_86').prop('disabled', false);
+			jQuery('.nothing').prop('disabled', false);
 		}
 	}
 
@@ -204,9 +205,15 @@ jQuery(document).ready(function(){
 	
 	jQuery('.classify_control').click(function (){
 		
-		let id = jQuery(this).attr("id");
+		//let id = jQuery(this).attr("id");
 		
-		addClassificationById (id);
+		//addClassificationById (id);
+		
+		
+		id = jQuery(this).attr("id");
+		idbits = id.split("_");
+		species_id = idbits.pop();
+		addClassificationById(species_id);
 		
 	});
 	
@@ -217,12 +224,19 @@ jQuery(document).ready(function(){
 	});
 	
 	jQuery('#control_nextseq').click(function (){
+	
+	// Add loading indications
+	jQuery(".loader").removeClass("invisible");
+	jQuery(this).text(loadingMsg);
+	
 	id = jQuery(this).attr("id");
 	var sideBarToggled = jQuery('#wrapper').is(".toggled");
 	var extra = "";
 	if ( sideBarToggled ) extra = "&toggled=" + "1";
 	url = BioDiv.root + "&task=get_photo&format=raw&action=" + id + extra;
 	jQuery.ajax(url, {'success': function() {
+		
+			jQuery(".loader").addClass("invisible");
 			window.location.reload(true);
 			if (document.getElementById('sub-photo-1')) {
 				jQuery('#control_nextseq').prop('disabled', true);
