@@ -208,9 +208,15 @@ class BiodivSurvey {
 								error_log ( "survey diff days = " . $surveyDiffDays );
 								
 								error_log ( "Checking days since last refusal" );
-								$mostRecentRefuseDate = date_create($latestRefuseDate);
-								$refuseInterval = date_diff($today, $mostRecentRefuseDate);
-								$refuseDiffDays = $refuseInterval->format( '%a' );
+								if ( $latestRefuseDate != null ) {
+									$mostRecentRefuseDate = date_create($latestRefuseDate);
+									$refuseInterval = date_diff($today, $mostRecentRefuseDate);
+									$refuseDiffDays = $refuseInterval->format( '%a' );
+								}
+								else {
+									// Just assign > 0
+									$refuseDiffDays = 999;
+								}
 						
 								error_log ( "refuse diff days = " . $refuseDiffDays );
 								
