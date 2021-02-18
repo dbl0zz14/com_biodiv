@@ -103,7 +103,7 @@ foreach($this->lcontrols as $control_id => $control){
 
 <?php
 	if($this->photoDetails['person_id'] == userID()){
-		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info classify_info'><h4>" . $this->translations['you_up']['translation_text'] . "</h4></div>";
+		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info classify_info'>" . $this->translations['you_up']['translation_text'] . "</div>";
 	}
 	else {
 		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info classify_info'></div>";

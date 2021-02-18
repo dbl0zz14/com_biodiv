@@ -197,23 +197,25 @@ class SiteHelper {
 		print '         <p>';
 
 
-		print '			<div id="map_canvas" style="width:400px;height:400px;"></div>';
-		print '			<div class="input-group" style="width:400px">';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">'.$this->translations['lat']['translation_text'].'</span>';
+		print '			<div id="map_canvas" style="width:100%;height:400px"></div>';
+		print '			<div class="input-group" style="width:100%">';
+		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.$this->translations['lat']['translation_text'].'</span>';
 		print '			    <input type="text" class="form-control required" id="latitude" name="latitude"/>';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">'.$this->translations['lon']['translation_text'].'</span>';
+		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.$this->translations['lon']['translation_text'].'</span>';
 		print '			    <input type="text" class="form-control required" id="longitude" name="longitude"/>';
 		print '			</div>';
-		print '			<div class="input-group" style="width:400px"> ';
-		print '			    <span class="input-group-addon" id="basic-addon1" style="width:100px">'.$this->translations['grid']['translation_text'].'</span>';
+		print '			<div class="input-group" style="width:100%"> ';
+		print '			    <span class="input-group-addon" id="basic-addon1" style="width:25%">'.$this->translations['grid']['translation_text'].'</span>';
 		print '			    <input type="text" class="form-control" id="grid_ref" name="grid_ref"/>';
 		print '			</div>';
+		
 
 
 		print '         <div id="latlonhelp" data-help="'.$this->translations['lat_lon_help']['translation_text'].'"></div>';
+		
 		print '         </p>';
 
-		print '        </div>';
+		print '        </div>'; // tab
 
 		print '        <div class="tab"><h2>'.$this->translations['extra_det']['translation_text'].'</h2>';
 		print '          <p>';

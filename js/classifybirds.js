@@ -228,6 +228,7 @@ jQuery(document).ready(function(){
 	// Add loading indications
 	jQuery(".loader").removeClass("invisible");
 	jQuery(this).text(loadingMsg);
+	jQuery(".loader").removeClass('invisible');
 	
 	id = jQuery(this).attr("id");
 	var sideBarToggled = jQuery('#wrapper').is(".toggled");
