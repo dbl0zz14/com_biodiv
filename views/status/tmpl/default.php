@@ -172,7 +172,7 @@ if ( $isCameraWebsite ) {
 // New version using class
 if ( $this->survey != null ) {
 	print '<div id="survey_modal" class="modal fade" role="dialog">';
-	print '  <div class="modal-dialog" style="width:60%;">';
+	print '  <div class="modal-dialog" style="width:95%;">';
 
 	print '    <!-- Modal content-->';
 	print '    <div class="modal-content">';
