@@ -1,3 +1,8 @@
+# 28/2/21 - Version 3.3.3   #
+* Display discover map within mobile screen.
+* Display location map within mobile screen on classify and test yourself.
+* Improve display of survey buttons on mobile.
+
 # 17/2/21 - Version 3.3.3   #
 * Write split files with no user id (bugfix)
 * Add loading message and loader circle
