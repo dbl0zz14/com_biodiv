@@ -127,20 +127,16 @@ if ( $this->haveConsent ) {
 	//print '       <button  class="btn btn-outline-primary btn-block btn-lg" > '.$this->translations['parti_info']['translation_text'].' <i class="fa fa-angle-down fa-lg" aria-hidden="true"></i></button>';
 	
 	//print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
-	print '            <div class="col-md-2 col-xs-6">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="task" value="add_response"/>';
     print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-    print '              <button id="take_survey"  class="btn btn-warning" type="submit">'.$this->translations['contribute']['translation_text'].'</button>';
+    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="take_survey"  class="btn btn-warning btn-block" type="submit">'.$this->translations['contribute']['translation_text'].'</button></div>';
 	print '          </form>';
-	print '          </div';
-	print '          <div class="col-md-2 col-xs-6">';
 	print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="view" value="status"/>';
-    print '              <button id="no_survey" class="btn btn-warning" type="submit"  data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button>';
+    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="no_survey" class="btn btn-warning btn-block" type="submit"  data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button></div>';
 	print '          </form>';
-	print '          </div';
 	
 	
 }

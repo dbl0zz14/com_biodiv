@@ -56,7 +56,9 @@ defined('_JEXEC') or die;
 		$url = imageURL($topic_id);
 		
 		print "<button class='image-btn topic-btn' type='button' data-topic='".$topic_id."' data-tooltip='".$this->translations['topic_tip']['translation_text'].
-			"'><div class='crop-width-col4'><img class='project-col-image cover scale2' alt = 'topic image' src='".$url."' /></div></button>";
+		//	"'><div class='crop-width-col4'><img class='project-col-image cover scale2' alt = 'topic image' src='".$url."' /></div></button>";
+		//	"'><div class='crop-width-col4'><img class='cover img-responsive' alt = 'topic image' src='".$url."' /></div></button>";
+			"'><div class='crop-width-col4'><img class='cover img-responsive' style='min-height:100%' alt = 'topic image' src='".$url."' /></div></button>";
 		
 		print '</div>'; // col-md-4
 		

@@ -238,21 +238,22 @@ if ( $this->survey != null ) {
 	
 	print '      </div>'; // panel-group
 	
-	print '      	<div>';
+	print '      </div>'; // modal body
+	print '      	<div class="modal-footer">';
 	//print '          <form id="take_survey" action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="task" value="take_survey"/>';
     print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-    print '              <button  class="btn btn-warning" type="submit">'.$this->translations['contribute']['translation_text'].'</button>';
-	print '              <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal" >'.$this->translations['maybe_later']['translation_text'].'</button>';
-	print '              <button id="no_survey" type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal" data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button>';
+	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button  class="btn btn-warning btn-block" type="submit">'.$this->translations['contribute']['translation_text'].'</button></div>';
+	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" >'.$this->translations['maybe_later']['translation_text'].'</button></div>';
+	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button id="no_survey" type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button></div>';
 	print '          </form>';
 	print '          </div>';
 
-	print '      </div>';
-	print '      <div class="modal-footer">';
+	
+	//print '      <div class="modal-footer">';
 	//print '        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal">'.$this->translations['not_now']['translation_text'].'</button>';
-	print '      </div>';
+	//print '      </div>';
 	print '    </div>';
 
 	print '  </div>';

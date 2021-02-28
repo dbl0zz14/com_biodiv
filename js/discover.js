@@ -256,6 +256,7 @@ jQuery(document).ready(function () {
 		}
 		jQuery('#sightingschart_message').html("");
 		jQuery('#uploadschart_message').html("");
+		jQuery('#howto_message').html("");
 
 	}
 	

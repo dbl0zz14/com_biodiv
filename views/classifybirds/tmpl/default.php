@@ -334,7 +334,7 @@ print "</div>";
       </div>
       <div class="modal-body">
 	    <div id="no_map"><h5> <?php print $this->translations['no_map']['translation_text']; ?> </h5></div>
-        <div id="map_canvas" style="width:500px;height:500px;"></div>
+        <div id="map_canvas" style="width:100%;height:400px"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

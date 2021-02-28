@@ -5,19 +5,75 @@ defined('_JEXEC') or die;
 
 class SpeciesCarousel {
 	
-	// An array of the children of this project.
-	var $translations;
+	private $translations;
+	private $filters;
+	private $allSpecies;
+	private $classifyInputs;
 	
 	function __construct()
 	{
 		$this->translations = getTranslations("classify");
 		$this->filters = array();
-		$this->allSpecies = codes_getList ( "speciestran" );
+		
+		$this->allSpecies = allSpecies();
+		
+		$err_msg = print_r ( $this->allSpecies, true );
+		error_log ( "allSpecies in constructor: " . $err_msg );
+		
+		$this->allSpeciesTran = codes_getList ( "speciestran" );
+		
+		$err_msg = print_r ( $this->allSpeciesTran, true );
+		error_log ( "allSpeciesTran in constructor: " . $err_msg );
+		
 		$this->classifyInputs = getClassifyInputs();
 	}
 	
 	function setFilters ( $filters ) {
 		$this->filters = $filters;
+	}
+	
+	public static function getAllSpecies () {
+		
+		error_log ("Static getAllSpecies called");
+		
+		$db = JDatabase::getInstance(dbOptions());
+	
+		$speciesArray = null;
+		
+		// Check the language tag and work differently if English
+		$lang = langTag();
+		if ( $lang == 'en-GB' ) {
+			
+			error_log ( "Language is English so no join to OptionData" );
+			$query = $db->getQuery(true);
+			
+			$query->select("O.option_id as id, O.option_name as name")
+				->from("Options O")
+				->where( "O.struc in ( 'mammal', 'bird', 'notinlist' )" );
+				
+			$db->setQuery($query);
+			
+			$speciesArray = $db->loadRowList();
+			
+		}
+		else {
+			
+			$query = $db->getQuery(true);
+			
+			$query->select("OD.option_id as id, OD.value as name")
+				->from("OptionData OD")
+				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','notinlist' )")
+				->where("OD.data_type = " . $db->quote($lang) );
+				
+			$db->setQuery($query);
+			
+			$speciesArray = $db->loadRowList();
+			
+		}
+		$err_msg = print_r ( $speciesArray, true );
+		error_log ( $err_msg );
+		
+		return $speciesArray;
 	}
 	
 	function generateSpeciesCarousel () {
@@ -73,10 +129,15 @@ class SpeciesCarousel {
 		print "		  <div id='classify-species'>";
 
 
+		$err_msg = print_r ( $this->allSpecies, true );
+		error_log ( "generateClassifyModal allSpecies = " . $err_msg );
+		
 		foreach ($this->allSpecies as $stuff) {
 			list($species_id, $species_name) = $stuff;
 			print "<h2 id='species_header_${species_id}' class='species_header'>" . $species_name."</h2>\n";
 		}
+		
+		error_log ( "Done allSpecies" );
 
 		print "<input type='hidden' name='species' id='species_value'/>\n";
 		//print "<input id='currPhotoId' type='hidden' name='photo_id' value='".$this->photo_id."'/>\n";

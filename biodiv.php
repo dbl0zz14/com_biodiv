@@ -3993,15 +3993,61 @@ function strucCmp($a, $b)
 		return strcmp($a, $b);
 	}
 }
+
+function allSpecies () {
+		
+		error_log ("allSpecies called");
+		
+		$db = JDatabase::getInstance(dbOptions());
 	
-function getSpecies ( $filterid, $onePage ) {
+		$speciesArray = null;
+		
+		// Check the language tag and work differently if English
+		$lang = langTag();
+		if ( $lang == 'en-GB' ) {
+			
+			error_log ( "Language is English so no join to OptionData" );
+			$query = $db->getQuery(true);
+			
+			$query->select("O.option_id as id, O.option_name as name")
+				->from("Options O")
+				->where( "O.struc in ( 'mammal', 'bird', 'notinlist' )" );
+				
+			$db->setQuery($query);
+			
+			$speciesArray = $db->loadRowList();
+			
+		}
+		else {
+			
+			$query = $db->getQuery(true);
+			
+			$query->select("OD.option_id as id, OD.value as name")
+				->from("OptionData OD")
+				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','notinlist' )")
+				->where("OD.data_type = " . $db->quote($lang) );
+				
+			$db->setQuery($query);
+			
+			$speciesArray = $db->loadRowList();
+			
+		}
+		$err_msg = print_r ( $speciesArray, true );
+		error_log ( $err_msg );
+		
+		return $speciesArray;
+}
+	
+function getSpecies ( $filterId, $onePage ) {
 	
 	$speciesList = array();
-	  
+	
+	/* Bypass the codes stuff with a set of selects directly in the database for speed
+	
 	//$species = codes_getList ( $filtername );
 	$restrict = array();
-	$restrict['restriction'] = "value = '" . $filterid . "'";
-	//$species = codes_getList ( "filterspecies", $restrict );
+	//$restrict['restriction'] = "value = '" . $filterid . "'";
+	$restrict['restriction'] = "list_id = '" . $filterid . "'";
 	$species = codes_getList ( "filterspeciestran", $restrict );
 	  
 	// Need to sort this list by name.
@@ -4044,7 +4090,93 @@ function getSpecies ( $filterid, $onePage ) {
 	uksort($speciesList, "strucCmp");
 	
 	//print_r ( $speciesList );
+	
+	*/
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$mammalArray = null;
+	$birdArray = null;
+	$notinlistArray = null;
+	
+	// Check the language tag and work differently if English
+	$lang = langTag();
+	if ( $lang == 'en-GB' ) {
 		
+		error_log ( "Language is English so no join to OptionData" );
+		$query = $db->getQuery(true);
+		
+		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
+			->from("Options O")
+			->innerJoin("SpeciesList SL on O.option_id = SL.species_id")
+			->where( "O.struc = 'mammal'" )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$mammalArray = $db->loadAssocList("id");
+		
+		error_log ( "Got mammal names" );
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
+			->from("Options O")
+			->innerJoin("SpeciesList SL on O.option_id = SL.species_id")
+			->where( "O.struc = 'bird'" )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$birdArray = $db->loadAssocList("id");
+		
+		error_log ( "Got bird names" );
+		
+	}
+	else {
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("OD.option_id as id, OD.value as name, O.struc as type")
+			->from("OptionData OD")
+			->innerJoin("SpeciesList SL on OD.option_id = SL.species_id")
+			->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'mammal'")
+			->where("OD.data_type = " . $db->quote($lang) )
+			->where("SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$mammalArray = $db->loadAssocList("id");
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("OD.option_id as id, OD.value as name, O.struc as type")
+			->from("OptionData OD")
+			->innerJoin("SpeciesList SL on OD.option_id = SL.species_id")
+			->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'bird'")
+			->where("OD.data_type = " . $db->quote($lang) )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$birdArray = $db->loadAssocList("id");
+		
+	}
+	
+	if ( $mammalArray ) $speciesList['mammal'] = $mammalArray;
+	if ( $birdArray ) $speciesList['bird'] = $birdArray;
+	
+	$err_msg = print_r ( $mammalArray, true );
+	error_log ( "mammal list for filter " . $filterId . ": " . $err_msg );
+	
+	$err_msg = print_r ( $birdArray, true );
+	error_log ( "bird list for filter " . $filterId . ": " . $err_msg );
+	
+	
 	return $speciesList;
 }
 

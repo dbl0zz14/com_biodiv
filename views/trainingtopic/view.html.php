@@ -63,12 +63,12 @@ class BioDivViewTrainingTopic extends JViewLegacy
 	// Create the classes used to generate the carousel html code
 	$this->mediaCarousel = new MediaCarousel();
 	
-	//error_log("TrainingTopic view - about to create SpeciesCarousel");
+	error_log("TrainingTopic view - about to create SpeciesCarousel");
 	
 	$this->speciesCarousel = new SpeciesCarousel();
 	$this->speciesCarousel->setFilters ( $this->filters );
 	
-	//error_log("TrainingTopic view - about to get sequences");
+	error_log("TrainingTopic view - about to get sequences");
 	
 	// Get the gold standard sequences for this topic
 	$this->sequences = getTrainingSequences($this->topic_id, 8);
