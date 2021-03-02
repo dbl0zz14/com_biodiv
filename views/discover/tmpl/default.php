@@ -32,15 +32,11 @@ else {
 
 
 <div class='row'>
-<div class='col-md-3 col-sm-3 col-xs-6'>
+<div class='col-md-7 col-sm-12 col-xs-12'>
 <?php
-  print "<div data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
-?>
-</div>
+  print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
 
-<div class='col-md-4 col-sm-9 col-xs-6'>
-<?php
-  print '<div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
+  print ' <div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
   print '  <button class="btn btn-warning" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
   print '  <button class="btn btn-warning active disabled" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
   print '</div>';
