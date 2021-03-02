@@ -51,9 +51,9 @@ else {
 
 <?php
 print "<div class='col-md-5 col-sm-12 col-xs-12'>";
-print "<div data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."' >";
-print "<div style='display:inline-block; '>";
-print "<select name = 'species_id' id='species_select'>";
+print "<div class='input-group' data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."' >";
+//print "<div style='display:inline-block; '>";
+print "<select class='form-control form-control-sm' name = 'species_id' id='species_select'>";
 print "  <option value='' disabled selected hidden>" . $this->translations['sel_sp']['translation_text'] . "...</option>";
 
 
@@ -63,18 +63,19 @@ print "  <option value='' disabled selected hidden>" . $this->translations['sel_
 	}
 
 print "</select>";
-print "</div>";
-print "<!-- span class='input-group-btn' -->";
-print "<div style='display:inline-block; '>";
+//print "</div>";
+print "<span class='input-group-btn'>";
+//print "<div style='display:inline-block; '>";
 print "<button  class='btn btn-warning' id='discover_species'>" . $this->translations['show_sp']['translation_text'] . "</button>";
-print "<!-- /span -->";
-print "</div>";
+print "</span>";
+//print "</div>";
 print "</div>";
 print "</div>";
 
 
 ?>
 </div> <!-- row -->
+
 
 <div class="row">
 <div class='col-xs-12 col-sm-12 col-md-8'>
