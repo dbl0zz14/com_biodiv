@@ -32,23 +32,18 @@ else {
 
 
 <div class='row'>
-<div class='col-md-7 col-sm-12 col-xs-12'>
-<?php
-  print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
-
-  print ' <div class="btn-group btn-toggle" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"> ';
-  print '  <button class="btn btn-warning" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
-  print '  <button class="btn btn-warning active disabled" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
-  print '</div>';
-
-?>
-
-</div>
 
 <?php
-print "<div class='col-md-5 col-sm-12 col-xs-12'>";
-print "<div class='input-group' data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."' >";
-//print "<div style='display:inline-block; '>";
+print "<div class='form-inline col-md-12 col-sm-12 col-xs-12' >";
+print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."' style='margin-bottom:4px;'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
+
+print ' <div class="btn-group" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"  style="margin-bottom:4px;"> ';
+print '  <button class="btn btn-warning" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
+print '  <button class="btn btn-warning hidden" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
+print '</div>';
+
+
+print " <div class='input-group' data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."'  style='margin-bottom:4px;'>";
 print "<select class='form-control form-control-sm' name = 'species_id' id='species_select'>";
 print "  <option value='' disabled selected hidden>" . $this->translations['sel_sp']['translation_text'] . "...</option>";
 
@@ -59,15 +54,12 @@ print "  <option value='' disabled selected hidden>" . $this->translations['sel_
 	}
 
 print "</select>";
-//print "</div>";
 print "<span class='input-group-btn'>";
-//print "<div style='display:inline-block; '>";
 print "<button  class='btn btn-warning' id='discover_species'>" . $this->translations['show_sp']['translation_text'] . "</button>";
 print "</span>";
-//print "</div>";
-print "</div>";
-print "</div>";
+print "</div>"; // input-group
 
+print "</div>"; // col-12
 
 ?>
 </div> <!-- row -->
@@ -79,7 +71,7 @@ print "</div>";
 <?php print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['data_warn']['translation_text']."</h5>";?>
 </div>
 <div class='col-xs-12 col-sm-12 col-md-4'>
-<?php print '<div id="howto_message"><h3>'.$this->translations['areas_tooltip']['translation_text'].'<h3></div>'; ?>
+<?php print '<div id="howto_message"><h5 class="bg-warning highlighted add-padding-all">'.$this->translations['areas_tooltip']['translation_text'].'<h5></div>'; ?>
 <div id="sightingschart_message"></div>
 <div id="uploadschart_message"></div>
 <div class="table-responsive discover-chart" style="padding: 0; height:340px; width:310px; overflow:hidden;">

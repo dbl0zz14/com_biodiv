@@ -64,10 +64,8 @@ jQuery(document).ready(function () {
 		else {
 			clearSites();
 		}
-		jQuery('#discover_sites').toggleClass('active');
-		jQuery('#hide_sites').toggleClass('active'); 
-		jQuery('#discover_sites').toggleClass('disabled');
-		jQuery('#hide_sites').toggleClass('disabled'); 
+		jQuery('#discover_sites').toggleClass('hidden');
+		jQuery('#hide_sites').toggleClass('hidden'); 
 		
 		
 	};
