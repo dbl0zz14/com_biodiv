@@ -39,11 +39,12 @@ class BioDivViewTransfer extends JViewLegacy
 			$this->photos = $db->loadAssocList("photo_id");
 			
 			// Create a second list of all original files to be copied to AWS S3 storage - nb could be videos too
+			// Only copy the files which have been processed (ie split)
 			$db = JDatabase::getInstance(dbOptions());
 			$query = $db->getQuery(true);
 			$query->select("of_id, person_id, site_id, dirname, filename")
 				->from("OriginalFiles")
-				->where("s3_status = 0");
+				->where("s3_status = 0 and status = 1");
 
 			$max_num = 500;
 			$db->setQuery($query, 0, $max_num); // LIMIT $max_num
