@@ -56,6 +56,7 @@ class BioDivViewProjectDashboard extends JViewLegacy
 	
 	$this->waitText = $this->translations['wait_text']['translation_text'];
 	$this->doneText = $this->translations['done_text']['translation_text'];
+	$this->genText = $this->translations['gen_text']['translation_text'];
 
     // Display the view
     parent::display($tpl);

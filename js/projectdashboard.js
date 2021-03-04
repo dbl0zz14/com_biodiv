@@ -3,6 +3,7 @@ jQuery(document).ready(function(){
 	// Pick up text string variables - could be non-English
 	const waitText = BioDiv.waitText;
 	const doneText = BioDiv.doneText;
+	const genText = BioDiv.genText;
 	
 	let currentReportType = null;
 	let currentReportId = null;
@@ -117,7 +118,7 @@ jQuery(document).ready(function(){
 		jQuery('.report-btn h4').removeClass('text-info');
 		jQuery(this).children("h4").addClass('text-info');
 		
-		jQuery('#report_display').html("<h4>Generating report...<h4>");
+		jQuery('#report_display').html("<h4>" + genText + "<h4>");
 		
 		displayReport(0);
 		

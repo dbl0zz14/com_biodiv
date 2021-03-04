@@ -12,6 +12,7 @@ defined('_JEXEC') or die;
 $document = JFactory::getDocument();
 $document->addScriptDeclaration("BioDiv.waitText = '".$this->waitText."';");
 $document->addScriptDeclaration("BioDiv.doneText = '".$this->doneText."';");
+$document->addScriptDeclaration("BioDiv.genText = '".$this->genText."';");
 
 
 if ( !$this->personId ) {
