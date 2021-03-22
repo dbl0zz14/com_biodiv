@@ -18,9 +18,21 @@ $document->addScriptDeclaration("BioDiv.loadingMsg = '".$this->translations['loa
 <p>
 <table class="table">
 <?php
+/*
 foreach($this->status as $msg => $count){
   print "<tr><td>$msg</td><td>$count</td></tr>\n";
  }
+ */
+ foreach ( $this->status as $row ) {
+		
+	print '<tr>';
+	
+	foreach ( $row as $rowField ) {
+		print '<td>'.$rowField.'</td>';
+	}
+	
+	print '</tr>';
+}
  
  $isCamera = getSetting("camera") == "yes";
  $classifyView = $isCamera ? "classify" : "classifybirds";

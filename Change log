@@ -1,3 +1,8 @@
+# 22/3/21 - Version 3.4.0   #
+* Add user dashboard page and associated reports/statistics
+* Changes to Sequence class to add own media files
+* Changes to BiodivReport to handle user reports as well as project resports
+
 # 28/2/21 - Version 3.3.3   #
 * Display discover map within mobile screen.
 * Display location map within mobile screen on classify and test yourself.
@@ -14,7 +19,7 @@
 * Handle project dashboard tooltips and wait messages in non-English languages
 
 # 21/1/21 - Version 3.3.2   #
-* Upload AVI files with datetime in filename to OriginalFiles.  COnvert to mp4 for display. 
+* Upload AVI files with datetime in filename to OriginalFiles.  Convert to mp4 for display. 
 * Search in classify and test yourself
 * Project admin page with reports displayed and to download
 * Default project setting used in audio site creation, not used in trapper.

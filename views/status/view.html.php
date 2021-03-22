@@ -30,7 +30,7 @@ class BioDivViewStatus extends JViewLegacy
     $person_id or die("No person_id");
 
     $this->root = 
-    $this->status = array();
+    $this->status = getSpotterStatistics();
 	
 	// Set the photo to zero on load and the classify option back to default 0
 	$app = JFactory::getApplication();
@@ -46,7 +46,7 @@ class BioDivViewStatus extends JViewLegacy
 
 	// Get all the text snippets for this view in the current language
 	$this->translations = getTranslations("status");
-
+/*
 	$query = $db->getQuery(true);
     $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
 		->from("Statistics")
@@ -87,7 +87,8 @@ class BioDivViewStatus extends JViewLegacy
 	
 	$this->status[$this->translations['tot_spot']['translation_text']] = $this->totalSpotters;
 	$this->status[$this->translations['you_curr']['translation_text'] . ' ' . getOrdinal($userPos + 1) . ' ' . $this->translations['contrib']['translation_text'] ] ='';
-		
+*/
+
 	// call new biodiv.php function instead of myProjects()
 	// Changed back argument to check redirect issue  
 	$this->projects = mySpottingProjects( true );

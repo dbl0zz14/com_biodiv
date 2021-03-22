@@ -235,6 +235,9 @@
 
 /* end of training specifics */
 
+
+
+
 #jform_profileMW_wherehear > li > a:hover, #jform_profileMW_wherehear > li > a:focus,  { background: #fff; color: #000; }
 
 @media only screen and (min-width: 992px) {
@@ -533,6 +536,14 @@
 /* Mark the steps that are finished and valid: */
 .step.finish {
   background-color: #4CAF50;
+}
+
+/* User dashboard - accordion buttons should be full width and height */
+.panel_options {
+	padding: 0;
+}
+.panel_options > .list-group {
+	margin: 0;
 }
 
 

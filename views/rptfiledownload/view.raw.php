@@ -52,7 +52,20 @@ class BioDivViewRptFileDownload extends JViewLegacy
 		
 		$this->reportURL = null;
 		
-		if ( in_array ($this->projectId, $allIds ) ) {
+		if ( $this->projectId == 0 && $person_id == $details['person_id']) {
+			error_log ( "valid user project, creating report" );
+			
+			$biodivReport = BiodivReport::createFromId ( $this->reportId );
+			
+			$biodivReport->createDownloadFile();
+			
+			$this->reportURL = $biodivReport->reportURL();
+			
+			$this->reportName = $biodivReport->getFilename();
+			
+			$this->headings = $biodivReport->headings();
+		}
+		else if ( in_array ($this->projectId, $allIds ) ) {
 			
 			error_log ( "valid project, creating report" );
 			
@@ -63,52 +76,13 @@ class BioDivViewRptFileDownload extends JViewLegacy
 			$this->reportURL = $biodivReport->reportURL();
 			
 			$this->reportName = $biodivReport->getFilename();
-			$this->headings = $biodivReport->headings();
-			//$this->data = $biodivReport->rows(0, $biodivReport->totalRows());
 			
-			//$this->data = $biodivReport->getData( $this->page );
+			$this->headings = $biodivReport->headings();
 		}
 		else {
 			$this->reportURL = "Sorry you do not have access";
 		}
 		
-		
-		/*
-		$this->months = (int)JRequest::getVar('months', 6);
-		
-		// determine the interval
-		if ( $this->months > 12 ) $this->interval = 4;
-		else if ( $this->months > 6 ) $this->interval = 2;
-		else $this->interval = 1;
-		$this->data = projectData ( $this->project_id, $this->months, $this->interval );
-		*/
-		/*
-		error_log ( "Creting test report" );
-		
-		$list = array (
-			array('aaa', 'bbb', 'ccc', 'dddd'),
-			array('123', '456', '789'),
-			array('"aaa"', '"bbb"')
-		);
-		
-		// Creates a new csv file and store it in tmp directory
-		$this->new_csv = fopen ( reportRoot().'/report.csv', 'w');
-		
-		foreach ($list as $fields) {
-			fputcsv($this->new_csv, $fields);
-		}
-		fclose($this->new_csv);
-		
-		error_log ( "File created" );
-		*/
-
-		// output headers so that the file is downloaded rather than displayed
-		//header("Content-type: text/csv");
-		//header("Content-disposition: attachment; filename = report.csv");
-		
-		//error_log ( "About to call readFile" );
-		
-		//readfile(reportRoot().'/report.csv');
 		
 		error_log ( "About to call display" );
 		

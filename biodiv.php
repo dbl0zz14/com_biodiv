@@ -45,8 +45,6 @@ require_once('libraries/getid3/getid3/getid3.php');
 include "aws.php";
 
 
-
-
 function db(){
   static $db;
   $options = dbOptions();
@@ -66,6 +64,16 @@ function userID(){
   }
   else{
     return $user->id;
+  }
+}
+
+function userTimezone() {
+  $user = JFactory::getUser();
+  if($user->guest){
+    return null;
+  }
+  else{
+    return $user->getTimezone();
   }
 }
 
@@ -365,6 +373,7 @@ function getSetting ( $key ) {
 	
 	return $value;
 }
+
   
 function update_siteLatLong ( $site_id, $lat, $lon ) {
 	if ( !$lat or !$lon ) {
@@ -993,8 +1002,8 @@ function myTrappingProjects () {
   // Add in the public and hybrid projects
   $myprojects = $myprojects + $publicprojects + $privateprojects;
   
-  $err_str = print_r ($myprojects, true);
-  error_log("myTrappingProjects myprojects = " . $err_str );
+  //$err_str = print_r ($myprojects, true);
+  //error_log("myTrappingProjects myprojects = " . $err_str );
   
   //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
   //print implode(",", $myprojects);
@@ -1255,6 +1264,134 @@ function projectDetails ( $project_id ) {
 }
 
 
+function getTrapperStatistics () {
+	
+	// Get all the text snippets for trapperdash view
+	$translations = getTranslations("dashtrapper");
+
+	$personId = (int)userID();
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$statRows = array();
+
+	$query = $db->getQuery(true);
+    $query->select("count(*) ")
+		->from("Site");
+	$db->setQuery($query); 
+	$numSites = $db->loadResult();
+	
+	array_push( $statRows, array($translations['tot_sites']['translation_text'], $numSites) );
+	
+	$query = $db->getQuery(true);
+    $query->select("count(*) ")
+		->from("Site")
+		->where("person_id = " . $personId);
+	$db->setQuery($query); 
+	$numSites = $db->loadResult();
+	
+	array_push( $statRows, array($translations['your_sites']['translation_text'], $numSites) );
+	
+	$query = $db->getQuery(true);
+    $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
+		->from("Statistics")
+		->where("project_id = 0")
+		->order("end_date DESC");
+	$db->setQuery($query, 0, 1); // LIMIT 1
+	$row = $db->loadAssoc();
+	
+	array_push( $statRows, array($translations['tot_seq']['translation_text'], $row['uploaded']) );
+	$query = $db->getQuery(true);
+    
+	
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	$query->select("sum(num_uploaded) ")
+		->from("SiteStatistics SS")
+		->innerJoin("Site S on S.site_id = SS.site_id and SS.end_date = " . $endDate)
+		->where("S.person_id = " . $personId);
+		
+	$db->setQuery($query); 
+	
+	error_log("Seq select query created: " . $query->dump());
+	
+	$mySeqs = $db->loadResult();
+	
+	$query = $db->getQuery(true);
+    $query->select("sum(num_uploaded) ")
+		->from("PrivateSiteStatistics SS")
+		->innerJoin("Site S on S.site_id = SS.site_id and SS.end_date = " . $endDate)
+		->where("S.person_id = " . $personId);
+		
+	$db->setQuery($query); 
+	
+	error_log("Seq select query created: " . $query->dump());
+	
+	$myPrivateSeqs = $db->loadResult();
+	
+	
+	array_push( $statRows, array($translations['your_seq']['translation_text'], $mySeqs+$myPrivateSeqs) );
+	
+	
+
+		
+	return $statRows;
+}	
+	
+	
+function getSpotterStatistics () {
+	
+	// Get all the text snippets for status view
+	$translations = getTranslations("status");
+
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$statRows = array();
+
+	$query = $db->getQuery(true);
+    $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
+		->from("Statistics")
+		->where("project_id = 0")
+		->order("end_date DESC");
+	$db->setQuery($query, 0, 1); // LIMIT 1
+	$row = $db->loadAssoc();
+	
+	array_push( $statRows, array($translations['tot_system']['translation_text'], $row['uploaded']) );
+	array_push( $statRows, array($translations['tot_class']['translation_text'], $row['classified']) );
+	
+	
+	$query = $db->getQuery(true);
+    $query->select("person_id, num_classified")
+		->from("LeagueTable")
+		->order("num_classified desc");
+    $db->setQuery($query);
+	
+    $leagueTable = $db->loadAssocList();
+	
+	$lTable = array_column($leagueTable, 'person_id');
+	$tSpotters = count($lTable);
+	
+	$personId = (int)userID();
+	$userPos = array_search ( $personId, $lTable );
+	
+	if ( $userPos === False  ) {
+		//print ( "Not in league table" );
+		$userPos = count($lTable);
+		$tSpotters += 1;
+		
+		array_push( $statRows, array($translations['num_you']['translation_text'], 0) );
+	
+	}
+	else {
+		array_push( $statRows, array($translations['num_you']['translation_text'], $leagueTable[$userPos]['num_classified']) );
+	}
+	
+	array_push( $statRows, array($translations['tot_spot']['translation_text'], $tSpotters) );
+	array_push( $statRows, array($translations['you_curr']['translation_text'] . ' ' . getOrdinal($userPos + 1) . ' ' . $translations['contrib']['translation_text'], '') );
+		
+	return $statRows;
+}	
+	
+	
 // Use the helper class to get the expertise details
 function userExpertise( $person_id ) {
 	
@@ -1480,6 +1617,17 @@ function calculateSiteStats ( $end_date = null ) {
 	
 	$uploaded = $db->loadAssocList("site_id", "num");
 	
+	// Handle pric=ate sites - this data goes in a different table
+	$query = $db->getQuery(true)
+		->select("site_id, count(distinct sequence_id) as num from Photo P")
+		->where("uploaded < " . $dateToUse )
+		->where('site_id in (select PSM.site_id from ProjectSiteMap PSM inner join Project P on P.project_id = PSM.project_id and P.access_level = 3)')
+		->group("site_id");
+		
+	$db->setQuery($query);
+	
+	$privateUploaded = $db->loadAssocList("site_id", "num");
+	
 	$query = $db->getQuery(true)
 		->select("P.site_id, count(distinct P.sequence_id) as num from Photo P")
 		->innerJoin("Animal A on A.photo_id = P.photo_id")
@@ -1491,6 +1639,19 @@ function calculateSiteStats ( $end_date = null ) {
 	$db->setQuery($query);
 	
 	$classified = $db->loadAssocList("site_id", "num");
+	
+	// Handle private sites
+	$query = $db->getQuery(true)
+		->select("P.site_id, count(distinct P.sequence_id) as num from Photo P")
+		->innerJoin("Animal A on A.photo_id = P.photo_id")
+		->where("A.species != 97")
+		->where("A.timestamp < " . $dateToUse )
+		->where('P.site_id in (select PSM.site_id from ProjectSiteMap PSM inner join Project P on P.project_id = PSM.project_id and P.access_level = 3)')
+		->group("site_id");
+		
+	$db->setQuery($query);
+	
+	$privateClassified = $db->loadAssocList("site_id", "num");
 	
 	$query = $db->getQuery(true)
 		->delete("SiteStatistics")
@@ -1514,6 +1675,37 @@ function calculateSiteStats ( $end_date = null ) {
 	foreach ($classified as $site_id=>$numClassified) {
 		$query = $db->getQuery(true)
 			->update("SiteStatistics")
+			->set("num_classified = " . $numClassified )
+			->where("site_id = " . $site_id)
+			->where("end_date = '" . $endDate . "'" );
+			
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+	
+	// Do similar for private sites
+	$query = $db->getQuery(true)
+		->delete("PrivateSiteStatistics")
+		->where("end_date = " . $endDate);
+		
+	$db->setQuery($query);
+	$result = $db->execute();
+	
+	// Insert using the uploaded sites.
+	foreach ($privateUploaded as $site_id=>$numLoaded) {
+		$query = $db->getQuery(true)
+			->insert("PrivateSiteStatistics")
+			->columns($db->quoteName(array('site_id', 'end_date', 'num_uploaded')))
+			->values("" . $site_id . ", '" . $endDate . "', " . $numLoaded  );
+			
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+	
+	// And update with the num classified
+	foreach ($privateClassified as $site_id=>$numClassified) {
+		$query = $db->getQuery(true)
+			->update("PrivateSiteStatistics")
 			->set("num_classified = " . $numClassified )
 			->where("site_id = " . $site_id)
 			->where("end_date = '" . $endDate . "'" );
@@ -2459,6 +2651,445 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
   
   return $projectData;
 }
+
+
+// Return number of uploads and classifications for the user's sites
+function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
+	
+	error_log("discoverUserUploads(" . $site_id . ", ". $num_months . ")");
+	
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("discover");
+	  
+	// Default to All sites
+	$siteText = $translations["all_sites"]["translation_text"];
+	if ( $site_id ) {
+		
+		$siteDetails = codes_getDetails($site_id, 'site');
+		$siteText = $translations["for_site"]["translation_text"] . ' ' . $siteDetails['site_name'];
+	}
+	$title = $translations["up_class"]["translation_text"] . " " . $siteText ;
+	
+	$interval_in_months = 1;
+    $numDisplayedMonths = $num_months + $interval_in_months;
+	$end_date = null;
+    if ( $end_date == null ) {
+	  $endDatePlus1 = strtotime("first day of next month" );
+	  $endDate = strtotime("last day of this month");
+    }
+    else {
+	  $endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+	  $endDate = strtotime($end_date);
+    }
+  
+	$datesArray = array();
+	$labelsArray = array();
+	for ( $i=$numDisplayedMonths; $i>0; $i-=$interval_in_months ) {
+	  $minusMonths = "-" . $i . " months";
+	  $months = $i-$interval_in_months+1;
+	  $labelStr = "- " . $months . " months";
+	  $dateMinusMonths = strtotime($minusMonths, $endDatePlus1);
+	  array_push ( $datesArray, date('Ymd', strtotime("-1 day", $dateMinusMonths)) );
+	  array_push ( $labelsArray, date('M Y', strtotime($labelStr, $endDatePlus1)) );
+	}
+	array_push ( $datesArray, date('Ymd', strtotime("-1 day", $endDatePlus1)) );
+  
+	// Select number of sequences uploaded and number classified up to each of our dates.
+	$numIntervals = count($datesArray)-1;
+  
+	$uploadedArray = array();
+	$classifiedArray = array();
+	$db = JDatabase::getInstance(dbOptions());
+	
+	// Include data from private sites as this is user data
+	for ( $j=0; $j<$numIntervals; $j++ ) {
+		
+		$query = $db->getQuery(true)
+			->select("sum(num_uploaded), sum(num_classified) from SiteStatistics SS")
+			->innerJoin("Site S on SS.site_id = S.site_id")
+			->where("S.person_id = " . userID() )
+			->where("end_date = " . $datesArray[$j+1] );
+			
+		if ( $site_id ) $query->where("S.site_id = " . $site_id);
+		
+		$db->setQuery($query);
+	
+		$row = $db->loadRow();
+		
+		$query = $db->getQuery(true)
+			->select("sum(num_uploaded), sum(num_classified) from PrivateSiteStatistics SS")
+			->innerJoin("Site S on SS.site_id = S.site_id")
+			->where("S.person_id = " . userID() )
+			->where("end_date = " . $datesArray[$j+1] );
+			
+		if ( $site_id ) $query->where("S.site_id = " . $site_id);
+		
+		$db->setQuery($query);
+	
+		$privateRow = $db->loadRow();
+		
+		$uploadedNum = $row['0'] ? $row['0'] : 0;
+		$uploadedNum += $privateRow['0'] ? $privateRow['0'] : 0;
+		
+		$classifiedNum = $row['1'] ? $row['1'] : 0;
+		$classifiedNum += $privateRow['1'] ? $privateRow['1'] : 0;
+		
+		
+		array_push ( $uploadedArray, $uploadedNum );
+		array_push ( $classifiedArray, $classifiedNum );
+	}
+	
+	// If all uploaded entries are 0 there are no uploads so reflect in title
+	if ( array_sum($uploadedArray) == 0 ) {
+		$title = $translations["no_up_class"]["translation_text"] . " " . $siteText ;
+	}
+
+  
+	$discoverData = array ( 
+		"labels" => $labelsArray,
+		"uploaded" => $uploadedArray,
+		"classified" => $classifiedArray,
+		"cla_label" => $translations["classified"]["translation_text"],
+		"upl_label" => $translations["uploaded"]["translation_text"],
+		"title" => $title
+		
+		);
+  
+  
+	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
+	//print implode(",", $projectdetails);
+  
+	return $discoverData;
+}
+
+
+// Return number of each species classified for the user's sites 
+// If top is false the rarest ones (non-zero) are returned 
+// NB here we include private sites as they belong to the user
+function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
+	
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("dashcharts");
+
+	$title = $translations["by_sp"]["translation_text"];
+	
+	$personId = userID();
+
+	//$projects = getSubProjectsById( $project_id );
+	//$id_string = implode(",", array_keys($projects));
+	
+	if ( $top === true ) $order = 'DESC';
+	else $order = 'ASC';
+
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("SA.species as species_id, O.option_name as species, sum(SA.num_sightings) as num_animals FROM SiteAnimals SA")
+		->innerJoin("Site S on SA.site_id = S.site_id and S.person_id = " . $personId)
+		->innerJoin("Options O on O.option_id = SA.species")
+		->group("SA.species")
+		->order("num_animals, species " . $order);
+	
+	if ( $site_id ) $query->where("S.site_id = " . $site_id);
+	
+	$db->setQuery($query);
+	
+	//error_log ( "discoverUserAnimals, query: " . $query->dump() );
+
+
+	// Include id...
+	$animals_w_id = $db->loadAssocList('species');
+	
+	//$errMsg = print_r($animals_w_id, true);
+	//error_log ( "Animals w id: " . $errMsg );
+
+	$animals = $db->loadAssocList('species', 'num_animals');
+	
+	//$errMsg = print_r($animals, true);
+	//error_log ( "Animals: " . $errMsg );
+	
+	
+	// Get the same for private sites
+	$query = $db->getQuery(true);
+	$query->select("SA.species as species_id, O.option_name as species, sum(SA.num_sightings) as num_animals FROM PrivateSiteAnimals SA")
+		->innerJoin("Site S on SA.site_id = S.site_id and S.person_id = " . $personId)
+		->innerJoin("Options O on O.option_id = SA.species")
+		->group("SA.species")
+		->order("num_animals, species " . $order);
+	
+	if ( $site_id ) $query->where("S.site_id = " . $site_id);
+	
+	$db->setQuery($query);
+	
+	//error_log ( "discoverUserAnimals, pquery: " . $query->dump() );
+
+
+	// Include id...
+	$p_animals_w_id = $db->loadAssocList('species');
+	
+	//$errMsg = print_r($p_animals_w_id, true);
+	//error_log ( "Private animals w id: " . $errMsg );
+
+	$p_animals = $db->loadAssocList('species', 'num_animals');
+	
+	//$errMsg = print_r($p_animals, true);
+	//error_log ( "Private animals: " . $errMsg );
+	
+	// If there are any private sites need to add those numbers in
+	foreach ($p_animals_w_id as $pAnimal) {
+		$pSpecies = $pAnimal['species'];
+		if ( array_key_exists($pSpecies, $animals_w_id) ) {
+			$animals[$pSpecies] += $pAnimal['num_animals'];
+			$animals_w_id[$pSpecies]['num_animals'] += $pAnimal['num_animals'];
+		}
+		else {
+			$array_changed = true;
+			$animals[$pSpecies] = $pAnimal['num_animals'];
+			$animals_w_id[$pSpecies] = $pAnimal;
+		}
+	}
+	
+
+	// Remove human and nothing if not to be included
+	if ( !$include_human ) {
+	  unset($animals['Human']);
+	  $array_changed = true;
+	}
+	if ( !$include_nothing ) {
+	  unset($animals['Nothing']);
+	  $array_changed = true;
+	}
+	if ( !$include_dontknow ) {
+	  unset($animals["Don't Know"]);
+	  $array_changed = true;
+	}
+
+	// Remove Likes
+	unset($animals["Like"]);
+	$array_changed = true;
+
+	// If we had to change the key names we need to re-sort the array
+	if ( $array_changed ) {
+		if ( $top ) {
+			arsort($animals);
+		}
+		else {
+			asort($animals);
+		}
+	}
+	
+	//$errMsg = print_r($animals, true);
+	//error_log ( "Animals after sort: " . $errMsg );
+	
+
+	
+
+	$animals_to_return_en = array();
+	// Finally handle the number of species, if we have more than required
+	// NB Other is a possible option so combine this with Other Species if we have both
+	$num_other = 0;
+
+	if ( key_exists("Other", $animals) ) {
+	$num_other = $animals["Other"];
+	$animals = akrem($animals, "Other");
+	}
+	
+	if ( $top ) {
+		
+		if ( $num_other > 0 ) {
+		
+			if ( $num_species && (count($animals) > $num_species-1) ) {
+				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
+				$total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
+				$animals_to_return_en['Other Species'] = "" + $total_other;
+			}
+			else {
+				$animals_to_return_en = $animals ;
+			}
+		}
+		else {
+			if ( $num_species && (count($animals) > $num_species) ) {
+				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
+				$total_other = array_sum(array_slice($animals, $num_species-1));
+				$animals_to_return_en['Other Species'] = "" + $total_other;
+			}
+			else {
+				$animals_to_return_en = $animals ;
+			}
+		}
+	}
+	else {
+		// Don't include Other for rare species, number could be large and make graph unreadable, so this is much simpler
+		$animals_to_return_en = array_slice($animals, 0, $num_species);
+	}
+
+	//$errMsg = print_r($animals_to_return_en, true);
+	//error_log ( "animals_to_return_en: " . $errMsg );
+	
+
+	$animals_to_return = array();
+	foreach ( $animals_to_return_en as $sp=>$num ) {
+	  //error_log( "animal row: " . $sp . ", " . $num );
+	  if ( $sp == "Other Species" ) {
+		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
+		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+	  }
+	  else {
+		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
+		  $animals_to_return[codes_getName($animals_w_id[$sp]["species_id"], "speciestran")] = $num;
+	  }
+	}
+
+	return array (
+		"labels" => array_keys($animals_to_return),
+		"animals" => array_values($animals_to_return),
+		"title" => $title
+		);
+		
+
+
+}
+
+
+// Return nummber of Nothing, Human and total of species classifications 
+function discoverUserNothingHuman ( $site_id = null  ) {
+	
+	error_log ( "discoverUserNothingHuman(" . $site_id . ")" );
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("dashcharts");
+
+	$title = $translations["noth_hum"]["translation_text"];
+	
+	$personId = userID();
+
+	//$projects = getSubProjectsById( $project_id );
+	//$id_string = implode(",", array_keys($projects));
+	
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("SA.species as species_id, O.option_name as species, sum(SA.num_sightings) as num_animals FROM SiteAnimals SA")
+		->innerJoin("Site S on SA.site_id = S.site_id and S.person_id = " . $personId)
+		->innerJoin("Options O on O.option_id = SA.species")
+		->group("SA.species");
+	
+	if ( $site_id ) $query->where("S.site_id = " . $site_id);
+		
+	$db->setQuery($query);
+	
+	//error_log ( "discoverUserNothingHuman, query: " . $query->dump() );
+
+
+	// Include id...
+	$animals_w_id = $db->loadAssocList('species');
+	
+	//$errMsg = print_r($animals_w_id, true);
+	//error_log ( "discoverUserNothingHuman Animals w id: " . $errMsg );
+
+	$animals = $db->loadAssocList('species', 'num_animals');
+	
+	//$errMsg = print_r($animals, true);
+	//error_log ( "discoverUserNothingHuman Animals: " . $errMsg );
+	
+	// Get the same for private sites
+	$query = $db->getQuery(true);
+	$query->select("SA.species as species_id, O.option_name as species, sum(SA.num_sightings) as num_animals FROM PrivateSiteAnimals SA")
+		->innerJoin("Site S on SA.site_id = S.site_id and S.person_id = " . $personId)
+		->innerJoin("Options O on O.option_id = SA.species")
+		->group("SA.species");
+	
+	if ( $site_id ) $query->where("S.site_id = " . $site_id);
+	
+	$db->setQuery($query);
+	
+	//error_log ( "discoverUserAnimals, pquery: " . $query->dump() );
+
+
+	// Include id...
+	$p_animals_w_id = $db->loadAssocList('species');
+	
+	//$errMsg = print_r($p_animals_w_id, true);
+	//error_log ( "discoverUserNothingHuman Private animals w id: " . $errMsg );
+
+	$p_animals = $db->loadAssocList('species', 'num_animals');
+	
+	//$errMsg = print_r($p_animals, true);
+	//error_log ( "discoverUserNothingHuman Private animals: " . $errMsg );
+	
+	// If there are any private sites need to add those numbers in
+	foreach ($p_animals_w_id as $pAnimal) {
+		$pSpecies = $pAnimal['species'];
+		if ( array_key_exists($pSpecies, $animals_w_id) ) {
+			$animals[$pSpecies] += $pAnimal['num_animals'];
+			$animals_w_id[$pSpecies]['num_animals'] += $pAnimal['num_animals'];
+		}
+		else {
+			$animals[$pSpecies] = $pAnimal['num_animals'];
+			$animals_w_id[$pSpecies] = $pAnimal;
+		}
+	}
+	
+
+	// Remove Likes
+	unset($animals["Like"]);
+	
+	$animals_to_return = array();
+	
+	if ( count($animals) > 0 ) {
+
+		$animals_to_return_en = array();
+		
+		// Want the number of Nothings and Humans, then a sum of all other classifications
+		// Handle zero Nothings/Humans
+		foreach (array("Nothing", "Human") as $optName ) {
+			if ( key_exists($optName, $animals) ) {
+				
+				$animals_to_return_en[$optName] = $animals[$optName];
+			}
+			else {
+				$animals_to_return_en[$optName] = 0;
+				$spId = codes_getCode($optName,'noanimal');
+				$animals_w_id[$optName]=array("species_id" => $spId, "species"=>$optName, "num_animals"=>0);
+			}
+		
+		}
+		$animals = akrem($animals, 'Nothing');
+		$animals = akrem($animals, 'Human');
+		
+		$animals_to_return_en['Animals'] = array_sum($animals);
+		
+		//$errMsg = print_r ( $animals, true );
+		//error_log ( "discoverUserNothingHuman animals array = " . $errMsg );
+		
+		//$errMsg = print_r ( $animals_w_id, true );
+		//error_log ( "discoverUserNothingHuman animals_w_id array = " . $errMsg );
+		
+		//$errMsg = print_r ( $animals_to_return_en, true );
+		//error_log ( "discoverUserNothingHuman animals_to_return_en array = " . $errMsg );
+		
+		
+		
+		foreach ( $animals_to_return_en as $sp=>$num ) {
+		  //error_log( "animal row: " . $sp . ", " . $num );
+		  if ( $sp == 'Animals' ) {
+			  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
+			  $animals_to_return[$translations["all_sp"]["translation_text"]] = $num;
+		  }
+		  else {
+			  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
+			  $animals_to_return[codes_getName($animals_w_id[$sp]["species_id"], "speciestran")] = $num;
+		  }
+		}
+	}
+
+	return array (
+		"labels" => array_keys($animals_to_return),
+		"animals" => array_values($animals_to_return),
+		"title" => $title
+		);
+		
+
+
+}
+
 
 function akrem($array,$key){
     $holding=array();
@@ -3873,51 +4504,11 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 }
 
 
-
-function getSequenceById($sequence_id) {
-  
-	$db = JDatabase::getInstance(dbOptions());
-	
-	$seq = new Sequence ( $sequence_id );
-  
-	$query = $db->getQuery(true);
-	$query->select("P.sequence_id, P.photo_id, P.site_id")->from("Photo P")
-		->where("P.sequence_id = ".$sequence_id )
-		->order("sequence_num");
-	$db->setQuery($query);
-	$photos = $db->loadObjectList();
-	
-	$seq->setLocation ( getSiteLocation ($photos[0]->site_id ) );
-	
-	foreach ( $photos as $photo ) {
-		$photo_id = $photo->photo_id;
-		$photo_url = photoURL($photo_id);
-		
-		//error_log("photo url: " . $photo_url );
-		
-		if ( isVideo($photo_id) ) {
-			$ext = strtolower(JFile::getExt($photo_url));
-			//error_log ( "Found video file, ext = " . $ext );
-			$seq->setMedia("video", $ext);
-		}
-		else if ( isAudio ($photo_id) ){
-			$ext = strtolower(JFile::getExt($photo_url));
-			//error_log ( "Found audio file, ext = " . $ext );
-			$seq->setMedia("audio", $ext);
-		}
-				
-		$seq->addMediaFile ( $photo_id, $photo_url );
-	}
-	
-	return $seq;
-  
-}
-
 function getTrainingSequence( $sequence_id, $topic_id = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
-	$seq = getSequenceById ( $sequence_id );
+	$seq = new Sequence ( $sequence_id );
 	
 	$esObjects = null;
 	

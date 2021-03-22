@@ -138,7 +138,14 @@ else {
 		print '<tr>';
 		
 		foreach ( $rowData as $rowField ) {
-			print '<td>'.$rowField.'</td>';
+			if ( strpos($rowField,"PlaySeq") === 0 ) {
+				$seqId = 0;
+				if ( strlen($rowField) > 7 ) $seqId = substr($rowField,7);
+				print '<td><button class="media-btn" data-seq_id="'. $seqId . '"><i class="fa fa-play"></i></button></td>';
+			}
+			else {
+				print '<td>'.$rowField.'</td>';
+			}
 		}
 		
 		print '</tr>';
@@ -148,4 +155,7 @@ else {
 	</table></div>';
 }
 
+
+
 ?>
+

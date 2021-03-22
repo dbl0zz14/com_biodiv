@@ -46,6 +46,7 @@ class BioDivViewReport extends JViewLegacy
 			//error_log ( "Report view.  Report_id = " . $this->report_id );
 			
 			$input = $app->input;
+			
 			$this->report_id = $input->get('report_id', 0, 'INT');
 			error_log ( "Report view.  Report_id = " . $this->report_id );
 
@@ -76,7 +77,33 @@ class BioDivViewReport extends JViewLegacy
 			$err_msg = print_r ( $allIds, true );
 			error_log ( $err_msg );
 			
-			if ( in_array ($this->project_id, $allIds ) ) {
+			if ( $this->project_id == 0 ) {
+				
+				error_log ( "No project id - user report" );
+				
+				$biodivReport = null;
+				
+				// Could be a new report or a new page of existing report
+				if ( $this->report_id == 0 ) {
+					$biodivReport = new BiodivReport( null, $this->report_type, $this->personId );
+					$this->report_id = $biodivReport->getReportId();
+				}
+				else {
+					$biodivReport = BiodivReport::createFromId ( $this->report_id );
+				}
+				
+				error_log ("Getting report data");
+				
+				$this->headings = $biodivReport->headings();
+				$this->totalRows = $biodivReport->totalRows();
+				$this->pageLength = $biodivReport->pageLength();
+				
+				//$this->data = $biodivReport->getData( $this->page );
+				$this->rows = $biodivReport->rows( $this->page );
+				
+				error_log ("Got rows");
+			}
+			else if ( in_array ($this->project_id, $allIds ) ) {
 				
 				error_log ( "valid project, creating report" );
 				
