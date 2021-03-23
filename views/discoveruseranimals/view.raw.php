@@ -42,10 +42,12 @@ class BioDivViewDiscoverUserAnimals extends JViewLegacy
 
 		$this->rare = $input->get('rare', 0, 'INT');
 		error_log ( "DiscoverUserAnimals view.  Rare = " . $this->rare );
-
 		
+		$this->colormap = getSetting('colormap');
 		
 		$this->data = discoverUserAnimals ( $this->siteId, $this->rare == 0, 10, true );
+		
+		$this->data["colormap"] = json_decode($this->colormap);
 		
 		error_log("DiscoverUserAnimals data set");
 		

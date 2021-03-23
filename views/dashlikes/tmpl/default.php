@@ -238,12 +238,13 @@ else {
 			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . $this->translations['review']['translation_text'] . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
 		}
 		
-		print '<div style="word-wrap: break-word;">' . $currentLike['upload_filename'] . '</div>';
+		print '<p></p>';
+		print '<div style="word-wrap: break-word;">' . $this->translations['filename']['translation_text'] . ' ' . $currentLike['upload_filename'] . '</div>';
 		print '<p></p>';
 		print '<p>' . $this->translations['site']['translation_text'] . ' ' . $seq->getSiteName() . '</p>';
 		print '<p>' . $this->translations['taken']['translation_text'] . ' ' . $currentLike['taken'] . '</p>';
 		print '<p>' . $this->translations['liked']['translation_text'] . ' ' . $currentLike['like_time'] . '</p>';
-		print '<p>' . $currentLike['species'] . '</p>';
+		print '<p>' . $this->translations['species']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
 		
 		
 		error_log ("Buttons printed" );

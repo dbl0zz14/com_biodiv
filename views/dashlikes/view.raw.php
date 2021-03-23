@@ -77,6 +77,9 @@ class BioDivViewDashLikes extends JViewLegacy
 		$errMsg = print_r ( $this->userTimezone, true );
 		error_log ( "tz detail: " . $errMsg );
 		
+		//Makes sure the timezone is available
+		get_object_vars($this->userTimezone);
+		
 		$this->languageTag = langTag();
 		
 		
@@ -211,6 +214,8 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		
 		$this->likesArray = array();
+		
+		error_log ("Timezone string = " . $this->userTimezone->timezone );
 	
 		if ( $this->languageTag == 'en-GB' ) {
 			

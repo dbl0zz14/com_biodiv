@@ -43,6 +43,12 @@ class BioDivViewDiscoverUserUploads extends JViewLegacy
 			// This defaults to 12 months for all sites
 			$this->data = discoverUserUploads ($this->siteId);
 			
+			$this->colormap = getSetting('colormap');
+		
+			$this->data["colormap"] = json_decode($this->colormap);
+		
+		
+			
 			error_log("DiscoverUserUploads data set");
 		}
 		

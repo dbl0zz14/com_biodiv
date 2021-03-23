@@ -43,9 +43,13 @@ class BioDivViewDiscoverUserNothingHuman extends JViewLegacy
 		$this->rare = $input->get('rare', 0, 'INT');
 		error_log ( "DiscoverUserNothingHuman view.  Rare = " . $this->rare );
 
+		$this->colormap = getSetting('colormap');
+		
 		
 		
 		$this->data = discoverUserNothingHuman ( $this->siteId, $this->rare == 0 );
+		
+		$this->data["colormap"] = json_decode($this->colormap);
 		
 		error_log("DiscoverUserNothingHuman data set");
 		

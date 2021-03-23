@@ -30,8 +30,14 @@ class BioDivViewCalculatestats extends JViewLegacy
 			$this->projectId = JRequest::getInt("project_id");
 			$this->calcMonths = JRequest::getInt("calc_months");
 			$this->calcDate = JRequest::getInt("calc_date");
+			
+			// Entry in Statistics for all projects
 			$this->calcTotals = JRequest::getInt("calc_totals");
+			
+			
 			$this->calcLeagueTable = JRequest::getInt("calc_leaguetable");
+			
+			
 			$this->calcAnimals = JRequest::getInt("calc_animals");
 			
 			// Calculate animals by site and by year - populates Features, FeatureSites and SiteAnimals tables
