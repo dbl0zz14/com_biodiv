@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 <?php
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
 }
 else {
 	
@@ -40,7 +40,7 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="index.php/'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
 	
 	print '</div>'; // col-6
 	
@@ -97,7 +97,7 @@ else {
 		
 	}
 	if ( $this->numMissingScores > 0 ) {
-		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.JURI::root().'/'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
+		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
 	}
 	
 	print '</div>'; // col-6
