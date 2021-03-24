@@ -646,7 +646,9 @@ jQuery(document).ready(function(){
 		
 	});
 	
-	
+	// Show the spotter page initially
+	jQuery('.show_options').first().trigger("click");
+	jQuery('#spotter_status').trigger( "click" );
 	
 	// ------------------------  End of dashboard controls
 	
