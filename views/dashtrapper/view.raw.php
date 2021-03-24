@@ -43,8 +43,19 @@ class BioDivViewDashTrapper extends JViewLegacy
 		
 		error_log ( "DashTrapper calling getTrapperStatistics" );
 		
-		// Spotter stats, repeat of part of Status view		
 		$this->statRows = getTrapperStatistics();
+		
+		// Check number of sites
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true);
+		$query->select("count(*)" )
+			->from("Site S")
+			->where("person_id = " . $this->personId);
+			
+		$db->setQuery($query);
+		
+		$this->numSites = $db->loadResult();
 		
 		//$errMsg = print_r ( $this->statRows, true );
 		//error_log ( "DashTrapper trapper statRows = " . $errMsg );

@@ -44,6 +44,10 @@ class BioDivViewProjectData extends JViewLegacy
 		else if ( $this->months > 6 ) $this->interval = 2;
 		else $this->interval = 1;
 		$this->data = projectData ( $this->project_id, $this->months, $this->interval );
+		
+		$this->colormap = getSetting('colormap');
+		$this->data["colormap"] = json_decode($this->colormap);
+		
 
 		// Display the view
 		parent::display($tpl);

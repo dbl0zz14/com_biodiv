@@ -40,7 +40,7 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="index.php/spotter-status">'. $this->translations['class_now']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="index.php/'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
 	
 	print '</div>'; // col-6
 	
@@ -90,6 +90,15 @@ else {
 	print '</tbody></table>';
 	
 	print '</div>'; // table responsive
+	
+	if ( $this->numTopicScores == 0 ) {
+		// No quiz results yet
+		print '<p>'.$this->translations['quiz_none']['translation_text'].'</p>';
+		
+	}
+	if ( $this->numMissingScores > 0 ) {
+		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.JURI::root().'/'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
+	}
 	
 	print '</div>'; // col-6
 	

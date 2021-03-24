@@ -9,7 +9,7 @@ jQuery(document).ready(function(){
 	clearReport = function () {
 		
 		jQuery('#report_display').empty();
-		
+		jQuery("#data_warning").hide();
 	}
 	
 	
@@ -173,15 +173,11 @@ jQuery(document).ready(function(){
 						labels: jsonObject.labels,
 						datasets: [{
 							label: jsonObject.cla_label, //"Classified",
-							//backgroundColor: '#00ba8a',
-							//borderColor: '#00ba8a',
 							backgroundColor: jsonObject.colormap[0],
 							borderColor: jsonObject.colormap[0],
 							data: jsonObject.classified
 						},{
 							label: jsonObject.upl_label, //"Uploaded",
-							//backgroundColor: '#32553f',
-							//borderColor: '#32553f',
 							backgroundColor: jsonObject.colormap[1],
 							borderColor: jsonObject.colormap[1],
 							data: jsonObject.uploaded
@@ -251,7 +247,9 @@ jQuery(document).ready(function(){
 		
 		displayRareSpeciesChart();
 		
-		displayNothingHumanChart();
+		//displayNothingHumanChart();
+		
+		displayTopSeqSpeciesChart();
 		
 	
 	}
@@ -275,6 +273,10 @@ jQuery(document).ready(function(){
 			
 			if(window.nothHumChart !== undefined && window.nothHumChart !== null){
 				window.nothHumChart.destroy();
+			}
+				
+			if(window.topSeqChart !== undefined && window.topSeqChart !== null){
+				window.topSeqChart.destroy();
 			}
 				
 			getCharts();
@@ -318,7 +320,6 @@ jQuery(document).ready(function(){
 							labels: jsonObject.labels,
 							datasets: [{
 								label: jsonObject.ani_label, // "Number of classifications"
-								//backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
 								backgroundColor: jsonObject.colormap,
 								data: jsonObject.animals
 							}
@@ -385,13 +386,6 @@ jQuery(document).ready(function(){
 				if ( jsonObject.labels.length > 0 ) {
 				
 					var ctx = document.getElementById('rareSpeciesChart').getContext('2d');
-					/*
-					if (window.rareChart) {
-						rareChart.data.labels = jsonObject.labels;
-						rareChart.data.datasets[0].data = jsonObject.animals;
-						rareChart.update();
-					} 
-					*/
 					window.rareChart = new Chart(ctx, {
 						// The type of chart we want to create
 						type: 'bar',
@@ -401,7 +395,6 @@ jQuery(document).ready(function(){
 							labels: jsonObject.labels,
 							datasets: [{
 								label: jsonObject.ani_label, // "Number of classifications",
-								//backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
 								backgroundColor: jsonObject.colormap,
 								data: jsonObject.animals
 							}
@@ -474,7 +467,6 @@ jQuery(document).ready(function(){
 							labels: jsonObject.labels,
 							datasets: [{
 								label: jsonObject.ani_label, // "Animals",
-								//backgroundColor: ["#32553f","#d6da9c","#00ba8a","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
 								backgroundColor: jsonObject.colormap,
 								data: jsonObject.animals
 							}
@@ -504,6 +496,85 @@ jQuery(document).ready(function(){
 	}	
 	
 	
+	displayTopSeqSpeciesChart = function () {
+		
+		let siteId = jQuery('#site_select').val();
+	
+		if ( jQuery('#topSeqSpeciesChart').length > 0  ) {
+			url = BioDiv.root + "&view=discoveruserseqanimals&format=raw" ;
+			
+			if ( siteId ) url += "&site=" + siteId;
+		
+			jQuery.ajax(url, {'success': function(data) {
+				//console.log(data);
+				console.log("Top species callback");
+				
+				// Now get the json data into the chart and display it.
+				var jsonObject = JSON.parse ( data );
+				//Chart.defaults.global.maintainAspectRatio = false;
+				
+				if(window.topSeqChart !== undefined && window.topSeqChart !== null){
+					window.topSeqChart.destroy();
+				}
+					
+				if ( jsonObject.labels.length > 0 ) {
+				
+					var ctx = document.getElementById('topSeqSpeciesChart').getContext('2d');
+					
+					window.topSeqChart = new Chart(ctx, {
+						// The type of chart we want to create
+						type: 'horizontalBar',
+
+						// The data for our dataset
+						data: {
+							labels: jsonObject.labels,
+							datasets: [{
+								label: jsonObject.ani_label, // "Number of classifications"
+								backgroundColor: jsonObject.colormap,
+								data: jsonObject.animals
+							}
+							]
+						},
+						
+						// Configuration options go here
+						options: {
+							title: {
+								display: false,
+								text: jsonObject.title, // 'All Classifications by Species'
+								position: 'bottom'
+							},
+							legend: {
+								display: false,
+							},
+							scales: {
+								xAxes: [{
+									ticks: {
+										beginAtZero:true,
+										autoSkip:false,
+										precision:0
+									}
+								}],
+								yAxes: [{
+									ticks: {
+										autoSkip:false
+									},
+									gridlines: {
+										display:false
+									}
+								}]
+							}
+
+						}
+					});
+				}
+				else {
+					console.log("No classifications");
+				}
+			}});
+		}	
+	}		
+	
+
 	
 	// -------------------------------  End of Chart stuff
 	

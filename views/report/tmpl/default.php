@@ -151,8 +151,9 @@ else {
 		print '</tr>';
 	}
 
-	print '</tbody>
-	</table></div>';
+	print '</tbody>';
+	print '</table>';
+	print '</div>';
 }
 
 

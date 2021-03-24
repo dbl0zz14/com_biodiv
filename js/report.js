@@ -61,6 +61,9 @@ jQuery(document).ready(function(){
 		
 		// From mediacarousel.js
 		addPlayMedia();
+		
+		// When it's a user dash board report this warning about the data div is available
+		jQuery("#data_warning").show();
 	};
 	
 	

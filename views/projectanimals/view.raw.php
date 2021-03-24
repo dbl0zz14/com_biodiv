@@ -37,7 +37,9 @@ class BioDivViewProjectAnimals extends JViewLegacy
 		
 		$this->data = projectAnimals ( $this->project_id, 8 );
 		
-		//$this->data = projectAnimals ( $this->project_id );
+		$this->colormap = getSetting('colormap');
+		$this->data["colormap"] = json_decode($this->colormap);
+		
 
 		// Display the view
 		parent::display($tpl);

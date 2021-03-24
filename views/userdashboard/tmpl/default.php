@@ -169,10 +169,22 @@ else {
 	print "</div>";	 // col-md-3
 
 	print "<div class='col-md-9'>";
+	
+	print "<div class='row'>";
 
-	print "<div id='report_display'>";
+	print "<div id='report_display'></div>";
+
+	print "</div>"; // report row
+
+	print "<div class='row'>";
+
+	print "<div id='data_warning' hidden>";
+	
+	print "<p style='margin-top: 10px'>".$this->translations['data_warn']['translation_text']."</p>";
 
 	print "</div>";
+
+	print "</div>"; // warning row
 
 	print "</div>"; // col-md-9
 

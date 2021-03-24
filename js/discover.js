@@ -29,24 +29,7 @@ jQuery(document).ready(function () {
 	}
 	
 	function getSiteColor(d) {
-		/*
-	// RdPu
-	return d > 100 ? '#49006a' :
-           d > 50  ? '#7a0177' :
-           d > 20  ? '#ae017e' :
-           d > 5   ? '#dd3497' :
-           d > 2   ? '#f768a1' :
-                      '#fa9fb5';
-					  */
-					  /*
-	// Pu
-	return d > 100 ? '#3f007d' :
-           d > 50  ? '#54278f' :
-           d > 20  ? '#6a51a3' :
-           d > 5   ? '#807dba' :
-           d > 2   ? '#9e9ac8' :
-                      '#bcbddc';
-					  */
+	
 	// MammalWeb greens
 	return d > 100 ? '#05785a' :
            d > 50  ? '#118c6c' :
@@ -335,7 +318,7 @@ jQuery(document).ready(function () {
 
 				legend.addTo(discovermap);
 				
-				showSpeciesTotalsChart(jsonObject.totals, jsonObject.title);
+				showSpeciesTotalsChart(jsonObject.totals, jsonObject.title, jsonObject.colormap);
 			}});
 			
 			
@@ -344,7 +327,7 @@ jQuery(document).ready(function () {
 		jQuery('#discover_areas').prop('disabled', false);
 	};
 	
-	showSpeciesTotalsChart = function ( totalsObject, title ) {
+	showSpeciesTotalsChart = function ( totalsObject, title, colormap ) {
 		var ele = document.getElementById('sightingschart');
 		var ctx = ele.getContext('2d');
 		clearCharts();
@@ -356,7 +339,7 @@ jQuery(document).ready(function () {
 			data: {
 				labels: Object.keys(totalsObject),
 				datasets: [{
-					backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+					backgroundColor: colormap,
 					data: Object.values(totalsObject)
 				}
 				]
@@ -518,7 +501,7 @@ jQuery(document).ready(function () {
 						labels: jsonObject.labels,
 						datasets: [{
 							label: jsonObject.ani_label, // "Number of classifications",
-							backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+							backgroundColor: jsonObject.colormap,
 							data: jsonObject.animals
 						}
 						]
@@ -582,13 +565,13 @@ jQuery(document).ready(function () {
 						labels: jsonObject.labels,
 						datasets: [{
 							label: jsonObject.cla_label, //"Classified",
-							backgroundColor: '#00ba8a',
-							borderColor: '#00ba8a',
+							backgroundColor: jsonObject.colormap[0],
+							borderColor: jsonObject.colormap[0],
 							data: jsonObject.classified
 						},{
 							label: jsonObject.upl_label, //"Uploaded",
-							backgroundColor: '#32553f',
-							borderColor: '#32553f',
+							backgroundColor: jsonObject.colormap[1],
+							borderColor: jsonObject.colormap[1],
 							data: jsonObject.uploaded
 						}
 						]

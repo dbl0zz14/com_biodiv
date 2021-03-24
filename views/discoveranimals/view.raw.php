@@ -46,7 +46,8 @@ class BioDivViewDiscoverAnimals extends JViewLegacy
 		
 		$this->data = discoverAnimals ( $this->lat_start, $this->lat_end, $this->lon_start, $this->lon_end, 7 );
 		
-		//print("DiscoverAnimals data set");
+		$this->colormap = getSetting('colormap');
+		$this->data["colormap"] = json_decode($this->colormap);
 		
 
 		// Display the view

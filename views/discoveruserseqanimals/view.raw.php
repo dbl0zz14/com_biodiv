@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
 *
 * @since 0.0.1
 */
-class BioDivViewDiscoverSites extends JViewLegacy
+class BioDivViewDiscoverUserSeqAnimals extends JViewLegacy
 {
         /**
          *
@@ -29,14 +29,27 @@ class BioDivViewDiscoverSites extends JViewLegacy
 		// Assign data to the view
 		//($person_id = (int)userID()) or die("No person_id");
 		
-		//print("DiscoverData display called");
-			
+		error_log("DiscoverUserSeqAnimals display called");
+		
+		
+		
 		$app = JFactory::getApplication();
-						
-		$this->data = discoverSites ();
+		
+		$input = $app->input;
+		
+		$this->siteId = $input->get('site', 0, 'INT');
+		error_log ( "DashCharts view.  Site id = " . $this->siteId );
+
+		$this->rare = $input->get('rare', 0, 'INT');
+		error_log ( "DiscoverUserSeqAnimals view.  Rare = " . $this->rare );
 		
 		$this->colormap = getSetting('colormap');
+		
+		$this->data = discoverUserSequenceAnimals ( $this->siteId, $this->rare == 0, 10, true );
+		
 		$this->data["colormap"] = json_decode($this->colormap);
+		
+		error_log("DiscoverUserSeqAnimals data set");
 		
 
 		// Display the view

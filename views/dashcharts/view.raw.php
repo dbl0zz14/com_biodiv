@@ -61,10 +61,25 @@ class BioDivViewDashCharts extends JViewLegacy
 			
 		$db->setQuery($query);
 		
-		error_log("Site select query created: " . $query->dump());
+		//error_log("Site select query created: " . $query->dump());
 				
 		$this->siteSelect = $db->loadAssocList("site_id", "site_name");
+		
+		// Count the user's sites
+		$this->numSites = count($this->siteSelect);
+		
+		// And add the All option
 		$this->siteSelect = array($this->translations['all']['translation_text']) + $this->siteSelect;
+		
+		// Does the user have any non-like classifications?
+		$query = $db->getQuery(true);
+		$query->select("count(*)" )
+			->from("Animal A")
+			->where("A.species != 97 and A.person_id = " . $this->personId);
+			
+		$db->setQuery($query);
+		
+		$this->numAnimals = $db->loadResult();
 		
 		//$errMsg = print_r ( $this->siteSelect, true );
 		//error_log ( "siteSelect: " . $errMsg );

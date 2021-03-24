@@ -48,7 +48,12 @@ else {
 	
 	print '<h3>'.$this->translations['upl_class']['translation_text'].'</h3>';
 	
-	print "<canvas id='userProgressChart' ></canvas>";
+	if ( $this->numSites > 0 ) {
+		print "<canvas id='userProgressChart' ></canvas>";
+	}
+	else {
+		print '<p>'.$this->translations['sites_none']['translation_text'].'</p>';
+	}
 		
 	
 	print '</div>'; // col-6

@@ -57,6 +57,12 @@ class BioDivViewDashSpotter extends JViewLegacy
 		// Get this users scores, avoid Gold standard or non-displayed ones when displaying
 		$this->scores = userExpertise($this->personId);
 		
+		$scoreTopicIds = array_column($this->scores, 'topic_id');
+		
+		$this->numTopicScores = count(array_intersect($scoreTopicIds, $this->topicIds));
+		
+		$this->numMissingScores = count($this->topicIds) - $this->numTopicScores;
+		
 		$errMsg = print_r ( $this->scores, true );
 		error_log ( "Spotter view, scores: " . $errMsg );
 		

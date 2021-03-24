@@ -29,13 +29,13 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: jsonObject.cla_label, //"Classified",
-						backgroundColor: '#00ba8a',
-						borderColor: '#00ba8a',
+						backgroundColor: jsonObject.colormap[0],
+						borderColor: jsonObject.colormap[0],
 						data: jsonObject.classified
 					},{
 						label: jsonObject.upl_label, //"Uploaded",
-						backgroundColor: '#32553f',
-						borderColor: '#32553f',
+						backgroundColor: jsonObject.colormap[1],
+						borderColor: jsonObject.colormap[1],
 						data: jsonObject.uploaded
 					}
 					]
@@ -71,13 +71,13 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: jsonObject.cla_label, //"Classified",
-						backgroundColor: '#00ba8a',
-						borderColor: '#00ba8a',
+						backgroundColor: jsonObject.colormap[0],
+						borderColor: jsonObject.colormap[0],
 						data: jsonObject.classified
 					},{
 						label: jsonObject.upl_label, //"Uploaded",
-						backgroundColor: '#32553f',
-						borderColor: '#32553f',
+						backgroundColor: jsonObject.colormap[1],
+						borderColor: jsonObject.colormap[1],
 						data: jsonObject.uploaded
 					}
 					]
@@ -114,13 +114,13 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: jsonObject.cla_label, // "Classified",
-						backgroundColor: '#00ba8a',
-						borderColor: '#00ba8a',
+						backgroundColor: jsonObject.colormap[0],
+						borderColor: jsonObject.colormap[0],
 						data: jsonObject.classified
 					},{
 						label: jsonObject.upl_label, // "Uploaded",
-						backgroundColor: '#32553f',
-						borderColor: '#32553f',
+						backgroundColor: jsonObject.colormap[1],
+						borderColor: jsonObject.colormap[1],
 						data: jsonObject.uploaded
 					}
 					]
@@ -159,7 +159,7 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: jsonObject.ani_label, // "Animals",
-						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+						backgroundColor: jsonObject.colormap,
 						data: jsonObject.animals
 					}
 					]
@@ -196,7 +196,7 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: jsonObject.ani_label, // "Number of classifications",
-						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+						backgroundColor: jsonObject.colormap,
 						data: jsonObject.animals
 					}
 					]
@@ -250,7 +250,7 @@ jQuery(document).ready(function(){
 					labels: jsonObject.labels,
 					datasets: [{
 						label: "Number of classifications",
-						backgroundColor: ["#32553f","#00ba8a","#66a381","#f6c67a","#d6da9c","#b4d0d0","#c9e6d1"],
+						backgroundColor: jsonObject.colormap,
 						data: jsonObject.animals
 					}
 					]

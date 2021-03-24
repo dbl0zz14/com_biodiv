@@ -2950,6 +2950,149 @@ function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $i
 }
 
 
+// Return number of sequences where each species has been classified at least once for the user's sites 
+// If top is false the rarest ones (non-zero) are returned 
+// NB here we include private sites as they belong to the user
+function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species = 10, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
+	
+	// Get all the text snippets for this view in the current language
+	$translations = getTranslations("dashcharts");
+
+	$title = $translations["by_sp"]["translation_text"];
+	
+	$personId = userID();
+
+	//$projects = getSubProjectsById( $project_id );
+	//$id_string = implode(",", array_keys($projects));
+	
+	if ( $top === true ) $order = 'DESC';
+	else $order = 'ASC';
+
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("A.species as species_id, O.option_name as species, count(distinct A.photo_id) as num_sequences FROM `Animal` A")
+		->innerJoin("Photo P on P.photo_id = A.photo_id and P.person_id = " . $personId)
+		->innerJoin("Options O on O.option_id = A.species")
+		->group("A.species")
+		->order("num_sequences, species " . $order);
+	
+	if ( $site_id ) $query->where("P.site_id = " . $site_id);
+	
+	$db->setQuery($query);
+	
+	error_log ( "discoverUserSequenceAnimals, query: " . $query->dump() );
+
+
+	// Include id...
+	$animals_w_id = $db->loadAssocList('species');
+	
+	$errMsg = print_r($animals_w_id, true);
+	error_log ( "Animals w id: " . $errMsg );
+
+	$animals = $db->loadAssocList('species', 'num_sequences');
+	
+	$errMsg = print_r($animals, true);
+	error_log ( "Animals: " . $errMsg );
+	
+	
+	// Remove human and nothing if not to be included
+	if ( !$include_human ) {
+	  unset($animals['Human']);
+	  $array_changed = true;
+	}
+	if ( !$include_nothing ) {
+	  unset($animals['Nothing']);
+	  $array_changed = true;
+	}
+	if ( !$include_dontknow ) {
+	  unset($animals["Don't Know"]);
+	  $array_changed = true;
+	}
+
+	// Remove Likes
+	unset($animals["Like"]);
+	$array_changed = true;
+
+	// If we had to change the key names we need to re-sort the array
+	if ( $array_changed ) {
+		if ( $top ) {
+			arsort($animals);
+		}
+		else {
+			asort($animals);
+		}
+	}
+	
+	//$errMsg = print_r($animals, true);
+	//error_log ( "Animals after sort: " . $errMsg );
+
+	$animals_to_return_en = array();
+	// Finally handle the number of species, if we have more than required
+	// NB Other is a possible option so combine this with Other Species if we have both
+	$num_other = 0;
+
+	if ( key_exists("Other", $animals) ) {
+	$num_other = $animals["Other"];
+	$animals = akrem($animals, "Other");
+	}
+	
+	if ( $top ) {
+		
+		if ( $num_other > 0 ) {
+		
+			if ( $num_species && (count($animals) > $num_species-1) ) {
+				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
+				$total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
+				$animals_to_return_en['Other Species'] = "" + $total_other;
+			}
+			else {
+				$animals_to_return_en = $animals ;
+			}
+		}
+		else {
+			if ( $num_species && (count($animals) > $num_species) ) {
+				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
+				$total_other = array_sum(array_slice($animals, $num_species-1));
+				$animals_to_return_en['Other Species'] = "" + $total_other;
+			}
+			else {
+				$animals_to_return_en = $animals ;
+			}
+		}
+	}
+	else {
+		// Don't include Other for rare species, number could be large and make graph unreadable, so this is much simpler
+		$animals_to_return_en = array_slice($animals, 0, $num_species);
+	}
+
+	$errMsg = print_r($animals_to_return_en, true);
+	error_log ( "animals_to_return_en: " . $errMsg );
+	
+
+	$animals_to_return = array();
+	foreach ( $animals_to_return_en as $sp=>$num ) {
+	  //error_log( "animal row: " . $sp . ", " . $num );
+	  if ( $sp == "Other Species" ) {
+		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
+		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+	  }
+	  else {
+		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
+		  $animals_to_return[codes_getName($animals_w_id[$sp]["species_id"], "speciestran")] = $num;
+	  }
+	}
+
+	return array (
+		"labels" => array_keys($animals_to_return),
+		"animals" => array_values($animals_to_return),
+		"title" => $title
+		);
+		
+
+
+}
+
+
 // Return nummber of Nothing, Human and total of species classifications 
 function discoverUserNothingHuman ( $site_id = null  ) {
 	

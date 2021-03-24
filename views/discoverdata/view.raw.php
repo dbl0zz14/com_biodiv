@@ -44,7 +44,8 @@ class BioDivViewDiscoverData extends JViewLegacy
 		// This defaults to 12 months
 		$this->data = discoverData ( $this->lat_start, $this->lat_end, $this->lon_start, $this->lon_end );
 		
-		//print("DiscoverData data set");
+		$this->colormap = getSetting('colormap');
+		$this->data["colormap"] = json_decode($this->colormap);
 		
 
 		// Display the view

@@ -244,7 +244,12 @@ else {
 		print '<p>' . $this->translations['site']['translation_text'] . ' ' . $seq->getSiteName() . '</p>';
 		print '<p>' . $this->translations['taken']['translation_text'] . ' ' . $currentLike['taken'] . '</p>';
 		print '<p>' . $this->translations['liked']['translation_text'] . ' ' . $currentLike['like_time'] . '</p>';
-		print '<p>' . $this->translations['species']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
+		if ( $this->likedByOthers == 1 ) {
+			print '<p>' . $this->translations['species_others']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
+		}
+		else {
+			print '<p>' . $this->translations['species']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
+		}
 		
 		
 		error_log ("Buttons printed" );

@@ -42,7 +42,8 @@ class BioDivViewDiscoverSpecies extends JViewLegacy
 				
 		$this->data = discoverSpecies ( $this->species_id, $this->year );
 		
-		//print("DiscoverData data set");
+		$this->colormap = getSetting('colormap');
+		$this->data["colormap"] = json_decode($this->colormap);
 		
 
 		// Display the view
