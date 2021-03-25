@@ -174,8 +174,8 @@ print "</div> <!-- .row -->";
 
 
 print " <div style='display: block; margin-top: 20px;'>";
-print "	<button type='submit' id='add_upload' class='btn btn-primary'>".biodiv_label_icons('upload', $this->translations['upload']['translation_text'])."</button>";
-print " <button type='button' class='btn btn-danger mw_help' data-dismiss='modal'>".biodiv_label_icons('help', $this->translations['help']['translation_text'])."</button>";
+print "	<button type='submit' id='add_upload' class='btn btn-success btn-lg'>".biodiv_label_icons('upload', $this->translations['upload']['translation_text'])."</button>";
+print " <button type='button' class='btn btn-danger btn-lg mw_help' data-dismiss='modal'>".biodiv_label_icons('help', $this->translations['help']['translation_text'])."</button>";
 	
 print "  </div>";
 
@@ -200,7 +200,7 @@ if ($this->previous_upload_id){
 	//print ".</p> <p  style='margin-top:20px;'><a class='btn btn-primary' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', $this->translations['up_more']['translation_text']) . "</a>";
 	
 	$action_more = $this->root . "&task=upload_more";
-	print "<p  style='margin-top:20px;'><a class='btn btn-primary' role='button' href='$action_more&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', $this->translations['up_more']['translation_text']) . "</a></p>";
+	print "<p  style='margin-top:20px;'><a class='btn btn-success btn-lg' role='button' href='$action_more&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', $this->translations['up_more']['translation_text']) . "</a></p>";
   }
   print "</strong>";
  }
@@ -210,7 +210,7 @@ if ($this->previous_upload_id){
 
 //print "  <div class='lead'><a href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".$this->translations['list_up']['translation_text']."</a></p>";
 print "  <div style='margin-top:20px;'>";
-print "  <a class='btn btn-primary' role='button' href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".biodiv_label_icons('list', $this->translations['list_up']['translation_text'])."</a>";
+print "  <a class='btn btn-primary btn-lg' role='button' href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".biodiv_label_icons('list', $this->translations['list_up']['translation_text'])."</a>";
 print "  </div>";
 
 

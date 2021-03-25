@@ -63,6 +63,6 @@ print "</table>";
 }
 
 
-print "  <a class='btn btn-primary' role='button' href='".BIODIV_ROOT."&view=upload&site_id=". $this->site_id."'>".biodiv_label_icons('upload', $this->translations['more_ph']['translation_text'])."</a>";
+print "  <a class='btn btn-success btn-lg' role='button' href='".BIODIV_ROOT."&view=upload&site_id=". $this->site_id."'>".biodiv_label_icons('upload', $this->translations['more_ph']['translation_text'])."</a>";
 
 ?>
