@@ -315,8 +315,8 @@ class SiteHelper {
 
 		print '        <div style="overflow:auto;">';
 		print '          <div style="float:right;">';
-		print '            <button type="button" id="prevBtn" onclick="nextPrev(-1)">'.$this->translations['prev']['translation_text'].'</button>';
-		print '            <button type="button" id="nextBtn" onclick="nextPrev(1)" data-next="'.$this->translations['next']['translation_text'].'" data-submit="'.$this->translations['submit']['translation_text'].'">'.$this->translations['next']['translation_text'].'</button>';
+		print '            <button type="button" id="prevBtn" class="btn btn-success btn-lg" onclick="nextPrev(-1)">'.$this->translations['prev']['translation_text'].'</button>';
+		print '            <button type="button" id="nextBtn" class="btn btn-success btn-lg" onclick="nextPrev(1)" data-next="'.$this->translations['next']['translation_text'].'" data-submit="'.$this->translations['submit']['translation_text'].'">'.$this->translations['next']['translation_text'].'</button>';
 		print '          </div>';
 		print '        </div>';
 
@@ -334,7 +334,7 @@ class SiteHelper {
 
 		print '      </div>';
 		print '      <div class="modal-footer">';
-		print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '        <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
 		print '      </div>';
 		print '    </div>';
 
@@ -375,7 +375,7 @@ class SiteHelper {
 
 		print '      </div>';
 		print '      <div class="modal-footer">';
-		print '        <button type="submit" class="btn btn-primary" >'.$this->translations['upload']['translation_text'].'</button>'.'<button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '        <button type="submit" class="btn btn-success btn-lg" >'.$this->translations['upload']['translation_text'].'</button>'.'<button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
 		print '      </div>';
 		print '        </form>';
 		
