@@ -97,7 +97,7 @@ foreach($this->lcontrols as $control_id => $control){
     // makeControlButton($control_id, $control);  
   // }
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
-  print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$this->nextseq."</button>";
+  print "<button type='button' class='btn btn-success' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
      </div> <!-- /.col-md-6 -->
@@ -354,7 +354,7 @@ print "</div>";
         <p></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
+        <button type="button" class="btn btn-primary classify-modal-button" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
       </div>
     </div>
 
@@ -417,7 +417,7 @@ foreach($this->classifyInputs as $formInput){
 ?>
 <hr/>
 <button type="button" class="btn btn-default" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
-        <button type="button" class="btn btn-primary" id='classify-save'><?php print $this->translations['save']['translation_text']; ?></button>
+        <button type="button" class="btn btn-success" id='classify-save'><?php print $this->translations['save']['translation_text']; ?></button>
 
 </div> <!--col3 -->
 

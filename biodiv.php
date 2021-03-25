@@ -25,7 +25,7 @@ include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
 
 
-define('BIODIV_MAX_FILE_SIZE', 35000000);
+define('BIODIV_MAX_FILE_SIZE', 50000000);
 
 // link to javascript stuff
 $document = JFactory::getDocument();

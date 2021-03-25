@@ -166,7 +166,7 @@ class SpeciesCarousel {
 
 		print "<hr/>";
 		print "<button type='button' class='btn btn-default' data-dismiss='modal'>".$this->translations['close']['translation_text']."</button>";
-		print "<button type='button' class='btn btn-primary' id='classify-save' data-dismiss='modal'>".$this->translations['save']['translation_text']."</button>";
+		print "<button type='button' class='btn btn-success' id='classify-save' data-dismiss='modal'>".$this->translations['save']['translation_text']."</button>";
 
 		print "</div> <!--col3 -->";
 

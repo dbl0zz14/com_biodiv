@@ -182,7 +182,7 @@ defined('_JEXEC') or die;
 	print "	      <form action = '".BIODIV_ROOT."' method = 'GET'>";
 	print "		  <input type='hidden' name='view' value='training'/>";
 	print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
-	print "		  <button class='btn btn-danger btn-lg' type='submit' >".
+	print "		  <button class='btn btn-success btn-lg' type='submit' >".
 				  $this->translations["finish"]["translation_text"]."</button>";
 	print "		  </form>";
 	print "</div>"; // col-3
@@ -191,7 +191,7 @@ defined('_JEXEC') or die;
 	print "	      <form action = '".BIODIV_ROOT."' method = 'GET'>";
 	print "		  <input type='hidden' name='view' value='status'/>";
 	print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
-	print "		  <button class='btn btn-danger btn-lg' type='submit' >".
+	print "		  <button class='btn btn-success btn-lg' type='submit' >".
 				  $this->translations["spot"]["translation_text"]."</button>";
 	print "		  </form>";
 	print "</div>"; // col-3
@@ -256,7 +256,7 @@ defined('_JEXEC') or die;
       </div>
 	  <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal"><?php print $this->translations['cancel']['translation_text']; ?></button>
-		<button type='button' class='btn btn-primary' data-dismiss="modal" id='challenge-save'><?php print $this->translations['submit']['translation_text']?></button>
+		<button type='button' class='btn btn-success' data-dismiss="modal" id='challenge-save'><?php print $this->translations['submit']['translation_text']?></button>
 	    </form>
       </div>
 	  	  

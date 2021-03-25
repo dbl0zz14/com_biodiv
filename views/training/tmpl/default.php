@@ -87,9 +87,9 @@ defined('_JEXEC') or die;
 		// This field causes age, gender and number to be included in the classification test/training.
 		//print "		<input type='hidden' name='detail' value='1'/>";
 		
-		print "		<button class='btn btn-danger classify-modal-button' type='submit' data-tooltip='".$this->translations["spot_tip"]["translation_text"]."'>".
+		print "		<button class='btn btn-success btn-lg classify-modal-button' type='submit' data-tooltip='".$this->translations["spot_tip"]["translation_text"]."'>".
 					$this->translations["start_spot"]["translation_text"]."</button>";
-		print "		<button type='button' class='btn btn-danger classify-modal-button' data-dismiss='modal'>".$this->translations['cancel']['translation_text']."</button>";
+		print "		<button type='button' class='btn btn-success btn-lg classify-modal-button' data-dismiss='modal'>".$this->translations['cancel']['translation_text']."</button>";
 		print "		</form>";
 		
 		print "      </div>"; // modal footer

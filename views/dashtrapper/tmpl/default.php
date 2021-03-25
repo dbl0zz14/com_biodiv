@@ -40,7 +40,7 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.$this->translations['trapper_page']['translation_text'].'" >'. $this->translations['man_sites']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.$this->translations['trapper_page']['translation_text'].'" >'. $this->translations['man_sites']['translation_text'] .'</a></p>';
 	
 	print '</div>'; // col-6
 	

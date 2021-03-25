@@ -1,3 +1,7 @@
+# 25/3/21 - Version 3.4.0   #
+* Make button colour consistent
+* Add person id to user reports of others' classifications
+
 # 22/3/21 - Version 3.4.0   #
 * Add user dashboard page and associated reports/statistics
 * Changes to Sequence class to add own media files

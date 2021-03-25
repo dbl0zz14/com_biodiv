@@ -40,7 +40,7 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
 	
 	print '</div>'; // col-6
 	
@@ -81,7 +81,7 @@ else {
 			
 			print '<td>'.$stars.'</td>';
 			
-			print '<td><a class="btn btn-danger" href="index.php/?option=com_biodiv&view=trainingtopic&topic_id='.$row['topic_id'].'">'. $this->translations['take_quiz']['translation_text'].'</a></td>';
+			print '<td><a class="btn btn-success" href="index.php/?option=com_biodiv&view=trainingtopic&topic_id='.$row['topic_id'].'">'. $this->translations['take_quiz']['translation_text'].'</a></td>';
 			
 			print '</tr>';
 		}
@@ -97,7 +97,7 @@ else {
 		
 	}
 	if ( $this->numMissingScores > 0 ) {
-		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
+		print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
 	}
 	
 	print '</div>'; // col-6

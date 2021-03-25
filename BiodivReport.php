@@ -1618,6 +1618,9 @@ private function generateAnimalDataAudio () {
 		// Delete any existing data 
 		$this->removePreviousRows();
 		
+		// Choose a random integer to add to person_ids
+		$addRand = rand(1,1000);
+		
 		$db = JDatabase::getInstance(dbOptions());
 		$query1 = null;
 		$query2 = null;
@@ -1628,7 +1631,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1647,7 +1650,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1688,6 +1691,9 @@ private function generateAnimalDataAudio () {
 		// Delete any existing data 
 		$this->removePreviousRows();
 		
+		// Choose a random integer to add to person_ids
+		$addRand = rand(1,1000);
+		
 		$db = JDatabase::getInstance(dbOptions());
 		$query1 = null;
 		$query2 = null;
@@ -1698,7 +1704,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1714,7 +1720,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")

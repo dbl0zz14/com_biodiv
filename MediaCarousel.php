@@ -35,7 +35,7 @@ class MediaCarousel {
 
 	function generateNextButton () {
 		$nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
-		print "<button type='button' class='btn btn-primary' id='control_nextseq'>".$nextseq."</button>";
+		print "<button type='button' class='btn btn-success' id='control_nextseq'>".$nextseq."</button>";
 	}
 
 	function generateLeftControls () {

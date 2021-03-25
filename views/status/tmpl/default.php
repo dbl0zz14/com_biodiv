@@ -43,7 +43,7 @@ foreach($this->status as $msg => $count){
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
-    <button  class='btn btn-warning btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
+    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
 </form>
 </p>
 <p>
@@ -51,7 +51,7 @@ foreach($this->status as $msg => $count){
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-warning btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
+    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
     
 </form>
 </p>
@@ -71,7 +71,7 @@ foreach($this->status as $msg => $count){
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-warning classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
+      <button  class='btn btn-success classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
 	</span>
 	
 </div>

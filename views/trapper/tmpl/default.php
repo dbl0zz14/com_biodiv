@@ -13,7 +13,7 @@ print '<h1>' . $this->translations['cam_sites']['translation_text']. '</h1>';
 print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['site_warn']['translation_text']."</h5>\n";
 //print "<div class='spacer-1em'></div>\n";
 
-print '<button type="button" id="add_site" class="btn btn-primary">'.$this->translations['add_site']['translation_text'].'</button>';
+print '<button type="button" id="add_site" class="btn btn-success btn-lg">'.$this->translations['add_site']['translation_text'].'</button>';
 
 
 if(count($this->sites) == 0){

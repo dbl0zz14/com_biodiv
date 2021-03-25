@@ -57,7 +57,7 @@ defined('_JEXEC') or die;
 	print "<input type='hidden' name='project_id' value='". $project["project_id"] ."'/>";
 	
 	print "<span class='input-group-btn'>";
-    print "  <button  class='btn btn-warning' type='submit'><i class='fa fa-search'></i> ".$this->translations['class_proj']['translation_text']."</button>";
+    print "  <button  class='btn btn-success btn-lg' type='submit'><i class='fa fa-search'></i> ".$this->translations['class_proj']['translation_text']."</button>";
 	print "</span>";
 	
 	print "</div>";
