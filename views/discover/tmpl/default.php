@@ -35,11 +35,11 @@ else {
 
 <?php
 print "<div class='form-inline col-md-12 col-sm-12 col-xs-12' >";
-print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."' style='margin-bottom:4px;'><button type='button' class='btn btn-success' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
+print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."' style='margin-bottom:4px;'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
 
 print ' <div class="btn-group" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"  style="margin-bottom:4px;"> ';
-print '  <button class="btn btn-success" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
-print '  <button class="btn btn-success hidden" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
+print '  <button class="btn btn-warning" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
+print '  <button class="btn btn-warning hidden" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
 print '</div>';
 
 
@@ -55,7 +55,7 @@ print "  <option value='' disabled selected hidden>" . $this->translations['sel_
 
 print "</select>";
 print "<span class='input-group-btn'>";
-print "<button  class='btn btn-success' id='discover_species'>" . $this->translations['show_sp']['translation_text'] . "</button>";
+print "<button  class='btn btn-warning' id='discover_species'>" . $this->translations['show_sp']['translation_text'] . "</button>";
 print "</span>";
 print "</div>"; // input-group
 
