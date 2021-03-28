@@ -120,7 +120,7 @@ else {
 
 	// Add the table and headings
 	print  '<div class="table-responsive col-xs-12 col-sm-12 col-md-12">';
-	print  '<table class="table">
+	print  '<table class="table" style="white-space:nowrap">
 	  <thead>
 		<tr>';
 		
@@ -144,7 +144,7 @@ else {
 				print '<td><button class="media-btn" data-seq_id="'. $seqId . '"><i class="fa fa-play"></i></button></td>';
 			}
 			else {
-				print '<td>'.$rowField.'</td>';
+				print '<td class="text-nowrap">'.$rowField.'</td>';
 			}
 		}
 		

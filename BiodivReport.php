@@ -14,7 +14,7 @@ include_once "local.php";
 class BiodivReport {
 	
 	// Default page length
-	const PAGE_LENGTH = 25;
+	const PAGE_LENGTH = 10;
 	
 	// If a report has fewer rows then returned as JSON, otherwise a file is created and link sent.
 	// This is also used as the max num of rows to write at a time to avoid memory limits
@@ -794,7 +794,9 @@ class BiodivReport {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -813,7 +815,9 @@ class BiodivReport {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -833,7 +837,8 @@ class BiodivReport {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -853,7 +858,8 @@ class BiodivReport {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -868,141 +874,6 @@ class BiodivReport {
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
 				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null")
 				->where("A.species != 97")
-				->where("PSM.project_id = " . $this->projectId);
-		
-			error_log("query2 created: " . $query2->dump());
-		}
-		
-		$unionQuery = $db->getQuery(true)
-             ->select('*')
-             ->from('(' . $query1->union($query2) . ') a');
-			 
-		$queryInsert = $db->getQuery(true)
-			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
-			->values($unionQuery);
-		
-		error_log("queryInsert created");
-		
-		$db->setQuery($queryInsert);
-		
-		error_log("About to execute");
-
-		$db->execute();
-		
-		error_log("Execution complete");
-					
-		
-		/*
-		
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id 
-		UNION 
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null 
-
-*/
-
-	}
-		
-		
-	private function generateAnimalDataOrig () {
-		
-		// Delete any existing data 
-		$this->removePreviousRows();
-		
-		$db = JDatabase::getInstance(dbOptions());
-		$query1 = null;
-		$query2 = null;
-		
-		// Will need to do this differently for non English language...
-		if ( $this->languageTag == 'en-GB' ) {
-		
-			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
-			// Set up the select queries for the report
-			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), REPLACE(IFNULL(O5.option_name, 'null'), ',', ' -'), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
-				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
-				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
-				->innerJoin("Photo P2 on PS.end_photo_id = P2.photo_id")
-				->innerJoin("Site S on P.site_id = S.site_id")
-				->innerJoin("Options O on O.option_id = A.species")
-				->leftJoin("Options O2 on O2.option_id = A.age")
-				->leftJoin("Options O3 on O3.option_id = A.gender")
-				->leftJoin("Options O4 on O4.option_id = A.sure")
-				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
-				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id")
-				->where("PSM.project_id = " . $this->projectId);
-			
-			error_log("query1 created: " . $query1->dump() );
-				
-			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), REPLACE(IFNULL(O5.option_name, 'null'), ',', ' -'), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
-				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
-				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
-				->innerJoin("Photo P2 on PS.end_photo_id = P2.photo_id")
-				->innerJoin("Site S on P.site_id = S.site_id")
-				->innerJoin("Options O on O.option_id = A.species")
-				->leftJoin("Options O2 on O2.option_id = A.age")
-				->leftJoin("Options O3 on O3.option_id = A.gender")
-				->leftJoin("Options O4 on O4.option_id = A.sure")
-				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
-				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null")
-				->where("PSM.project_id = " . $this->projectId);
-		
-			error_log("query2 created: " . $query2->dump());
-		}
-		else {
-			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), IFNULL(OD5.value, O.option_name), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
-				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
-				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
-				->innerJoin("Photo P2 on PS.end_photo_id = P2.photo_id")
-				->innerJoin("Site S on P.site_id = S.site_id")
-				->innerJoin("Options O on O.option_id = A.species")
-				->leftJoin("OptionData OD on OD.option_id = A.species and OD.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD2 on OD2.option_id = A.age and OD2.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD3 on OD3.option_id = A.gender and OD3.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
-				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id")
-				->where("PSM.project_id = " . $this->projectId);
-			
-			error_log("query1 created: " . $query1->dump() );
-				
-			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), IFNULL(OD5.value, O.option_name), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
-				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
-				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
-				->innerJoin("Photo P2 on PS.end_photo_id = P2.photo_id")
-				->innerJoin("Site S on P.site_id = S.site_id")
-				->innerJoin("Options O on O.option_id = A.species")
-				->leftJoin("OptionData OD on OD.option_id = A.species and OD.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD2 on OD2.option_id = A.age and OD2.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD3 on OD3.option_id = A.gender and OD3.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
-				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
-				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null")
 				->where("PSM.project_id = " . $this->projectId);
 		
 			error_log("query2 created: " . $query2->dump());
@@ -1072,7 +943,8 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1087,7 +959,8 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(A.notes, 'null'), IFNULL(O2.option_name, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1103,7 +976,8 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1119,7 +993,8 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), A.timestamp) as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(A.notes, 'null'), IFNULL(OD2.value, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1154,33 +1029,6 @@ private function generateAnimalDataAudio () {
 		
 		error_log("Execution complete");
 					
-		
-		/*
-		
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id 
-		UNION 
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null 
-
-*/
-
 	}
 	
 	
@@ -1200,7 +1048,8 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1215,7 +1064,8 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1231,7 +1081,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1246,7 +1096,7 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1297,7 +1147,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1310,7 +1160,7 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1324,7 +1174,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1337,7 +1187,7 @@ private function generateAnimalDataAudio () {
 			error_log("query1 created: " . $query1->dump() );
 				
 			$query2 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1494,7 +1344,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1513,7 +1363,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1564,7 +1414,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id ) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1580,7 +1430,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1631,7 +1481,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1650,7 +1500,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1704,7 +1554,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1720,7 +1570,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id+".$addRand.", P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1768,7 +1618,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1784,7 +1634,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, 'null', 'null', 'null', 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1831,7 +1681,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1846,7 +1696,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), 'null', 'null', 'null', 'null') as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1892,7 +1742,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1911,7 +1761,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1963,7 +1813,7 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(O.option_name, ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1979,7 +1829,7 @@ private function generateAnimalDataAudio () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), P.photo_id, P.upload_filename, P.taken, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), IFNULL(A.notes, 'null'), IFNULL(OD4.value, 'null'), A.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, IFNULL(A.notes, 'null'), SUBSTRING_INDEX(IFNULL(OD5.value, O.option_name), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
