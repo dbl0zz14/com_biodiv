@@ -2900,7 +2900,7 @@ function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $i
 			if ( $num_species && (count($animals) > $num_species-1) ) {
 				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
 				$total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
-				$animals_to_return_en['Other Species'] = "" + $total_other;
+				$animals_to_return_en['Other Species'] = "" . $total_other;
 			}
 			else {
 				$animals_to_return_en = $animals ;
@@ -2910,7 +2910,7 @@ function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $i
 			if ( $num_species && (count($animals) > $num_species) ) {
 				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
 				$total_other = array_sum(array_slice($animals, $num_species-1));
-				$animals_to_return_en['Other Species'] = "" + $total_other;
+				$animals_to_return_en['Other Species'] = "" . $total_other;
 			}
 			else {
 				$animals_to_return_en = $animals ;
@@ -3043,7 +3043,7 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 			if ( $num_species && (count($animals) > $num_species-1) ) {
 				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
 				$total_other = array_sum(array_slice($animals, $num_species-1)) + $num_other;
-				$animals_to_return_en['Other Species'] = "" + $total_other;
+				$animals_to_return_en['Other Species'] = "" . $total_other;
 			}
 			else {
 				$animals_to_return_en = $animals ;
@@ -3053,7 +3053,7 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 			if ( $num_species && (count($animals) > $num_species) ) {
 				$animals_to_return_en = array_slice($animals, 0, $num_species-1);
 				$total_other = array_sum(array_slice($animals, $num_species-1));
-				$animals_to_return_en['Other Species'] = "" + $total_other;
+				$animals_to_return_en['Other Species'] = "" . $total_other;
 			}
 			else {
 				$animals_to_return_en = $animals ;
