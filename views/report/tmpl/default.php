@@ -13,7 +13,7 @@ if ( !$this->personId ) {
 }
 else {
 
-	error_log("report tmpl printing data");
+	//error_log("report tmpl printing data");
 
 	print '<div class="col-xs-12 col-sm-12 col-md-12">';
 	
@@ -42,13 +42,13 @@ else {
 			
 	$db = JDatabase::getInstance(dbOptions());
 
-	error_log ( "report template, totalRows = " . $this->totalRows );
+	//error_log ( "report template, totalRows = " . $this->totalRows );
 
-	error_log ( "getData, pageLength = " . $this->pageLength );
+	//error_log ( "getData, pageLength = " . $this->pageLength );
 		
 	$numPages = ceil($this->totalRows/$this->pageLength);
 
-	error_log ("getData: num pages = " . $numPages );
+	//error_log ("getData: num pages = " . $numPages );
 
 	// This bit gives a max pagination displayed system ie automatically move the pages on
 	$numPagesDisplayed = 16;
@@ -115,8 +115,8 @@ else {
 
 
 
-	$err_msg = print_r ( $this->rows, true );
-	error_log ( "report template, rows: " . $err_msg );
+	//$err_msg = print_r ( $this->rows, true );
+	//error_log ( "report template, rows: " . $err_msg );
 
 	// Add the table and headings
 	print  '<div class="table-responsive col-xs-12 col-sm-12 col-md-12">';

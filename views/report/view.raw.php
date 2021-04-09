@@ -26,7 +26,7 @@ class BioDivViewReport extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "Report view display called" );
+		//error_log ( "Report view display called" );
 		
 		$this->personId = (int)userID();
 		
@@ -39,7 +39,7 @@ class BioDivViewReport extends JViewLegacy
 			$app = JFactory::getApplication();
 			$this->project_id =
 			(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id');
-			error_log ( "Report view.  Project id = " . $this->project_id );
+			//error_log ( "Report view.  Project id = " . $this->project_id );
 			
 			//$this->report_id =
 			//(int)$app->getUserStateFromRequest('com_biodiv.report_id', 'report_id');
@@ -48,15 +48,15 @@ class BioDivViewReport extends JViewLegacy
 			$input = $app->input;
 			
 			$this->report_id = $input->get('report_id', 0, 'INT');
-			error_log ( "Report view.  Report_id = " . $this->report_id );
+			//error_log ( "Report view.  Report_id = " . $this->report_id );
 
 			$this->report_type =
 			(int)$app->getUserStateFromRequest('com_biodiv.report_type', 'report_type');
-			error_log ( "Report view.  Report_type = " . $this->report_type );
+			//error_log ( "Report view.  Report_type = " . $this->report_type );
 			
 			$this->page =
 			(int)$app->getUserStateFromRequest('com_biodiv.page', 'page');
-			error_log ( "Report view.  Page = " . $this->page );
+			//error_log ( "Report view.  Page = " . $this->page );
 			
 			/* refinement
 			$this->pageLength =
@@ -69,17 +69,17 @@ class BioDivViewReport extends JViewLegacy
 				
 			// Check user is project admin for this project
 			$allProjects = myAdminProjects();
-			$err_msg = print_r ( $allProjects, true );
-			error_log ( $err_msg );
+			//$err_msg = print_r ( $allProjects, true );
+			//error_log ( $err_msg );
 			
-			$allIds = array_column ( $allProjects, 'project_id' );
+			$allIds = array_keys ( $allProjects );
 			
-			$err_msg = print_r ( $allIds, true );
-			error_log ( $err_msg );
+			//$err_msg = print_r ( $allIds, true );
+			//error_log ( $err_msg );
 			
 			if ( $this->project_id == 0 ) {
 				
-				error_log ( "No project id - user report" );
+				//error_log ( "No project id - user report" );
 				
 				$biodivReport = null;
 				
@@ -92,7 +92,7 @@ class BioDivViewReport extends JViewLegacy
 					$biodivReport = BiodivReport::createFromId ( $this->report_id );
 				}
 				
-				error_log ("Getting report data");
+				//error_log ("Getting report data");
 				
 				$this->headings = $biodivReport->headings();
 				$this->totalRows = $biodivReport->totalRows();
@@ -101,11 +101,11 @@ class BioDivViewReport extends JViewLegacy
 				//$this->data = $biodivReport->getData( $this->page );
 				$this->rows = $biodivReport->rows( $this->page );
 				
-				error_log ("Got rows");
+				//error_log ("Got rows");
 			}
 			else if ( in_array ($this->project_id, $allIds ) ) {
 				
-				error_log ( "valid project, creating report" );
+				//error_log ( "valid project, creating report" );
 				
 				$biodivReport = null;
 				
@@ -118,7 +118,7 @@ class BioDivViewReport extends JViewLegacy
 					$biodivReport = BiodivReport::createFromId ( $this->report_id );
 				}
 				
-				error_log ("Getting report data");
+				//error_log ("Getting report data");
 				
 				$this->headings = $biodivReport->headings();
 				$this->totalRows = $biodivReport->totalRows();
@@ -127,7 +127,7 @@ class BioDivViewReport extends JViewLegacy
 				//$this->data = $biodivReport->getData( $this->page );
 				$this->rows = $biodivReport->rows( $this->page );
 				
-				error_log ("Got rows");
+				//error_log ("Got rows");
 			}
 			else {
 				$this->data = "Sorry you do not have access";

@@ -160,7 +160,7 @@ function codes_insertObject($fields, $struc){
 	else {
 		$table = codes_getTable($struc);
 		
-		error_log ( "codes_insertObject, struc = " . $struc . ", got table " . $table );
+		//error_log ( "codes_insertObject, struc = " . $struc . ", got table " . $table );
 
 		$success = $db->insertObject($table, $fields);
 		if($success){
@@ -737,7 +737,7 @@ function getOptionData($option_id, $data_type) {
 	$option_data = $db->loadColumn();
 	
 	$err_msg = print_r ( $option_data, true );
-	error_log ( "getOptionData id= " . $option_id . ", type = " . $data_type . ", result = " . $err_msg );
+	//error_log ( "getOptionData id= " . $option_id . ", type = " . $data_type . ", result = " . $err_msg );
 	return $option_data;
 
 }
@@ -929,7 +929,11 @@ function addSubProjects (&$projects, &$pairs) {
 }
 
 function myTrappingProjects () {
-  //print "<br/>myTrappingProjects called<br/>";
+  return getProjects ( 'TRAP' );
+	
+	/*
+	
+//print "<br/>myTrappingProjects called<br/>";
   // what user am I?
   $person_id = (int)userID();
   
@@ -1007,23 +1011,23 @@ function myTrappingProjects () {
   
   //print "<br/>Got " . count($myprojects) . " all projects user has access to<br/>They are:<br>";
   //print implode(",", $myprojects);
-  /*
-  usort($myprojects, function ($a, $b) {
-	  $err_str = print_r ($a, true);
-	  error_log("myTrappingProjects usort a = " . $err_str);
-	  $err_str = print_r ($b, true);
-	  error_log("myTrappingProjects usort b = " . $err_str);
-	  
-      return $a['proj_prettyname'] - $b['proj_prettyname'];
-	}
-  );
-  */
+ 
   asort($myprojects);
   
   return $myprojects;
+  
+  */
 }
 
 function mySpottingProjects ($reduce = false) {
+	
+	return getProjects ( 'SPOT', $reduce );
+	
+	/*
+	
+	Changed to use new non-recursive function above
+	
+	
 	$person_id = (int)userID();
   
   // first select all project/parent pairs into memory, exclude private ones.
@@ -1112,10 +1116,17 @@ function mySpottingProjects ($reduce = false) {
   asort($myprojects);
   return $myprojects;
   
-  
+  */
 }
 
 function myAdminProjects () {
+	
+	return getProjects ( 'ADMIN' );
+	
+	/*
+	
+	Changed to use new non-recursive function above
+	
 	
 	$person_id = (int)userID();
   
@@ -1131,6 +1142,8 @@ function myAdminProjects () {
 	$projects = $db->loadAssocList();
 	
 	return $projects;
+	
+	*/
   
 }
 
@@ -1162,8 +1175,16 @@ function getSingleProjectOptions ( $project_id, $option_type ) {
 function getProjectOptions( $project_id, $option_type, $use_exclusions ){
   // Call myprojects to get the project list, then get details for each.
   $myprojects = null;
+  /*
   if ( $project_id ) {
 	  $myprojects = getSubProjectsById( $project_id );
+  }
+  else {
+	  $myprojects = mySpottingProjects();
+  }
+  */
+   if ( $project_id ) {
+	  $myprojects = getProjects( 'SPOT', false, $project_id );
   }
   else {
 	  $myprojects = mySpottingProjects();
@@ -1312,7 +1333,7 @@ function getTrapperStatistics () {
 		
 	$db->setQuery($query); 
 	
-	error_log("Seq select query created: " . $query->dump());
+	//error_log("Seq select query created: " . $query->dump());
 	
 	$mySeqs = $db->loadResult();
 	
@@ -1324,7 +1345,7 @@ function getTrapperStatistics () {
 		
 	$db->setQuery($query); 
 	
-	error_log("Seq select query created: " . $query->dump());
+	//error_log("Seq select query created: " . $query->dump());
 	
 	$myPrivateSeqs = $db->loadResult();
 	
@@ -2185,10 +2206,10 @@ function getFeatureSpecies() {
 	
 	//Update to be the name in correct language
 	foreach ( $fs as $id=>$name ) {
-		error_log("Updating $fs[$id]");
+		//error_log("Updating $fs[$id]");
 		$tr_name = codes_getOptionTranslation ( $id );
 		$fs[$id] = $tr_name;
-		error_log(" new name = " . $tr_name . ", in array: " . $fs[$id]);
+		//error_log(" new name = " . $tr_name . ", in array: " . $fs[$id]);
 	}
 	
 	// Reorder list after translating
@@ -2201,7 +2222,7 @@ function getFeatureSpecies() {
 // Return all sites which are in the FeatureSites table - ir they are within a feature and in a non-private project
 function discoverSites () {
 	
-	error_log("discoverSites");
+	//error_log("discoverSites");
 	
 	// Get all the text snippets for this view in the current language
 	$translations = getTranslations("discover");
@@ -2229,10 +2250,10 @@ function discoverSites () {
 		  $w = $row["west"];
 		  $s = $row["south"];
 		  $n = $row["north"];
-		  error_log( "row: " . $fid . ", " . $num );
+		  //error_log( "row: " . $fid . ", " . $num );
 		  
 		  // New feature each row as summed over years.
-		  error_log( "adding new feature " . $fid . ", " . $num );
+		  //error_log( "adding new feature " . $fid . ", " . $num );
 		  $features[$fid] = array();
 		  $features[$fid]["type"] = "Feature";
 		  $features[$fid]["properties"] = array();
@@ -2241,7 +2262,7 @@ function discoverSites () {
 		  $features[$fid]["geometry"] = array();
 		  $features[$fid]["geometry"]["type"] = "Polygon";
 		  $features[$fid]["geometry"]["coordinates"] = [[[$e,$s],[$w,$s],[$w,$n],[$e,$n],[$e,$s]]];
-		  error_log( "added new feature " . $fid . ", " . $num );
+		  //error_log( "added new feature " . $fid . ", " . $num );
 		  
 	}
 	  
@@ -2345,7 +2366,7 @@ function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months 
 // Return some animal sightings data for the sites within this area
 function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_species = null, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
 	
-	error_log("discoverAnimals(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
+	//error_log("discoverAnimals(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
 	
 	// Get all the text snippets for this view in the current language
 	  $translations = getTranslations("discover");
@@ -2424,7 +2445,7 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  
 	  $animals_to_return = array();
 	  foreach ( $animals_to_return_en as $sp=>$num ) {
-		  error_log( "animal row: " . $sp . ", " . $num );
+		  //error_log( "animal row: " . $sp . ", " . $num );
 		  if ( $sp == "Other Species" ) {
 			  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
 		  }
@@ -2451,7 +2472,7 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 // Return some animal sightings data for the sites within this area
 function discoverSpecies ( $species_id, $year = null  ) {
 	
-	error_log("discoverSpecies(" . $species_id . ", ". $year . ")");
+	//error_log("discoverSpecies(" . $species_id . ", ". $year . ")");
 	
 	// Get all the text snippets for this view in the current language
 	  $translations = getTranslations("discover");
@@ -2656,7 +2677,7 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
 // Return number of uploads and classifications for the user's sites
 function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
 	
-	error_log("discoverUserUploads(" . $site_id . ", ". $num_months . ")");
+	//error_log("discoverUserUploads(" . $site_id . ", ". $num_months . ")");
 	
 	// Get all the text snippets for this view in the current language
 	$translations = getTranslations("discover");
@@ -2980,19 +3001,19 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 	
 	$db->setQuery($query);
 	
-	error_log ( "discoverUserSequenceAnimals, query: " . $query->dump() );
+	//error_log ( "discoverUserSequenceAnimals, query: " . $query->dump() );
 
 
 	// Include id...
 	$animals_w_id = $db->loadAssocList('species');
 	
 	$errMsg = print_r($animals_w_id, true);
-	error_log ( "Animals w id: " . $errMsg );
+	//error_log ( "Animals w id: " . $errMsg );
 
 	$animals = $db->loadAssocList('species', 'num_sequences');
 	
 	$errMsg = print_r($animals, true);
-	error_log ( "Animals: " . $errMsg );
+	//error_log ( "Animals: " . $errMsg );
 	
 	
 	// Remove human and nothing if not to be included
@@ -3065,8 +3086,8 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 		$animals_to_return_en = array_slice($animals, 0, $num_species);
 	}
 
-	$errMsg = print_r($animals_to_return_en, true);
-	error_log ( "animals_to_return_en: " . $errMsg );
+	//$errMsg = print_r($animals_to_return_en, true);
+	//error_log ( "animals_to_return_en: " . $errMsg );
 	
 
 	$animals_to_return = array();
@@ -3096,7 +3117,7 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 // Return nummber of Nothing, Human and total of species classifications 
 function discoverUserNothingHuman ( $site_id = null  ) {
 	
-	error_log ( "discoverUserNothingHuman(" . $site_id . ")" );
+	//error_log ( "discoverUserNothingHuman(" . $site_id . ")" );
 	// Get all the text snippets for this view in the current language
 	$translations = getTranslations("dashcharts");
 
@@ -3380,6 +3401,356 @@ function getProjectTree ( $project_id ) {
 	return new Project ( $result->project_id, $result->project_prettyname, $result->project_description, $result->level, $result->access_level, $result->priority );
 }
 
+
+
+// $access can be SPOT, TRAP, ADMIN, LIST
+// Get all projects for the given access.  If project id is null get all for this user.  If project id is set get that plus subs
+function getProjects ( $access, $reduce=false, $projectId = null ) {
+	
+	$returnArray = array();
+	
+	$allProjects = getAccessProjectsWithSubs ( $access );
+	
+	if ( $projectId ) {
+		$returnArray = $allProjects[$projectId];
+	}
+	else {
+		foreach ( $allProjects as $id=>$projects ) {
+			$returnArray +=  $projects;
+		}
+	}
+	
+	if ( $reduce ) {
+	  // Only want the private projects plus the projects that don't have a parent already in the list.
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
+	$query->where("P.access_level = 3 or (P.access_level < 3 and P.parent_project_id is null) or (P.access_level < 3 and P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2))");
+	$db->setQuery($query);
+	$allreduced = $db->loadAssocList('proj_id', 'proj_prettyname');
+	
+	$returnArray = array_intersect_key ( $returnArray, $allreduced );
+  }
+	
+	asort($returnArray);
+	
+	return $returnArray;
+}
+
+
+// $access can be SPOT, TRAP, ADMIN, LIST
+// Return array with access for all project ids.  If there is no access to that project od it will not appear on its own list, if there is it will.
+function getAccessProjectsWithSubs ( $access ) {
+	
+	//error_log ( "getProjectsWithSubs called" );
+	
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("project_id, IFNULL(parent_project_id,0) as parent_id, project_prettyname as project_name, access_level")->from("Project P");
+	
+	$db->setQuery($query);
+
+	$projectRows = $db->loadAssocList('project_id');
+	
+	//$errMsg = print_r ( $projectRows, true );
+	//error_log ( "getAccessProjectsWithSubs project rows: " . $errMsg );
+	
+	$returnArray = array();
+	
+	// Full access is public plus hybrid for spotting, public for trapping, ?? for admin and public plus hybris plus restricted for list
+	$allProjects = array();
+	
+	// Controlled access depends on access type but these are the sub projects with access level requiring control
+	$controlledAccess = array();
+	
+	// First create the children arrays for each project
+	foreach ( $projectRows as $projectId=>$row ) {
+		
+// create array for possible children of this project, one on full access list and one on controlled list
+		$allProjects[$projectId] = array();
+		
+		$accessLevel = $row['access_level'];
+		
+		switch ( $access ) {
+			case "TRAP":
+				if ( $accessLevel > 0 ) $controlledAccess[$projectId] = array();
+				break;
+				
+			case "SPOT":
+				if ( $accessLevel > 1 ) $controlledAccess[$projectId] = array();
+				break;
+				
+			case "LIST":
+				if ( $accessLevel > 2 ) $controlledAccess[$projectId] = array();
+				break;
+			
+			case "ADMIN":
+				// Must be admin of this or an ancestor to have admin access, for ALL projects
+				$controlledAccess[$projectId] = array();
+				break;
+				
+			default:
+				$controlledAccess[$projectId] = array();
+		}
+		
+	}
+	
+	// Add subs to controlled list where relevant so can get at them based on user access list 
+	foreach ( $projectRows as $projectId=>$row ) {
+		
+		$projectName = $row['project_name'];
+		$parentId = $row['parent_id'];
+		$accessLevel = $row['access_level'];
+		
+		$isControlled = false;
+		
+		switch ( $access ) {
+			case "TRAP":
+				if ( $accessLevel > 0 ) $isControlled = true;
+				break;
+				
+			case "SPOT":
+				if ( $accessLevel > 1 ) $isControlled = true;
+				break;
+				
+			case "LIST":
+				if ( $accessLevel > 2 ) $isControlled = true;
+				break;
+			
+			case "ADMIN":
+				$isControlled = true;
+				break;
+				
+			default:
+				$isControlled = true;
+		}
+		
+		if ( $isControlled ) {
+			if ( $parentId != 0 ) {
+				
+				//error_log ( "getProjectsWithSubs parent id not null" );
+				
+				$parent = $parentId;
+				
+				while ( $parent != 0 ) {
+					
+					if ( array_key_exists ( $parent, $controlledAccess ) ) {
+						if ( !array_key_exists($projectId, $controlledAccess[$parent]) ) $controlledAccess[$parent][$projectId] = $projectName;
+					}
+					else {
+						// Add the parent with the child so we can check for access later
+						$controlledAccess[$parent] = array();
+						$controlledAccess[$parent][$projectId] = $projectName;
+					}
+									
+					// Get the parent's parent
+					$parent = $projectRows[$parent]['parent_id'];
+				}
+			}
+		}			
+	}
+	
+	//$errMsg = print_r ( $controlledAccess, true );
+	//error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
+	
+	// Now to get the access for this user
+	$personId = userID();
+	$roleId = 2;
+	if ( $access == 'ADMIN' ) $roleId = 1;
+	
+	// Admin user (role 1) implies user (role 2)
+	$query = $db->getQuery(true);
+	$query->select("project_id")
+		->from("ProjectUserMap PUM")
+		->where("PUM.person_id = " . $personId )
+		->where("PUM.role_id <= " . $roleId );
+	
+	$db->setQuery($query);
+
+	$userAccess = $db->loadColumn();
+	
+	//$errMsg = print_r ( $userAccess, true );
+	//error_log ( "getAccessProjectsWithSubs got userAccess: " . $errMsg );
+	
+	$fullUserList = array() + $userAccess;
+	
+	// Add additional subs to full user list
+	foreach ( array_keys($controlledAccess) as $controlledProject ) {
+		
+		if  (in_array($controlledProject, $userAccess) ) {
+			
+			//error_log ( "Controlled project " . $controlledProject . " in access array" );
+			
+			$controlledSubs = array_keys($controlledAccess[$controlledProject]);
+			
+			$fullUserList = array_merge ( $fullUserList, array_keys($controlledAccess[$controlledProject]) );
+		}
+	}
+	
+	//$errMsg = print_r ( $fullUserList, true );
+	//error_log ( "getAccessProjectsWithSubs got fullUserList: " . $errMsg );
+	
+	// Now add all subs to result, only include restricted where they are on the list.
+	foreach ( $projectRows as $projectId=>$row ) {
+		
+		$projectName = $row['project_name'];
+		$parentId = $row['parent_id'];
+		$accessLevel = $row['access_level'];
+		
+		$isControlled = false;
+		
+		switch ( $access ) {
+			case "TRAP":
+				if ( $accessLevel > 0 ) $isControlled = true;
+				break;
+				
+			case "SPOT":
+				if ( $accessLevel > 1 ) $isControlled = true;
+				break;
+				
+			case "LIST":
+				if ( $accessLevel > 2 ) $isControlled = true;
+				break;
+			
+			case "ADMIN":
+				$isControlled = true;
+				break;
+				
+			default:
+				$isControlled = true;
+		}
+		
+		// Add project to its own list if have access
+		if ( $isControlled ) {
+			// 
+			if ( in_array ( $projectId, $fullUserList ) ){
+				$allProjects[$projectId][$projectId] = $projectName;
+			}
+		}
+		else {
+			$allProjects[$projectId][$projectId] = $projectName;
+		}
+		
+		if ( $parentId != 0 ) {
+			
+			//error_log ( "getProjectsWithSubs parent id not null" );
+			
+			$parent = $parentId;
+			
+			while ( $parent != 0 ) {
+				
+				// Only add this project if it's not controlled or is controlled and on the user list.
+				if ( $isControlled ) {
+					// Add the child to the array of the parent, if it is on the user list
+					if ( in_array ( $projectId, $fullUserList ) ) {
+						
+						//error_log ( "Adding " . $projectId . " to list for parent " . $parent );
+						if ( !array_key_exists($projectId, $allProjects[$parent]) ) $allProjects[$parent][$projectId] = $projectName;
+					}
+				}
+				else {
+					//error_log ( "Adding " . $projectId . " to list for parent " . $parent );
+					if ( !array_key_exists($projectId, $allProjects[$parent]) ) $allProjects[$parent][$projectId] = $projectName;
+				}
+								
+				// Get the parent's parent
+				$parent = $projectRows[$parent]['parent_id'];
+			}
+		}	
+	}
+	
+	//$errMsg = print_r ( $allProjects, true );
+	//error_log ( "getAccessProjectsWithSubs got allProjects: " . $errMsg );
+	
+	
+	return $allProjects;
+	
+}
+
+/*
+function getProjectsWithSubs () {
+	
+	//error_log ( "getProjectsWithSubs called" );
+	
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("project_id, IFNULL(parent_project_id,0) as parent_id")->from("Project P");
+	
+	$db->setQuery($query);
+
+	$projectRows = $db->loadAssocList('project_id', 'parent_id');
+	
+	//$errMsg = print_r ( $projectRows, true );
+	//error_log ( "getProjectWithSubs project rows: " . $errMsg );
+	
+	$returnArray = array();
+	
+	// First create a children array for each project
+	foreach ( $projectRows as $projectId=>$parentId ) {
+		
+		// create array for possible children of this project
+		$returnArray[$projectId] = array();
+		
+	}
+	
+	//$errMsg = print_r ( $returnArray, true );
+	//error_log ( "getProjectWithSubs created arrays for each project: " . $errMsg );
+	
+	//error_log ( "getProjectsWithSubs about to add children" );
+	
+	// Now add children where relevant
+	foreach ( $projectRows as $projectId=>$parentId ) {
+		
+		if ( $parentId != 0 ) {
+			
+			//error_log ( "getProjectsWithSubs parent id not null" );
+			
+			$parent = $parentId;
+			
+			while ( $parent != 0 ) {
+				// Add the child to the array of the parent
+				$returnArray[$parent][] = $projectId;
+				
+				//error_log ( "getProjectsWithSubs added " . $projectId . " as child of " . $parent);
+				
+				// Get the parent's parent
+				$parent = $projectRows[$parent];
+			}
+		}
+		
+	}
+	
+	//$errMsg = print_r ( $returnArray, true );
+	//error_log ( "getProjectWithSubs got: " . $errMsg );
+	
+	return $returnArray;
+	
+}
+*/
+/*
+// NB Currently this function does not take account of access level
+function getThisAndAllSubs ( $projectId ) {
+	
+	//error_log ( "getThisAndAllSubs called, project id = " . $projectId );
+	
+	$returnArray = array();
+	
+	if ( $projectId ) {
+		
+		$allProjectsWithSubs = getProjects();
+		
+		$returnArray = $allProjectsWithSubs[$projectId];
+		
+	}
+	
+	//$errMsg = print_r ( $returnArray, true );
+	//error_log ( "getThisAndAllSubs got: " . $errMsg );
+	
+	return $returnArray;
+	
+}
+*/
 
 function getSubProjectsById($project_id, $exclude_private = false){
   
@@ -3760,12 +4131,12 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		$db->setQuery($q1); 
 		$num_rows = $db->loadResult();
 		
-		error_log("chooseMultiple: num rows = " . $num_rows);
+		////error_log("chooseMultiple: num rows = " . $num_rows);
 		
 		// Get a random integer between 0 and $num_rows-1
 		$row_num = rand(0, $num_rows - 1);
 		
-		error_log("chooseMultiple: chosen row = " . $row_num);
+		//error_log("chooseMultiple: chosen row = " . $row_num);
 		
 		$q2 = $db->getQuery(true);
 		$q2->select("P.photo_id, P.sequence_id")
@@ -3788,10 +4159,10 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 			
 			$photo_id = $photo->photo_id;
 			//print "<br>chooseMultiple, photo found with id " . $photo_id . " <br>";
-			error_log("chooseMultiple: got photo = " . $photo_id);
+			//error_log("chooseMultiple: got photo = " . $photo_id);
 		}	
 		else {
-			error_log("chooseMultiple: no photo ");
+			//error_log("chooseMultiple: no photo ");
 		}
 	}
 	
@@ -3848,12 +4219,12 @@ function chooseSingle ( $project_ids, $classify_own ) {
 	$db->setQuery($q1); 
 	$num_rows = $db->loadResult();
 		
-	error_log("chooseSingle: num rows = " . $num_rows);
+	//error_log("chooseSingle: num rows = " . $num_rows);
 		
 	// Get a random integer between 0 and $num_rows-1
 	$row_num = rand(0, $num_rows - 1);
 		
-	error_log("chooseSingle: chosen row = " . $row_num);
+	//error_log("chooseSingle: chosen row = " . $row_num);
 		
 	$q2 = $db->getQuery(true);
 	$q2->select("P.photo_id, P.sequence_id")
@@ -3874,10 +4245,10 @@ function chooseSingle ( $project_ids, $classify_own ) {
 	$photo = $db->loadObject();
 	if ( $photo ) {
 		$photo_id = $photo->photo_id;
-		error_log("chooseSingle: got photo = " . $photo_id);
+		//error_log("chooseSingle: got photo = " . $photo_id);
 	}	
 	else {
-		error_log("chooseSingle: no photo = ");
+		//error_log("chooseSingle: no photo = ");
 	}
 	
 	return $photo_id;
@@ -4007,12 +4378,12 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 		$db->setQuery($q1); 
 		$num_rows = $db->loadResult();
 			
-		error_log("chooseSingle: num rows = " . $num_rows);
+		//error_log("chooseSingle: num rows = " . $num_rows);
 			
 		// Get a random integer between 0 and $num_rows-1
 		$row_num = rand(0, $num_rows - 1);
 			
-		error_log("chooseSingle: chosen row = " . $row_num);
+		//error_log("chooseSingle: chosen row = " . $row_num);
 			
 		$q2 = $db->getQuery(true);
 		$q2->select("P.photo_id, P.sequence_id")
@@ -4533,8 +4904,8 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 		$db->setQuery($query);
 		$sequences_by_species = $db->loadAssocList('species_id');
 		
-		$err_str = print_r($sequences_by_species, true);
-		error_log("sequences by species: " . $err_str);
+		//$err_str = print_r($sequences_by_species, true);
+		//error_log("sequences by species: " . $err_str);
 
 		$used_ids = array();
 		
@@ -4549,7 +4920,7 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			$already_used = array_intersect($used_ids, $ids);
 			
 			if ( count($already_used) > 0 ) {
-				error_log ("Got already used sequence(s) for species " . $sp_id );
+				//error_log ("Got already used sequence(s) for species " . $sp_id );
 				foreach ( $already_used as $used_id ) {
 					$id_key = array_search($used_id, $ids);
 					unset($ids[$id_key]);
@@ -4559,13 +4930,13 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			
 			// If no sequences left, remove this species from the list.
 			if ( $sp_count <= 0 ) {
-				error_log ("Got no sequences left for species " . $sp_id );
+				//error_log ("Got no sequences left for species " . $sp_id );
 				unset($sequences_by_species[$sp_id]);
 			}
 			else {
 				// Only change if necessary
 				if ( $sp_count != $sp['num_seqs'] ) {
-					error_log ("Removed sequence(s) so resetting list for species " . $sp_id );
+					//error_log ("Removed sequence(s) so resetting list for species " . $sp_id );
 				
 					$sp['num_seqs'] = $sp_count;
 					$sp['seqs'] = implode ( ',', $ids );
@@ -4576,8 +4947,8 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			
 		}
 		
-		$err_str = print_r($sequences_by_species, true);
-		error_log("sequences by species: " . $err_str);
+		//$err_str = print_r($sequences_by_species, true);
+		//error_log("sequences by species: " . $err_str);
 
 		// Need at least one species and at least max_number of sequences
 		$num_species = count($sequences_by_species);
@@ -4634,8 +5005,8 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 				$seq_ids = array_merge ( $seq_ids, array_slice($ids, 0, $seq_count) );
 				
 							
-				$err_str = print_r($seq_ids, true);
-				error_log("seq_ids: " . $err_str);
+				//$err_str = print_r($seq_ids, true);
+				//error_log("seq_ids: " . $err_str);
 				
 			}
 		}
@@ -4730,7 +5101,7 @@ function strucCmp($a, $b)
 
 function allSpecies () {
 		
-		error_log ("allSpecies called");
+		//error_log ("allSpecies called");
 		
 		$db = JDatabase::getInstance(dbOptions());
 	
@@ -4740,7 +5111,7 @@ function allSpecies () {
 		$lang = langTag();
 		if ( $lang == 'en-GB' ) {
 			
-			error_log ( "Language is English so no join to OptionData" );
+			//error_log ( "Language is English so no join to OptionData" );
 			$query = $db->getQuery(true);
 			
 			$query->select("O.option_id as id, O.option_name as name")
@@ -4766,8 +5137,8 @@ function allSpecies () {
 			$speciesArray = $db->loadRowList();
 			
 		}
-		$err_msg = print_r ( $speciesArray, true );
-		error_log ( $err_msg );
+		//$err_msg = print_r ( $speciesArray, true );
+		//error_log ( $err_msg );
 		
 		return $speciesArray;
 }
@@ -4837,7 +5208,7 @@ function getSpecies ( $filterId, $onePage ) {
 	$lang = langTag();
 	if ( $lang == 'en-GB' ) {
 		
-		error_log ( "Language is English so no join to OptionData" );
+		//error_log ( "Language is English so no join to OptionData" );
 		$query = $db->getQuery(true);
 		
 		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
@@ -4851,7 +5222,7 @@ function getSpecies ( $filterId, $onePage ) {
 		
 		$mammalArray = $db->loadAssocList("id");
 		
-		error_log ( "Got mammal names" );
+		//error_log ( "Got mammal names" );
 		
 		$query = $db->getQuery(true);
 		
@@ -4866,7 +5237,7 @@ function getSpecies ( $filterId, $onePage ) {
 		
 		$birdArray = $db->loadAssocList("id");
 		
-		error_log ( "Got bird names" );
+		//error_log ( "Got bird names" );
 		
 	}
 	else {
@@ -4904,11 +5275,11 @@ function getSpecies ( $filterId, $onePage ) {
 	if ( $mammalArray ) $speciesList['mammal'] = $mammalArray;
 	if ( $birdArray ) $speciesList['bird'] = $birdArray;
 	
-	$err_msg = print_r ( $mammalArray, true );
-	error_log ( "mammal list for filter " . $filterId . ": " . $err_msg );
+	//$err_msg = print_r ( $mammalArray, true );
+	//error_log ( "mammal list for filter " . $filterId . ": " . $err_msg );
 	
-	$err_msg = print_r ( $birdArray, true );
-	error_log ( "bird list for filter " . $filterId . ": " . $err_msg );
+	//$err_msg = print_r ( $birdArray, true );
+	//error_log ( "bird list for filter " . $filterId . ": " . $err_msg );
 	
 	
 	return $speciesList;
@@ -5297,12 +5668,12 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 		$numSpecies = $numSpecies + count($all_this_type);
 	}
 	
-	error_log ("printSpeciesListSearch: num per page = " . $numPerPage );
-	error_log ("printSpeciesListSearch: num species = " . $numSpecies );
+	//error_log ("printSpeciesListSearch: num per page = " . $numPerPage );
+	//error_log ("printSpeciesListSearch: num species = " . $numSpecies );
 	
 	$numPages = ceil($numSpecies/$numPerPage);
 	
-	error_log ("printSpeciesListSearch: num pages = " . $numPages );
+	//error_log ("printSpeciesListSearch: num pages = " . $numPages );
 	
 	
 	
@@ -5380,11 +5751,11 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	
 	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
 	//Get the option ids  
-	error_log("About to get dk and other ids" );
+	//error_log("About to get dk and other ids" );
 	$otherId = codes_getCode("Other",'species');
-	error_log("printBirdSpeciesList: otherId = " . $otherId );
+	//error_log("printBirdSpeciesList: otherId = " . $otherId );
 	$dkId = codes_getCode("Don\'t Know",'species');
-	error_log("printBirdSpeciesList: dkId = " . $dkId );
+	//error_log("printBirdSpeciesList: dkId = " . $dkId );
 	
 	$btnClass = 'btn-primary';
 	
@@ -5397,11 +5768,11 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	print '<div id="species_group_'.$filterId.'_'.$otherId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	// Add Nothing and Human 
-	error_log("About to get nothing and human ids" );
+	//error_log("About to get nothing and human ids" );
 	$nothingId = codes_getCode("Nothing",'noanimal');
-	error_log("printBirdSpeciesList: nothingId = " . $nothingId );
+	//error_log("printBirdSpeciesList: nothingId = " . $nothingId );
 	$humanId = codes_getCode("Human",'noanimal');
-	error_log("printBirdSpeciesList: humanId = " . $humanId );
+	//error_log("printBirdSpeciesList: humanId = " . $humanId );
 	
 	$btnClass = 'btn-primary';
 	
@@ -5634,12 +6005,12 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 		$numSpecies = $numSpecies + count($all_this_type);
 	}
 	
-	error_log ("printBirdSpeciesList: num per page = " . $numPerPage );
-	error_log ("printBirdSpeciesList: num species = " . $numSpecies );
+	//error_log ("printBirdSpeciesList: num per page = " . $numPerPage );
+	//error_log ("printBirdSpeciesList: num species = " . $numSpecies );
 	
 	$numPages = ceil($numSpecies/$numPerPage);
 	
-	error_log ("printBirdSpeciesList: num pages = " . $numPages );
+	//error_log ("printBirdSpeciesList: num pages = " . $numPages );
 	
 	
 	
@@ -5711,11 +6082,11 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	
 	// Explicitly add the notinlist (Don't know and Other) buttons at the bottom
 	//Get the option ids  
-	error_log("About to get dk and other ids" );
+	//error_log("About to get dk and other ids" );
 	$otherId = codes_getCode("Other",'species');
-	error_log("printBirdSpeciesList: otherId = " . $otherId );
+	//error_log("printBirdSpeciesList: otherId = " . $otherId );
 	$dkId = codes_getCode("Don\'t Know",'species');
-	error_log("printBirdSpeciesList: dkId = " . $dkId );
+	//error_log("printBirdSpeciesList: dkId = " . $dkId );
 	
 	$btnClass = 'btn-primary';
 	
@@ -5728,11 +6099,11 @@ function printBirdSpeciesList ( $filterId, $speciesList, $useSeq=false, $dataTog
 	print '<div id="species_group_'.$filterId.'_'.$otherId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	// Add Nothing and Human 
-	error_log("About to get nothing and human ids" );
+	//error_log("About to get nothing and human ids" );
 	$nothingId = codes_getCode("Nothing",'noanimal');
-	error_log("printBirdSpeciesList: nothingId = " . $nothingId );
+	//error_log("printBirdSpeciesList: nothingId = " . $nothingId );
 	$humanId = codes_getCode("Human",'noanimal');
-	error_log("printBirdSpeciesList: humanId = " . $humanId );
+	// error_log("printBirdSpeciesList: humanId = " . $humanId );
 	
 	$btnClass = 'btn-primary';
 	

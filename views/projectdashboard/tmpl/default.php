@@ -27,7 +27,7 @@ else {
 	print "</div>";
 	
 	// Check for no admin projects
-	error_log ( "Num projects = " . count($this->projects) );
+	//error_log ( "Num projects = " . count($this->projects) );
 	if ( count($this->projects) == 0 ) {
 		print "<div class='col-md-12'>";
 
@@ -50,14 +50,14 @@ else {
 
 
 		$isFirst = true;
-		foreach($this->projects as $row){
+		foreach($this->projects as $projId=>$projName){
 			if ( $isFirst ) {
 				// Default to first project
-				print "<option value='".$row['project_id']."' selected>".$row['project_name']."</option>";
+				print "<option value='".$projId."' selected>".$projName."</option>";
 				$isFirst = false;
 			}
 			else {
-				print "<option value='".$row['project_id']."'>".$row['project_name']."</option>";
+				print "<option value='".$projId."'>".$projName."</option>";
 			}
 		}
 
@@ -78,7 +78,7 @@ else {
 			
 			$tooltipText = "";
 			if ( array_key_exists ( $reportType, $this->reportText ) ) {
-				error_log ("Tooltip text = " . $this->reportText[$reportType] );
+				//error_log ("Tooltip text = " . $this->reportText[$reportType] );
 				$tooltipText = ' data-toggle="tooltip" title="' . preg_replace( '/[\W]/', ' ', $this->reportText[$reportType]) . '"';
 			}
 			print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'" style="white-space: normal;">';

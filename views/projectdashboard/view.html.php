@@ -42,13 +42,13 @@ class BioDivViewProjectDashboard extends JViewLegacy
 	$this->reports = BiodivReport::listReports();
 	
 	$err_msg = print_r ( $this->reports , true );
-	error_log ( "reports: " . $err_msg );
+	//error_log ( "reports: " . $err_msg );
 	
 	$this->reportText = array();
 	foreach ( $this->reports as $report ) {
 		$helpId = getOptionData($report[0], 'help');
-		error_log ( "report id = " . $report[0] );
-		error_log ( "helpId = " . print_r ( $helpId, true ) );
+		//error_log ( "report id = " . $report[0] );
+		//error_log ( "helpId = " . print_r ( $helpId, true ) );
 		if ( count($helpId) > 0 ) {
 			$this->reportText[$report[0]] = codes_getName($helpId[0], 'helptran');
 		}
