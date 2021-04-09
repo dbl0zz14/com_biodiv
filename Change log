@@ -1,3 +1,7 @@
+# 9/4/21 - Version 3.4.1   #
+* Improved method for getting sub projects
+* In project dashboard add all subprojects to each report with project id and name columns
+
 # 25/3/21 - Version 3.4.0   #
 * Make button colour consistent
 * Add person id to user reports of others' classifications
