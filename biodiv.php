@@ -929,10 +929,11 @@ function addSubProjects (&$projects, &$pairs) {
 }
 
 function myTrappingProjects () {
+  
   return getProjects ( 'TRAP' );
 	
-	/*
 	
+	/*
 //print "<br/>myTrappingProjects called<br/>";
   // what user am I?
   $person_id = (int)userID();
@@ -1015,8 +1016,8 @@ function myTrappingProjects () {
   asort($myprojects);
   
   return $myprojects;
-  
   */
+  
 }
 
 function mySpottingProjects ($reduce = false) {
@@ -1025,7 +1026,7 @@ function mySpottingProjects ($reduce = false) {
 	
 	/*
 	
-	Changed to use new non-recursive function above
+	//Changed to use new non-recursive function above
 	
 	
 	$person_id = (int)userID();
@@ -1124,8 +1125,7 @@ function myAdminProjects () {
 	return getProjects ( 'ADMIN' );
 	
 	/*
-	
-	Changed to use new non-recursive function above
+	//Changed to use new non-recursive function above
 	
 	
 	$person_id = (int)userID();
@@ -3464,34 +3464,58 @@ function getAccessProjectsWithSubs ( $access ) {
 	// Controlled access depends on access type but these are the sub projects with access level requiring control
 	$controlledAccess = array();
 	
+	// Private access treated separately as have to be admin of parent to have access
+	$controlledAccess = array();
+	
 	// First create the children arrays for each project
 	foreach ( $projectRows as $projectId=>$row ) {
 		
-// create array for possible children of this project, one on full access list and one on controlled list
+		// create array for possible children of this project, one on full access list and one on controlled list if hybrid or restriced and 
+		// one on private list of private
 		$allProjects[$projectId] = array();
 		
 		$accessLevel = $row['access_level'];
 		
 		switch ( $access ) {
 			case "TRAP":
-				if ( $accessLevel > 0 ) $controlledAccess[$projectId] = array();
+				if ( $accessLevel == 3 ) {
+					$privateAccess[$projectId] = array();
+				}
+				else if ( $accessLevel > 0 ) {
+					$controlledAccess[$projectId] = array();
+				}
 				break;
 				
 			case "SPOT":
-				if ( $accessLevel > 1 ) $controlledAccess[$projectId] = array();
+				if ( $accessLevel == 3 ) {
+					$privateAccess[$projectId] = array();
+				}
+				else if ( $accessLevel > 1 ) {
+					$controlledAccess[$projectId] = array();
+				}
 				break;
 				
 			case "LIST":
-				if ( $accessLevel > 2 ) $controlledAccess[$projectId] = array();
+				if ( $accessLevel == 3 ) $privateAccess[$projectId] = array();
 				break;
 			
 			case "ADMIN":
 				// Must be admin of this or an ancestor to have admin access, for ALL projects
-				$controlledAccess[$projectId] = array();
+				if ( $accessLevel == 3 ) {
+					$privateAccess[$projectId] = array();
+				}
+				else {
+					$controlledAccess[$projectId] = array();
+				}
 				break;
 				
 			default:
-				$controlledAccess[$projectId] = array();
+				if ( $accessLevel == 3 ) {
+					$privateAccess[$projectId] = array();
+				}
+				else {
+					$controlledAccess[$projectId] = array();
+				}
 		}
 		
 	}
@@ -3507,15 +3531,21 @@ function getAccessProjectsWithSubs ( $access ) {
 		
 		switch ( $access ) {
 			case "TRAP":
-				if ( $accessLevel > 0 ) $isControlled = true;
+				if ( $accessLevel > 0 ) {
+					$isControlled = true;
+				}
 				break;
 				
 			case "SPOT":
-				if ( $accessLevel > 1 ) $isControlled = true;
+				if ( $accessLevel > 1 ) {
+					$isControlled = true;
+				}
 				break;
 				
 			case "LIST":
-				if ( $accessLevel > 2 ) $isControlled = true;
+				if ( $accessLevel > 2 ) {
+					$isControlled = true;
+				}
 				break;
 			
 			case "ADMIN":
@@ -3524,6 +3554,7 @@ function getAccessProjectsWithSubs ( $access ) {
 				
 			default:
 				$isControlled = true;
+				break;
 		}
 		
 		if ( $isControlled ) {
@@ -3551,34 +3582,57 @@ function getAccessProjectsWithSubs ( $access ) {
 		}			
 	}
 	
-	//$errMsg = print_r ( $controlledAccess, true );
-	//error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
+	$errMsg = print_r ( $controlledAccess, true );
+	error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
 	
 	// Now to get the access for this user
 	$personId = userID();
-	$roleId = 2;
-	if ( $access == 'ADMIN' ) $roleId = 1;
 	
-	// Admin user (role 1) implies user (role 2)
 	$query = $db->getQuery(true);
-	$query->select("project_id")
+	$query->select("PUM.project_id as project_id, PUM.role_id as role_id, P.access_level as access_level")
 		->from("ProjectUserMap PUM")
-		->where("PUM.person_id = " . $personId )
-		->where("PUM.role_id <= " . $roleId );
+		->innerJoin ("Project P on P.project_id = PUM.project_id")
+		->where("PUM.person_id = " . $personId );
 	
 	$db->setQuery($query);
 
-	$userAccess = $db->loadColumn();
+	$userAccess = $db->loadAssocList();
 	
-	//$errMsg = print_r ( $userAccess, true );
-	//error_log ( "getAccessProjectsWithSubs got userAccess: " . $errMsg );
+	$errMsg = print_r ( $userAccess, true );
+	error_log ( "getAccessProjectsWithSubs got userAccess: " . $errMsg );
 	
-	$fullUserList = array() + $userAccess;
+	$userAccessList = array();
+	
+	foreach ( $userAccess as $row ) {
+		
+		$roleId = $row['role_id'];
+		$projId = $row['project_id'];
+		$projLevel = $row['access_level'];
+		
+		// For admin, user needs admin role and access level of the project doesn't matter
+		if ( $access == 'ADMIN' ) {
+			
+			if ( $roleId == 1 ) $userAccessList[] = $projId;
+		}
+		// For trap list, add project if non public
+		else {
+			if ( $projLevel > 0 ) {
+			
+				$userAccessList[] = $projId;		
+			}
+			else if ( $roleId == 1 ) {
+				$userAccessList[] = $projId;
+			}
+		} 
+		
+	}
+	
+	$fullUserList = array() + $userAccessList;
 	
 	// Add additional subs to full user list
 	foreach ( array_keys($controlledAccess) as $controlledProject ) {
 		
-		if  (in_array($controlledProject, $userAccess) ) {
+		if  (in_array($controlledProject, $userAccessList) ) {
 			
 			//error_log ( "Controlled project " . $controlledProject . " in access array" );
 			
@@ -3588,8 +3642,8 @@ function getAccessProjectsWithSubs ( $access ) {
 		}
 	}
 	
-	//$errMsg = print_r ( $fullUserList, true );
-	//error_log ( "getAccessProjectsWithSubs got fullUserList: " . $errMsg );
+	$errMsg = print_r ( $fullUserList, true );
+	error_log ( "getAccessProjectsWithSubs got fullUserList: " . $errMsg );
 	
 	// Now add all subs to result, only include restricted where they are on the list.
 	foreach ( $projectRows as $projectId=>$row ) {
