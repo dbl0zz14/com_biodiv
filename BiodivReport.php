@@ -1096,36 +1096,9 @@ private function generateAnimalDataAudio () {
 			 ->from('(' . $query2 . ') b')
 			 ->group('b.site_id, b.site_name, b.project_id');
 			 
-		error_log("generateSequenceData query created: " . $query3->dump() );
+		//error_log("generateSequenceData query created: " . $query3->dump() );
 		
-		/*
-		$query1 = $db->getQuery(true);
-		$query1->select("P.site_id as site_id, REPLACE(S.site_name, ',', ' ') as site_name, P.sequence_id as sequence_id, A.animal_id as animal_id, IF(A.animal_id>0, 1, 0) as animal_num from Photo P")
-				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-				->innerJoin("Site S on S.site_id = P.site_id")
-				->leftJoin("Animal A on P.photo_id = A.photo_id and A.species != 97")
-				->where("P.sequence_id > 0")
-				->where("PSM.project_id in (" . $projectStr . ")")
-				->where("((P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL) or (P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id))"  );
-
-		$query2 = $db->getQuery(true)
-				->select( "a.site_id, a.site_name, a.sequence_id, IF(sum(a.animal_num)>0, 1, 0) as num_class" )
-				 ->from('(' . $query1 . ') a')
-				 ->group('a.site_id, a.site_name, a.sequence_id');
-
-		$query3 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', b.site_id, b.site_name, count(*), sum(b.num_class)) as report_csv")
-				 ->from('(' . $query2 . ') b')
-				 ->group('b.site_id, b.site_name');
-
-		error_log("generateSequenceData query created: " . $query3->dump() );
-		*/
-		//$db->setQuery($query3);
 		
-		//$results = $db->loadAssocList('site_id');
-		
-		//$err_msg = print_r ( $results, true );
-		////error_log ( "BiodivReport::generateSequenceData, query results: " . $err_msg );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
