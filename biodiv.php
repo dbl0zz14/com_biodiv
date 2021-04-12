@@ -736,7 +736,7 @@ function getOptionData($option_id, $data_type) {
 	$db->setQuery($query);
 	$option_data = $db->loadColumn();
 	
-	$err_msg = print_r ( $option_data, true );
+	//$err_msg = print_r ( $option_data, true );
 	//error_log ( "getOptionData id= " . $option_id . ", type = " . $data_type . ", result = " . $err_msg );
 	return $option_data;
 
@@ -2275,7 +2275,7 @@ function discoverSites () {
 // Return some animal sightings data for the sites within this area
 function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months = 12  ) {
 	
-	error_log("discoverData(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
+	//error_log("discoverData(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
 	
 	// Get all the text snippets for this view in the current language
 	$translations = getTranslations("discover");
@@ -3007,12 +3007,12 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 	// Include id...
 	$animals_w_id = $db->loadAssocList('species');
 	
-	$errMsg = print_r($animals_w_id, true);
+	//$errMsg = print_r($animals_w_id, true);
 	//error_log ( "Animals w id: " . $errMsg );
 
 	$animals = $db->loadAssocList('species', 'num_sequences');
 	
-	$errMsg = print_r($animals, true);
+	//$errMsg = print_r($animals, true);
 	//error_log ( "Animals: " . $errMsg );
 	
 	
@@ -3421,14 +3421,35 @@ function getProjects ( $access, $reduce=false, $projectId = null ) {
 	}
 	
 	if ( $reduce ) {
-	  // Only want the private projects plus the projects that don't have a parent already in the list.
+	  
+	// Only want the private projects plus the projects that don't have a parent already in the list.
 	$db = JDatabase::getInstance(dbOptions());
 	
+	/*
 	$query = $db->getQuery(true);
 	$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname")->from("Project P");
 	$query->where("P.access_level = 3 or (P.access_level < 3 and P.parent_project_id is null) or (P.access_level < 3 and P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2))");
 	$db->setQuery($query);
 	$allreduced = $db->loadAssocList('proj_id', 'proj_prettyname');
+	*/
+	
+	$query = $db->getQuery(true);
+	$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname, P.parent_project_id as parent_id, P.access_level as access_level")->from("Project P");
+	$db->setQuery($query);
+	$fullList = $db->loadAssocList('proj_id');
+	
+	$allreduced = array();
+	
+	foreach ( $fullList as $projId=>$row ) {
+		$parent = $row['parent_id'];
+		$level = $row['access_level'];
+		if ( $level == 3 ) {
+			$allreduced[$projId] = $row;
+		}
+		else if ( !$parent or !array_key_exists($parent, $returnArray ) ) {
+			$allreduced[$projId] = $row;
+		}
+	}
 	
 	$returnArray = array_intersect_key ( $returnArray, $allreduced );
   }
@@ -3465,13 +3486,12 @@ function getAccessProjectsWithSubs ( $access ) {
 	$controlledAccess = array();
 	
 	// Private access treated separately as have to be admin of parent to have access
-	$controlledAccess = array();
+	$privateAccess = array();
 	
 	// First create the children arrays for each project
 	foreach ( $projectRows as $projectId=>$row ) {
 		
-		// create array for possible children of this project, one on full access list and one on controlled list if hybrid or restriced and 
-		// one on private list of private
+		// create array for possible children of this project, one on full access list and one on controlled list if hybrid or restriced, exclude private as must have explicit access or admin access to an ancestor
 		$allProjects[$projectId] = array();
 		
 		$accessLevel = $row['access_level'];
@@ -3496,26 +3516,17 @@ function getAccessProjectsWithSubs ( $access ) {
 				break;
 				
 			case "LIST":
-				if ( $accessLevel == 3 ) $privateAccess[$projectId] = array();
 				break;
 			
 			case "ADMIN":
 				// Must be admin of this or an ancestor to have admin access, for ALL projects
-				if ( $accessLevel == 3 ) {
-					$privateAccess[$projectId] = array();
-				}
-				else {
-					$controlledAccess[$projectId] = array();
-				}
+				// Private are treated as restricted for ADMIN projects
+				$controlledAccess[$projectId] = array();
 				break;
 				
 			default:
-				if ( $accessLevel == 3 ) {
-					$privateAccess[$projectId] = array();
-				}
-				else {
-					$controlledAccess[$projectId] = array();
-				}
+				$controlledAccess[$projectId] = array();
+				
 		}
 		
 	}
@@ -3528,24 +3539,29 @@ function getAccessProjectsWithSubs ( $access ) {
 		$accessLevel = $row['access_level'];
 		
 		$isControlled = false;
+		$isPrivate = false;
 		
 		switch ( $access ) {
 			case "TRAP":
-				if ( $accessLevel > 0 ) {
+				if ( $accessLevel == 3 ) {
+					$isPrivate = true;
+				}
+				else if ( $accessLevel > 0 and $accessLevel < 3 ) {
 					$isControlled = true;
 				}
 				break;
 				
 			case "SPOT":
-				if ( $accessLevel > 1 ) {
+				if ( $accessLevel == 3 ) {
+					$isPrivate = true;
+				}
+				else if ( $accessLevel > 1 and $accessLevel < 3 ) {
 					$isControlled = true;
 				}
 				break;
 				
 			case "LIST":
-				if ( $accessLevel > 2 ) {
-					$isControlled = true;
-				}
+				$isControlled = false;
 				break;
 			
 			case "ADMIN":
@@ -3580,10 +3596,36 @@ function getAccessProjectsWithSubs ( $access ) {
 				}
 			}
 		}			
+		if ( $isPrivate ) {
+			if ( $parentId != 0 ) {
+				
+				//error_log ( "getProjectsWithSubs parent id not null" );
+				
+				$parent = $parentId;
+				
+				while ( $parent != 0 ) {
+					
+					if ( array_key_exists ( $parent, $privateAccess ) ) {
+						if ( !array_key_exists($projectId, $privateAccess[$parent]) ) $privateAccess[$parent][$projectId] = $projectName;
+					}
+					else {
+						// Add the parent with the child so we can check for access later
+						$privateAccess[$parent] = array();
+						$privateAccess[$parent][$projectId] = $projectName;
+					}
+									
+					// Get the parent's parent
+					$parent = $projectRows[$parent]['parent_id'];
+				}
+			}
+		}		
 	}
 	
-	$errMsg = print_r ( $controlledAccess, true );
-	error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
+	//$errMsg = print_r ( $controlledAccess, true );
+	//error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
+	
+	//$errMsg = print_r ( $privateAccess, true );
+	//error_log ( "getProjectWithSubs private access tree: " . $errMsg );
 	
 	// Now to get the access for this user
 	$personId = userID();
@@ -3598,10 +3640,11 @@ function getAccessProjectsWithSubs ( $access ) {
 
 	$userAccess = $db->loadAssocList();
 	
-	$errMsg = print_r ( $userAccess, true );
-	error_log ( "getAccessProjectsWithSubs got userAccess: " . $errMsg );
+	//$errMsg = print_r ( $userAccess, true );
+	//error_log ( "getAccessProjectsWithSubs got userAccess: " . $errMsg );
 	
 	$userAccessList = array();
+	$adminAccessList = array();
 	
 	foreach ( $userAccess as $row ) {
 		
@@ -3609,7 +3652,17 @@ function getAccessProjectsWithSubs ( $access ) {
 		$projId = $row['project_id'];
 		$projLevel = $row['access_level'];
 		
+		// Keep an admin list and a user list
+		if ( $roleId == 1 ) {
+			$adminAccessList[] = $projId;
+			$userAccessList[] = $projId;
+		}
+		else if ( $projLevel > 0 ) {
+			$userAccessList[] = $projId;
+		}
+		
 		// For admin, user needs admin role and access level of the project doesn't matter
+		/*
 		if ( $access == 'ADMIN' ) {
 			
 			if ( $roleId == 1 ) $userAccessList[] = $projId;
@@ -3624,26 +3677,37 @@ function getAccessProjectsWithSubs ( $access ) {
 				$userAccessList[] = $projId;
 			}
 		} 
+		*/
 		
 	}
 	
 	$fullUserList = array() + $userAccessList;
 	
 	// Add additional subs to full user list
-	foreach ( array_keys($controlledAccess) as $controlledProject ) {
+	foreach ( array_keys($controlledAccess) as $controlledParent ) {
 		
-		if  (in_array($controlledProject, $userAccessList) ) {
+		if  (in_array($controlledParent, $userAccessList) ) {
 			
 			//error_log ( "Controlled project " . $controlledProject . " in access array" );
 			
-			$controlledSubs = array_keys($controlledAccess[$controlledProject]);
+			$controlledSubs = array_keys($controlledAccess[$controlledParent]);
 			
-			$fullUserList = array_merge ( $fullUserList, array_keys($controlledAccess[$controlledProject]) );
+			$fullUserList = array_merge ( $fullUserList, $controlledSubs );
+		}
+	}
+	// Add additional from private list to full user list
+	foreach ( array_keys($privateAccess) as $privateParent ) {
+		
+		if  (in_array($privateParent, $adminAccessList) ) {
+			
+			$privateSubs = array_keys($privateAccess[$privateParent]);
+			
+			$fullUserList = array_merge ( $fullUserList, $privateSubs );
 		}
 	}
 	
-	$errMsg = print_r ( $fullUserList, true );
-	error_log ( "getAccessProjectsWithSubs got fullUserList: " . $errMsg );
+	//$errMsg = print_r ( $fullUserList, true );
+	//error_log ( "getAccessProjectsWithSubs got fullUserList: " . $errMsg );
 	
 	// Now add all subs to result, only include restricted where they are on the list.
 	foreach ( $projectRows as $projectId=>$row ) {
@@ -5012,7 +5076,7 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 			
 			shuffle( $species );
 			
-			$err_str = print_r($species, true);
+			//$err_str = print_r($species, true);
 			//error_log("species: " . $err_str);
 			
 			$species_to_use = null;
@@ -5039,12 +5103,12 @@ function getTrainingSequences( $topic_id, $max_number=10 ) {
 				}
 			}
 			
-			$err_str = print_r($species_to_use, true);
+			//$err_str = print_r($species_to_use, true);
 			//error_log("species to use: " . $err_str);
 			
 			// Set up an assoc array with species and sequence count required
 			$species_with_count = array_count_values($species_to_use);
-			$err_str = print_r($species_with_count, true);
+			//$err_str = print_r($species_with_count, true);
 			//error_log("species with count: " . $err_str);
 
 			

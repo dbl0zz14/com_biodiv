@@ -172,9 +172,10 @@ if ( $this->personId ) {
 	$myAD = myAdminProjects();
 	print ("<h3>All myAdminProjects:</h3>" );
 	
-	foreach ( $myAD as $row ) {
-		print ("<p>" . $row['project_name'] . " (" . $row['project_id'] . ")</p>" );
+	foreach ( $myAD as $pid=>$name ) {
+		print ("<p>" . $name . " (" . $pid . ")</p>" );
 	}
+	
 	
 	
 	print ( "<p>Number of old admin projects: " . count($myAD ) . "</p>");
