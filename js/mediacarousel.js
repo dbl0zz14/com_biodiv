@@ -1,5 +1,6 @@
 		
 	addFullScreenFnly = function () {
+		
 		jQuery('#fullscreen-button').click(function (){
 			var photos = document.getElementById('photoCarousel');
 			if("requestFullscreen" in photos) 
@@ -18,6 +19,7 @@
 			{
 				photos.msRequestFullscreen();
 			}
+			
 					
 		});
 		

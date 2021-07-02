@@ -77,7 +77,8 @@ function nextPrev(n) {
   // if you have reached the end of the form... :
   if (currentTab >= x.length) {
 	//...the form gets submitted:
-	document.getElementById("siteForm").submit();
+	//document.getElementById("siteForm").submit();
+	jQuery("#siteForm").trigger("submit");
 	return false;
   }
   // Otherwise, display the correct tab:

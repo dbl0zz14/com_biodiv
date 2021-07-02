@@ -80,7 +80,7 @@ class BiodivFFMpeg {
 		
 		$success = true;
 		
-		$command = "ffmpeg -i " . $infile . " -metadata creation_time=\"".$createDate."\" -c:av copy  " . $outfile;
+		$command = "ffmpeg -i " . $infile . " -metadata creation_time=\"".$createDate."\"  " . $outfile;
 
 		error_log ( "convertAviToMp4: command = " . $command );
 		
@@ -94,6 +94,32 @@ class BiodivFFMpeg {
 		return $success;
 
 	}
+	
+	
+	
+	
+	public function addCaption ( $infile, $outfile, $textToAdd ) {
+		
+		error_log("addCaption: infile = " . $infile . ", outfile = " . $outfile . ", textToAdd = " . $textToAdd  );
+		
+		$success = true;
+		
+		$command = "ffmpeg -i " . $infile . "  -vf \"drawtext=text='". $textToAdd ."':x=10:y=H-th-10:fontfile=/usr/share/fonts/dejavu/DejaVuSans.ttf:fontsize=12:fontcolor=white:shadowx=1:shadowy=1\"  " . $outfile;
+
+		error_log ( "addCaption: command = " . $command );
+		
+		exec($command, $output, $returnVar);
+		
+		if ( $returnVar !== 0 ) {
+			error_log ( "addCaption failed" );
+			$success = false;
+		}
+		
+		return $success;
+
+	}
+
+	
 
 
 	public function generateSonogram ( $infile, $outfile ) {

@@ -52,8 +52,8 @@
 #fullscreen-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.4); color: white; bottom: 8px; right: 8px; z-index: 100;/*transform: translate(-50%, -50%);*/}
 #fullscreen-exit-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.4); color: white; bottom: 40px; right: 40px; z-index: 100;} /*top 680px */
 
-.view-kiosk #fullscreen-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 0; right: 0; z-index: 100;/*transform: translate(-50%, -50%);*/}
-.view-kiosk #fullscreen-exit-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 40px; right: 40px; z-index: 100;} /*top 680px */
+.view-kioskv1 #fullscreen-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 0; right: 0; z-index: 100;/*transform: translate(-50%, -50%);*/}
+.view-kioskv1 #fullscreen-exit-button { position: absolute; border: none; background-color: rgba(0, 0, 0, 0.8); color: white; bottom: 40px; right: 40px; z-index: 100;} /*top 680px */
 
 
 
@@ -81,25 +81,25 @@
 }
 
 
-.view-kiosk :fullscreen #photoCarouselInner > .item > img {
+.view-kioskv1 :fullscreen #photoCarouselInner > .item > img {
 	height: 100vh;
 	max-height: 100vh;
 	margin-left: auto;
 	margin-right: auto;
 }
-.view-kiosk :-moz-full-screen #photoCarouselInner > .item > img {
+.view-kioskv1 :-moz-full-screen #photoCarouselInner > .item > img {
 	height: 100vh;
 	max-height: 100vh;
 	margin-left: auto;
 	margin-right: auto;
 }
-.view-kiosk :-webkit-full-screen #photoCarouselInner > .item > img {
+.view-kioskv1 :-webkit-full-screen #photoCarouselInner > .item > img {
 	height: 100vh;
 	max-height: 100vh;
 	margin-left: auto;
 	margin-right: auto;
 }
-.view-kiosk :-ms-fullscreen #photoCarouselInner > .item > img {
+.view-kioskv1 :-ms-fullscreen #photoCarouselInner > .item > img {
 	height: 100vh;
 	max-height: 100vh;
 	margin-left: auto;
@@ -538,6 +538,13 @@
   background-color: #4CAF50;
 }
 
+/* For validation of uploadForm, used when uploading a file to an existing site */
+#uploadForm select.invalid {
+  background-color: #ffdddd;
+}
+
+
+
 /* User dashboard - accordion buttons should be full width and height */
 .panel_options {
 	padding: 0;
@@ -555,38 +562,38 @@
 }
 
 
-.view-kiosk  .t3-mainnav { display: none; }
-.view-kiosk  .t3-footer { display: none; }
-.view-kiosk  .t3-mainbody { padding: 0; }
-.view-kiosk  .t3-content { padding: 0; }
-/* .view-kiosk { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
-.view-kiosk { touch-action: none; }
+.view-kioskv1  .t3-mainnav { display: none; }
+.view-kioskv1  .t3-footer { display: none; }
+.view-kioskv1  .t3-mainbody { padding: 0; }
+.view-kioskv1  .t3-content { padding: 0; }
+/* .view-kioskv1 { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
+.view-kioskv1 { touch-action: none; }
 
 .view-startkiosk  .t3-mainnav { display: none; }
 .view-startkiosk  .t3-footer { display: none; }
 .view-startkiosk  .body { padding-top: 0 !important; zoom-level: 1.1;}
 .view-startkiosk  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
 .view-startkiosk  .t3-content { padding: 0; }
-/*.view-startkiosk { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
+/*.view-startkioskv1 { touch-action: pan-x pan-y; } *//* disable pinch zoom on kiosk */
 .view-startkiosk { touch-action: none; } 
 .view-startkiosk  > h1 { margin-top: 50px; }
 
 
 
-.view-feedback  .t3-mainnav { display: none; }
-.view-feedback  .t3-footer { display: none; }
-.view-feedback  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
-.view-feedback  .t3-content { padding: 0; }
-/*.view-feedback { touch-action: pan-x pan-y; } *//* disable all touch actions on kiosk */
-.view-feedback { touch-action: none; } /* disable pinch zoom on kiosk */
+.view-feedbackv1  .t3-mainnav { display: none; }
+.view-feedbackv1  .t3-footer { display: none; }
+.view-feedbackv1  .t3-mainbody { padding: 0; margin: 0; padding: 0; position: fixed; left: 0; top: 0; width: 100%;}
+.view-feedbackv1  .t3-content { padding: 0; }
+/*.view-feedbackv1 { touch-action: pan-x pan-y; } *//* disable all touch actions on kiosk */
+.view-feedbackv1 { touch-action: none; } /* disable pinch zoom on kiosk */
 
 
 /*
-.view-kiosk { cursor: none; }
-.view-startkiosk { cursor: none; }
-.view-feedback { cursor: none; }
+.view-kioskv1 { cursor: none; }
+.view-startkioskv1 { cursor: none; }
+.view-feedbackv1 { cursor: none; }
 */
-/*.view-kiosk .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
+/*.view-kioskv1 .carousel-indicators > li { height: 15px; width: 15px; display: none;}*/
 /*
 #start-kiosk-jumbotron {
  background-image: url("http://localhost/rhombus/biodivimages/projects/hancock_urban.jpg");
@@ -676,20 +683,20 @@
 }
 
 
-.view-kiosk  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
-.view-kiosk  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}
-.view-kiosk .kiosk-photos > h1 { font-size: 35px; margin-bottom: 20px; margin-top: 30px; }
-.view-kiosk  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 30px; }
+.view-kioskv1  > body { padding-top: 0; zoom: 1.0; overflow: hidden; object-fit: contain; }
+.view-kioskv1  .classify-header > h5 { margin-bottom: 3px; margin-top: 20px;}
+.view-kioskv1 .kiosk-photos > h1 { font-size: 35px; margin-bottom: 20px; margin-top: 30px; }
+.view-kioskv1  .classify-header > h1 { color: #00BA8A; text-align: center; margin-bottom: 30px; }
 .kiosk-h2 { margin-top: 20px; margin-bottom: 20px; }
-.view-kiosk  .classify-header > h2 { margin-top: 15px; margin-bottom: 15px; }
-.view-kiosk  .well  > h2 { margin-top: 0; margin-bottom: 10px; }
+.view-kioskv1  .classify-header > h2 { margin-top: 15px; margin-bottom: 15px; }
+.view-kioskv1  .well  > h2 { margin-top: 0; margin-bottom: 10px; }
 /*.view-kiosk .animals-bar { margin-left: -10px;  }*/
-.view-kiosk #species-nav { padding: 0; color: grey !important; }
+.view-kioskv1 #species-nav { padding: 0; color: grey !important; }
 
 
 #sidebar-wrapper > h4 { margin-top: 40px; color: white; text-align: center; }
 
-.view-kiosk .modal-dialog .classify-modal-button {
+.view-kioskv1 .modal-dialog .classify-modal-button {
 	height: 5em;
 	width: 9em;
 	margin: 5px;
@@ -697,16 +704,16 @@
 	font-weight: bolder;
 }
 
-.view-kiosk .species_classify {
+.view-kioskv1 .species_classify {
 	font-size: 14px;
 	font-weight: normal;
 }
 
-.view-kiosk .species_classify > label {
+.view-kioskv1 .species_classify > label {
 	font-weight: normal;
 }
 
-.view-kiosk .species-radio > label {
+.view-kioskv1 .species-radio > label {
 	font-weight: normal;
 }
 
@@ -757,11 +764,11 @@
   -moz-border-radius-topright: 8px;
   border-top-right-radius: 8px;
 }
-.view-kiosk .nav {
+.view-kioskv1 .nav {
 	background-color: white;
 }
 
-.view-kiosk .nav-tabs {
+.view-kioskv1 .nav-tabs {
 	border-left: 1px solid #cccccc;
 	border-right: none;
 	border-bottom: none;
@@ -773,7 +780,7 @@
   border-top-right-radius: 8px;
 }
 
-.view-kiosk .nav-tabs > li > a {
+.view-kioskv1 .nav-tabs > li > a {
 	border-right: 1px solid #cccccc;
 	border-top: 1px solid #cccccc;
 	background-color: #f5f5f5 !important;
@@ -783,7 +790,7 @@
 }
 
 
-.view-kiosk .nav-tabs > li.active > a, .view-kiosk .nav-tabs > li.active > a:focus {
+.view-kioskv1 .nav-tabs > li.active > a, .view-kioskv1 .nav-tabs > li.active > a:focus {
     /*border-top: 1px solid #cccccc;
 	border-right: 1px solid #cccccc;*/
 	background-color: #66a381 !important;
@@ -796,7 +803,7 @@
 	margin-right: 0;
 }
 
-.view-kiosk .nav-tabs > li > a:hover {
+.view-kioskv1 .nav-tabs > li > a:hover {
     border-top: 1px solid #cccccc;
 	border-right: 1px solid #cccccc;
 	background-color: white !important;
@@ -804,7 +811,7 @@
 	margin-right: 0;
 }
 
-.view-kiosk .nav-tabs > li > a:focus {
+.view-kioskv1 .nav-tabs > li > a:focus {
     border-top: 1px solid #cccccc;
 	border-right: 1px solid #cccccc;
 	background-color: white !important;
@@ -820,7 +827,7 @@
 	padding-left: 5px;
 }
 
-.view-kiosk #control_nextseq {
+.view-kioskv1 #control_nextseq {
 	
 	height: 6em;
 	width: 11em;
@@ -843,35 +850,35 @@
 	margin: auto;	*/
 }
 
-.view-kiosk .btn-danger {
+.view-kioskv1 .btn-danger {
 	background-color: #00a177;
 }
 
-.view-kiosk .btn-danger:disabled,
-.view-kiosk .btn-danger.disabled{
+.view-kioskv1 .btn-danger:disabled,
+.view-kioskv1 .btn-danger.disabled{
   color:#cccccc;
   border-color: darkgrey;
   background-color: grey;
 }
-.view-kiosk .btn-danger:disabled:hover,
-.view-kiosk .btn-danger:disabled:focus,
-.view-kiosk .btn-danger.disabled:hover,
-.view-kiosk .btn-danger.disabled:focus {
+.view-kioskv1 .btn-danger:disabled:hover,
+.view-kioskv1 .btn-danger:disabled:focus,
+.view-kioskv1 .btn-danger.disabled:hover,
+.view-kioskv1 .btn-danger.disabled:focus {
   color:#cccccc;
   border-color: darkgrey;
   background-color: grey;
 }
 
-.view-kiosk #photo-container {
+.view-kioskv1 #photo-container {
 	padding-left: 5px;
 }
 
-.view-kiosk #back-to-top { display: none; }
-.view-kiosk .modal-dialog { width: 90%; }
-.view-kiosk .modal-dialog > img { width: 50%; }
-.view-kiosk .species-modal-side > h2 { margin-top: 0; }
+.view-kioskv1 #back-to-top { display: none; }
+.view-kioskv1 .modal-dialog { width: 90%; }
+.view-kioskv1 .modal-dialog > img { width: 50%; }
+.view-kioskv1 .species-modal-side > h2 { margin-top: 0; }
 
-.view-kiosk .species-radio {
+.view-kioskv1 .species-radio {
   border-radius: 16px;
   padding: 5px;
   margin: 5px;
@@ -880,9 +887,9 @@
   font-weight: normal;
 }
 
-.view-kiosk .species-carousel-control { height: 27px;}
-.view-kiosk .species-carousel-control.left { /*left: -30px;*/ }
-.view-kiosk .species-carousel-control.right { /*right: -30px;*/ }
+.view-kioskv1 .species-carousel-control { height: 27px;}
+.view-kioskv1 .species-carousel-control.left { /*left: -30px;*/ }
+.view-kioskv1 .species-carousel-control.right { /*right: -30px;*/ }
 
 
 /* This is the sidebar testing styling */
@@ -955,7 +962,7 @@
 	margin: auto;
 }
 */
-.view-kiosk #photoCarouselInner .item > img {
+.view-kioskv1 #photoCarouselInner .item > img {
 	max-height: 70vh;
 	margin: auto;
 }

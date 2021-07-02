@@ -14,6 +14,9 @@ function doInactive() {
 	var userKey = jQuery('#start-kiosk-jumbotron').attr("data-user-key");
 	url += "&user_key=" + userKey;
 	url += "&" + userKey;
+	
+	url = "start-kiosk";
+	
 	//jQuery.get(url);
 	window.location.href = "" + url;
 	

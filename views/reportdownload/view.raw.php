@@ -45,7 +45,7 @@ class BioDivViewReportDownload extends JViewLegacy
 		$err_msg = print_r ( $allProjects, true );
 		error_log ( $err_msg );
 		
-		$allIds = array_column ( $allProjects, 'project_id' );	
+		$allIds = array_keys ( $allProjects );
 		$err_msg = print_r ( $allIds, true );
 		error_log ( $err_msg );
 		

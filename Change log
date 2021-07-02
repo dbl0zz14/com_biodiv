@@ -1,3 +1,13 @@
+# 2/7/21 - Version 3.5.0   #
+* New version of kiosk, with Get Started, Learn, Classify, Quiz, Map and About pages
+* Changes for version 1 kiosks to pick up the new version from an Enter screen.
+* Start to use namespace for Biodiv classes
+* Add addCaption function to BiodivFFMpeg class
+* If taken date is before jan 1 2000, treat as suspicious and check filename instead
+* Add ability to record audio from within website 
+* On species charts, add pre 2000 species to unknown column
+* Add parameter to specify project in nextSequence rather than taking from request
+
 # 9/4/21 - Version 3.4.1   #
 * Improved method for getting sub projects
 * In project dashboard add all subprojects to each report with project id and name columns

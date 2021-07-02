@@ -14,12 +14,14 @@ class SiteHelper {
 	private $help;
 	private $sites;
 	private $isCamera;
+	private $justRecorded;
 	
-	function __construct( $isCamera = true)
+	function __construct( $isCamera = true )
 	{
 		$this->translations = getTranslations("trapper");
 		
 		$this->isCamera = $isCamera;
+		$this->justRecorded = false;
 		$this->userprojects = myTrappingProjects();
 		$this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
 		
@@ -45,6 +47,11 @@ class SiteHelper {
 	
 	public function getProjectSiteData () {
 		return $this->projectsitedata;
+	}
+	
+	// Set to true or false to indicate if we will be uploading a file recorded within the website
+	public function setJustRecorded ( $justRecorded ) {
+		$this->justRecorded = $justRecorded;
 	}
 	
 	public function getHelpArray() {
@@ -176,6 +183,7 @@ class SiteHelper {
 		
 		$task = 'add_site';
 		if ( $withUpload ) $task = 'add_site_and_upload';
+		if ( $this->justRecorded ) $view = 'record'; 
 		
 		print '<div id="add_site_modal" class="modal fade" role="dialog" aria-hidden="true" >';
 		print '  <div class="modal-dialog modal-sm">';
@@ -185,7 +193,13 @@ class SiteHelper {
 		print '      <div class="modal-header">';
 		print '      </div>';
 		print '      <div class="modal-body">';
-		print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . '" method="post">';
+		
+		if ( $this->justRecorded ) {
+			print '        <form id="siteForm" action="'. BIODIV_ROOT . '&view=' . $task . '" method="post">';
+		}
+		else {
+			print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . '" method="post">';
+		}
 		print JHtml::_('form.token');
 
 		print '        <div class="tab"><h2>'.$this->translations['enter_site']['translation_text'].'</h2>';

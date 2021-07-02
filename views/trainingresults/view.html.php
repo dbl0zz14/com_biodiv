@@ -260,74 +260,11 @@ class BioDivViewTrainingResults extends JViewLegacy
 	
 	$written = $app->getUserState('com_biodiv.written');
 	if ( !$written ) {
+		
 		// Write the results to the database
-		$db = JDatabase::getInstance(dbOptions());
-		$fields = new StdClass();
-		$fields->person_id = $person_id;
-		$fields->topic_id = $this->topic_id;
-		$fields->sequences = $seq_json;
-		$fields->answers = $ani_json;
-		$fields->score = $score_percent;
-		$success = $db->insertObject("UserTest", $fields);
-		if(!$success){
-			error_log ( "UserTest insert failed" );
-		}
-		else {
-			// Calculate the moving average and write it to the database
-			$query = $db->getQuery(true);
-			$query->select("sequences, score")->from("UserTest UE")
-				->where("person_id = " . $db->quote($person_id) )
-				->where("topic_id = " . $this->topic_id)
-				->order("timestamp DESC")
-				->setLimit("3");
-			$db->setQuery($query);
-			$rows = $db->loadAssocList();
-			
-			$scores = array_column($rows, "score");
-			
-			$seqs = array_column($rows, "sequences");
-			
-			$num_seqs = 0;
-			foreach ( $seqs as $s ) {
-				$s_list = json_decode($s);
-				$num_seqs += count($s_list);
-			}
-			
-			$moving_avg = array_sum($scores) / count($scores);
-			
-			// Is there already an average row for this topic? If so, update it, otherwise insert.
-			$query = $db->getQuery(true);
-			$query->select("ue_id")->from("UserExpertise UE")
-				->where("person_id = " . $db->quote($person_id) )
-				->where("topic_id = " . $this->topic_id);
-			$db->setQuery($query);
-			$ue_id = $db->loadResult();
-			
-			if ( $ue_id ) {
-				//error_log("expertise exists - updating ue_id " . $ue_id);
-				$avfields = new StdClass();
-				$avfields->ue_id = $ue_id;
-				$avfields->num_sequences = $num_seqs;
-				$avfields->score = $moving_avg;
-				$success = $db->updateObject("UserExpertise", $avfields, "ue_id");
-				if(!$success){
-					error_log ( "UserExpertise update failed" );
-				}
-			}
-			else {
-				//error_log("enew expertise - inserting");
-				$avfields = new StdClass();
-				$avfields->person_id = $person_id;
-				$avfields->topic_id = $this->topic_id;
-				$avfields->num_sequences = $num_seqs;
-				$avfields->score = $moving_avg;
-				$success = $db->insertObject("UserExpertise", $avfields);
-				if(!$success){
-					error_log ( "UserExpertise insert failed" );
-				}
-			}
-		}
-		// Remove the sequences so we don't rewrite this training session
+		writeTestResults ( $this->topic_id, $seq_json, $ani_json, $score_percent );
+		
+		// Ensure we don't rewrite this training session
 		$app->setUserState('com_biodiv.written', '1');
 		
 	}

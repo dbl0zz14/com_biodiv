@@ -23,21 +23,38 @@ print '<div class="opaque-bg">';
 print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '  <div>';  
 print '  <h3>We need your help to identify animals on camera trap images. What can you see on each sequence of photos?</h3>';      
-print '  <!-- h3>Touch the button to start spotting</h3 -->';   
+print '  <!-- h3>Touch the button to start exploring</h3 -->';   
 print '  </div>'; 
 print '</div>'; // opaque-bg
   
 //print '  <a id="start-kiosk-spotting" class="btn btn-danger" src="">Start Spotting</a>';
-?>
 
+/*
 <form action = "<?php print BIODIV_ROOT.'&'.$this->user_key;?>" method = 'GET'>
-    <input type='hidden' name='view' value='kiosk'/>
+    <input type='hidden' name='view' value='kioskv1'/>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_only_project' value='1'/>
 	<input type='hidden' name='my_project' value='<?php print $this->project->project_prettyname; ?>' />
 	<button  id='start-kiosk-btn' class='btn btn-danger' type='submit'><i class='fa fa-search'></i> Start Spotting</button>
     
 
+</form>
+
+<form action = "<?php print BIODIV_ROOT.'&'.$this->user_key;?>" method = 'GET'>
+    <input type='hidden' name='view' value='kiosk'/>
+    <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
+    <input type='hidden' name='project_id' value='<?php print $this->project_id; ?>' />
+	<button  id='start-kiosk-btn' class='btn btn-danger' type='submit'></i> Enter</button>
+    
+
+</form>
+*/
+
+
+?>
+
+<form action = "http://localhost/rhombus/en/hancock-urban-kiosk" method = 'GET'>
+   <button  id='start-kiosk-btn' class='btn btn-danger' type='submit'></i> Enter</button>
 </form>
 
 <!--button type='button' id='classify_help_button' class='btn btn-danger btn-block' data-toggle='modal' data-target='#help_modal'>Learn How</button -->
@@ -58,7 +75,7 @@ print '</div>';
 
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-JHTML::script("com_biodiv/startkiosk.js", true, true);
+//JHTML::script("com_biodiv/startkioskv1.js", true, true);
 
 ?>
 

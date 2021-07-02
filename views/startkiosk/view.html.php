@@ -30,8 +30,8 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  //($person_id = (int)userID()) or die("No person_id");
 	  $app = JFactory::getApplication();
 	  
-	  $this->my_project =
-	    (int)$app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
+	  //$this->my_project =
+	  //  (int)$app->getUserStateFromRequest('com_biodiv.my_project', 'my_project', 0);
 		
 	  $this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);

@@ -49,6 +49,7 @@ class BioDivViewMediaCarousel extends JViewLegacy
 	$this->mediaCarousel = new MediaCarousel();
 	
 	// Get the gold standard sequences for this topic
+	// NB if this is not an expert sequence the Sequence object is created but no species data is added
 	$this->sequence = getTrainingSequence($this->sequence_id, $this->topic_id);
 	
     // Display the view

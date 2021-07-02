@@ -27,24 +27,34 @@ class BiodivFile {
 	private $taken;
 	
 	
-	function __construct( $filename, $originalFilename )
+	function __construct( $filename, $originalFilename, $treatAsAudio = false )
 	{
 		$this->filename = $filename;
 		$this->originalFilename = $originalFilename;
 		$this->ext = strtolower(JFile::getExt($originalFilename));
 		
-		switch ( $this->ext ) {
-			case 'mp3':
-			case 'm4a':
-			case 'wav':
-				$this->type = self::AUDIO;
-				break;
-			case 'mp4':
-			case 'avi':
-				$this->type = self::VIDEO;
-				break;
-			default:
-				$this->type = self::IMAGE;
+		//$this->mimeType = mime_content_type($filename);
+		//error_log ( "BiodivFile got mime type " . $this->mimeType );
+		
+		if ( $treatAsAudio === true ) {
+			$this->type = self::AUDIO;
+		}
+		else {
+			switch ( $this->ext ) {
+				case 'mp3':
+				case 'm4a':
+				case 'wav':
+				case 'ogg':
+				case 'webm':
+					$this->type = self::AUDIO;
+					break;
+				case 'mp4':
+				case 'avi':
+					$this->type = self::VIDEO;
+					break;
+				default:
+					$this->type = self::IMAGE;
+			}
 		}
 				
 		$this->taken = null;
@@ -100,11 +110,11 @@ class BiodivFile {
 			$this->exif = $this->getVideoMeta();
 			
 			$err_str = print_r ( array_keys($this->exif), true );
-			error_log ( "generateMeta - exif array keys: " . $err_str );
+			//error_log ( "generateMeta - exif array keys: " . $err_str );
 			
 			if ( array_key_exists ( 'error', $this->exif ) ) {
-				$err_str = print_r ( $this->exif['error'] );
-				error_log ( "Error generating meta for file " . $this->filename . ": " . $err_str );
+				$err_str = print_r ( $this->exif['error'], true );
+				//error_log ( "Error generating meta for file " . $this->filename . " array: " . $err_str );
 			}
 			
 			switch ( $this->ext ) {
@@ -114,16 +124,31 @@ class BiodivFile {
 					$creation_time_unix = $this->exif['quicktime']['moov']['subatoms'][0]['creation_time_unix'];
 					$this->taken = date('Y-m-d H:i:s', $creation_time_unix);
 					
+					$testDate = date ( '2000-01-01' );
+					if ( $this->taken < $testDate ) {
+						error_log ("Got suspicious date in meta data: " . $this->taken . ", trying filename instead" );
+						$this->taken = null;
+					}
+					
+					if ( $this->taken == null )
+					{
+						$this->setDateFromFilename( true );
+						if ( !$this->taken ) {
+							addMsg("error","File upload unsuccessful for $this->filename. No creation time in meta data or filename.  Should be similar to myfile_YYYYMMDD_HHmmss.wav or myfileYYYY-MM-DD_HH-mm-ss.wav");
+						}
+					}
+					break;
+					
 					break;
 					
 				case 'wav':
-					error_log ( "Found wav audio file, ext is " . $this->ext );
+					//error_log ( "Found wav audio file, ext is " . $this->ext );
 					$date_found = false;
 					
 					// Test for a wamd or guan chunk (Wildlife Acoustics Songmeter) and if exists get datetime
 					$this->setDateFromWavMeta ();
 					
-					error_log ( "generateMeta, taken from meta data = " . $this->taken );
+					//error_log ( "generateMeta, taken from meta data = " . $this->taken );
 					
 					if ( $this->taken == null )
 					{
@@ -139,13 +164,13 @@ class BiodivFile {
 					}
 					break;
 				case 'avi':
-					error_log ( "Found avi audio file, ext is " . $this->ext );
+					//error_log ( "Found avi audio file, ext is " . $this->ext );
 					$date_found = false;
 					
 					// Test for a date in the riff info chunk -  ICRD?
 					$this->setDateFromAviMeta ();
 					
-					error_log ( "generateMeta, taken from meta data = " . $this->taken );
+					//error_log ( "generateMeta, taken from meta data = " . $this->taken );
 					
 					if ( $this->taken == null )
 					{
@@ -161,7 +186,7 @@ class BiodivFile {
 					}
 					break;
 				
-				default:		// mp3, avi
+				default:		// mp3, avi, ogg, webm
 					$this->setDateFromFilename( true );
 					if ( !$this->taken ) {
 						addMsg("error","File upload unsuccessful for $this->filename. Incorrect filename format.  Should be similar to myfile_YYYYMMDD_HHmmss.mp3 or myfileYYYY-MM-DD_HH-mm-ss.wav");
@@ -183,7 +208,7 @@ class BiodivFile {
 		$isWamd = array_key_exists ( 'wamd', $this->exif['riff']['WAVE'] );
 					
 		if ( $isWamd ) {
-			error_log ("Found wamd chunk");
+			//error_log ("Found wamd chunk");
 			$this->setDateFromWamd();
 		}
 		
@@ -191,7 +216,7 @@ class BiodivFile {
 			$isGuan = array_key_exists ( 'guan', $this->exif['riff']['WAVE'] );
 			
 			if ( $isGuan ) {
-				error_log ("Found guan chunk");
+				//error_log ("Found guan chunk");
 				$this->setDateFromGuan();
 			}
 		}
@@ -202,59 +227,59 @@ class BiodivFile {
 			$isInfo = array_key_exists ( 'INFO', $this->exif['riff']['WAVE'] );
 			
 			if ( $isInfo ) {
-				error_log ("Found info chunk");
+				//error_log ("Found info chunk");
 				$this->setDateFromInfo();
 			}
 		}
 		if ( !$this->taken ) {
-			error_log ( "No taken datetime found in wamd, guan or INFO chunk - what is in the WAVE?" );
+			//error_log ( "No taken datetime found in wamd, guan or INFO chunk - what is in the WAVE?" );
 			
 			$err_str = print_r ( array_keys($this->exif['riff']['WAVE']), true );
-			error_log ( "wave = " . $err_str );
+			//error_log ( "wave = " . $err_str );
 		}
 	}
 	
 	function setDateFromWamd () {
 		
-		error_log ( "setDateFromWamd called" );
+		//error_log ( "setDateFromWamd called" );
 		
 		if ( $this->exif == null ) {
 			$this->generateMeta();
 		}
 		
-		error_log ( "About to find offset" );
+		//error_log ( "About to find offset" );
 		
 		$wamd_offset = $this->exif['riff']['WAVE']['wamd'][0]['offset'];
 		$wamd_size = $this->exif['riff']['WAVE']['wamd'][0]['size'];
 			
-		error_log ( "WAMD offset = " . $wamd_offset . ", WAMD size = " . $wamd_size );
+		//error_log ( "WAMD offset = " . $wamd_offset . ", WAMD size = " . $wamd_size );
 			
-		error_log ("About to open " . $this->filename . " for direct reading" );
+		//error_log ("About to open " . $this->filename . " for direct reading" );
 			
 		if(!$fh = fopen ($this->filename, 'r')) {
-			error_log ( "Can't open file " . $this->filename . " for reading" );
+			//error_log ( "Can't open file " . $this->filename . " for reading" );
 			$this->taken = null;
 			return false;
 		}
 		
 		fseek ( $fh, $wamd_offset );
 		
-		error_log ("About to read chunkId from " . $this->filename  );
+		//error_log ("About to read chunkId from " . $this->filename  );
 		
 		$chunkId = fread($fh, 4);
 		
-		error_log ( "Chunk id: {$chunkId}" );
+		//error_log ( "Chunk id: {$chunkId}" );
 
 		if ($chunkId === 'wamd') {
 
-			error_log ("wamd found.  About to read and unpack size from " . $this->filename  );
+			//error_log ("wamd found.  About to read and unpack size from " . $this->filename  );
 		  
 			$size = unpack('V', fread($fh, 4));
 			$wamd_size = $size[1];
 		  
 			$size_str = print_r ( $size, true );
 	
-			error_log ( "Size: {$size_str}" );
+			//error_log ( "Size: {$size_str}" );
 		  
 			$size_read = 0;
 			$timestampFound = false;
@@ -264,7 +289,7 @@ class BiodivFile {
 				$id = unpack('C', fread($fh, 2));
 				$size_read += 2;
 				$err_str = print_r ( $id, true );
-				error_log ( "id: " . $err_str );
+				//error_log ( "id: " . $err_str );
 			  
 			  
 				$format = array(
@@ -300,40 +325,40 @@ class BiodivFile {
 					
 				$id_str = $format[$id[1]];
 
-				error_log ("Id from format: {$format[$id[1]]}");
+				//error_log ("Id from format: {$format[$id[1]]}");
 			  
 				$len = unpack('V', fread($fh, 4));		
 				$size_read += 4;		  
 				$err_str = print_r ( $len, true );
-				error_log ( "len: " . $err_str );
+				//error_log ( "len: " . $err_str );
 			  
 				if ( $len[1] == 2 ) {
 				  $val = unpack('v', fread($fh, $len[1]));		
 				  $size_read += 2;		  
 				  $err_str = print_r ( $val, true );
-				  error_log ( "val: " . $err_str );
+				  //error_log ( "val: " . $err_str );
 				}
 				else if ( $len[1] == 4 ) {
 				  $val = unpack('V', fread($fh, $len[1]));		
 				  $size_read += 4;		  
 				  $err_str = print_r ( $val, true );
-				  error_log ( "val: " . $err_str );
+				  //error_log ( "val: " . $err_str );
 				}
 				else {
 				  $val_format = 'A'.$len[1].$id_str;
 				  $val = unpack($val_format, fread($fh, $len[1]));		
 				  $size_read += $len[1];		  
 				  $err_str = print_r ( $val, true );
-				  error_log ( "val: " . $err_str );
+				  //error_log ( "val: " . $err_str );
 				}
 			  
 				// If it was the timestamp store it and exit the while loop
 				if ( $id[1] == 5 ) {
-				  error_log ( "Got timestamp" );
+				  //error_log ( "Got timestamp" );
 				  
 				  $this->taken = $val['timestamp'];
 				  
-				  error_log ( "Set taken to " . $this->taken );
+				  //error_log ( "Set taken to " . $this->taken );
 				  $timestampFound = true;
 				}
 			  
@@ -342,7 +367,7 @@ class BiodivFile {
 			  //error_log ( "val: " . $err_str );
 			}
 		  
-			error_log ("End of wamd chunk" );
+			//error_log ("End of wamd chunk" );
 		}
 		fclose ($fh);
 		
@@ -370,7 +395,7 @@ class BiodivFile {
 		}
 		else if ( is_array ( $guanChunk ) ) {
 			$err_str = print_r ( $guanChunk, true );
-			error_log ( "Guan chunk: " . $err_str );
+			//error_log ( "Guan chunk: " . $err_str );
 			
 			$guanData = $guanChunk[0]['data'];
 			
@@ -392,15 +417,15 @@ class BiodivFile {
 			*/
 			
 			$guanDataArray = explode ( "\n", $guanData );
-			error_log ( "guanDataArray[10] = " . $guanDataArray[9] );
+			//error_log ( "guanDataArray[10] = " . $guanDataArray[9] );
 			
 			// Search through for the timestamp (probably at element 9 but can't guarantee that)
 			foreach ( $guanDataArray as $element ) {
 				if ( strpos ( $element, 'Timestamp:' ) === 0 ) {
-					error_log ( "Found timestamp line" );
+					//error_log ( "Found timestamp line" );
 					// Everything after the : is the timestamp
 					$this->taken = substr ( $element, 10 );
-					error_log ( "Timestamp found in guan chunk is " . $this->taken );
+					//error_log ( "Timestamp found in guan chunk is " . $this->taken );
 				}
 			}
 		}
@@ -430,18 +455,18 @@ class BiodivFile {
 		}
 		else if ( is_array ( $infoChunk ) ) {
 			$err_str = print_r ( $infoChunk, true );
-			error_log ( "INFO chunk: " . $err_str );
+			//error_log ( "INFO chunk: " . $err_str );
 			
 			// AudioMoth stores the details as a comment eg “Recorded at 20:28:00 28/04/2020 (UTC) by AudioMoth 0FE081F80FE081F0 at gain setting 2 while battery state was 3.9V”
 			if ( array_key_exists ( "ICMT", $infoChunk ) ) {
-				error_log ( "Found ICMT comment" );
+				//error_log ( "Found ICMT comment" );
 				$comment = $infoChunk['ICMT'][0]['data'];
 				
 				$rec_at = strpos ( $comment, 'Recorded at ' );
 				$stop = strpos ( $comment, ' by AudioMoth' );
 				
 				if ( $rec_at === false || $stop === false ) {
-					error_log ( "AudioMoth comment string not found - cannot read recorded datetime" );
+					//error_log ( "AudioMoth comment string not found - cannot read recorded datetime" );
 				}
 				else {
 				
@@ -451,7 +476,7 @@ class BiodivFile {
 					
 					$rec_date = substr ( $comment, $start, $len );
 					
-					error_log ( "Found recorded date: " . $rec_date );
+					//error_log ( "Found recorded date: " . $rec_date );
 					
 					// Need to reformat the datetime string
 					$date = date_create_from_format ( 'H:i:s d/m/Y', $rec_date);
@@ -464,14 +489,14 @@ class BiodivFile {
 			
 			// Some AVI files store the datetime in the ICRD chunk
 			else if ( array_key_exists ( "ICRD", $infoChunk ) ) {
-				error_log ( "Found ICRD comment" );
+				//error_log ( "Found ICRD comment" );
 				
 				$err_msg = print_r (  $infoChunk['ICRD'], true );
-				error_log ( "ICRD array = " . $err_msg );
+				//error_log ( "ICRD array = " . $err_msg );
 				
 				$icrdData = $infoChunk['ICRD'][0]['data'];
 				
-				error_log ( "ICRD data = " . $icrdData );
+				//error_log ( "ICRD data = " . $icrdData );
 				
 			}
 			else {
@@ -497,13 +522,13 @@ class BiodivFile {
 		try {
 			// Id there a riff chunk
 			$riffChunk = $this->exif['riff'];
-			error_log ( "Found riff chunk: " );
+			//error_log ( "Found riff chunk: " );
 			$err_msg = print_r ( $riffChunk  );
-			error_log ( "riff keys: " . $err_msg );
+			//error_log ( "riff keys: " . $err_msg );
 			$infoChunk = $this->exif['riff']['AVI']['INFO'];
-			error_log ( "Found info chunk: " );
+			//error_log ( "Found info chunk: " );
 			$err_msg = print_r ( $infoChunk );
-			error_log ( "info chunk: " . $err_msg );
+			//error_log ( "info chunk: " . $err_msg );
 			
 		} 
 		catch ( Exception $e ) {
@@ -515,18 +540,18 @@ class BiodivFile {
 		}
 		else if ( is_array ( $infoChunk ) ) {
 			$err_str = print_r ( $infoChunk, true );
-			error_log ( "INFO chunk: " . $err_str );
+			//error_log ( "INFO chunk: " . $err_str );
 			
 			// Some AVI files store the datetime in the ICRD chunk
 			if ( array_key_exists ( "ICRD", $infoChunk ) ) {
-				error_log ( "Found ICRD chunk" );
+				//error_log ( "Found ICRD chunk" );
 				
 				$err_msg = print_r (  $infoChunk['ICRD'], true );
-				error_log ( "ICRD array = " . $err_msg );
+				//error_log ( "ICRD array = " . $err_msg );
 				
 				$icrdData = $infoChunk['ICRD'][0]['data'];
 				
-				error_log ( "ICRD data = " . $icrdData );
+				//error_log ( "ICRD data = " . $icrdData );
 				
 				$this->taken = null;
 			}
@@ -1117,8 +1142,10 @@ class BiodivFile {
 		// Initialize getID3 engine
 		$getID3 = new getID3;
 		
-		// Analyze file and store returned data in $ThisFileInfo
-		$fileinfo = $getID3->analyze($this->filename);
+		// Analyze file and store returned data in $ThisFileInfo, include filesize parameter
+		$size = filesize($this->filename);
+		$fileinfo = $getID3->analyze($this->filename, $size);
+		
 		
 		return $fileinfo;
 
@@ -1137,47 +1164,47 @@ class BiodivFile {
 		}
 		$ext = JFile::getExt($fileToUse);
 		$no_extension = basename($fileToUse, '.'.$ext);
-		error_log ( "Basename = " . $no_extension );
+		//error_log ( "Basename = " . $no_extension );
 		$file_bits = explode('_', $no_extension);
 		
 		// Check we have at least 3 bits
 		if ( count($file_bits) > 2 ) {
-			error_log ( "Got more than two bits:" );
+			//error_log ( "Got more than two bits:" );
 			$bits = print_r ( $file_bits, true );
-			error_log ( $bits );
+			//error_log ( $bits );
 			$filetime = array_pop($file_bits);
 			$filedate = array_pop($file_bits);
 			if ( is_numeric($filetime) && is_numeric($filedate) ) {
 				
-				error_log ("Date and time are numeric " );
+				//error_log ("Date and time are numeric " );
 				
 				$dateStr = $filedate . ' ' . $filetime;
 				$unixTime = strtotime($dateStr);
 				
 				if ( $unixTime == 0 ) {
-					error_log ("Can't create unix time from date string " . $dateStr );
+					//error_log ("Can't create unix time from date string " . $dateStr );
 					$success = false;
 				}
 				else {
 					$this->taken = date('Y-m-d H:i:s', $unixTime );
 				}
 					
-				error_log ("Got taken to be " . $this->taken );
+				//error_log ("Got taken to be " . $this->taken );
 				
 				// Check format was ok
 				$date_errors = date_get_last_errors();
 				if ( $date_errors['warning_count'] > 0 || $date_errors['error_count'] > 0 ) {
-					error_log("Errors or warnings when creating date");
+					//error_log("Errors or warnings when creating date");
 					$success = false;
 				}
 			}
 			else {
-				error_log ("Date or time not numeric" );
+				//error_log ("Date or time not numeric" );
 				$success = false;
 			}
 		}
 		else {
-			error_log ("Not enough file bits" );
+			//error_log ("Not enough file bits" );
 			$success = false;
 		}
 		if ( !$success ) {
@@ -1192,23 +1219,23 @@ class BiodivFile {
 					$dateBits = explode ( '-', $dtArray[0] );
 					
 					$err_str = print_r ( $dateBits, true );
-					error_log ( "date arr " . $err_str );
+					//error_log ( "date arr " . $err_str );
 					
 					$filedate = intval($dateBits[0])*10000 + intval($dateBits[1])*100 + intval($dateBits[2]);
 					
-					error_log ("Got date int to be " . $filedate );
+					//error_log ("Got date int to be " . $filedate );
 					
 					$timeBits = explode ( '-', $dtArray[1] );
 					
 					$err_str = print_r ( $timeBits, true );
-					error_log ( "time arr " . $err_str );
+					//error_log ( "time arr " . $err_str );
 					
 					$filetime = intval($timeBits[0])*10000 + intval($timeBits[1])*100 + intval($timeBits[2]);
 					
-					error_log ("Got time int to be " . $filetime );
+					//error_log ("Got time int to be " . $filetime );
 					
 					$dateStr = sprintf("%06d %06d",$filedate,$filetime);
-					error_log ( "Date string = " . $dateStr );
+					//error_log ( "Date string = " . $dateStr );
 					$unixTime = strtotime($dateStr);
 				
 					if ( $unixTime == 0 ) {
@@ -1219,12 +1246,12 @@ class BiodivFile {
 						$this->taken = date('Y-m-d H:i:s', $unixTime );
 					}
 				
-					error_log ("Got taken to be " . $this->taken );
+					//error_log ("Got taken to be " . $this->taken );
 					
 					// Check format was ok
 					$date_errors = date_get_last_errors();
 					if ( $date_errors['warning_count'] == 0 || $date_errors['error_count'] == 0 ) {
-						error_log("No errors or warnings when creating date");
+						//error_log("No errors or warnings when creating date");
 						$success = true;
 					}
 				}

@@ -26,6 +26,8 @@ class BioDivViewUpload extends JViewLegacy
 
     public function display($tpl = null) 
     {
+	  //error_log ( "Upload view display called " );
+	  
 	  $app = JFactory::getApplication();
 	  
 	  // Get all the text snippets for this view in the current language
@@ -86,8 +88,6 @@ class BioDivViewUpload extends JViewLegacy
 	  $this->previous_upload_date = new JDate($uploadDetails['timestamp']);
 
 	  // Display the view
-
-
 	  parent::display($tpl);
     }
 }

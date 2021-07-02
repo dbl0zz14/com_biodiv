@@ -93,7 +93,7 @@ class BiodivReport {
 			
 			$this->reportId = codes_insertObject($reportFields, 'report');
 			
-			error_log ("New report, id = " . $this->reportId . ", generating Report row data for type " . $this->reportTypeName);
+			//error_log ("New report, id = " . $this->reportId . ", generating Report row data for type " . $this->reportTypeName);
 			
 			// And generate the data (in the database) here.
 			// Like this to avoid multiple database queries when paging through
@@ -667,6 +667,8 @@ class BiodivReport {
 		$unionQuery = $db->getQuery(true)
              ->select('*')
              ->from('(' . $query1->union($query2) . ') a');
+			 
+		//error_log("generateUploadDataAudio unionQuery created: " . $unionQuery->dump());
 			 
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')

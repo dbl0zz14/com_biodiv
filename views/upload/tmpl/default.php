@@ -9,6 +9,7 @@
 defined('_JEXEC') or die;
 $action = $this->root . "&view=uploadm";
 
+
 JHTML::stylesheet("bootstrap-datepicker-master/datepicker3.css", array(), true);
 
 showMessages();
@@ -84,13 +85,13 @@ if ( $this->isCamera ) {
 				 'max' => $now->format($mForm));
 				 
 	$err_str = print_r ( $defaultDate, true );
-	error_log ( "default dates: " . $err_str );
+	//error_log ( "default dates: " . $err_str );
 
 	$err_str = print_r ( $defaultHours, true );
-	error_log ( "default hours: " . $err_str );
+	//error_log ( "default hours: " . $err_str );
 
 	$err_str = print_r ( $defaultMins, true );
-	error_log ( "default mins: " . $err_str );
+	//error_log ( "default mins: " . $err_str );
 
 
 
@@ -184,6 +185,9 @@ print "  </div>";
 //print "</div> <!-- /.container -->  ";
 print "</form>";
 
+//error_log ("Upload end of form");
+
+
 print "</div>"; // class='col-md-6'
 
 print "<div class='col-md-6'>";
@@ -206,6 +210,7 @@ if ($this->previous_upload_id){
  }
 
 
+error_log ("Upload end of prev upload");
 
 
 //print "  <div class='lead'><a href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".$this->translations['list_up']['translation_text']."</a></p>";
@@ -246,6 +251,8 @@ print "</div>";
 
 JHTML::script("com_biodiv/upload.js", true, true);
 JHTML::script("bootstrap-datepicker-master/bootstrap-datepicker.js", true, true);
+
+
 
 ?>
 

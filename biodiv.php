@@ -23,6 +23,8 @@ include_once "BiodivFFMpeg.php";
 include_once "BiodivFile.php";
 include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
+include_once "KioskSpecies.php";
+include_once "Biodiv/BeginnerQuiz.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 50000000);
@@ -131,11 +133,11 @@ function codes_insertObject($fields, $struc){
 
 				$success = $db->insertObject($table, $exifFields);
 				if($success){
-					print "Insert succeeded";
+					//print "Insert succeeded";
 					error_log("Insert succeeded, id = " . $id );
 				}
 				else{
-					print "Insert failed";
+					//print "Insert failed";
 					error_log("Photo insert failed due to " . $e);
 					$db->transactionRollback();
 					$success = false;
@@ -2564,8 +2566,12 @@ function discoverSpecies ( $species_id, $year = null  ) {
 		  $num = $total["num_sightings"];
 		  		  
 		  // New total for each year, add zeros as unknown
+		  // Anything pre 2000 probably indicates incorrect date so add to unknown.
 		  //error_log( "adding new total for year " . $year . ", " . $num );
 		  if ( $year == 0 ) {
+			$totals["unknown"] = $num;
+		  }
+		  if ( $year < 2000 ) {
 			$totals["unknown"] = $num;
 		  }
 		  else {
@@ -4048,7 +4054,7 @@ function isFavourite($photo_id){
 // New version of nextSequence which considers the classify priority mode of each project.
 // At the time of writing this could be:
 // Multiple (allow multiple classifications per photo, done by different users), Single (classify all photos once), Time ordered (classify the oldest sequence first)
-function nextSequence(){
+function nextSequence( $project_id = null){
   
   //print "<br/>nextSequence called<br/>";
 	
@@ -4065,9 +4071,15 @@ function nextSequence(){
   //$last_photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
   $last_photo_id = (int)$app->getUserState('com_biodiv.prev_photo_id', 0);
   
-  $project_id = null;
+  //$project_id = null;
   
-  if ( $classify_project ) $project_id = $app->getUserState("com_biodiv.project_id");
+  if ( $classify_project && $project_id == null ) {
+	  $project_id = $app->getUserState("com_biodiv.project_id");
+  }
+  
+  error_log ( "classify_project = " . $classify_project );
+  error_log ( "classify_own = " . $classify_own );
+  error_log ( "project_id = " . $project_id );
   
   //print "<br>nextSequence, project_id: " . $project_id . "<br>" ;
   
@@ -5260,6 +5272,151 @@ function allSpecies () {
 		
 		return $speciesArray;
 }
+
+
+function getSpeciesOrig ( $filterid, $onePage ) {
+	
+	$speciesList = array();
+	
+	//$species = codes_getList ( $filtername );
+	$restrict = array();
+	$restrict['restriction'] = "value = '" . $filterid . "'";
+	//$restrict['restriction'] = "list_id = '" . $filterid . "'";
+	
+	error_log ("Getting filterspeciestran");
+	$species = codes_getList ( "filterspeciestran", $restrict );
+	error_log ("Got filterspeciestran");
+	  
+	// Need to sort this list by name.
+	usort($species, "cmp");
+	  
+	// Sort the data 
+	//array_multisort($name, SORT_ASC, $species);
+
+	$features = array();
+	$features['restriction'] = "struc='notinlist'";
+	//$notInListSpecies = codes_getList ( "species", $features );
+	$notInListSpecies = codes_getList ( "speciestran", $features );
+	$species = array_merge($species, $notInListSpecies);
+	foreach($species as $stuff){
+		  
+		list($id, $name) = $stuff;
+	    //print ( "<br>classify view: species list - " . $id . ", " . $name . "<br>" );
+	    $details = codes_getDetails($id, 'species');
+		//print ( "details - <br>" );
+		//print_r ( $details );
+		
+		// If we don't have a slot for this struc type yet, create one.
+		if ( !in_array($details['struc'], array_keys($speciesList)) ) {
+			//print "Creating array for " . $details['struc'];
+			$speciesList[$details['struc']] = array();
+		}
+	    
+	    $speciesList[$details['struc']][$id] = array("name" => $name,
+					"type" => $details['struc'], // mammal or bird or notinlist
+					"page" => $details['seq']);
+					
+		// For species to all fit on one page - we want them grouped as mammals (alphabetical), birds (alphabetical), notinlist (may want to change this to go to Mammal or Bird list?).
+		if ( $onePage && ($details['struc'] == "mammal" or $details['struc'] == "bird") )
+		{
+			$speciesList[$details['struc']][$id]["page"] = 1;
+		}
+	}
+	
+	// Just make sure mammal is the first struc type...
+	uksort($speciesList, "strucCmp");
+	
+	//print_r ( $speciesList );
+	
+	/*
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$mammalArray = null;
+	$birdArray = null;
+	$notinlistArray = null;
+	
+	// Check the language tag and work differently if English
+	$lang = langTag();
+	if ( $lang == 'en-GB' ) {
+		
+		//error_log ( "Language is English so no join to OptionData" );
+		$query = $db->getQuery(true);
+		
+		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
+			->from("Options O")
+			->innerJoin("SpeciesList SL on O.option_id = SL.species_id")
+			->where( "O.struc = 'mammal'" )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$mammalArray = $db->loadAssocList("id");
+		
+		//error_log ( "Got mammal names" );
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
+			->from("Options O")
+			->innerJoin("SpeciesList SL on O.option_id = SL.species_id")
+			->where( "O.struc = 'bird'" )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$birdArray = $db->loadAssocList("id");
+		
+		//error_log ( "Got bird names" );
+		
+	}
+	else {
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("OD.option_id as id, OD.value as name, O.struc as type")
+			->from("OptionData OD")
+			->innerJoin("SpeciesList SL on OD.option_id = SL.species_id")
+			->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'mammal'")
+			->where("OD.data_type = " . $db->quote($lang) )
+			->where("SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$mammalArray = $db->loadAssocList("id");
+		
+		$query = $db->getQuery(true);
+		
+		$query->select("OD.option_id as id, OD.value as name, O.struc as type")
+			->from("OptionData OD")
+			->innerJoin("SpeciesList SL on OD.option_id = SL.species_id")
+			->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'bird'")
+			->where("OD.data_type = " . $db->quote($lang) )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$birdArray = $db->loadAssocList("id");
+		
+	}
+	
+	if ( $mammalArray ) $speciesList['mammal'] = $mammalArray;
+	if ( $birdArray ) $speciesList['bird'] = $birdArray;
+	
+	//$err_msg = print_r ( $mammalArray, true );
+	//error_log ( "mammal list for filter " . $filterId . ": " . $err_msg );
+	
+	//$err_msg = print_r ( $birdArray, true );
+	//error_log ( "bird list for filter " . $filterId . ": " . $err_msg );
+	
+	*/
+	
+	return $speciesList;
+}
 	
 function getSpecies ( $filterId, $onePage ) {
 	
@@ -6251,12 +6408,194 @@ function getLogos ( $project_id ) {
 		$query->innerJoin("ProjectOptions PO on PO.option_id = OD.option_id");
 		$query->innerJoin("Options O on PO.option_id = O.option_id");
 		$query->where("PO.project_id = " . $project_id );
-		$query->where("OD.data_type = 'image'" );
+		$query->where("OD.data_type = 'logo'" );
 		$query->order("O.seq");
 		$db->setQuery($query);
 		$logos = $db->loadColumn();
 	}
 	return $logos;
+}
+
+
+
+function addUpload ( $isCamera, $site_id ) {
+	
+	//error_log ( "addUpload ( $isCamera, $site_id ) called" );
+	
+	$app = JFactory::getApplication();
+	
+	canEdit($site_id, "site") or die("Cannot edit site_id $site_id");
+	
+	$fields = new StdClass();
+	
+	// For audio no need for deployment start and end times, camera only
+	if ( $isCamera ) {
+		foreach(array("deployment", "collection") as $dt){
+		  $date = JRequest::getString("${dt}_date");
+		  if(!strlen($date)){
+			addMsg('error', "No $dt date specified");
+		  }
+		  $hours = JRequest::getString("${dt}_hours");
+		  if(!strlen($hours)){
+			addMsg('error', "No $dt hours specified");
+		  }
+		  $mins = JRequest::getString("${dt}_mins");
+		  if(!strlen($mins)){
+			addMsg('error', "No $dt mins specified: $mins ");
+		  }
+		  $datetime[$dt] = $date . " " . $hours . ":" . $mins;
+		}
+		
+		$fields->deployment_date = $datetime['deployment'];
+		$fields->collection_date = $datetime['collection'];
+		
+	}
+	
+	//error_log ( "addUpload setting common fields" );
+	
+	// These are the common fields
+	$camera_tz = JRequest::getString('timezone');
+	$tz = 0;
+	$is_dst = 0;
+	$utc_offset = 0;
+	if(!strlen($camera_tz)){
+		addMsg('error', "No camera timezone specified");
+	}
+	// Get the offset
+	$tz = IntlTimeZone::createTimeZone($camera_tz);
+	$utc_offset = $tz->getRawOffset()/60000;
+	
+	$is_dst = JRequest::getInt('dst');
+	if ($is_dst == 1 ) {
+		// Adjust the offset from UTC for daylight saving time
+		$utc_offset += $tz->getDSTSavings()/60000;
+	}
+	
+	$upload_id = null;
+		
+	if(!someMsgs("error")){
+		
+		//error_log ( "addUpload no error messages so adding upload" );
+		
+		$fields->person_id = userID();
+		$fields->site_id = $site_id;
+		$fields->camera_tz = $camera_tz;
+		$fields->is_dst = $is_dst;
+		$fields->utc_offset = $utc_offset;
+		$upload_id = codes_insertObject($fields, 'upload');
+		$app->setUserState('com_biodiv.upload_id', $upload_id);
+	}
+	
+	//error_log ( "addUpload returning, upload_id = " . $upload_id );
+	
+	
+	return $upload_id;
+}
+
+
+
+// When recording can get video/mp4 mime types so can require audio
+function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $fileType, $treatAsAudio = false ) {
+	
+	$problem = false;
+	
+	//error_log ( "uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $fileType, $treatAsAudio ) called");
+
+	if($fileSize > BIODIV_MAX_FILE_SIZE){
+	  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
+	  $problem = true;
+	} 
+	//	$tmpName = JFile::makeSafe($tmpName);
+	// NB can get this error if PHP max dilsize and upload size are too small:
+	else if(!is_uploaded_file($tmpName)){
+		//error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
+		addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem");
+		$problem = true;
+	}
+	else {
+
+		$ext = strtolower(JFile::getExt($clientName));
+		$newName = md5_file($tmpName) . "." . $ext;
+
+		//error_log ( "Uploading file " . $clientName . ", extension is " . $ext );
+
+		$dirName = siteDir($site_id);
+		$newFullName = "$dirName/$newName";
+
+		if(JFile::exists($newFullName)){
+		  addMsg("warning", "File already uploaded: $clientName");
+		  $problem = true;
+		}
+		else {
+
+			// Create a BiodivFile object
+			$biodivFile = new BiodivFile ( $tmpName, $clientName, $treatAsAudio );
+
+			$taken = $biodivFile->takenDate();
+			$exif = $biodivFile->exif();
+			$is_audio = $biodivFile->isAudio();
+
+			//error_log ( "Values from BiodivFile: ");
+			//error_log ( "taken = " . $taken );
+			//error_log ( "is_audio = " . $is_audio );
+
+			if ( $taken == null ) {
+				addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
+				$problem = true;
+			}
+			else {
+
+				$exists = JFile::exists($tmpName);
+				$success=	JFile::upload($tmpName, $newFullName);
+				if(!$success){
+					addMsg("error","File upload unsuccessful for $clientName");
+					$problem = true;
+				}	
+				else {
+
+					$struc = 'photo';
+
+					$photoFields = new stdClass();
+					$photoFields->filename = $newName;
+					$photoFields->upload_filename = $clientName;
+					$photoFields->dirname = $dirName;
+					$photoFields->site_id = $site_id;
+					$photoFields->upload_id = $upload_id;
+					$photoFields->person_id = userID();
+					$photoFields->taken = $taken;
+					$photoFields->size = $fileSize;
+					$photoFields->exif = $exif;
+
+					// If we have file splitting for audio, then write to different table.
+					$splitAudio = getSetting("split_audio") == "yes";
+
+					//error_log ( "split_audio setting = " . $splitAudio );
+					//error_log ( "is_audio = " . $is_audio );
+					if ( $is_audio && $splitAudio ) {
+						$struc = 'origfile';
+					}
+
+					// For all avi files need to convert to MP4
+					if ( $ext == 'avi' ) {
+						$struc = 'origfile';
+					}
+
+					//error_log ( "Inserting object for struc " . $struc );
+					if(codes_insertObject($photoFields, $struc)){
+					  addMsg('success', "Uploaded $clientName");
+					}
+					else {
+						// Remove files if the database insert failed
+						JFile::delete($newFullName);
+						$problem = true;
+					}
+				}
+			}
+		}
+	}
+	
+	return $problem == false;
+
 }
 
 // Used to write details of a generated file (eg split or sonogram) to Photo table.
@@ -6672,6 +7011,86 @@ function getSiteLocation($site_id) {
 	$siteDetails = codes_getDetails($site_id, 'site');	
 	return new Location($siteDetails['latitude'], $siteDetails['longitude']);	
 
+}
+
+
+function writeTestResults ( $topicId, $sequencesJson, $answersJson, $scorePercent ) {
+	
+	//error_log ( "writeTestResults ( " . $topicId . ", " . $sequencesJson . ", " . $answersJson . ", " . $scorePercent . ")" );
+	
+	$personId = userID();
+	
+	// Write the results to the database
+	$db = JDatabase::getInstance(dbOptions());
+	$fields = new StdClass();
+	$fields->person_id = $personId;
+	$fields->topic_id = $topicId;
+	$fields->sequences = $sequencesJson;
+	$fields->answers = $answersJson;
+	$fields->score = $scorePercent;
+	$success = $db->insertObject("UserTest", $fields);
+	if(!$success){
+		error_log ( "UserTest insert failed" );
+	}
+	else {
+		// Calculate the moving average and write it to the database
+		$query = $db->getQuery(true);
+		$query->select("sequences, score")->from("UserTest UE")
+			->where("person_id = " . $db->quote($personId) )
+			->where("topic_id = " . $topicId)
+			->order("timestamp DESC")
+			->setLimit("3");
+		$db->setQuery($query);
+		$rows = $db->loadAssocList();
+		
+		$scores = array_column($rows, "score");
+		
+		$seqs = array_column($rows, "sequences");
+		
+		$num_seqs = 0;
+		foreach ( $seqs as $s ) {
+			$s_list = json_decode($s);
+			$num_seqs += count($s_list);
+		}
+		
+		$moving_avg = array_sum($scores) / count($scores);
+		
+		// Is there already an average row for this topic? If so, update it, otherwise insert.
+		$query = $db->getQuery(true);
+		$query->select("ue_id")->from("UserExpertise UE")
+			->where("person_id = " . $db->quote($personId) )
+			->where("topic_id = " . $topicId);
+		$db->setQuery($query);
+		$ue_id = $db->loadResult();
+		
+		if ( $ue_id ) {
+			//error_log("expertise exists - updating ue_id " . $ue_id);
+			$avfields = new StdClass();
+			$avfields->ue_id = $ue_id;
+			$avfields->num_sequences = $num_seqs;
+			$avfields->score = $moving_avg;
+			$avfields->timestamp = date("Y-m-d H:i:s");
+			$success = $db->updateObject("UserExpertise", $avfields, "ue_id");
+			if(!$success){
+				error_log ( "UserExpertise update failed" );
+			}
+		}
+		else {
+			//error_log("enew expertise - inserting");
+			$avfields = new StdClass();
+			$avfields->person_id = $personId;
+			$avfields->topic_id = $topicId;
+			$avfields->num_sequences = $num_seqs;
+			$avfields->score = $moving_avg;
+			$success = $db->insertObject("UserExpertise", $avfields);
+			if(!$success){
+				error_log ( "UserExpertise insert failed" );
+			}
+		}
+	}
+	
+	return $success;
+	
 }
 
 

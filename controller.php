@@ -620,6 +620,91 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
   
+  // Simplified version for kiosk where there are no additional data, just one species id, then get next sequence
+  function kiosk_add_animal_next(){
+	  
+	error_log ( "kiosk_add_animal_next called" );
+    
+	$this->kiosk_add_animal ( 'kioskmediacarousel' );
+	
+  }
+
+  
+  // Simplified version for kiosk where there are no additional data, just one species id, then return a results template
+  function kiosk_add_animal_finish(){
+	  
+	$this->kiosk_add_animal ( 'kioskfeedback' );
+	
+  }
+  
+  function kiosk_add_animal ($next_view) {
+	
+	$app = JFactory::getApplication();
+
+    $fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		
+		// Now set the photo_id from the form value, but check it is in the same sequence as the "current" one.
+		$fields->photo_id = $this->input->get('photo_id', 0);
+		$fields->species = $this->input->get('species', 0);
+		
+		error_log ("Photo id = " . $fields->photo_id);
+		error_log ("Species id = " . $fields->species);
+		
+		if ( $fields->photo_id == 0 or $fields->species == 0 ) {
+			error_log ("add_animal_kiosk_next no photo_id or species");
+		}
+		else {
+			
+			$animal_id = codes_insertObject($fields, 'animal');
+			
+			$app->setUserState('com_biodiv.animal_id', $animal_id);
+			
+			// if human then update the photo to say so
+			if($fields->species == 87){
+				$db = JDatabase::getInstance(dbOptions());	
+				$fields2 = new stdClass();
+				$fields2->photo_id = $fields->photo_id;
+				$fields2->contains_human = 1;
+				// we do note own this object so access db directly
+				$db->updateObject('Photo', $fields2, 'photo_id');
+			}
+			
+			$animal_ids = $app->getUserState('com_biodiv.animal_ids', 0);
+			
+			// In kiosk mode we keep track of the animals in order to give feedback.
+			$all_animal_ids = $app->getUserState('com_biodiv.all_animal_ids', 0);
+			
+			// And add the new animal_id
+			if ( !$animal_ids ) {
+				//error_log("Setting animal_ids to " . $animal_id);
+				$app->setUserState('com_biodiv.animal_ids', $animal_id);
+			}
+			else {
+				//error_log("Setting animal_ids to " . $animal_ids . "_" . $animal_id);
+				$app->setUserState('com_biodiv.animal_ids', $animal_ids . "_" . $animal_id);
+			}
+			
+			// And add the new animal_id
+			if ( !$all_animal_ids ) {
+				//error_log("Setting all_animal_ids to " . $animal_id);
+				$app->setUserState('com_biodiv.all_animal_ids', $animal_id);
+			}
+			else {
+				//error_log("Setting all_animal_ids to " . $all_animal_ids . "_" . $animal_id);
+				$app->setUserState('com_biodiv.all_animal_ids', $all_animal_ids . "_" . $animal_id);
+			}
+		}
+    }
+	$this->input->set('view', $next_view);
+    parent::display();
+	
+  }
+
+  
   function add_challenge(){
 	  
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
@@ -650,6 +735,36 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
   
+  function kiosk_timeout_v1() {
+	
+	$app = JFactory::getApplication();
+	
+	$project_id =
+	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
+	
+	if ( !$project_id ) {
+		  $project_id = JRequest::getString("project_id");
+	}
+	
+	$user_key =
+	    $app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
+	
+	if ( !$user_key ) {
+		  $user_key = JRequest::getString("user_key");
+	}
+	  
+	//error_log ("Controller - project_id = " . $project_id );  
+	//error_log ("Controller - user_key = " . $user_key );	
+	
+	$app->setUserState('com_biodiv.project_id', $project_id);
+	$app->setUserState('com_biodiv.user_key', $user_key);
+	
+	$this->input->set('view', 'startkioskv1');
+  
+    parent::display();
+  }
+  
+  
   function kiosk_timeout() {
 	
 	$app = JFactory::getApplication();
@@ -678,6 +793,8 @@ class BioDivController extends JControllerLegacy
   
     parent::display();
   }
+  
+  
 
   // handle individual or multiple files uploaded as images
   function uploadm(){
@@ -712,6 +829,11 @@ class BioDivController extends JControllerLegacy
 		$clientName = $clientNames[$index];
 		$fileSize = $fileSizes[$index];
 		$fileType = $fileTypes[$index];
+		
+		$success = uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $fileType );
+		
+		
+		/*
 		if($fileSize > BIODIV_MAX_FILE_SIZE){
 		  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
 		  continue;
@@ -802,6 +924,7 @@ class BioDivController extends JControllerLegacy
 			// Remove files if the database insert failed
 			JFile::delete($newFullName);
 		}
+		*/
       }
     
 	}
@@ -1095,15 +1218,25 @@ class BioDivController extends JControllerLegacy
 
   // add new upload
   function add_upload(){
-    $app = JFactory::getApplication();
-	
+	  
+	error_log ( "Controller: add_upload called");
+    
 	// Get setting that shows whether this is camera deployment site (eg MammalWeb) or audio (eg NaturesAudio)
 	$isCamera = getSetting("camera") == "yes";	  
 
     $site_id = JRequest::getInt('site_id');
     $site_id or die("No site_id");
-    canEdit($site_id, "site") or die("Cannot edit site_id $site_id");
+    
+	$upload_id = addUpload ( $isCamera, $site_id );
 	
+	if(!$upload_id){
+	  $this->input->set('view', 'upload');
+	}
+	else{
+	  $this->input->set('view', 'uploadm');
+	}
+	
+	/*
 	$fields = new StdClass();
 	
 	// For audio no need for deployment start and end times, camera only
@@ -1161,6 +1294,7 @@ class BioDivController extends JControllerLegacy
 	  $app->setUserState('com_biodiv.upload_id', $upload_id);
 	  $this->input->set('view', 'uploadm');
 	}
+	*/
 	
 	parent::display();
 
