@@ -17,7 +17,7 @@ else {
 }
 
 
-print "<div class='row'>";	
+print "<div class='row spaced_row'>";	
 print "<div class='col-md-12'>";	
 print "<div class='col-md-12'>";	
 

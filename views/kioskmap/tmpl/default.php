@@ -53,15 +53,29 @@ else {
 }
 
 
-print '  <div class="col-md-10 col-md-offset-1"><h1 class="text-center">'.$this->translations['map_heading']['translation_text'].'</h1></div>';  
+print '  <div class="col-md-12">';
+print '  <div class="col-md-12">';
+print '  <div class="col-md-10 col-md-offset-1 h1 text-center slight_lower">'.$this->translations['map_heading']['translation_text'].'</div>';  
+print ' <div>'; // col-12
+print ' <div>'; // col-12
+
 
 
 print '<div class="row">';
-print '<div class="col-md-12 text-center">';
+print '<div id="map_buttons" class="col-md-12 text-center">';
 
 
 
-print '<div class="form-inline col-md-12 col-sm-12 col-xs-12" >';
+print '<div class="form-inline col-md-12 col-sm-12 col-xs-12 " >';
+
+print '<div class="col-md-2">';
+
+print ' <div class="btn-group" style="margin-bottom:4px;"> ';
+print '  <button class="btn btn-success small_btn" id="project_area" >'.$this->translations['zoom_project']['translation_text'].'</button> ';
+print '</div>'; // btn-group
+
+print '</div>'; // col-2
+
 
 print '<div class="col-md-2">';
 
@@ -75,15 +89,6 @@ print '<div class="col-md-2">';
 print ' <div class="btn-group" style="margin-bottom:4px;"> ';
 print '  <button class="btn btn-success small_btn" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
 print '  <button class="btn btn-success small_btn hidden" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
-print '</div>'; // btn-group
-
-print '</div>'; // col-2
-
-
-print '<div class="col-md-2">';
-
-print ' <div class="btn-group" style="margin-bottom:4px;"> ';
-print '  <button class="btn btn-success small_btn" id="project_area" >'.$this->translations['zoom_project']['translation_text'].'</button> ';
 print '</div>'; // btn-group
 
 print '</div>'; // col-2

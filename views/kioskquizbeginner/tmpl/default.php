@@ -136,15 +136,7 @@ else {
 			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.$this->translations['match_photos']['translation_text'].'</h2>';
 		}
 		
-		/*
-		if ( $this->isVideo ) {
-			print '  <h2 id="match_with" class="text-center" >'.$this->translations['match_video']['translation_text'].'</h2>';
-		}
-		else {
-			print '  <h2 id="match_with" class="text-center" >'.$this->translations['match_photos']['translation_text'].'</h2>';
-		}
-		*/
-	
+		
 		if ( $i == 0 ) {
 			print '<div id="species_choices_'.$i.'" class="species_group">';
 		}
@@ -155,9 +147,6 @@ else {
 		$correct = $seq->getPrimarySpecies();
 		$correctId = $correct[0]->id;
 		
-		// Determine whether photos or video
-		//$photoIds = array_keys ( $seq->getMediaFiles() );
-		//$this->isVideo = isVideo($photoIds[0]);
 		
 		$this->options = $this->quiz->getIncorrectSpecies($i, 3);
 		
@@ -209,7 +198,6 @@ else {
 		
 		print '<h2 class="text-center quiz_h2"">'.$this->translations['species_is']['translation_text'].' ' .$correctName.'</h2>';
 		
-		//print '<img style="max-height:48vh; max-width:100%; margin:0;, padding:0;" src="' . $correctImageURL . '" />';
 		
 		print '<img class="img-responsive center-block" style="max-height:48vh;" src="' . $correctImageURL . '" />';
 		
@@ -238,9 +226,7 @@ else {
 	// ----------------------------- Progress bar ---------------------------
 
 	$progWidth = 100/$numSeqs;
-	//print "<div class='progress'>";
-	//print "  <div id='seq_progress_bar' class='progress-bar progress-bar-info' role='progressbar' aria-valuenow='".$progWidth."' aria-valuemin='0' aria-valuemax='100' style='width:".$progWidth."%'>";
-	
+		
 	print '<div id="quiz_progress" class="species_group">';
 	print '<div class="col-md-12">';
 	print "<div class='progress'>";
