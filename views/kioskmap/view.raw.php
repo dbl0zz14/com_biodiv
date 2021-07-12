@@ -52,8 +52,8 @@ class BioDivViewKioskMap extends JViewLegacy
 	
 	$this->projectMapSettings = $db->loadAssocList('data_type', 'value');
 	
-	$errStr = print_r ( $this->projectMapSettings, true );
-	error_log ( "KioskMap settings: " . $errStr );
+	//$errStr = print_r ( $this->projectMapSettings, true );
+	//error_log ( "KioskMap settings: " . $errStr );
 		
 	// All kiosks are UK based so for now set initial area to UK
 	$this->initialMapSettings = array (

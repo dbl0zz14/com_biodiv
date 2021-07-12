@@ -267,6 +267,8 @@ else {
 	
 	print '<div class="row spaced_row">';
 	
+	print '<div class="row">';
+	
 	$offset = 'col-md-offset-1';
 	foreach ( $this->sequences as $seq ) {
 		
@@ -279,6 +281,26 @@ else {
 		$longSpeciesNameClass = '';
 		if ( strlen($speciesName) > 13 ) $longSpeciesNameClass = 'long_species_name';
 			
+		print '<div class="col-md-2 '. $offset .'">';
+		
+		print '<h3 class="text-center"><div class=" '.$longSpeciesNameClass.'">'.$speciesName.'</div></h3>';
+		
+		print '</div>'; // col-2
+		
+		$offset = '';
+	}
+	
+	print '</div>';
+	
+	print '<div class="row">';
+	
+	$offset = 'col-md-offset-1';
+	foreach ( $this->sequences as $seq ) {
+		
+		$correct = $seq->getPrimarySpecies();
+		$correctId = $correct[0]->id;
+		
+		
 		$image = codes_getName($correctId,'kioskimg');
 		$imageText = "";
 		$imageURL = "";
@@ -288,7 +310,6 @@ else {
 			
 		
 		print '<div class="col-md-2 '. $offset .'">';
-		print '<h3 class="text-center"><div class=" '.$longSpeciesNameClass.'">'.$speciesName.'</div></h3>';
 		
 		print '<img class="img-responsive center-block" style="max-height:48vh;" src="' . $imageURL . '" />';
 		
@@ -297,7 +318,11 @@ else {
 		$offset = '';
 	}
 	
-	print '</div>';
+	print '</div>'; // row
+	
+	print '</div>'; // spaced_row
+	
+	print '<div class="row spaced_row">';
 	
 	print '<div class="col-md-4 col-md-offset-2">';
 	print '	<button id="play_again" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['play_again']['translation_text'].'</button>';
@@ -307,6 +332,7 @@ else {
 	print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_home" >'.$this->translations['back_home']['translation_text'].'</button>';
 	print '</div>';
 	
+	print '</div>'; // row
 	
 	print '</div>'; // col-12
 	print '</div>'; // col-12

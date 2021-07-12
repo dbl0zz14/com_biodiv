@@ -44,6 +44,7 @@ function displayWhatSee () {
 	}
 	
 	
+	
 }
 
 function displayAllMammals ( page ) {
@@ -292,6 +293,7 @@ function kioskSpeciesLoaded () {
 function kioskAddAnimalSuccess () {
 		
 	//setBackgroundImage();
+	jQuery(".loader").addClass("invisible");
 	
 	displayWhatSee();
 	
@@ -328,6 +330,8 @@ addClassification = function ( photoId, speciesId ) {
 	if ( classifyCount < maxClassifications ) {
 	
 		let url = BioDiv.root + "&task=kiosk_add_animal_next&format=raw&photo_id=" + photoId + "&species=" + speciesId;
+		
+		jQuery(".loader").removeClass("invisible");
 		
 		jQuery('#media_carousel').load(url, kioskAddAnimalSuccess);
 	}

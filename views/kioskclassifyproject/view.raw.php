@@ -50,8 +50,20 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 
 		$this->secondProject = null;
 		if ( $classifySecond == 1 ) {
-			// Use MammalWeb for now
-			$this->secondProject = 1;
+			// Get secondary project or default to MammalWeb Britain
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true)
+					->select("OD.data_type, OD.value")
+					->from("OptionData OD")
+					->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'kiosk'")
+					->innerjoin("ProjectOptions PO on PO.option_id = OD.option_id and OD.data_type = 'secondaryproject'")
+					->where("PO.project_id = " . $this->projectId);
+			$db->setQuery($query); 
+			
+			$this->secondProject = $db->loadResult();
+			
+			if ( $this->secondProject == null ) $this->secondProject = 1;
+	
 		}
 		
 		$this->user_key = 

@@ -93,12 +93,13 @@ defined('_JEXEC') or die;
 	print '</div>'; // col-12
 
 		
-	print '<div class="modal fade" id="learn_species_modal" tabindex="-1" role="dialog" aria-labelledby="speciesArticle" aria-hidden="true">';
+	print '<div class="modal" id="learn_species_modal" tabindex="-1" role="dialog" aria-labelledby="speciesArticle" aria-hidden="true">';
 	print ' <div class="modal-dialog modal-lg">';
 	print '	<div class="modal-content">';
-	print '	  <div class="modal-header">';
+	print '	  <div class="modal-header text-right">';
 	
-	print '     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+	//print '     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+	print '    <button type="button"  class="mwclose h4" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>';
 	print '	 </div>'; // modal header
 	print '	 <div class="modal-body">';
 	print '    <div id="learn_species_helplet"></div>';

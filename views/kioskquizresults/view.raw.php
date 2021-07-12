@@ -36,7 +36,7 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 		$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-		error_log ( "Project id = " . $this->projectId );
+		//error_log ( "Project id = " . $this->projectId );
 
 		// Get the parameters from the input data
 		$input = JFactory::getApplication()->input;
@@ -45,10 +45,10 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 		$qs = $input->getString('questions', 0);
 		$as = $input->getString('answers', 0);
 		
-		error_log ( "Project: " . $this->projectId );
-		error_log ( "Topic: " . $this->topicId );
-		error_log ( "Questions: " . $qs );
-		error_log ( "Answers: " . $as );
+		//error_log ( "Project: " . $this->projectId );
+		//error_log ( "Topic: " . $this->topicId );
+		//error_log ( "Questions: " . $qs );
+		//error_log ( "Answers: " . $as );
 		
 		$this->questions = json_decode($qs);
 		$this->answers = json_decode($as);
@@ -75,7 +75,7 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 		}
 
 		$this->numQuestions = count($this->questions);
-		error_log ("Got " . $this->numQuestions . " questions" );
+		//error_log ("Got " . $this->numQuestions . " questions" );
 		
 		$this->score = 0;
 		
@@ -85,10 +85,10 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 		for ( $i = 0; $i < $this->numQuestions; $i++ ) {
 			
 			$seqId = $this->questions[$i];
-			error_log ("Checking sequence " . $seqId );
+			//error_log ("Checking sequence " . $seqId );
 			
 			$answer = $this->answers[$i];
-			error_log ("User answer is " . $answer->speciesId);
+			//error_log ("User answer is " . $answer->speciesId);
 			
 			$seq = getTrainingSequence ( $seqId, $this->topicId );
 			
@@ -97,7 +97,7 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 			$correctAnswer = $seq->getPrimarySpecies()[0];
 			
 			$errStr = print_r ( $correctAnswer, true );
-			error_log ("Correct answer is " . $errStr);
+			//error_log ("Correct answer is " . $errStr);
 			
 			$isCorrect = false;
 			$correctId = $correctAnswer->id;
@@ -111,7 +111,7 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 									"userId"=> $userId, 
 									"isCorrect"=> $isCorrect];
 									
-			error_log ( "Added result" );
+			//error_log ( "Added result" );
 			
 		}
 		

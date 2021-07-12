@@ -7,21 +7,17 @@
  
 // No direct access to this file
 defined('_JEXEC') or die;
-//print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->projectId.'" data-user-key="'.$this->user_key.'" >';
 
-//print '<div id="feedback" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->project_id.'" data-user-key="'.$this->user_key.'" >';
-
-//print '<div class="opaque-bg">';
 
 print '<div class="col-md-12">';
 print '<div class="col-md-12">';
 
-print '<h1 class="text-center lower_heading">'.$this->translations['thankyou']['translation_text'] . '</h1>';
+print '<h1 class="text-center lower_heading"><strong>'.$this->translations['thankyou']['translation_text'] . '</strong></h1>';
 	
 
 if ( $this->all_animals ) {
 	
-	print '<h1 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h1>';
+	print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
 	
 		
 	print "<div class='row spaced_row'>";
@@ -124,7 +120,6 @@ print '</div>';
 
 print '</div>'; // col-12
 print '</div>'; // col-12
-
 
 
 

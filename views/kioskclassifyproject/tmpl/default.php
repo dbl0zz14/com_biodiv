@@ -351,7 +351,8 @@ else {
 		print '</div>';
 	}
 	
-	
+	// Circle of doom when loading next sequence/video
+	print '<div class="loader invisible"></div>';
 }
 
 

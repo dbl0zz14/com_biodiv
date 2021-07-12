@@ -155,7 +155,7 @@ function setAboutButton () {
 	jQuery('#kiosk_project').click(function (){
 		
 		var url = BioDiv.root + "&view=kioskabout&format=raw";
-		jQuery('#kiosk').load(url);
+		jQuery('#kiosk').load(url, kioskAboutSuccess);
 		
 	});
 	
