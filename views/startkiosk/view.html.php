@@ -60,6 +60,9 @@ class BioDivViewStartkiosk extends JViewLegacy
 	  $app->setUserState('com_biodiv.classify_count', 0);
 	  $app->setUserState('com_biodiv.all_animal_ids', 0);
 	  
+	  // This is only used for Hancock kiosk
+	  $this->kioskUrl = JURI::root()."hancock-urban-kiosk";
+	  
 	  // get the url for the project image
 	  $this->projectImageUrl = projectImageURL($this->project_id);
 	  

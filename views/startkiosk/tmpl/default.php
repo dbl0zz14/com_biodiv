@@ -28,14 +28,15 @@ print '  </div>';
 print '</div>'; // opaque-bg
   
 
-?>
-
-<form action = "http://localhost/rhombus/en/hancock-urban-kiosk" method = 'GET'>
-   <button  id='start-kiosk-btn' class='btn btn-success' type='submit'></i> Enter</button>
-</form>
 
 
-<?php
+//print '<form action = "http://localhost/rhombus/en/hancock-urban-kiosk" method = "GET"> ';
+print '<form action = "'.$this->kioskUrl.'" method = "GET"> ';
+print '   <button  id="start-kiosk-btn" class="btn btn-success" type="submit"></i> Enter</button>';
+print '</form>';
+
+
+
 
 print '<div class="row opaque-logo-row">';
 foreach ( $this->logos as $logo ) {
