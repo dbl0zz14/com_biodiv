@@ -365,20 +365,20 @@ else {
 		
 		if ( $seq->getMedia() == "photo" ) {
 			
-			print '<div id="whatsee_info" class="info col-md-7">';
+			print '<div id="whatsee_info" class="mwinfo col-md-7">';
 			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro']['translation_text'].'</div>';
 			print '</div>';
 			
-			print '<div id="whatsee_vid_info" class="info col-md-7" style="display:none">';
+			print '<div id="whatsee_vid_info" class="mwinfo col-md-7" style="display:none">';
 			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro_vid']['translation_text'].'</div>';
 			print '</div>';
 		}
 		else {
-			print '<div id="whatsee_info" class="info col-md-7" style="display:none">';
+			print '<div id="whatsee_info" class="mwinfo col-md-7" style="display:none">';
 			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro']['translation_text'].'</div>';
 			print '</div>';
 			
-			print '<div id="whatsee_vid_info" class="info col-md-7">';
+			print '<div id="whatsee_vid_info" class="mwinfo col-md-7">';
 			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro_vid']['translation_text'].'</div>';
 			print '</div>';
 		}
