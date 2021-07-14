@@ -31,7 +31,7 @@ print '</div>'; // opaque-bg
 ?>
 
 <form action = "http://localhost/rhombus/en/hancock-urban-kiosk" method = 'GET'>
-   <button  id='start-kiosk-btn' class='btn btn-danger' type='submit'></i> Enter</button>
+   <button  id='start-kiosk-btn' class='btn btn-success' type='submit'></i> Enter</button>
 </form>
 
 
