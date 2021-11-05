@@ -88,6 +88,7 @@ function kioskIntroSuccess () {
 	setLearnBirdsButton ();
 	setQuizButton();
 	setTutorialButton();
+	setAudioTutorialButton ();
 	setClassifyButton();
 	setQuizButton();
 	setMapButton();
