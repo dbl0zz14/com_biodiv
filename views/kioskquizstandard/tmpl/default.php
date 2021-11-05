@@ -343,7 +343,7 @@ else {
 
 		print '<div id="chosen_species"  class="species_group" style="display:none">';
 
-		print "<div id='species_helplet'></div>";
+		print "<div class='well'><div id='species_helplet'></div></div>";
 
 		print '<div class="col-md-6">';
 		print '	<button id="classify_save" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['yes_save']['translation_text'].'</button>';

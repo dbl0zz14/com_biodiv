@@ -16,6 +16,7 @@ function kioskLearnSuccess () {
 	
 	disableSpeciesArticleLinks();
 	
+	enableEmptyHelpletOnClose();
 }
 
 
@@ -88,6 +89,26 @@ function setSpeciesButtons () {
 		jQuery('#learn_species_helplet').load(url);
 		
 	});
+	
+	jQuery('.learn-species-audio-btn').click(function (){
+		id = jQuery(this).attr("id");
+		idbits = id.split("_");
+		species_id = idbits.pop();
+		//jQuery('.species_header').hide();
+		//jQuery('#species_value').attr('value', species_id);
+		
+		jQuery('#learn_species_helplet').empty();
+		jQuery('#learn_species_modal').show();
+		var url = BioDiv.root + "&view=kioskajaxaudio&format=raw&option_id=" + species_id;
+		jQuery('#learn_species_helplet').load(url, audioSpeciesLoaded);
+		
+	});
+}
+
+function audioSpeciesLoaded () {
+	if ( jQuery('.audio-species-sono').length > 0 ) {
+		jQuery('iframe').remove();
+	}
 }
 
 function disableSpeciesArticleLinks () {
@@ -96,6 +117,13 @@ function disableSpeciesArticleLinks () {
 		e.preventDefault();
 		console.log(jQuery(this).attr('href'));
 	});
+}
+
+function enableEmptyHelpletOnClose () {
+	
+	jQuery('#learn_species_modal').on('hidden.bs.modal', function () {
+		jQuery('#learn_species_helplet').empty();
+	})
 }
 
 

@@ -59,14 +59,14 @@ class MediaCarousel {
 			$mediaUrl = $photoUrls[$photoId];
 			print '<div id="videoContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
 			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
-			print '<video id="classify-video" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+			print '<video id="classify-video" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
 		}
 		else if ( $media === "audio" ) {
 			$photoId = array_keys($photoUrls)[0];
 			$mediaUrl = $photoUrls[$photoId];
 			print '<div id="audioContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
 			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
-			print '<audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</audio></div>';
+			print '<audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</audio></div>';
 		}
 		else if ( $media === "photo" ) {
 			

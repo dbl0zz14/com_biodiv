@@ -45,7 +45,7 @@ class BioDivViewKioskLearn extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
+		//error_log("Kiosk View: user_key = " . $this->user_key);
 
 		// Get the text snippets - enables multilingual
 		$this->translations = getTranslations("kiosklearn");
@@ -71,8 +71,8 @@ class BioDivViewKioskLearn extends JViewLegacy
 		$keys = array_column($this->allSpecies, 'name');
 		array_multisort($keys, SORT_ASC, $this->allSpecies);
 		
-		$errStr = print_r ( $this->allSpecies , true );
-		error_log ( "KioskLearn, all species after sort: " . $errStr );
+		//$errStr = print_r ( $this->allSpecies , true );
+		//error_log ( "KioskLearn, all species after sort: " . $errStr );
 		
 		
 		

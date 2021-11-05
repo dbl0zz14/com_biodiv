@@ -126,13 +126,15 @@ class BeginnerQuiz {
 			
 			$species = getSpecies ( $listId, null );
 			
-			$mammalIds = array_keys($species['mammal']);
+			if ( array_key_exists ( 'mammal', $species ) ) {
+				$mammalIds = array_keys($species['mammal']);
+				$this->speciesList = array_merge ( $this->speciesList, $mammalIds);
+			}
 			
-			$this->speciesList = array_merge ( $this->speciesList, $mammalIds);
-			
-			$birdIds = array_keys($species['bird']);
-			
-			$this->speciesList = array_merge ( $this->speciesList, $birdIds);
+			if ( array_key_exists ( 'bird', $species ) ) {
+				$birdIds = array_keys($species['bird']);
+				$this->speciesList = array_merge ( $this->speciesList, $birdIds);
+			}
 			
 		}
 	}

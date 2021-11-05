@@ -19,7 +19,7 @@ class KioskSpecies {
 	
 	function __construct( $projectId )
 	{
-		error_log ( "KioskSpecies constructor called, projectId = " . $projectId );
+		//error_log ( "KioskSpecies constructor called, projectId = " . $projectId );
 		
 		$this->projectId = $projectId;
 		
@@ -91,13 +91,13 @@ class KioskSpecies {
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = 'kiosklist'")
 			->where("O.struc = 'kioskfilter'" );
 		
-		error_log("query to get list ids created: " . $query->dump() );
+		//error_log("query to get list ids created: " . $query->dump() );
 		
 		$db->setQuery($query);
 		$listIds = $db->loadColumn();
 		
-		$errStr = print_r ($listIds, true);
-		error_log ( "KioskSpecies::setKioskFilters Species list array: " . $errStr );
+		//$errStr = print_r ($listIds, true);
+		//error_log ( "KioskSpecies::setKioskFilters Species list array: " . $errStr );
 			
 			
 		// Different version for English or not
@@ -109,7 +109,7 @@ class KioskSpecies {
 				->innerJoin("OptionData OD on SL.list_id = OD.option_id")
 				->order("type, name");
 				
-			error_log("query to get species for lists created: " . $query->dump() );
+			//error_log("query to get species for lists created: " . $query->dump() );
 		
 			$db->setQuery($query);
 			$allSpecies = $db->loadAssocList();

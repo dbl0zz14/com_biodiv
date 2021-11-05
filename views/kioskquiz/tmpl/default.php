@@ -19,19 +19,39 @@ print '</div>'; // opaque-bg
 
 
 print '<div class="col-md-4">';
-print '	<button id="beginner_quiz" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['beginner']['translation_text'].'</button>';
+
+if ( $this->isCamera ) {
+	print '	<button id="beginner_quiz" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['beginner']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="beginner_quiz_audio" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['beginner']['translation_text'].'</button>';
+}
+
 print '</div>';
 
 
 
 print '<div class="col-md-4">';
-print '	<button id="intermediate_quiz" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['intermediate']['translation_text'].'</button>';
+
+if ( $this->isCamera ) {
+	print '	<button id="intermediate_quiz" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['intermediate']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="intermediate_quiz_audio" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['intermediate']['translation_text'].'</button>';
+}
+
 print '</div>';
 
 
 
 print '<div class="col-md-4">';
-print '	<button id="expert_quiz" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['expert']['translation_text'].'</button>';
+
+if ( $this->isCamera ) {
+	print '	<button id="expert_quiz" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['expert']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="expert_quiz_audio" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['expert']['translation_text'].'</button>';
+}
 print '</div>';
 
 

@@ -13,8 +13,9 @@ defined('_JEXEC') or die;
 //print '<div id="start-kiosk-jumbotron" data-project-img="'.$this->projectImageUrl.' class="jumbotron" >';
 print '<div id="start-kiosk-jumbotron" class="jumbotron text-center" data-project-img="'.$this->projectImageUrl.'" data-project-id="'.$this->projectId.'" data-user-key="'.$this->user_key.'" >';
 
-print '<div class="opaque-heading">';
-print '  <h2><strong>'.$this->project->project_prettyname.'</strong></h2>';  
+//print '<div class="opaque-heading">';
+print '<div class="start_header">';
+print '  <h1>'.$this->project->project_prettyname.'</h1>';  
 print '</div>'; // opaque-bg
 
 
@@ -29,7 +30,12 @@ print '</div>';
 
 print '<div class="col-md-4">';
 
-print '	<button id="kiosk_animals" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['learn_animals']['translation_text'].'</button>';
+if ( $this->birdsOnly ) {
+	print '	<button id="kiosk_birds" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['learn_birds']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="kiosk_animals" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['learn_animals']['translation_text'].'</button>';
+}
 
 print '</div>';
 

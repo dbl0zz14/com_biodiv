@@ -28,13 +28,62 @@ function kioskQuizSuccess () {
 		jQuery('#kiosk').load(url, kioskStandardQuizSuccess);
 	});
 	
+	jQuery('#beginner_quiz_audio').click(function (){
+		
+		var url = BioDiv.root + "&view=kioskquizbeginneraudio&format=raw";
+		jQuery('#kiosk').load(url, kioskBeginnerQuizSuccess);
+	});
+	
+	jQuery('#intermediate_quiz_audio').click(function (){
+		
+		var url = BioDiv.root + "&view=kioskquizstandardaudio&level=improver&format=raw";
+		jQuery('#kiosk').load(url, kioskStandardQuizAudioSuccess);
+	});
+	
+	jQuery('#expert_quiz_audio').click(function (){
+		
+		var url = BioDiv.root + "&view=kioskquizstandardaudio&level=expert&format=raw";
+		jQuery('#kiosk').load(url, kioskStandardQuizAudioSuccess);
+	});
+	
 	
 }
 
 
-function kioskBeginnerQuizSuccess () {
+function speciesChosen () {
+		
+	pauseAllVideo();
 	
-	console.log("Beginner quiz loaded");
+	let thisEl = jQuery(this);
+	
+	if ( thisEl.hasClass('correct-species') ) {
+		
+		jQuery('.match_with').hide();
+		jQuery('#try_again').hide();
+		jQuery('#correct_species').show();
+		
+		let speciesChoicePanel = thisEl.closest(".species_group");
+		
+		let id = speciesChoicePanel.attr("id");
+		let idbits = id.split("_");
+		let question_id = idbits.pop();
+		
+		
+		jQuery('#species_choices_' + question_id).hide();
+		jQuery('#correct_species_' + question_id).show();
+	}
+	else {
+		jQuery('.match_with').hide();
+		jQuery('#correct_species').hide();
+		jQuery('#try_again').show();
+	}
+	
+	
+}
+
+
+// Image, video and audio
+function kioskBeginnerQuizSuccess () {
 	
 	seqJson = jQuery('#seq_ids').attr('data-seq-ids');
 	
@@ -44,47 +93,17 @@ function kioskBeginnerQuizSuccess () {
 	addFullScreenFnly();
 	kioskFullscreenExtras();
 	
-	jQuery('.beginner-quiz-btn').click(function (){
-		
-		console.log ( "Species chosen" );
-		
-		let thisEl = jQuery(this);
-		
-		if ( thisEl.hasClass('correct-species') ) {
-			
-			console.log ("Correct!");
-			
-			jQuery('.match_with').hide();
-			jQuery('#try_again').hide();
-			jQuery('#correct_species').show();
-			
-			let speciesChoicePanel = thisEl.closest(".species_group");
-			
-			let id = speciesChoicePanel.attr("id");
-		    let idbits = id.split("_");
-		    let question_id = idbits.pop();
-		    
-			
-			jQuery('#species_choices_' + question_id).hide();
-			jQuery('#correct_species_' + question_id).show();
-		}
-		else {
-			console.log ("Try again!");
-			
-			jQuery('.match_with').hide();
-			jQuery('#correct_species').hide();
-			jQuery('#try_again').show();
-		}
-		
-	});
+	jQuery('.beginner-quiz-btn').click( speciesChosen );
+	
+	jQuery('.beginner-quiz-audio-btn').click ( speciesChosen );
 	
 	jQuery(".beginner_next").click(function () {
 		
 		jQuery(this).closest(".species_group").hide();
 		
-		jQuery('.look_thro').hide();
-		jQuery('.match_with').hide();
-		jQuery('.whatsee_info').hide();
+		//jQuery('.look_thro').hide();
+		//jQuery('.match_with').hide();
+		//jQuery('.whatsee_info').hide();
 		jQuery('#photoCarousel').hide();
 		jQuery('#quiz_progress').hide();
 		
@@ -98,7 +117,6 @@ function kioskBeginnerQuizSuccess () {
 
 	jQuery("#beginner_results").click(function () {
 		
-		console.log("Finished quiz");
 		currentBeginnerSequence = 0;
 		
 		jQuery('#quiz_whatsee').hide();
@@ -108,6 +126,8 @@ function kioskBeginnerQuizSuccess () {
 		jQuery('#beginner_quiz_rhs').hide();
 		
 		jQuery('#whatsee_info_panel').hide();
+		
+		jQuery("#audioAttribution").empty();
 		
 		jQuery('#beginner_quiz_results').show();
 	
@@ -121,6 +141,13 @@ function kioskBeginnerQuizSuccess () {
 		
 	});
 	
+	jQuery('#play_again_audio').click(function (){
+		
+		var url = BioDiv.root + "&view=kioskquizbeginneraudio&format=raw";
+		jQuery('#kiosk').load(url, kioskBeginnerQuizSuccess);
+		
+	});
+	
 	jQuery('.back_to_home').click( function () {
 		
 		let url = BioDiv.root + "&view=kioskstart&format=raw";
@@ -128,10 +155,23 @@ function kioskBeginnerQuizSuccess () {
 		jQuery('#kiosk').load(url, kioskStartSuccess);
 	});
 
+	//jQuery('.beginner-audio-sono').focusout( pauseVideo );
+	//jQuery('#media_carousel').focusout( pauseVideo );
+	
+	//jQuery('.beginner-audio-sono').click(pauseAllOtherVideo);
+	//jQuery('#media_carousel').click(pauseAllOtherVideo);
+	
+	setMediaCarouselPause();
+	setBeginnerSonoPause();
 
 }
 
 function nextBeginnerQuestionLoaded() {
+	
+	jQuery('.look_thro').hide();
+	jQuery('.match_with').hide();
+	jQuery('.whatsee_info').hide();
+		
 	
 	jQuery('#correct_species').hide();
 	jQuery('#try_again').hide();
@@ -147,8 +187,9 @@ function nextBeginnerQuestionLoaded() {
 	jQuery("#whatsee_info_" + currentBeginnerSequence).show();
 	jQuery("#species_choices_" + currentBeginnerSequence).show();
 	
+	updateAttribution();
 	
-	
+	setMediaCarouselPause();
 }
 
 
@@ -160,11 +201,25 @@ updateProgressBar = function () {
 	jQuery("#seq_progress_bar").attr("aria-valuenow", newwidth);
 	jQuery("#seq_progress_bar").width(newwidth + "%");
 }
+
+
+function updateAttribution () {
+	let attrib = jQuery("#audioAttribution");
+	attrib.empty();
+	
+	let newAttribs = jQuery(".attrib_" + currentBeginnerSequence);
+	
+	let newText = "";
+	
+	for ( let i = 0; i < newAttribs.length; i++ ) {
+		newText += newAttribs[i].innerHTML;
+	}
+	
+	attrib.text(newText);
+}
 				
 
 function addQuizSpecies(photoId, speciesId) {
-	
-	console.log("Adding quiz species");
 	
 	let newSpecies = {"photoId": photoId, "speciesId": speciesId};
 	
@@ -173,10 +228,53 @@ function addQuizSpecies(photoId, speciesId) {
 }
 
 
+function addQuizSpeciesMulti(photoId, speciesId, speciesName) {
+	
+	let numAnswers = quizSpeciesAnswers.length;
+	let firstAnswer = true;
+	let speciesIndex = 0;
+	
+	if ( numAnswers > 0 ) {
+		let prevPhotoId = quizSpeciesAnswers[numAnswers-1].photoId;
+		
+		if ( prevPhotoId == photoId ) {
+			firstAnswer = false;
+		}
+	}
+	if ( firstAnswer ) {
+		let newSpecies = {"photoId": photoId, "speciesId": [speciesId]};
+	
+		quizSpeciesAnswers.push(newSpecies);
+	}
+	else {
+		quizSpeciesAnswers[numAnswers-1].speciesId.push(speciesId);
+		speciesIndex = quizSpeciesAnswers[numAnswers-1].speciesId.length - 1;
+	}
+	
+	
+	// Display the button.
+	let idString = "remove_animal_" + speciesIndex;
+	
+	jQuery('#classifications').append( "<button id='" + idString + "' type='button' class='remove_animal btn btn-danger'>" + speciesName + 
+		" <span aria-hidden='true' class='fa fa-times-circle'></span><span class='sr-only'>Close</span></button>\n" );
+	jQuery('#' + idString).click(function (){
+		
+		jQuery(this).remove();
+		// And remove the classification.
+		quizSpeciesAnswers[numAnswers-1].speciesId.splice(speciesIndex, 1);
+		
+		
+	});
+	
+
+}
+
+
 function displayNextQuestionOrFinish() {
 	
+	jQuery("#classifications").empty();
+	
 	if ( currentStandardSequence + 1 == sequenceIds.length ) {
-		console.log ( "Finished quiz" );
 		
 		let topicId = jQuery("#topic_id").attr("data-topic-id");
 		let qs = JSON.stringify(sequenceIds);
@@ -187,9 +285,13 @@ function displayNextQuestionOrFinish() {
 			questions: qs,
 			answers: as
 		};
-			
 		
-		let url = BioDiv.root + "&view=kioskquizresults&format=raw";
+		let resultsView = "kioskquizresults";
+		if ( isAudioQuiz() ) {
+			resultsView = "kioskquizresultsmulti";
+		}			
+		
+		let url = BioDiv.root + "&view=" + resultsView + "&format=raw";
 		
 		jQuery.post ( url, postData, standardResultsLoaded );
 		
@@ -208,14 +310,32 @@ function displayNextQuestionOrFinish() {
 
 function nextStandardQuestionLoaded () {
 	
-	displayWhatSee();
+	if ( isAudioQuiz() ) {
+		displayWhatHear();
+	}
+	else {
+		displayWhatSee();
+	}
 	
 	jQuery("#chosen_species").hide();
 	
 	addFullScreenFnly();
 	kioskFullscreenExtras();
 	
+	setMediaCarouselPause ();
+	
 }
+
+
+function isAudioQuiz () {
+	
+	let isAudio = false;
+	if ( jQuery("#classify_whathear").length > 0 ) {
+		isAudio = true;
+	}
+	return isAudio;
+}
+
 
 
 function standardResultsLoaded ( data ) {
@@ -242,6 +362,13 @@ function standardResultsLoaded ( data ) {
 			//jQuery('#carousel_modal').modal('show');
 		}
 		});
+		
+	});
+	
+	jQuery('#play_again_multi').click(function (){
+		
+		var url = BioDiv.root + "&view=kioskquizstandardaudio&format=raw";
+		jQuery('#kiosk').load(url, kioskStandardQuizAudioSuccess);
 		
 	});
 	
@@ -308,6 +435,8 @@ function kioskStandardQuizSuccess () {
 		
 	jQuery('.back_to_filter').click( displayWhatSee );
 	
+	jQuery('.intelligent_back').click( backClicked );
+	
 	jQuery('#classify_save').click(function (){
 		
 		let photoId = jQuery("#videoContainer").attr("data-photo-id");
@@ -329,6 +458,87 @@ function kioskStandardQuizSuccess () {
 	} );
 	
 	
+	setMediaCarouselPause ();
+	//setSpeciesSonoPause ();
+}
+
+function kioskStandardQuizAudioSuccess () {
+	
+	currentStandardSequence = 0;
+	
+	seqJson = jQuery('#seq_ids').attr('data-seq-ids');
+	
+	sequenceIds = JSON.parse(seqJson);
+	
+	quizSpeciesAnswers = [];
+	
+	addFullScreenFnly();
+	kioskFullscreenExtras();
+	
+	
+	jQuery('#classify_mammal').click( displaySelectMammal );
+	
+	jQuery('#classify_bird').click( displaySelectBird );
+	
+	jQuery('.species_select').click( audioSpeciesSelected );
+	
+	jQuery('#not_on_mammal_list').click(function (){
+		displayAllMammals( 0 );
+	});
+	
+	jQuery('#scroll_up_mammals').click(function (){
+		displayAllMammals( -1 );
+	});
+	
+	jQuery('#scroll_down_mammals').click(function (){
+		displayAllMammals( 1 );
+	});
+	
+	jQuery('#not_on_bird_list').click(function (){
+		displayAllBirds( 0 );
+	});
+	
+	jQuery('#scroll_up_birds').click(function (){
+		displayAllBirds( -1 );
+	});
+	
+	jQuery('#scroll_down_birds').click(function (){
+		displayAllBirds( 1 );
+	});
+		
+	jQuery('.back_to_filter').click( displayWhatSee );
+	
+	jQuery('.intelligent_back').click( backClicked );
+	
+	jQuery('#classify_save_multi').click(function (){
+		
+		let photoId = jQuery("#videoContainer").attr("data-photo-id");
+		
+		if ( !photoId ) {
+			photoId = jQuery("#audioContainer").attr("data-photo-id");
+		}
+		
+		let speciesId = jQuery(this).attr("data-species-id");
+		let speciesName = jQuery(this).attr("data-species-name");
+		
+		addQuizSpeciesMulti(photoId, speciesId, speciesName);
+		
+		if ( jQuery(".remove_animal").length >= maxSpeciesPerClip ) {
+			displayReachedMaxSpecies();
+		}
+		else {
+			displayWhatMoreHear();
+		}
+		
+	} );
+	
+	jQuery('#finish_clip').click(displayNextQuestionOrFinish);
+	
+	setMediaCarouselPause ();
+	//setSpeciesSonoPause ();
+	
+	
+		
 }
 
 

@@ -41,7 +41,7 @@ class BioDivViewConvert extends JViewLegacy
 	    ->where("status = 0")
 		->where("filename like '%avi'" );
 		
-	  $db->setQuery($query, 0, 500);
+	  $db->setQuery($query, 0, 10);
 	  $this->files = $db->loadAssocList();
 	  
 	  // Mark all the files as being worked on - so set status to -1

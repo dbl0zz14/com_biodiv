@@ -45,7 +45,7 @@ class BioDivViewKioskStart extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
+		//error_log("Kiosk View: user_key = " . $this->user_key);
 		
 		// Make sure there are no stray animals
 		$app->setUserState('com_biodiv.all_animal_ids', 0);
@@ -55,9 +55,12 @@ class BioDivViewKioskStart extends JViewLegacy
 
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
+		//error_log ( "Project image url: " . $this->projectImageUrl );
 
 		// Get the logos to be displayed for this project
 		$this->logos = getLogos($this->projectId);
+		
+		$this->birdsOnly = getSetting("birds_only") == "yes";
 
 		
 		// Display the view

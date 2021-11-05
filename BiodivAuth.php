@@ -52,6 +52,9 @@ class BiodivAuth {
 		
 		// Pick up some environment options:
 		$apiOpts = apiOptions();
+		
+		//$errStr = print_r($apiOpts, true);
+		//error_log ("API options from local.php: " . $errStr );
 		$kid = $apiOpts['kid'];
 		$region = $apiOpts['region'];
 		$userPoolId = $apiOpts['userpool'];

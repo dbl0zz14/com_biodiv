@@ -73,6 +73,7 @@ class BioDivViewKioskIntro extends JViewLegacy
 			->select('*')
 			->from('#__content')
 			->where('catid = ' . $this->categoryId )
+			->where('state = 1')
 			->order('ordering');
 		
 		error_log("content query1 created: " . $query1->dump() );

@@ -45,6 +45,8 @@ class BioDivViewKioskQuiz extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
+		$this->isCamera = getSetting("camera") == "yes";
+
 		// Get the text snippets - enables multilingual
 		$this->translations = getTranslations("kioskquiz");
 

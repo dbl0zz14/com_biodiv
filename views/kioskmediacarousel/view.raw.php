@@ -26,7 +26,7 @@ class BioDivViewKioskMediaCarousel extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskMediaCarousel::display called" );
+		//error_log ( "BioDivViewKioskMediaCarousel::display called" );
 		// Assign data to the view
 		//($person_id = (int)userID()) or die("No person_id");
 		$app = JFactory::getApplication();
@@ -35,7 +35,7 @@ class BioDivViewKioskMediaCarousel extends JViewLegacy
 		$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-		error_log ( "Project id = " . $this->projectId );
+		//error_log ( "Project id = " . $this->projectId );
 
 		if ( !$this->projectId ) die ("no project id given" );
 
@@ -44,6 +44,7 @@ class BioDivViewKioskMediaCarousel extends JViewLegacy
 		// Set the user state so classifies just for this project
 		$app->setUserState('com_biodiv.classify_only_project', 1);
 
+		// Flag to say whether or not we're classifying the second project.
 		$classifySecond = 
 		$app->getUserStateFromRequest('com_biodiv.classify_second_project', 'classify_second_project', 0);
 
@@ -70,29 +71,29 @@ class BioDivViewKioskMediaCarousel extends JViewLegacy
 		$this->mediaCarousel = new MediaCarousel();
 		
 		// Is a specific sequence requested?
-		error_log ( "getting sequence" );
+		//error_log ( "getting sequence" );
 		
 		$this->sequenceId = null;
 		$this->sequence = null;
 		
 		$this->sequenceId = $input->getInt('sequence_id', null);
 		
-		error_log ( "sequence id parameter = " . $this->sequenceId );
+		//error_log ( "sequence id parameter = " . $this->sequenceId );
 		
 		if ( $this->sequenceId == null ) {
-			error_log ( "sequence id parameter is null" );
+			//error_log ( "sequence id parameter is null" );
 			
 			// May have asked for a second project, deafults to primary (from user request) if not
 			$sequenceDetails = nextSequence($this->secondProject);
 			
 			if ( count($sequenceDetails) > 0 ) {
-				error_log ("got details");
+				//error_log ("got details");
 				$this->sequenceId = $sequenceDetails[0]['sequence_id'];
 				$this->sequence = new Sequence ( $this->sequenceId );
 			}
 		}
 		else {
-			error_log ( "sequence id parameter is set" );
+			//error_log ( "sequence id parameter is set" );
 			
 			$this->sequence = new Sequence ( $this->sequenceId );
 		}
@@ -122,7 +123,7 @@ class BioDivViewKioskMediaCarousel extends JViewLegacy
 		}
 		*/
 		
-		error_log ( "about to call display" );
+		//error_log ( "about to call display" );
 		
 		// Display the view
 		parent::display($tpl);

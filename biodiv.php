@@ -4077,9 +4077,9 @@ function nextSequence( $project_id = null){
 	  $project_id = $app->getUserState("com_biodiv.project_id");
   }
   
-  error_log ( "classify_project = " . $classify_project );
-  error_log ( "classify_own = " . $classify_own );
-  error_log ( "project_id = " . $project_id );
+  //error_log ( "classify_project = " . $classify_project );
+  //error_log ( "classify_own = " . $classify_own );
+  //error_log ( "project_id = " . $project_id );
   
   //print "<br>nextSequence, project_id: " . $project_id . "<br>" ;
   
@@ -4942,8 +4942,7 @@ function getProjectFilters ( $project_id, $photo_id = null ) {
 		$query->innerJoin("ProjectOptions PO on PO.option_id = O.option_id");
 		$query->innerJoin("Photo P on P.photo_id = ". $photo_id);
 		$query->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id");
-		$query->where("P.photo_id >= PSM.start_photo_id" );
-		$query->where("PSM.end_photo_id is NULL" );
+		$query->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)" );
 		$query->where("PSM.project_id = PO.project_id" );
 		$query->where("O.struc = 'projectfilter'" );
 		$query->order("O.seq");
@@ -5283,9 +5282,9 @@ function getSpeciesOrig ( $filterid, $onePage ) {
 	$restrict['restriction'] = "value = '" . $filterid . "'";
 	//$restrict['restriction'] = "list_id = '" . $filterid . "'";
 	
-	error_log ("Getting filterspeciestran");
+	//error_log ("Getting filterspeciestran");
 	$species = codes_getList ( "filterspeciestran", $restrict );
-	error_log ("Got filterspeciestran");
+	//error_log ("Got filterspeciestran");
 	  
 	// Need to sort this list by name.
 	usort($species, "cmp");
@@ -7093,6 +7092,84 @@ function writeTestResults ( $topicId, $sequencesJson, $answersJson, $scorePercen
 	
 }
 
+
+function calculateTestScore ( $topicId, $seqenceId, $userSpecies ) {
+	
+	$score = 0;
+	$marks = array();
+	$primaryCorrect = array();
+	$wrong = array();
+	$totalSpecies = 0;
+	
+	$seq = getTrainingSequence($seqenceId, $topicId);
+		
+		
+	$correctPrimary = $seq->getPrimarySpecies();
+	$correctSecondary = $seq->getSecondarySpecies();
+	$numExpertPrimary = count($correctPrimary);
+	$numExpertSecondary = count($correctSecondary);
+	$totalSpecies += $numExpertPrimary;
+	$numExpertSpecies = $numExpertPrimary + $numExpertSecondary;
+	
+	$correctPrimaryIds = array_unique (array_map ( function($x) { return $x->id; } , $correctPrimary ) );
+	$correctSecondaryIds = array_unique (array_map ( function($x) { return $x->id; } , $correctSecondary ) );
+	
+	$userIds = array_unique ( $userSpecies );
+	  
+	
+	// Compare the sets of species.
+	$userCorrectPrimary = array_intersect ( $userIds, $correctPrimaryIds );
+	
+	
+	$numCorrectPrimary = count($userCorrectPrimary);
+	
+	$userSecondary = array_diff ( $userIds, $userCorrectPrimary );
+	
+	
+	$userCorrectSecondary = array_intersect ( $correctSecondaryIds, $userSecondary );
+	$numCorrectSecondary = count($userCorrectSecondary);
+	
+	
+	$userRemaining = array_diff ( $userSecondary, $userCorrectSecondary );
+	
+	
+	$numWrong = count($userRemaining);
+	
+	$score += $numCorrectPrimary;
+	
+	// Only add secondary to total if the user has got it
+	if ( $numCorrectSecondary > 0 ) {
+		$score += $numCorrectSecondary;
+		$totalSpecies += $numCorrectSecondary;
+	}
+	
+	//error_log("Num wrong for " . $seq->getId() . " is " . $numWrong);
+	
+	$marks = $numCorrectPrimary + $numCorrectSecondary;
+	
+	//error_log("Marks for " . $seq->getId() . " is " . $marks);
+	
+	$numUserAnimals = count($userIds);
+	
+	$extraAnimals = $numUserAnimals - $numExpertSpecies;
+	
+	if ( $extraAnimals > 0 ) {
+		// Increase denominator if user has added extra species.
+		$totalSpecies += $extraAnimals;
+	}
+		
+	return array("correct"=>$marks, 
+				"correctPrimary"=>$numCorrectPrimary, 
+				"correctSecondary"=>$numCorrectSecondary, 
+				"wrong"=>$numWrong, 
+				"total"=>$totalSpecies, 
+				"userSpecies"=>$userSpecies, 
+				"expertPrimarySpecies"=>$correctPrimaryIds, 
+				"expertSecondarySpecies"=>$correctSecondaryIds );
+	
+}
+	
+	
 
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');

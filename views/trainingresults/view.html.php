@@ -150,10 +150,7 @@ class BioDivViewTrainingResults extends JViewLegacy
 		
 		$seq = $this->sequences[$i];
 		
-		//$correct = $seq->getSpecies();
-		
-		//$numExpertSpecies = count($correct);
-		//$this->totalSpecies += $numExpertSpecies;
+		//NB should be using biodiv.php function calculateTestScore for each sequence...
 		
 		$correctPrimary = $seq->getPrimarySpecies();
 		$correctSecondary = $seq->getSecondarySpecies();

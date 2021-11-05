@@ -8,8 +8,6 @@ var beforeExitFullScreen = true;
 
 function kioskClassifyTutorialSuccess () {
 
-	console.log("Tutorial loaded - now in separate js file");
-	
 	beforeFullScreen = true;
 	beforeExitFullScreen = true;
 
@@ -32,6 +30,7 @@ function kioskClassifyTutorialSuccess () {
 	addPlayedCallback ( kioskPlayDone );
 	
 }
+
 
 
 function kioskPlayDone () {
@@ -62,7 +61,6 @@ function kioskPlayDone () {
 	jQuery("#fullscreen").show();
 	
 }
-
 
 
 function kioskFullScreenDone () {
@@ -450,12 +448,707 @@ function kioskSaveNothingDone () {
 }
 
 
+function kioskClassifyAudioTutorialSuccess () {
+
+	beforeFullScreen = true;
+	beforeExitFullScreen = true;
+
+	
+	let seqAttr = jQuery("#sequences_species").attr( "data-sequences");
+	let spAttr = jQuery("#sequences_species").attr( "data-species");
+	let typeAttr = jQuery("#sequences_species").attr( "data-types");
+	
+	tutSequenceIds = JSON.parse(seqAttr);
+	tutSpeciesIds = JSON.parse(spAttr);
+	tutSequenceTypes = JSON.parse(typeAttr);
+	
+	setMediaCarouselPause();
+	
+	jQuery("#play_video_audio").show();
+	
+	addPlayedCallback ( kioskAudioPlayDone );
+	
+}
+
+
+
+function kioskAudioPlayDone () {
+	
+	addFullScreenFnly();
+	kioskFullscreenExtras();
+	tutorialFullscreenExtras();
+	
+	jQuery("#classify_tutorial_vid").hide();
+	jQuery("#play_video_audio").hide();
+	
+	jQuery('#classify_bird').prop('disabled', false);
+	
+	jQuery("#tut_what_hear").show();
+	jQuery("#click_bird_audio").show();
+	
+	jQuery('#classify_bird').one("click", function (){
+		
+		kioskChooseBirdAudioDone();
+		
+	});
+
+}
+
+
+
+
+function kioskChooseBirdAudioDone () {
+	
+	jQuery('#tut_what_hear').hide();
+	jQuery("#click_bird_audio").hide();
+	
+	jQuery('#tut_identify').show();
+	jQuery('#might_be_jackdaw').show();
+
+
+	jQuery('.species_group').hide();
+	jQuery('#bird_buttons').show();
+	
+	
+	let sp = tutSpeciesIds[0][0];
+	jQuery('.species_select_' + sp ).one("click",function (){
+		
+		kioskChooseFirstSpeciesAudioDone();
+		
+	});
+		
+}
+
+function kioskChooseFirstSpeciesAudioDone () {
+	
+	jQuery("#might_be_jackdaw").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[0][0];
+	
+	populateSpeciesHelpletAudio ( sp, kioskChooseFirstPopulatedAudio );
+}
+
+
+function kioskChooseFirstPopulatedAudio () {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskChooseFirstSonoPlayed );
+	
+	jQuery('.intelligent_back' ).one("click", function (){
+		
+		kioskNoGoBackDoneAudio();
+		
+	});
+	
+}
+
+
+function kioskChooseFirstSonoPlayed () {
+	
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#not_sure_audio').show();
+	
+	/*
+	jQuery('.intelligent_back' ).one("click", function (){
+		
+		kioskNoGoBackDoneAudio();
+		
+	});
+	*/
+}
+
+
+function kioskNoGoBackDoneAudio () {
+	
+	jQuery("#species_helplet").empty();
+	
+	jQuery('#tut_happy').hide();
+	jQuery('#play_species_sono').hide();
+	jQuery('#not_sure_audio').hide();
+	jQuery('#chosen_species').hide();
+	jQuery('.back_to_filter' ).prop('disabled', true);
+		
+	jQuery('#tut_identify').show();
+	jQuery("#might_be_bluetit").show();
+	jQuery("#bird_buttons").show();
+	
+	let sp = tutSpeciesIds[0][1];
+	jQuery('.species_select_' + sp ).one("click",function (){
+		
+		kioskChooseFirstAgainDoneAudio();
+		
+	});
+	
+}
+
+
+function kioskChooseFirstAgainDoneAudio () {
+	
+	jQuery("#might_be_bluetit").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[0][1];
+	
+	populateSpeciesHelpletAudio ( sp, kioskChooseFirstAgainPopulatedAudio );
+	
+	
+
+}
+
+
+function kioskChooseFirstAgainPopulatedAudio() {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskPlayedFirstAgain );
+	
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveFirstDoneAudio();
+		
+	});
+}
+
+function kioskPlayedFirstAgain () {
+	
+	jQuery('#play_species_sono').hide();
+	jQuery('#click_save_audio').show();
+	
+	/*
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveFirstDoneAudio();
+		
+	});
+	*/
+}
+
+
+function kioskSaveFirstDoneAudio() {
+	
+	jQuery("#species_helplet").empty();
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#bird_tag_1').show();
+	
+	jQuery('#tut_happy').hide();
+	jQuery('#click_save_audio').hide();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery("#tut_hearagain").show();
+	jQuery('#filter_buttons').show();
+	jQuery('#another_bird').show();
+	
+	jQuery('#classify_bird').prop('disabled', false);
+	jQuery('#classify_bird').one("click", function (){
+		
+		kioskChosenSecondToRemove();
+		
+	});
+	
+}
+
+function kioskChosenSecondToRemove () {
+	
+	
+	jQuery("#tut_hearagain").hide();
+	jQuery('#another_bird').hide();
+	
+	jQuery('#tut_identify').show();
+	
+	jQuery('.species_group').hide();
+	jQuery("#bird_buttons").show();
+	jQuery('#might_be_crow').show();
+	
+	let sp = tutSpeciesIds[0][2];
+	jQuery('.species_select_' + sp ).one("click",function (){
+		
+		kioskRemoveBirdSpeciesSelected();
+		
+	});
+	
+}
+
+function kioskRemoveBirdSpeciesSelected () {
+	
+	
+	jQuery("#might_be_crow").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[0][2];
+	
+	populateSpeciesHelpletAudio ( sp, kioskRemoveBirdPopulatedAudio );
+	
+}
+
+
+function kioskRemoveBirdPopulatedAudio () {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskPlayedRemove );
+	
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveRemoveDoneAudio();
+		
+	});
+}
+
+function kioskPlayedRemove () {
+	
+	jQuery('#play_species_sono').hide();
+	jQuery('#click_save_remove').show();
+	
+	/*
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveRemoveDoneAudio();
+		
+	});
+	*/
+}
+
+function kioskSaveRemoveDoneAudio () {
+	
+	jQuery("#species_helplet").empty();
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#bird_tag_2').show();
+	
+	jQuery('#click_save_remove').hide();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery('#tut_hearagain').show();
+	jQuery('#filter_buttons').show();
+	jQuery('#other_button').hide();
+	jQuery('#finish_clip').show();
+	
+	jQuery('#click_to_remove').show();
+	
+	jQuery('#bird_tag_2').one("click", function (){
+		
+		kioskRemovedDoneAudio();
+		
+	});
+}
+
+function kioskRemovedDoneAudio() {
+	
+	jQuery('#bird_tag_2').hide();
+	
+	jQuery('#tut_happy').hide();
+	jQuery('#click_to_remove').hide();
+	jQuery('#species_helplet').empty();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery("#tut_hearagain").show();
+	jQuery('#filter_buttons').show();
+	jQuery('#another_bird').show();
+	
+	jQuery('#classify_bird').prop('disabled', false);
+	jQuery('#classify_bird').one("click", function (){
+		
+		kioskChosenSecondBird();
+		
+	});
+	
+}
+
+
+function kioskChosenSecondBird () {
+	
+	
+	jQuery("#tut_hearagain").hide();
+	jQuery('#another_bird').hide();
+	
+	jQuery('#tut_identify').show();
+	
+	jQuery('.species_group').hide();
+	jQuery("#bird_buttons").show();
+	jQuery('#might_be_woodpigeon').show();
+	
+	let sp = tutSpeciesIds[0][3];
+	jQuery('.species_select_' + sp ).one("click",function (){
+		
+		kioskSecondBirdSpeciesSelected();
+		
+	});
+	
+}
+
+function kioskSecondBirdSpeciesSelected () {
+	
+	
+	jQuery("#might_be_woodpigeon").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[0][3];
+	
+	populateSpeciesHelpletAudio ( sp, kioskChooseSecondPopulatedAudio );
+	
+}
+
+
+function kioskChooseSecondPopulatedAudio () {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskPlayedSecond );
+	
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveSecondDoneAudio();
+		
+	});
+}
+
+function kioskPlayedSecond () {
+	
+	jQuery('#play_species_sono').hide();
+	jQuery('#click_save_second').show();
+	
+	/*
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveSecondDoneAudio();
+		
+	});
+	*/
+}
+
+function kioskSaveSecondDoneAudio () {
+	
+	jQuery("#species_helplet").empty();
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#bird_tag_3').show();
+	
+	jQuery('#click_save_second').hide();
+	jQuery('#species_helplet').empty();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery('#tut_hearagain').show();
+	jQuery('#filter_buttons').show();
+	jQuery('#other_button').hide();
+	jQuery('#finish_clip').show();
+	
+	jQuery('#finish_clip_audio').show();
+	
+	jQuery('#finish_clip').one("click", function (){
+		
+		kioskFinishClipDoneAudio();
+		
+	});
+}
+
+function kioskFinishClipDoneAudio() {
+	
+	jQuery('#finish_clip_audio').hide();
+	jQuery('.remove_animal').hide();
+	
+	let url = BioDiv.root + "&view=kioskmediacarousel&format=raw&sequence_id=" + tutSequenceIds[1];
+	
+	jQuery('#media_carousel').load(url, kioskNotInListLoadedAudio);
+	
+}
+
+function kioskNotInListLoadedAudio () {
+	
+	setMediaCarouselPause();
+	
+	jQuery('#tut_hearagain').hide();
+	jQuery('#finish_clip').hide();
+	jQuery('#other_button').show();
+	
+	jQuery("#tut_play_next").show();
+	jQuery("#play_second_audio").show();
+	
+	
+	addPlayedCallback ( kioskNotInListPlayedAudio );
+}
+
+function kioskNotInListPlayedAudio () {
+	
+	jQuery("#play_second_audio").hide();
+	jQuery("#tut_play_next").hide();
+	
+	jQuery("#tut_what_hear").show();
+	jQuery("#click_bird_audio").show();
+	
+	jQuery('#classify_bird').prop('disabled', false);
+	jQuery('#classify_bird').one("click", function (){
+		
+		kioskChooseNotOnBirdDone();
+		
+	});
+	
+	
+}
+
+function kioskChooseNotOnBirdDone () {
+	
+	jQuery("#tut_what_hear").hide();
+	jQuery("#click_bird_audio").hide();
+	
+	jQuery('#tut_identify').show();
+	
+	jQuery('#not_on_list_audio').show();
+
+
+	jQuery('.species_group').hide();
+	jQuery('#bird_buttons').show();
+	
+	
+	jQuery('#not_on_bird_list').one("click", function (){
+		
+		kioskChooseNotOnListAudioDone();
+		
+	});
+	
+}
+
+function kioskChooseNotOnListAudioDone () {
+	
+	jQuery("#not_on_list_audio").hide();
+	jQuery("#scroll_all_audio").show();
+	
+	displayAllBirds(0);
+	
+	jQuery('#scroll_up_birds').click(function (){
+		displayAllBirds( -1 );
+	});
+	
+	jQuery('#scroll_down_birds').click(function (){
+		displayAllBirds( 1 );
+	});
+	
+	
+	let sp = tutSpeciesIds[1][0];
+	let buttonSelector = '.species_select_' + sp ;
+	jQuery(buttonSelector).prop('disabled', false);
+	
+	jQuery(buttonSelector).one("click",function (){
+		
+		kioskNotOnBirdSpeciesSelected();
+		
+	});
+	
+}
+
+function kioskNotOnBirdSpeciesSelected () {
+	
+	jQuery("#scroll_all_audio").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[1][0];
+	
+	populateSpeciesHelpletAudio ( sp, kioskNotOnBirdSpeciesLoaded );
+}
+
+function kioskNotOnBirdSpeciesLoaded () {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskPlayedNotOnBird );
+	
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveNotOnDoneAudio();
+		
+	});
+}
+
+function kioskPlayedNotOnBird () {
+	
+	jQuery('#play_species_sono').hide();
+	jQuery('#click_save_rare_audio').show();
+	
+	/*
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveNotOnDoneAudio();
+		
+	});
+	*/
+}
+
+function kioskSaveNotOnDoneAudio () {
+	
+	jQuery("#species_helplet").empty();
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#bird_tag_4').show();
+	
+	jQuery('#click_save_rare_audio').hide();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery('#tut_hearagain').show();
+	jQuery('#filter_buttons').show();
+	jQuery('#other_button').hide();
+	jQuery('#finish_clip').show();
+	
+	jQuery('#another_bird').show();
+	
+	jQuery('#classify_bird').prop('disabled', false);
+	jQuery('#classify_bird').one("click", function (){
+		
+		kioskChosenLastBird();
+		
+	});
+}
+
+function kioskChosenLastBird () {
+	
+	
+	jQuery("#tut_hearagain").hide();
+	jQuery('#another_bird').hide();
+	
+	jQuery('#tut_identify').show();
+	
+	jQuery('.species_group').hide();
+	jQuery("#bird_buttons").show();
+	jQuery('#might_be_wren').show();
+	
+	let sp = tutSpeciesIds[1][1];
+	jQuery('.species_select_' + sp ).one("click",function (){
+		
+		kioskLastBirdSpeciesSelected();
+		
+	});
+	
+}
+
+function kioskLastBirdSpeciesSelected () {
+	
+	
+	jQuery("#might_be_wren").hide();
+	jQuery('.species_buttons').hide();
+	
+	let sp = tutSpeciesIds[1][1];
+	
+	populateSpeciesHelpletAudio ( sp, kioskChooseLastPopulatedAudio );
+	
+}
+
+
+function kioskChooseLastPopulatedAudio () {
+	
+	setSpeciesSonoPause();
+	
+	jQuery('#tut_identify').hide();
+	jQuery('#tut_happy').show();
+	jQuery('#play_species_sono').show();
+	jQuery('#chosen_species').show();
+	
+	addPlayedSonoCallback ( kioskPlayedLast );
+	
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveLastDoneAudio();
+		
+	});
+}
+
+function kioskPlayedLast () {
+	
+	jQuery('#play_species_sono').hide();
+	jQuery('#click_save_wren').show();
+	
+	/*
+	jQuery('#classify_save_multi' ).one("click", function (){
+		
+		kioskSaveLastDoneAudio();
+		
+	});
+	*/
+}
+
+function kioskSaveLastDoneAudio () {
+	
+	jQuery("#species_helplet").empty();
+	jQuery('#play_species_sono').hide();
+	
+	jQuery('#bird_tag_5').show();
+	
+	jQuery('#click_save_wren').hide();
+	jQuery('#chosen_species').hide();
+	jQuery('#tut_happy').hide();
+	
+	jQuery('#tut_hearagain').show();
+	jQuery('#filter_buttons').show();
+	jQuery('#other_button').hide();
+	jQuery('#finish_clip').show();
+	
+	jQuery('#save_final_audio').show();
+	
+	jQuery('#finish_clip').one("click", function (){
+		
+		kioskFinishAllClipsDoneAudio();
+		
+	});
+}
+
+function kioskFinishAllClipsDoneAudio () {
+	
+	jQuery('.remove_animal').hide();
+	
+	jQuery('.classify_panel_right').hide();
+	jQuery('.classify_panel_left').hide();
+	jQuery('#tut_hearagain').hide();
+	
+	jQuery('#save_final_audio').hide();
+	
+	//setBackgroundImage();
+	
+	setQuizButton();
+	
+	setClassifyAudioProjectButton();
+	
+	setHomeButton();
+	
+	jQuery('#tut_feedback').show();
+}
+
 
 
 function addPlayedCallback ( playedFunction ) {
 	
 	//jQuery('#classify-video').bind('ended', function (e) {
-		jQuery('#classify-video').one('ended', function (e) {
+	jQuery('#classify-video').one('ended', function (e) {
 		
 		playedFunction();
 		
@@ -473,7 +1166,27 @@ function addPlayedCallback ( playedFunction ) {
 	
 }
 
-
+function addPlayedSonoCallback ( playedFunction ) {
+	
+	//jQuery('#classify-video').bind('ended', function (e) {
+	//jQuery('#species_helplet > video').one('ended', function (e) {
+	let speciesVid = jQuery('#species_helplet').find('video');
+	//jQuery('video').one('ended', function (e) {
+	speciesVid.one('ended', function (e) {
+		
+		playedFunction();
+		
+	});
+	/*
+	jQuery('video').one('pause', function (e) {
+		
+		playedFunction();
+		
+	});
+	*/
+}
+	
+	
 function populateSpeciesHelplet ( speciesId, nextFunction ) {
 	
 	jQuery('#species_helplet').empty();
@@ -485,7 +1198,22 @@ function populateSpeciesHelplet ( speciesId, nextFunction ) {
 	// Ensure that no hyperlinks can be clicked in kiosk mode
 	jQuery('#species_helplet').on('click', 'a', function(e) {
 		e.preventDefault();
-		console.log(jQuery(this).attr('href'));
+	});	
+		
+
+}
+    
+function populateSpeciesHelpletAudio ( speciesId, nextFunction ) {
+	
+	jQuery('#species_helplet').empty();
+	
+	// Populate the helplet
+	var url = BioDiv.root + "&view=kioskspeciesaudio&format=raw&option_id=" + speciesId;
+	jQuery('#species_helplet').load(url, nextFunction);
+	
+	// Ensure that no hyperlinks can be clicked in kiosk mode
+	jQuery('#species_helplet').on('click', 'a', function(e) {
+		e.preventDefault();
 	});	
 		
 

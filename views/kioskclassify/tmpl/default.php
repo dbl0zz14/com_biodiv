@@ -17,21 +17,36 @@ print '  <div class=" h3 explain">'.$this->translations['how_choose']['translati
 print '</div>'; // opaque-bg
 
 
-
+// Use alternative views for audio sites
 print '<div class="col-md-4">';
-print '	<button id="classify_tutorial" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['tutorial']['translation_text'].'</button>';
+if ( $this->isCamera ) {
+	print '	<button id="classify_tutorial" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['tutorial']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="classify_audio_tutorial" class="btn btn-lg btn-block btn-success h2 control_btn" type="submit">'.$this->translations['tutorial']['translation_text'].'</button>';
+}
 print '</div>';
 
 
 
 print '<div class="col-md-4">';
-print '	<button id="classify_project" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['classify_project']['translation_text'].'</button>';
+if ( $this->isCamera ) {
+	print '	<button id="classify_project" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['classify_project']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="classify_audio_project" class="btn btn-lg btn-block btn-success h2 control_btn">'.$this->translations['classify_project']['translation_text'].'</button>';
+}
 print '</div>';
 
 
 
 print '<div class="col-md-4">';
-print '	<button id="classify_wider" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['classify_wider']['translation_text'].'</button>';
+if ( $this->isCamera ) {
+	print '	<button id="classify_wider" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['classify_wider']['translation_text'].'</button>';
+}
+else {
+	print '	<button id="classify_audio_wider" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['classify_wider']['translation_text'].'</button>';
+}
 print '</div>';
 
 

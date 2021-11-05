@@ -8,6 +8,7 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
+error_log ( "Kiosk feedback template called" );
 
 print '<div class="col-md-12">';
 print '<div class="col-md-12">';
@@ -17,98 +18,236 @@ print '<h1 class="text-center lower_heading"><strong>'.$this->translations['than
 
 if ( $this->all_animals ) {
 	
-	print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
+	$numAnimals = count($this->all_animals);
 	
-		
-	print "<div class='row spaced_row'>";
+	$maxRows = 2;
+	$numPerRow = 5;
 	
-	print '<div class="row">';
-	
-	
-	print "<div class='col-md-1'></div>"; // offset
-	
-	
-	foreach ($this->all_animals as $animal) {
-		
-		print "<div class='col-md-2'>";
-		
-		$longSpeciesNameClass = 'h4';
-		if ( strlen($animal->name) > 13 ) $longSpeciesNameClass = 'long_species_name';
-		
-		print '<h3 class="text-center"><div class=" '.$longSpeciesNameClass.'">'.$animal->name.'</div></h3>';
-		
-		/*
-		$longSpeciesNameClass = 'h4';
-		if ( strlen($animal->name) > 13 ) $longSpeciesNameClass = 'long_species_name';
-		print "<div class='text-center " . $longSpeciesNameClass . "'>" . $animal->name . "</div>" ;
-		*/
-		print "</div>";
+	if ( $numAnimals > 10 and $numAnimals <= 12 ) {
+		$numPerRow = 6;
+	}
+	else if ( $numAnimals > 12 ) {
+		$numPerRow = 10;
 	}
 	
-	print "</div>"; // row
+	$numFullRows = intval($numAnimals/$numPerRow);
+	//error_log ( "num full rows: " . $numFullRows );
 	
+	$numOnPartRow = $numAnimals%$numPerRow;
+	//error_log ( "num on part row: " . $numOnPartRow );
 	
-	print '<div class="row">';
+	$extraRow = 0;
+	if ( $numOnPartRow > 0 ) $extraRow = 1;
+	$numRows = $numFullRows + $extraRow;
+	//error_log ( "num rows altogether: " . $numRows );
 	
-	print "<div class='col-md-1'></div>"; // offset
+	// Only display up to max rows so displays ok
+	if ( $numRows > $maxRows ) $numRows = $maxRows;
+	
 		
-	foreach ($this->all_animals as $animal) {
+	if ( $numRows == 1 ) {
+		print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
 		
-		print "<div class='col-md-2'>";
+		print "<div class='row spaced_row'>";
+	}
+	else if ( $numPerRow > 6 ) {
+		print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
 		
-		/*
-		$longSpeciesNameClass = 'h4';
-		if ( strlen($animal->name) > 13 ) $longSpeciesNameClass = 'long_species_name';
+		//print "<div class='row half_spaced_row'>";
+		//print '</div>'; // row spaced_row
+	}
+	else {
+		print '<h2 class="text-center">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
+	}
 		
-		print '<h3 class="text-center"><div class=" '.$longSpeciesNameClass.'">'.$animal->name.'</div></h3>';
+	for ( $i=0; $i<$numRows; $i++ ) {
 		
-		*/
+		//error_log ( "row " . $i );
 		
-		$imageURL = "";
+		$animalsLeft = $numAnimals - $i*$numPerRow;
 		
-		if ( $animal->kiosk_image ) {
-			$imageURL = JURI::root().$animal->kiosk_image;
-			//print "<img src='".$imageURL."' width='100%'>";
+		$numOnRow = min ( $animalsLeft, $numPerRow );
+		
+		if ( $numPerRow <= 6 ) {
+			
+			print '<div class="row feedback_species_row">';
+			
+			if ( $numOnRow == 5 ) {
+				print "<div class='col-md-1'></div>"; // offset
+			}
+			else if ( $numOnRow == 4 ) {
+				print "<div class='col-md-2'></div>"; // offset
+			}
+			else if ( $numOnRow == 3 ) {
+				print "<div class='col-md-3'></div>"; // offset
+			}
+			else if ( $numOnRow == 2 ) {
+				print "<div class='col-md-4'></div>"; // offset
+			}
+			else if ( $numOnRow == 1 ) {
+				print "<div class='col-md-5'></div>"; // offset
+			}
+
 		}
 		else {
-			if ( $animal->struc == "bird" ) {
-				$imageURL = JURI::root()."images/thumbnails/OtherBird.png";
-				//print "<img src='".$imageURL."' width='100%'>";
+			print '<div class="row feedback_species_row_sml">';
+			
+			if ( $numOnRow > 8 and $numOnRow <= 10 ) {
+				print "<div class='col-md-1'></div>"; // offset
 			}
-			else if ( $animal->name == "Human" or $animal->species == 87 ){
-				$imageURL = JURI::root()."images/thumbnails/Human.png";
-				//print "<img src='".$imageURL."' width='100%'>";
+			else if ( $numOnRow > 6 and $numOnRow <= 8 ) {
+				print "<div class='col-md-2'></div>"; // offset
 			}
-			else if ( $animal->name == "Nothing" or $animal->species == 86 ){
-				$imageURL = JURI::root()."images/thumbnails/Undergrowth.jpg";
-				//print "<img src='".$imageURL."' width='100%'>";
+			else if ( $numOnRow > 4 and $numOnRow <= 6 ) {
+				print "<div class='col-md-3'></div>"; // offset
 			}
-			else if ( $animal->name == "Don't Know" or $animal->species == 96 ){
-				$imageURL = JURI::root()."images/thumbnails/DontKnow.png";
-				//print "<img src='".$imageURL."' width='100%'>";
+			else if ( $numOnRow > 2 and $numOnRow <= 4 ) {
+				print "<div class='col-md-4'></div>"; // offset
 			}
-			else {
-				$imageURL = JURI::root()."images/thumbnails/Fur.jpg";
-				//print "<img src='".$imageURL."' width='100%'>";
+			else if ( $numOnRow <= 2 ) {
+				print "<div class='col-md-5'></div>"; // offset
+			}
+			
+			print "<div class='col-md-1'></div>"; // offset
+		}
+	
+		for ($j=0; $j < $numPerRow; $j++) {
+			
+			//error_log ( "row element " . $j );
+			
+			if ( $i*$numPerRow + $j < $numAnimals ) {
+			
+				$animal = $this->all_animals[ $i*$numPerRow + $j ];
+				
+				$speciesNameClass = 'h4';
+				
+				if ( $numPerRow > 6 ) {
+					
+					$speciesNameClass = 'h5';
+					print "<div class='col-md-1'>";
+					
+				}
+				else {
+					print "<div class='col-md-2'>";
+				}
+				
+				if ( strlen($animal->name) > 13 ) $longSpeciesNameClass = 'long_species_name';
+				
+				//print '<h3 class="text-center"><div class=" '.$longSpeciesNameClass.'">'.$animal->name.'</div></h3>';
+				
+				print '<div class="text-center ' . $speciesNameClass . '">'.$animal->name.'</div>';
+				
+				print "</div>"; // col-2 or 1
+				
 			}
 		}
-		print '<img class="img-responsive center-block" style="max-height:48vh;" src="' . $imageURL . '" />';
+	
+		print "</div>"; // row
+	
+		if ( $numPerRow <= 6 ) {
+			
+			print '<div class="row">';
+			
+			if ( $numOnRow == 5 ) {
+				print "<div class='col-md-1'></div>"; // offset
+			}
+			else if ( $numOnRow == 4 ) {
+				print "<div class='col-md-2'></div>"; // offset
+			}
+			else if ( $numOnRow == 3 ) {
+				print "<div class='col-md-3'></div>"; // offset
+			}
+			else if ( $numOnRow == 2 ) {
+				print "<div class='col-md-4'></div>"; // offset
+			}
+			else if ( $numOnRow == 1 ) {
+				print "<div class='col-md-5'></div>"; // offset
+			}
+
+		}
+		else {
+			print '<div class="row">';
+			
+			if ( $numOnRow > 8 and $numOnRow <= 10 ) {
+				print "<div class='col-md-1'></div>"; // offset
+			}
+			else if ( $numOnRow > 6 and $numOnRow <= 8 ) {
+				print "<div class='col-md-2'></div>"; // offset
+			}
+			else if ( $numOnRow > 4 and $numOnRow <= 6 ) {
+				print "<div class='col-md-3'></div>"; // offset
+			}
+			else if ( $numOnRow > 2 and $numOnRow <= 4 ) {
+				print "<div class='col-md-4'></div>"; // offset
+			}
+			else if ( $numOnRow <= 2 ) {
+				print "<div class='col-md-5'></div>"; // offset
+			}
+			
+			print "<div class='col-md-1'></div>"; // offset
+		}
 		
-		print '</div>'; // col-2
+		
+		for ($j=0; $j < $numPerRow; $j++) {
+			
+			//error_log ( "row element " . $j );
+			
+			if ( $i*$numPerRow + $j < $numAnimals ) {
+		
+				$animal = $this->all_animals[ $i*$numPerRow + $j ];
+		
+				if ( $numPerRow > 6 ) {
+					print "<div class='col-md-1'>";
+				}
+				else {
+					print "<div class='col-md-2'>";
+				}
+				
+				$imageURL = "";
+				
+				if ( $animal->kiosk_image ) {
+					$imageURL = JURI::root().$animal->kiosk_image;
+				}
+				else {
+					if ( $animal->struc == "bird" ) {
+						$imageURL = JURI::root()."images/thumbnails/OtherBird.png";
+					}
+					else if ( $animal->name == "Human" or $animal->species == 87 ){
+						$imageURL = JURI::root()."images/thumbnails/Human.png";
+					}
+					else if ( $animal->name == "Nothing" or $animal->species == 86 ){
+						$imageURL = JURI::root()."images/thumbnails/Undergrowth.jpg";
+					}
+					else if ( $animal->name == "Don't Know" or $animal->species == 96 ){
+						$imageURL = JURI::root()."images/thumbnails/DontKnow.png";
+					}
+					else {
+						$imageURL = JURI::root()."images/thumbnails/Fur.jpg";
+					}
+				}
+				print '<img class="img-responsive center-block" style="max-height:48vh;" src="' . $imageURL . '" />';
+				
+				print '</div>'; // col-2
+			}
+			
+		}
+		
+		print '</div>'; // row 
 		
 	}
-	
-	print '</div>'; // row spaced_row
-	
-	//print "</div>"; // row spotted-animals
+	if ( $numRows == 1 ) {
+		print '</div>'; // row spaced_row
+	}
+	else if ( $numPerRow > 6 ) {
+		print '<div class="row half_spaced_row">';
+		print '</div>'; // row spaced_row
+	}
 	
 	
 }
 
 print '<h2 class="text-center" style="margin-top:5vh;">'.$this->translations['help_sci']['translation_text'] . '</h1>';
 
-//print "</div>"; // row
-//print '</div>'; // opaque-bg
 
 print '<div class="col-md-4 col-md-offset-2">';
 print '	<button id="classify_again" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['classify_again']['translation_text'].'</button>';

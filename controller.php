@@ -101,7 +101,7 @@ class BioDivController extends JControllerLegacy
 	$site_id = addSite();
 	
 	if ( $site_id ) {		
-	    error_log("Setting view to upload, site = ". $site_id);
+	    //error_log("Setting view to upload, site = ". $site_id);
 		$this->input->set('view', 'upload');
 		$this->input->set('site_id', $site_id);
 	}
@@ -576,6 +576,8 @@ class BioDivController extends JControllerLegacy
   }
 
   function remove_animal_single_tag(){
+	  
+	//error_log ("remove_animal_single_tag called" );
     //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $app = JFactory::getApplication();
 
@@ -583,7 +585,10 @@ class BioDivController extends JControllerLegacy
 	if ( userID() ) {
 
 		$photo_id = (int)$app->getUserState('com_biodiv.photo_id', 0);
+		//error_log ("photo_id = " . $photo_id );
+		
 		$animal_id = JRequest::getInt("animal_id");
+		//error_log ("animal_id = " . $animal_id );
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
@@ -610,6 +615,8 @@ class BioDivController extends JControllerLegacy
 		$result = $db->execute();
 	
 		$app->setUserState('com_biodiv.animal_id', 0);
+		
+		//error_log ("About to remove animal_id = " . $animal_id );
     
 		removeAnimalId ($animal_id);
 	
@@ -623,7 +630,7 @@ class BioDivController extends JControllerLegacy
   // Simplified version for kiosk where there are no additional data, just one species id, then get next sequence
   function kiosk_add_animal_next(){
 	  
-	error_log ( "kiosk_add_animal_next called" );
+	//error_log ( "kiosk_add_animal_next called" );
     
 	$this->kiosk_add_animal ( 'kioskmediacarousel' );
 	
@@ -636,6 +643,39 @@ class BioDivController extends JControllerLegacy
 	$this->kiosk_add_animal ( 'kioskfeedback' );
 	
   }
+  
+  // Kiosk version (for audio) where more than one species can be added
+  function kiosk_add_animal_multi(){
+	  
+	//error_log ( "kiosk_add_animal_multi called" );
+    
+	$this->kiosk_add_animal ( 'kiosksingletag' );
+	
+  }
+
+  
+  // Kiosk version (for audio) where finished classifying and want next clip
+  function kiosk_next_clip(){
+	  
+	//error_log ( "kiosk_next_clip called" );
+	
+	$this->input->set('view', 'kioskmediacarousel' );
+    parent::display();
+	
+  }
+
+  
+  // Kiosk version (for audio) where finished classifying and want feedback
+  function kiosk_get_feedback(){
+	  
+	//error_log ( "kiosk_get_feedback called" );
+	
+	$this->input->set('view', 'kioskfeedback' );
+    parent::display();
+	
+  }
+
+  
   
   function kiosk_add_animal ($next_view) {
 	
@@ -651,8 +691,8 @@ class BioDivController extends JControllerLegacy
 		$fields->photo_id = $this->input->get('photo_id', 0);
 		$fields->species = $this->input->get('species', 0);
 		
-		error_log ("Photo id = " . $fields->photo_id);
-		error_log ("Species id = " . $fields->species);
+		//error_log ("Photo id = " . $fields->photo_id);
+		//error_log ("Species id = " . $fields->species);
 		
 		if ( $fields->photo_id == 0 or $fields->species == 0 ) {
 			error_log ("add_animal_kiosk_next no photo_id or species");
@@ -699,11 +739,67 @@ class BioDivController extends JControllerLegacy
 			}
 		}
     }
+	
+	//error_log ( "About to call display for view " . $next_view );
 	$this->input->set('view', $next_view);
     parent::display();
 	
   }
 
+  
+    function kiosk_remove_animal(){
+	  
+	//error_log ("kiosk_remove_animal called" );
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+
+	// Only do the work if user is logged in
+	if ( userID() ) {
+
+		$animal_id = $this->input->get('animal_id', 0);
+		$photo_id = $this->input->get('photo_id', 0);
+		
+		//error_log ("animal_id = " . $animal_id );
+		//error_log ("photo_id = " . $photo_id );
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$animal = codes_getDetails($animal_id, "animal");
+		if ( $animal['species'] == 87 ) {
+			$fields = new stdClass();
+			$fields->photo_id = $photo_id;
+			$fields->contains_human = 0;
+			// we do note own this object so access db directly
+			$db->updateObject('Photo', $fields, 'photo_id');
+		}
+		
+		$conditions = array('person_id = ' . userID(),
+				 'photo_id = ' . $photo_id,
+				 'animal_id = ' . $animal_id);
+
+		$query = $db->getQuery(true);
+		$query->delete($db->quoteName('Animal'));
+		$query->where($conditions);
+	 
+		$db->setQuery($query);
+	 
+	 
+		$result = $db->execute();
+	
+		$app->setUserState('com_biodiv.animal_id', 0);
+		
+		//error_log ("About to remove animal_id = " . $animal_id );
+    
+		removeAnimalId ($animal_id);
+	
+	}
+    
+	$this->input->set('view', 'singletag');
+  
+    parent::display();
+  }
+  
+  
   
   function add_challenge(){
 	  
@@ -974,7 +1070,7 @@ class BioDivController extends JControllerLegacy
   
   function no_survey () {
 	  
-	error_log ( "no_survey called" );
+	//error_log ( "no_survey called" );
 	
 	// Get all the form data and write to db
 	
@@ -986,7 +1082,7 @@ class BioDivController extends JControllerLegacy
 		$input = $app->input;
 		
 		$survey_id = $input->get("survey", 0, 'int');
-		error_log ( "survey id: " . $survey_id );
+		//error_log ( "survey id: " . $survey_id );
 		
 		// Dissent added for all levels
 		$db = JDatabase::getInstance(dbOptions());
@@ -1019,7 +1115,7 @@ class BioDivController extends JControllerLegacy
   
   function take_survey () {
 	  
-	error_log ( "take_survey called" );
+	//error_log ( "take_survey called" );
 	
 	// Get all the form data and write to db
 	
@@ -1031,7 +1127,7 @@ class BioDivController extends JControllerLegacy
 		$input = $app->input;
 		
 		$survey_id = $input->get("survey", 0, 'int');
-		error_log ( "survey id: " . $survey_id );
+		//error_log ( "survey id: " . $survey_id );
 		
 		// Consent only added for top level surveys
 		$isFollowUp = BiodivSurvey::isFollowUp($survey_id);
@@ -1039,7 +1135,7 @@ class BioDivController extends JControllerLegacy
 		if ( !$isFollowUp ) {
 		
 			$consent_given = $input->get("consent", 0, 'int');
-			error_log ( "consent_given: " . $consent_given );
+			//error_log ( "consent_given: " . $consent_given );
 		
 			$db = JDatabase::getInstance(dbOptions());
 			
@@ -1077,7 +1173,7 @@ class BioDivController extends JControllerLegacy
   function add_response() {
 	
 	
-	error_log ( "add_response called" );
+	//error_log ( "add_response called" );
 	
 	// Get all the form data and write to db
 	
@@ -1090,7 +1186,7 @@ class BioDivController extends JControllerLegacy
 		$input = $app->input;
 		
 		$survey_id = $input->get("survey", 0, 'int');
-		error_log ( "survey id: " . $survey_id );
+		//error_log ( "survey id: " . $survey_id );
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
@@ -1110,14 +1206,14 @@ class BioDivController extends JControllerLegacy
 			$responseTypes = BiodivSurvey::getResponseTypes($survey_id);
 			$responseTrns = BiodivSurvey::getResponseTranslations();
 			
-			$err_str = print_r ( $responseTypes, true );
-			error_log ( "Response types: " . $err_str );
+			//$err_str = print_r ( $responseTypes, true );
+			//error_log ( "Response types: " . $err_str );
 			
 			// get the array of responses
 			$sqArr = $input->get('sq', 'xxx', 'array');
 			
-			$err_str = print_r ( $sqArr, true );
-			error_log ( "sq filtered as array: " . $err_str );
+			//$err_str = print_r ( $sqArr, true );
+			//error_log ( "sq filtered as array: " . $err_str );
 			
 			
 			foreach ( $sqArr as $sq_id => $response ) {
@@ -1201,7 +1297,7 @@ class BioDivController extends JControllerLegacy
 		
 		$new_upload_id = codes_insertObject($fields, 'upload');
 		
-		error_log ( "new_upload_id = " . $new_upload_id );
+		//error_log ( "new_upload_id = " . $new_upload_id );
 		
 		//$app->getUserStateFromRequest('com_biodiv.upload_id', $new_upload_id);
 	    $app->setUserState('com_biodiv.upload_id', $new_upload_id);
@@ -1219,7 +1315,7 @@ class BioDivController extends JControllerLegacy
   // add new upload
   function add_upload(){
 	  
-	error_log ( "Controller: add_upload called");
+	//error_log ( "Controller: add_upload called");
     
 	// Get setting that shows whether this is camera deployment site (eg MammalWeb) or audio (eg NaturesAudio)
 	$isCamera = getSetting("camera") == "yes";	  

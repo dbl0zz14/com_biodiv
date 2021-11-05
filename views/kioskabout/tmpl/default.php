@@ -18,8 +18,14 @@ print '<h1 class="text-center">'.$this->translations['heading']['translation_tex
 $maxArticles = 6;
 $articleColClass = "col-md-4";
 
-if ( count( $this->articles ) < 5 ) {
+$numArticles = count( $this->articles );
+if ( $numArticles < 5 ) {
 	$maxArticles = 4;
+	$articleColClass = "col-md-6";
+}
+
+if ( $numArticles < 4 ) {
+	$maxArticles = $numArticles;
 	$articleColClass = "col-md-6";
 }
 
