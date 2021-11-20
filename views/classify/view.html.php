@@ -185,6 +185,7 @@ class BioDivViewClassify extends JViewLegacy
 			$this->sequenceProgress = 0;
 		}
 	  
+		$this->invertimage = $this->translations['invert_image']['translation_text'] . " <span class='fa fa-adjust'/>";
 		$this->showmap = $this->translations['show_map']['translation_text'] . " <span class='fa fa-map-marker'/>";
 		$this->nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
 

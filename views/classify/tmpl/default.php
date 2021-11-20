@@ -66,20 +66,7 @@ else {
 }
 ?>
 	<div class='row'>
- <?php
-
-/*
-    <div class='col-md-3 photo-col'>
-	<div class='btn-group pull-left' role='group'>
-foreach($this->lcontrols as $control_id => $control){
-  makeControlButton($control_id, $control);
-}
-
-
-        </div> <!-- /.btn-group -->
-     </div> <!-- /.col-md-3 -->
-*/ 
-?>
+ 
 <?php
 	if($this->photoDetails['person_id'] == userID()){
 		//print "<div class='col-xs-12 col-sm-6 col-md-6'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
@@ -96,6 +83,7 @@ foreach($this->lcontrols as $control_id => $control){
   // foreach($this->rcontrols as $control_id => $control){
     // makeControlButton($control_id, $control);  
   // }
+  print "<button type='button' class='btn btn-primary' id='invert_image'>".$this->invertimage."</button>";
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
   print "<button type='button' class='btn btn-success' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
@@ -175,9 +163,10 @@ foreach($this->sequence as $photo_details  ){
 	print '</div>';
 	$j++;
  }
-
-  print '</div> <!-- /.carousel-inner -->';
+ 
   
+  print '</div> <!-- /.carousel-inner -->';
+    
   print '<!-- Left and right controls -->';
   
   if (count($this->sequence) > 1 ) {

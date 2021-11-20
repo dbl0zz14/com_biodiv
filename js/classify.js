@@ -317,7 +317,27 @@ jQuery(document).ready(function(){
 	
 	});
 	
-	
+	jQuery('#invert_image').click(function() {
+		
+		let originalImage = jQuery("#photoCarouselInner > .item > img");
+		let currFilter = originalImage.css("filter");
+		if ( currFilter == "invert(1)" ) {
+			originalImage.css("filter","");
+		}
+		else {
+			originalImage.css("filter","invert(1)");
+		}
+		
+		let originalVideo = jQuery("video");
+		let currVidFilter = originalVideo.css("filter");
+		if ( currVidFilter == "invert(1)" ) {
+			originalVideo.css("filter","");
+		}
+		else {
+			originalVideo.css("filter","invert(1)");
+		}
+		
+	});
 	
 
 	// Add any remove click functions on refresh.

@@ -50,12 +50,24 @@ class BiodivAuth {
 		
 		$jwt = $auth_array[1];
 		
+		// Get the first part of the jwt, the header, decode it and get the kid
+		$jwtArray = explode('.', $jwt);
+		$jwtHeader = JWT::urlsafeB64Decode($jwtArray[0]);
+		//error_log ( "JWT header: " . $jwtHeader );
+
+		$decodedHeader = json_decode($jwtHeader);
+		$errStr = print_r ( $decodedHeader, true );
+		//error_log ( "JWT decoded header: " . $errStr );
+
+		$kid = $decodedHeader->kid;
+		//error_log ( "JWT kid: " . $kid );
+		
 		// Pick up some environment options:
 		$apiOpts = apiOptions();
 		
 		//$errStr = print_r($apiOpts, true);
 		//error_log ("API options from local.php: " . $errStr );
-		$kid = $apiOpts['kid'];
+		
 		$region = $apiOpts['region'];
 		$userPoolId = $apiOpts['userpool'];
         
