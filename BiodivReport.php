@@ -166,6 +166,12 @@ class BiodivReport {
 				case "USERALLSPECIESAUDIO":
 					$this->generateUserAnimalAllAudio ();
 					break;
+				case "EFFORT":
+					$this->generateEffortData ();
+					break;
+				case "ALLEFFORT":
+					$this->generateAllEffortData ();
+					break;
 				default:
 					error_log ("No report type found for " . $this->reportTypeName );
 			}
@@ -193,10 +199,39 @@ class BiodivReport {
 	
 		
 		
-	// List of the available reports
+	// List of the available project reports
 	public static function listReports () {
 		
 		$reports = codes_getList('reporttypetran');
+		
+		return $reports;
+	}
+	
+	// List of the available opt-in project reports for the given project
+	public static function listOptInReports ( $projectId ) {
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		// Set up the select query for the report
+		$query = $db->getQuery(true)
+			->select( "O.option_id, O.option_name")
+			->from("Options O")
+			->innerJoin("ProjectOptions PO on O.option_id = PO.option_id and O.struc='optinreport'" ) 
+			->where("PO.project_id = ".$projectId)
+			->order("O.seq");
+			
+		$db->setQuery($query);
+		$reports = $db->loadRowList();
+	
+		// Translate if necessary
+		$langObject = JFactory::getLanguage();
+		$languageTag = $langObject->getTag();
+		if ( $languageTag != 'en-GB' ) {
+			foreach ( $reports as $rpt ) {
+				$nameTran = codes_getOptionTranslation($rpt[0]);
+				$rpt[1] = $nameTran;
+			}
+		}
 		
 		return $reports;
 	}
@@ -304,13 +339,6 @@ class BiodivReport {
 			}
 		}
 		
-		
-		/*
-		$restrict = array();
-		$restrict['restriction'] = "value = '" . $this->reportType . "'";
-		//$species = codes_getList ( "filterspecies", $restrict );
-		$headings = codes_getList ( "reportheadingtran", $restrict );
-		*/
 		$err_msg = print_r ( $headings, true );
 		//error_log ( "Report headings: " . $err_msg );
 		
@@ -730,29 +758,6 @@ class BiodivReport {
 				->order("S.site_name, P.taken, A.timestamp");
 			
 			//error_log("query1 created: " . $query1->dump() );
-			/*	
-			$query2 = $db->getQuery(true)
-				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), A.animal_id, A.person_id, P.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), P.photo_id, P.upload_filename, P.taken, P2.upload_filename, P2.taken, P2.sequence_num, S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.deployment_date, U.collection_date, REPLACE(O.option_name, ',', ' -'), IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(O4.option_name, 'null'), A.timestamp) as report_csv")
-				
-				//->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
-				->select( "CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' ') as site_name, P.upload_filename, P.taken as ptaken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id, A.animal_id, A.timestamp as timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), IFNULL(A.notes, 'null'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ")
-				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
-				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
-				->innerJoin("Photo P2 on PS.end_photo_id = P2.photo_id")
-				->innerJoin("Site S on P.site_id = S.site_id")
-				->innerJoin("Upload U on P.upload_id = U.upload_id")
-				->innerJoin("Options O on O.option_id = A.species")
-				->leftJoin("Options O2 on O2.option_id = A.age")
-				->leftJoin("Options O3 on O3.option_id = A.gender")
-				->leftJoin("Options O4 on O4.option_id = A.sure")
-				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
-				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null")
-				->where("A.species != 97")
-				->where("PSM.project_id = " . $this->projectId);
-		
-			//error_log("query2 created: " . $query2->dump());
-			*/
 		}
 		else {
 			$query1 = $db->getQuery(true)
@@ -778,12 +783,6 @@ class BiodivReport {
 			//error_log("query1 created: " . $query1->dump() );
 				
 		}
-		/*
-		$unionQuery = $db->getQuery(true)
-             ->select('*')
-             //->from('(' . $query1->union($query2) . ') a');
-			 ->from('(' . $query1->union($query2) . ') a');
-		*/	 
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
@@ -801,32 +800,7 @@ class BiodivReport {
 		//error_log("Execution complete");
 					
 		
-		/*
 		
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id 
-		UNION 
-		select A.animal_id, PSM.project_id, A.person_id, P.site_id, S.site_name, P.upload_filename as start_filename, P.photo_id as start_photo_id, P.taken as start_taken, P2.photo_id as end_photo_id, P2.taken as end_taken, S.grid_ref, O.option_name as species, O2.option_name as age, O3.option_name as gender, A.number, A.timestamp as classify_time 
-		from Animal A 
-		inner join Photo P on A.photo_id = P.photo_id and P.sequence_num = 1
-		inner join PhotoSequence PS on P.photo_id = PS.start_photo_id
-		inner join Photo P2 on PS.end_photo_id = P2.photo_id
-		inner join Site S on P.site_id = S.site_id
-		inner join Options O on O.option_id = A.species
-		left join Options O2 on O2.option_id = A.age
-		left join Options O3 on O3.option_id = A.gender
-		inner join ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is null 
-
-*/
-
 	}
 		
 		
@@ -1822,6 +1796,155 @@ private function generateUserSequenceData () {
 
 	}
 		
+	//Effort data for the most recent month
+	private function generateEffortData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		$endDate = date('Ymd', strtotime("last day of this month"));
+		
+		// Get any subprojects for this project id
+		//$projectIds = getThisAndAllSubs ( $this->projectId );
+		$projects = getProjects ( 'ADMIN', false, $this->projectId );
+		
+		$projectStr = implode(',', array_keys($projects));
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query1 = null;
+		
+		// No need to do this differently for non English language as no text...
+		$query1 = $db->getQuery(true)
+			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, '". $endDate . "', IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->from("ProjectUserMap PUM")
+			->leftJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id and LTM.end_date = '".$endDate."'")
+			->leftJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id and UTS.end_date = '".$endDate."'")
+			->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
+			->where("PUM.project_id in (" . $projectStr . ")")
+			->order("PUM.person_id");
+			
+		error_log("query1 created: " . $query1->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv')))
+			->values($query1);
+		
+		//error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		//error_log("About to execute");
+
+		$db->execute();
+	
+
+	}
+	
+	// This version gets all months not just the most recent one
+	private function generateAllEffortData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		$options = dbOptions();
+		$db = JDatabaseDriver::getInstance($options);
+		
+		// Get any subprojects for this project id
+		$projects = getProjects ( 'ADMIN', false, $this->projectId );
+		
+		$projectStr = implode(',', array_keys($projects));
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query1 = null;
+		
+		$query1 = $db->getQuery(true)
+			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->from("ProjectUserMap PUM")
+			->innerJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
+			->innerJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id and UTS.end_date = LTM.end_date")
+			->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
+			->where("PUM.project_id in (" . $projectStr . ")");
+		
+		error_log("query1 created: " . $query1->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv')))
+			->values($query1);
+		
+		error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		//error_log("About to execute");
+
+		$db->execute();
+		
+		
+		$query2 = $db->getQuery(true)
+			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, UTS.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->from("ProjectUserMap PUM")
+			->leftJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
+			->innerJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id")
+			->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
+			->where("PUM.project_id in (" . $projectStr . ")")
+			->where("LTM.end_date is NULL");
+			
+		error_log("query2 created: " . $query2->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv')))
+			->values($query2);
+		
+		error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		//error_log("About to execute");
+
+		$db->execute();
+		
+		
+		$query3 = $db->getQuery(true)
+			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->from("ProjectUserMap PUM")
+			->innerJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
+			->leftJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id")
+			->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
+			->where("PUM.project_id in (" . $projectStr . ")")
+			->where("UTS.end_date is NULL");
+			
+		error_log("query3 created: " . $query3->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv')))
+			->values($query3);
+		
+		error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		//error_log("About to execute");
+
+		$db->execute();
+
+	}
+		
+	
 }
 
 ?>

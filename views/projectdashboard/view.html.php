@@ -54,6 +54,19 @@ class BioDivViewProjectDashboard extends JViewLegacy
 		}
 	}
 	
+	$this->optInReports = array();
+	// Get the opt-in reports for each project.
+	foreach ( array_keys($this->projects) as $projectId ) {
+		$optInRpts = BiodivReport::listOptInReports( $projectId );
+		if ( count($optInRpts) > 0 ) {
+			$this->optInReports[$projectId] = BiodivReport::listOptInReports( $projectId );
+		}
+	}
+	
+	//$errMsg = print_r ( $this->optInReports, true );
+	//error_log ( "ProjectDashboard Opt in reports array: " );
+	//error_log ( $errMsg );
+	
 	$this->waitText = $this->translations['wait_text']['translation_text'];
 	$this->doneText = $this->translations['done_text']['translation_text'];
 	$this->genText = $this->translations['gen_text']['translation_text'];

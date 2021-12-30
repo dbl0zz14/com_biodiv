@@ -50,11 +50,13 @@ else {
 
 
 		$isFirst = true;
+		$firstProjectId = null;
 		foreach($this->projects as $projId=>$projName){
 			if ( $isFirst ) {
 				// Default to first project
 				print "<option value='".$projId."' selected>".$projName."</option>";
 				$isFirst = false;
+				$firstProjectId = $projId;
 			}
 			else {
 				print "<option value='".$projId."'>".$projName."</option>";
@@ -83,12 +85,33 @@ else {
 			}
 			print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'" style="white-space: normal;">';
 			
-			//print '<h4 class="list-group-item-heading">'.$reportName.'</h4>';
-			//print '<div class="list-group-item-text">'.$this->reportArticles[$reportId]->introtext.'</div>';
-			
 			print '<h4>'.$reportName.'</h4>';
-			//print '<div>' . $this->reportArticles[$reportType]->introtext . '</div>';
+			
 			print '</button>';
+		}
+		
+		// Add the opt in reports by project - display only first
+		foreach ( $this->optInReports as $projectId=>$projectReports ) {
+			foreach ( $projectReports as $report ) {
+				$reportType = $report[0];
+				$reportName = $report[1];
+				
+				$styleText = "white-space: normal;";
+				if ( $projectId != $firstProjectId ) {
+					$styleText .= " display: none;";
+				}
+				// When page is first loaded 			
+				$tooltipText = "";
+				if ( array_key_exists ( $reportType, $this->reportText ) ) {
+					//error_log ("Tooltip text = " . $this->reportText[$reportType] );
+					$tooltipText = ' data-toggle="tooltip" title="' . preg_replace( '/[\W]/', ' ', $this->reportText[$reportType]) . '"';
+				}
+				print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'"  data-project_id="'.$projectId.'" style="'.$styleText.'">';
+				
+				print '<h4>'.$reportName.'</h4>';
+				
+				print '</button>';
+			}
 		}
 
 		print '</div>'; // list-group

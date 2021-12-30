@@ -15,6 +15,14 @@ if ($this->calcLeagueTable == 1 ) {
 	print "Calculating league table <br>";
 	calculateLeagueTable();
 }
+else if ($this->calcLeagueMonth == 1 and $this->calcMonths > 0) {
+	print "Calculating league table by month history<br>";
+	calculateLeagueTableByMonthHistory ( null, $this->calcMonths );
+}
+else if ($this->calcLeagueMonth == 1 ) {
+	print "Calculating league table by month<br>";
+	calculateLeagueTableByMonth();
+}
 else if ($this->calcAnimals == 1 ) {
 	print "Calculating animal statistics <br>";
 	calculateAnimalStatistics();
@@ -34,6 +42,14 @@ else if ($this->calcSiteAnimals == 1 ) {
 else if ($this->calcExpertise == 1 ) {
 	print "Calculating user expertise <br>";
 	calculateUserExpertise();
+}
+else if ($this->calcTests == 1 and $this->calcMonths > 0) {
+	print "Calculating league table by month history<br>";
+	calculateUserTestStatisticsHistory ( $this->calcMonths );
+}
+else if ($this->calcTests == 1 ) {
+	print "Calculating user test totals <br>";
+	calculateUserTestStatistics();
 }
 else if ($this->calcTotals == 1) {
 	print "Calculating totals.<br>";

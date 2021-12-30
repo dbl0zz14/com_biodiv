@@ -36,7 +36,7 @@ class BioDivViewRecord extends JViewLegacy
 		
 		$this->loaded = false;
 		
-		$this->siteId = $clientName = $input->getInt('site_id', 0);
+		$this->siteId = $input->getInt('site_id', 0);
 		
 		//error_log("BioDivViewRecord site id = " . $this->siteId);
 		
@@ -90,28 +90,6 @@ class BioDivViewRecord extends JViewLegacy
 				$this->loaded = $success;
 			}
 			
-			/*
-			$file = $input->files->get('data');
-			$clientName = $input->get('fname', 0, "string"); 
-
-			$errStr = print_r ( $file, true );
-			//error_log ( "BioDivViewRecord file details: " . $errStr );
-
-			$tmpName = $file['tmp_name'];
-
-
-			$ext = strtolower(JFile::getExt($clientName));
-			$newName = md5_file($tmpName) . "." . $ext;
-
-			//error_log ( "Uploading file " . $tmpName . ", extension is " . $ext );
-
-			$dirName = 'biodivimages';
-			$newFullName = "$dirName/$newName";
-
-
-			$this->loaded =	JFile::upload($tmpName, $newFullName);
-			
-			*/
 		}
 
 

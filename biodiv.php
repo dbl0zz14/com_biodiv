@@ -25,6 +25,9 @@ include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
 include_once "KioskSpecies.php";
 include_once "Biodiv/BeginnerQuiz.php";
+//include_once "Biodiv/ResourceSet.php";
+//include_once "Biodiv/ResourceFile.php";
+//include_once "Biodiv/SchoolCommunity.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 50000000);
@@ -87,6 +90,7 @@ codes_parameters_addTable("StructureMeta", $dbOptions['database']);
 
 function codes_insertObject($fields, $struc){
 	if(!canCreate($struc, $fields)){
+	error_log( "Cannot create $struc");
 	print "Cannot create $struc";
 		return false;
 	}
@@ -498,6 +502,8 @@ function canEdit($id, $struc, $allow = 0){
   case 'photo':
   case 'site':
   case 'animal':
+  case 'resourceset':
+  case 'resourcefile':
     return $details['person_id'] == userID();
   break;
     
@@ -529,6 +535,8 @@ function canCreate($struc, $fields){
   case 'animal':
   case 'origfile':
   case 'report':
+  case 'resourceset':
+  case 'resourcefile':
     return $fields->person_id == userID();   
     break;
 
@@ -636,6 +644,10 @@ function siteURL($site_id){
   $person_id or die("Cannot find person for siteDir");
   
   return JURI::root()."/biodivimages/person_${person_id}/site_${site_id}";
+}
+
+function biodivRoot() {
+	return JURI::root();
 }
 
 function isVideo($photo_id) {
@@ -2027,6 +2039,353 @@ function calculateLeagueTable () {
 			$query->insert("LeagueTable");
 			$query->columns($db->quoteName(array('person_id', 'num_classified')));
 			$query->values("" . $person_id . ", " . $num_sequences );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+	}
+}
+
+// Recalculate statistics for all projects
+// Use with care this will overwrite existing figures.
+function calculateLeagueTableByMonthHistory ( $project_id = null, $num_months = null) {
+	
+	$endDate = strtotime("last day of this month");
+	$endDatePlus1 = strtotime("first day of next month" );
+
+	$datesArray = array();
+	
+	// Default to 3 months of data.
+	$numDisplayedMonths = 4;
+	if ( $num_months ) {
+		$numDisplayedMonths = $num_months + 1;
+	}
+  
+	for ( $i=$numDisplayedMonths; $i>=0; $i-- ) {
+		$minusMonths = "-" . $i . " months";
+		$firstOfMonth = strtotime($minusMonths, $endDatePlus1);
+		calculateLeagueTableByMonth ( $project_id, date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+	}
+}
+
+
+
+// Calculate the classification and upload contributions for the project given 
+// or for all projects.  Store the results in the LeagueTableByMonth table.  Overwrite a row if it already exists.
+function calculateLeagueTableByMonth ( $project_id = null, $end_date = null ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$projects = null;
+	
+	if ( $project_id ) {
+		$projects = getSubProjectsById( $project_id );	
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("DISTINCT P.project_id, P.project_prettyname from Project P");
+		$db->setQuery($query);
+		$projects = $db->loadAssocList('project_id');
+	}
+	$project_ids = array_keys($projects);
+	
+	// Get users to count for classifications and uploads.
+	$query = $db->getQuery(true);
+	$query->select("distinct person_id from Animal order by person_id");
+	$db->setQuery($query);
+	$animalUsers = $db->loadColumn();
+	
+	$query = $db->getQuery(true);
+	$query->select("distinct person_id from Upload order by person_id");
+	$db->setQuery($query);
+	$uploadUsers = $db->loadColumn();
+	
+	// Contributing users are made up of all the above
+	$contributers = array_unique ( array_merge ( $animalUsers, $uploadUsers ) );
+	//$errMsg = print_r ( $contributers, true );
+	//error_log ( "Contributers: ");
+	//error_log ( $errMsg );
+	$personStr = implode ( ',', $contributers );
+	
+	$endDatePlus1 = strtotime("first day of next month" );
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	$prevMonthEndTime = strtotime("last day of last month" );
+	$prevMonthEnd = date('Ymd', $prevMonthEndTime);
+	
+	if ( $end_date ) {
+		$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+		$endDate = date('Ymd', strtotime($end_date));  
+		
+		$firstDay = strtotime( date('Y-m-d', $endDatePlus1) . ' - 1 month');
+		//print ( "First day of month: " . date('Ymd', $firstDay) . "<br>" );
+		
+		$prevMonthEndTime = strtotime("-1 day", $firstDay);     
+		//print ( "Day before that: " . date('Ymd', $prevMonthEndTime) . "<br>" );
+		
+		$prevMonthEnd = date('Ymd', $prevMonthEndTime);
+	}
+	
+	$dateToUse = date('Ymd', $endDatePlus1);
+	
+	
+	print ( "Month end = " . $endDate . " Prev month end = " . $prevMonthEnd . "<br>" );
+	
+	// Work through project by project as we don't want to include the children here.
+	foreach ( $project_ids as $proj_id ) {
+		
+		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
+		
+		$query = $db->getQuery(true);
+		$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
+			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			->where("P.sequence_id > 0")
+			->where("P.person_id in (" . $personStr . ")")
+			->where("P.uploaded < " . $dateToUse )
+			->where("PSM.project_id = " . $proj_id )
+			->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
+			->group("P.person_id");
+		
+		
+		$db->setQuery($query);
+		
+		//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+		
+		$userUploaded = $db->loadAssocList("person_id", "numUploaded");
+		
+		//$errMsg = print_r ( $userUploaded, true );
+		//error_log ( "userUploaded: ");
+		//error_log ( $errMsg );
+	
+		$query = $db->getQuery(true);
+		$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
+			->innerJoin("Photo P on A.photo_id = P.photo_id")
+			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			->where("P.person_id in (" . $personStr . ")")
+			->where("A.timestamp < " . $dateToUse )
+			->where("PSM.project_id = " . $proj_id )
+			->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
+			->group("A.person_id");
+		
+		
+		$db->setQuery($query);
+		
+		//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
+		
+		$userClassified = $db->loadAssocList("person_id", "numClassified");
+		
+		//$errMsg = print_r ( $userClassified, true );
+		//error_log ( "userClassified: ");
+		//error_log ( $errMsg );
+		
+		foreach ( $contributers as $personId ) {
+			
+			print ( "<br/>Checking project $proj_id, person $personId <br/>" );
+			
+			$numUp = 0;
+			if ( array_key_exists( $personId, $userUploaded ) ) $numUp = $userUploaded[$personId];
+	
+			$numCl = 0;
+			if ( array_key_exists( $personId, $userClassified ) ) $numCl = $userClassified[$personId];
+			
+			// Only insert data if the user has participated in this project
+			if ( $numUp > 0 or $numCl > 0 ) {
+				
+				print ( "Person: $personId, Num uploaded: $numUp, num classified: $numCl <br/>" );
+	
+				// Any data for previous month 
+				$query = $db->getQuery(true);
+				$query->select("total_uploaded, total_classified from LeagueTableByMonth")
+					->where("project_id = " . $proj_id )
+					->where("person_id = " . $personId )
+					->where("end_date = '" . $prevMonthEnd . "'" );
+				$db->setQuery($query);
+				
+				//error_log ( "calculateLeagueTableByMonth, prev month query: " . $query->dump() );
+				
+				$prevMonthResults = $db->loadAssocList();
+				
+				$prevUpld = 0;
+				$prevClassd = 0;
+				if ( count($prevMonthResults) > 0 ) {
+					$prevUpld = $prevMonthResults[0]["total_uploaded"];
+					$prevClassd = $prevMonthResults[0]["total_classified"];
+				}
+				$monthlyClassified = $numCl - $prevClassd;
+				$monthlyUploaded = $numUp - $prevUpld;
+				
+				print ( "Person: $personId, project: $proj_id, monthly classd: $monthlyClassified, monthlyUploaded: $monthlyUploaded <br/>" );
+				
+				// Update or insert
+				$query = $db->getQuery(true);
+				$query->select("project_id, end_date from LeagueTableByMonth")
+					->where("project_id = " . $proj_id )
+					->where("person_id = " . $personId )
+					->where("end_date = '" . $endDate . "'" );
+				$db->setQuery($query);
+				$resultRow = $db->loadRowList();
+				
+				if ( count($resultRow) > 0 ) {
+					print "Existing entry for user $personId, project $proj_id, end_date $endDate - updating<br/>";
+					
+					$query = $db->getQuery(true);
+					$query->update("LeagueTableByMonth");
+					$query->set("month_uploaded = " . $monthlyUploaded . ", month_classified = " . $monthlyClassified . ", total_uploaded = " . $numUp . ", total_classified = " . $numCl . ", timestamp = CURRENT_TIMESTAMP");
+					$query->where("project_id = " . $proj_id );
+					$query->where("person_id = " . $personId );
+					$query->where("end_date = '" . $endDate . "'" );
+					$db->setQuery($query);
+					$result = $db->execute();
+				}
+				else {
+					print "New entry in statistics for user $personId, project $proj_id, end_date $endDate<br/>";
+					
+					$query = $db->getQuery(true);
+					$query->insert("LeagueTableByMonth");
+					$query->columns($db->quoteName(array('project_id', 'person_id', 'end_date', 'month_uploaded', 'month_classified', 'total_uploaded', 'total_classified')));
+					$query->values("" . $proj_id . ", " . $personId . ", '" . $endDate . "', " . $monthlyUploaded . ", " . $monthlyClassified . ", " . $numUp . ", " . $numCl );
+					$db->setQuery($query);
+					$result = $db->execute();
+				}
+			}
+		}
+	}
+}
+
+// Recalculate UserTestStatistics
+// Use with care this will overwrite existing figures.
+function calculateUserTestStatisticsHistory ( $num_months = null) {
+	
+	$endDate = strtotime("last day of this month");
+	$endDatePlus1 = strtotime("first day of next month" );
+
+	$datesArray = array();
+	
+	// Default to 3 months of data.
+	$numDisplayedMonths = 4;
+	if ( $num_months ) {
+		$numDisplayedMonths = $num_months + 1;
+	}
+  
+	for ( $i=$numDisplayedMonths; $i>=0; $i-- ) {
+		$minusMonths = "-" . $i . " months";
+		$firstOfMonth = strtotime($minusMonths, $endDatePlus1);
+		calculateUserTestStatistics ( date('Ymd', strtotime("-1 day", $firstOfMonth)) );
+	}
+}
+
+
+
+// Calculate the classification and upload contributions for the project given 
+// or for all projects.  Store the results in the LeagueTableByMonth table.  Overwrite a row if it already exists.
+function calculateUserTestStatistics ( $end_date = null ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$endDatePlus1 = strtotime("first day of next month" );
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	$prevMonthEndTime = strtotime("last day of last month" );
+	$prevMonthEnd = date('Ymd', $prevMonthEndTime);
+	
+	if ( $end_date ) {
+		$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+		$endDate = date('Ymd', strtotime($end_date));  
+		
+		$firstDay = strtotime( date('Y-m-d', $endDatePlus1) . ' - 1 month');
+		//print ( "First day of month: " . date('Ymd', $firstDay) . "<br>" );
+		
+		$prevMonthEndTime = strtotime("-1 day", $firstDay);     
+		//print ( "Day before that: " . date('Ymd', $prevMonthEndTime) . "<br>" );
+		
+		$prevMonthEnd = date('Ymd', $prevMonthEndTime);
+	}
+	
+	$dateToUse = date('Ymd', $endDatePlus1);
+	
+	
+	print ( "Month end = " . $endDate . " Prev month end = " . $prevMonthEnd . "<br>" );
+	
+	print "DateToUse = " . $dateToUse . "<br>";
+	
+	$query = $db->getQuery(true);
+	$query->select("UT.person_id as person_id, count(*) as num_tests, ROUND(AVG(UT.score)) as av_score from UserTest UT")
+		->where("UT.timestamp < " . $dateToUse )
+		->group("UT.person_id");
+	
+	$db->setQuery($query);
+	
+	//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+	
+	$userTotals = $db->loadAssocList("person_id");
+	
+	$errMsg = print_r ( $userTotals, true );
+	error_log ( "userTotals: ");
+	error_log ( $errMsg );
+
+	foreach ( $userTotals as $userTotal ) {
+		
+		$personId = $userTotal['person_id'];
+		$totalTests = $userTotal['num_tests'];
+		$totalAvg = $userTotal['av_score'];
+		
+		print ( "Person: $personId, Total tests: $totalTests, average score: $totalAvg % <br/>" );
+
+		// Any data for previous month 
+		$query = $db->getQuery(true);
+		$query->select("total_tests, total_score from UserTestStatistics")
+			->where("person_id = " . $personId )
+			->where("end_date = '" . $prevMonthEnd . "'" );
+		$db->setQuery($query);
+		
+		error_log ( "calculateUserTests, prev month query: " . $query->dump() );
+		
+		$prevMonthResults = $db->loadAssocList();
+			
+		$prevTotalTests = 0;
+		$prevAvg = 0;
+		
+		if ( count($prevMonthResults) > 0 ) {
+			$prevTotalTests = $prevMonthResults[0]["total_tests"];
+			$prevAvg = $prevMonthResults[0]["total_score"];
+		}
+		
+		print ( "Person: $personId, prev total: $prevTotalTests, prev average: $prevAvg <br/>" );
+		
+		$monthlyTotal = $totalTests - $prevTotalTests;
+		
+		if ( $monthlyTotal > 0 ) {
+			$monthlyAvg = round(($totalAvg*$totalTests - $prevAvg*$prevTotalTests)/$monthlyTotal);
+		}
+		else {
+			$monthlyAvg = 0;
+		}
+		
+		print ( "Person: $personId, monthly total: $monthlyTotal, monthly average: $monthlyAvg <br/>" );
+		
+		// Update or insert
+		$query = $db->getQuery(true);
+		$query->select("person_id, end_date from UserTestStatistics")
+			->where("person_id = " . $personId )
+			->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$resultRow = $db->loadRowList();
+			
+		if ( count($resultRow) > 0 ) {
+			print "Existing entry for user $personId, end_date $endDate - updating<br/>";
+			
+			$query = $db->getQuery(true);
+			$query->update("UserTestStatistics");
+			$query->set("month_tests = " . $monthlyTotal . ", month_score = " . $monthlyAvg . ", total_tests = " . $totalTests . ", total_score = " . $totalAvg . ", timestamp = CURRENT_TIMESTAMP");
+			$query->where("person_id = " . $personId );
+			$query->where("end_date = '" . $endDate . "'" );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+		else {
+			print "New entry in UserTestStatistics for user $personId, end_date $endDate<br/>";
+			
+			$query = $db->getQuery(true);
+			$query->insert("UserTestStatistics");
+			$query->columns($db->quoteName(array('person_id', 'end_date', 'month_tests', 'month_score', 'total_tests', 'total_score')));
+			$query->values("" . $personId . ", '" . $endDate . "', " . $monthlyTotal . ", " . $monthlyAvg . ", " . $totalTests . ", " . $totalAvg );
 			$db->setQuery($query);
 			$result = $db->execute();
 		}
@@ -7169,8 +7528,6 @@ function calculateTestScore ( $topicId, $seqenceId, $userSpecies ) {
 	
 }
 	
-	
-
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');
  

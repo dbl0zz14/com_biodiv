@@ -37,6 +37,8 @@ class BioDivViewCalculatestats extends JViewLegacy
 			
 			$this->calcLeagueTable = JRequest::getInt("calc_leaguetable");
 			
+			// Calculate monthly upload and classify statistics by user and project
+			$this->calcLeagueMonth = JRequest::getInt("calc_leaguemonth");
 			
 			$this->calcAnimals = JRequest::getInt("calc_animals");
 			
@@ -51,6 +53,9 @@ class BioDivViewCalculatestats extends JViewLegacy
 			
 			// Calculate user expertise based on gold standard
 			$this->calcExpertise = JRequest::getInt("calc_expertise");
+			
+			// Calculate monthly quiz statistics by user
+			$this->calcTests = JRequest::getInt("calc_tests");
 		
 			parent::display($tpl);
         }

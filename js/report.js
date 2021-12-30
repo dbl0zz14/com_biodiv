@@ -15,8 +15,6 @@ jQuery(document).ready(function(){
 	
 	displayReport = function ( pageNum ) {
 		
-		//let project_id = jQuery("#project_select").children("option:selected").val();
-		
 		let url = "";
 		
 		// Is there a report already loaded?
