@@ -1870,7 +1870,7 @@ private function generateUserSequenceData () {
 		$query1 = null;
 		
 		$query1 = $db->getQuery(true)
-			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
 			->from("ProjectUserMap PUM")
 			->innerJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
 			->innerJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id and UTS.end_date = LTM.end_date")
@@ -1894,7 +1894,7 @@ private function generateUserSequenceData () {
 		
 		
 		$query2 = $db->getQuery(true)
-			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, UTS.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, UTS.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
 			->from("ProjectUserMap PUM")
 			->leftJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
 			->innerJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id")
@@ -1919,7 +1919,7 @@ private function generateUserSequenceData () {
 		
 		
 		$query3 = $db->getQuery(true)
-			->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', PUM.person_id, U.username, U.email, LTM.end_date, IFNULL(LTM.month_classified,0), IFNULL(LTM.month_uploaded,0), IFNULL(UTS.month_tests,0), IFNULL(UTS.month_score,0), IFNULL(LTM.total_classified,0), IFNULL(LTM.total_uploaded,0), IFNULL(UTS.total_tests,0), IFNULL(UTS.total_score,0)) as report_csv")
 			->from("ProjectUserMap PUM")
 			->innerJoin("LeagueTableByMonth LTM on PUM.person_id = LTM.person_id and PUM.project_id = LTM.project_id")
 			->leftJoin("UserTestStatistics UTS on PUM.person_id = UTS.person_id")
