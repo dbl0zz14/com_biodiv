@@ -25,9 +25,16 @@ include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
 include_once "KioskSpecies.php";
 include_once "Biodiv/BeginnerQuiz.php";
-//include_once "Biodiv/ResourceSet.php";
-//include_once "Biodiv/ResourceFile.php";
-//include_once "Biodiv/SchoolCommunity.php";
+include_once "Biodiv/ResourceSet.php";
+include_once "Biodiv/ResourceFile.php";
+include_once "Biodiv/SchoolCommunity.php";
+include_once "Biodiv/BadgeGroup.php";
+include_once "Biodiv/Badge.php";
+include_once "Biodiv/Task.php";
+include_once "Biodiv/EventLog.php";
+include_once "Biodiv/MessageList.php";
+include_once "Biodiv/Award.php";
+include_once "Biodiv/SchoolSpecies.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 50000000);

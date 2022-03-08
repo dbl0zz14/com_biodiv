@@ -1,3 +1,8 @@
+# 8/3/22 - Version 3.6.0
+* Schools awards and badges added
+* Resource hub added
+* css moved to templates within Joomla
+
 # 30/12/21 - Version 3.5.2
 * Add project specific reports
 * Add user effort reports, current month and all months versions

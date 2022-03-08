@@ -928,99 +928,6 @@ class BioDivController extends JControllerLegacy
 		
 		$success = uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $fileType );
 		
-		
-		/*
-		if($fileSize > BIODIV_MAX_FILE_SIZE){
-		  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
-		  continue;
-		} 
-		//	$tmpName = JFile::makeSafe($tmpName);
-		// NB can get this error if PHP max dilsize and upload size are too small:
-		if(!is_uploaded_file($tmpName)){
-		  addMsg("error", "Not an uploaded file $tmpName - check file size is below PHP limits, or there may be a network problem");
-		  continue;
-		}
-		//	JHelperMedia::isImage($tmpName) or die("Not an image");
-		
-		$ext = strtolower(JFile::getExt($clientName));
-		$newName = md5_file($tmpName) . "." . $ext;
-		
-		error_log ( "Uploading file " . $clientName . ", extension is " . $ext );
-		
-		$dirName = siteDir($site_id);
-		$newFullName = "$dirName/$newName";
-		
-		//error_log("tmpName = " . $tmpName );
-		//error_log("newFullName = " . $newFullName );
-		if(JFile::exists($newFullName)){
-		  addMsg("warning", "File already uploaded: $clientName");
-		  continue;
-		}
-		
-		
-		// Create a BiodivFile object
-		$biodivFile = new BiodivFile ( $tmpName, $clientName );
-		
-		$taken = $biodivFile->takenDate();
-		$exif = $biodivFile->exif();
-		$is_audio = $biodivFile->isAudio();
-		
-		error_log ( "Values from BiodivFile: ");
-		error_log ( "taken = " . $taken );
-		error_log ( "is_audio = " . $is_audio );
-		
-		if ( $taken == null ) {
-			addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
-			continue;
-		}
-		
-		$exists = JFile::exists($tmpName);
-		$success=	JFile::upload($tmpName, $newFullName);
-		if(!$success){
-			addMsg("error","File upload unsuccessful for $clientName");
-			continue;
-		}	
-		
-		if(userID()==179){
-		  addMsg("warning","success $success exists $exists tmpName $tmpName newFullName $newFullName userID ".userID());
-		}
-		
-		$struc = 'photo';
-		
-		$photoFields = new stdClass();
-		$photoFields->filename = $newName;
-		$photoFields->upload_filename = $clientName;
-		$photoFields->dirname = $dirName;
-		$photoFields->site_id = $site_id;
-		$photoFields->upload_id = $upload_id;
-		$photoFields->person_id = userID();
-		$photoFields->taken = $taken;
-		$photoFields->size = $fileSize;
-		$photoFields->exif = $exif;
-		
-		// If we have file splitting for audio, then write to different table.
-		$splitAudio = getSetting("split_audio") == "yes";
-		
-		error_log ( "split_audio setting = " . $splitAudio );
-		error_log ( "is_audio = " . $is_audio );
-		if ( $is_audio && $splitAudio ) {
-			$struc = 'origfile';
-		}
-		
-		// For avi files need to convert to MP4
-		if ( $ext == 'avi' ) {
-			$struc = 'origfile';
-		}
-		
-		error_log ( "Inserting object for struc " . $struc );
-		if(codes_insertObject($photoFields, $struc)){
-		  addMsg('success', "Uploaded $clientName");
-		}
-		else {
-			// Remove files if the database insert failed
-			JFile::delete($newFullName);
-		}
-		*/
       }
     
 	}
@@ -1057,6 +964,200 @@ class BioDivController extends JControllerLegacy
       $verify->guid = $guid;
       $success = $db->insertObject("UploadVerify", $verify);
     }
+  }
+
+  function verify_resource_set(){
+    
+	error_log ( "verify_resource_set called" );
+	
+	$app = JFactory::getApplication();
+    $set_id = $app->getUserStateFromRequest("com_biodiv.resource_set_id", "resource_set_id", 0);
+    
+	if(!canEdit($set_id, 'resourceset')){
+      die("Cannot edit resource set " . $set_id);
+    }
+    $guid = JRequest::getString('guid');
+    if(!$guid){
+      die("No guid");
+    }
+    $done = JRequest::getBool('done');
+
+    $db = JDatabase::getInstance(dbOptions());
+
+
+    if($done){
+      $query = $db->getQuery(true);
+      $query->delete($db->quoteName("ResourceSetVerify"));
+      $query->where("set_id = " . (int)$set_id . " AND guid = '$guid'");
+      $db->setQuery($query);
+      $success = $db->execute();
+    }
+    else{
+      $verify = new stdClass();
+      $verify->set_id = $set_id;
+      $verify->guid = $guid;
+      $success = $db->insertObject("ResourceSetVerify", $verify);
+    }
+  }
+  
+  // handle individual or multiple files 
+  function upload_resource_set(){
+	  
+	error_log ( "upload_resource_set called" );
+	
+	$app = JFactory::getApplication();
+	$set_id = $app->getUserState('com_biodiv.resource_set_id', 0);
+    $isSchoolUpload = JRequest::getInt('school');
+	
+	error_log ( "Set id = " . $set_id );
+	
+    if ( $set_id and canEdit($set_id, "resourceset") ) {
+	
+		error_log ( "Can edit set id = " . $set_id );
+		
+		$problem = false;
+	
+		$setDetails = codes_getDetails($set_id, "resourceset");
+	
+		$errMsg = print_r ( $setDetails, true );
+		error_log ( "Got resource set details:" );
+		error_log ( $errMsg );
+	
+		$resource_type = $setDetails['resource_type'];
+		$resource_type or die ("No resource_type");
+
+		$fail = 0;
+	
+		error_log ( "About to do upload" );
+
+		$files = JRequest::getVar('myfile', null, 'files', 'array'); 
+		
+		$errMsg = print_r ( $files, true );
+		error_log ( "Got files: " );
+		error_log ( $errMsg );
+		
+		
+		if(!isset($files['tmp_name'])){
+		  error_log ( "No file uploaded" );
+		  addMsg("error", "No file uploaded");
+		  $fail = 1;
+		}
+		$tmpNames = $files['tmp_name'];  // assuming multiple upload
+		$clientNames = $files['name'];  // assuming multiple upload
+		$fileSizes = $files['size'];  // assuming multiple upload
+		$fileTypes = $files['type'];  // assuming multiple upload
+		if(!is_array($tmpNames)){  // if single upload
+		  $tmpNames = array($tmpNames);
+		  $clientNames = array($clientNames);
+		  $fileSizes = array($fileSizes);
+		  $fileTypes = array($fileTypes);
+		}
+		if(!$fail){
+			
+			error_log ("Uploading resources for $set_id" );
+			
+			$resourceSet = new Biodiv\ResourceSet ( $set_id );
+			
+			//$details = codes_getDetails($set_id, "resourceset");
+			$resourceType = $resourceSet->getResourceType();
+			$dirPath = $resourceSet->getDirPath();
+			$dirName = $resourceSet->getDirName();
+			
+			foreach($tmpNames as $index => $tmpName){
+			  
+				error_log ("Uploading next file, tmp name = " . $tmpName );
+				
+				$clientName = $clientNames[$index];
+				$fileSize = $fileSizes[$index];
+				$fileType = $fileTypes[$index];
+				
+				error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
+				
+				//$success = $resourceSet->uploadResourceFile ( $resource_type, $tmpName, $clientName, $fileSize, $fileType );
+				
+				if($fileSize > BIODIV_MAX_FILE_SIZE){
+					error_log ( "Filesize too big" );
+					addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
+					$problem = true;
+				}
+				
+				
+				
+				//	$tmpName = JFile::makeSafe($tmpName);
+				// NB can get this error if PHP max dilsize and upload size are too small:
+				else if(!is_uploaded_file($tmpName)){
+					error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
+					addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem");
+					$problem = true;
+				}
+				else {
+					
+					error_log ( "File size ok" );
+
+					$ext = strtolower(JFile::getExt($clientName));
+					$newName = md5_file($tmpName) . "." . $ext;
+
+					error_log ( "Uploading file " . $clientName . ", extension is " . $ext );
+					
+					error_log ("Resource set dir = " . $dirName );
+					
+					//$newFullName = "$dirPath/$newName";
+					$newFullName = "$dirName/$newName";
+					
+					error_log ("New full name = " . $newFullName );
+
+					if(JFile::exists($newFullName)){
+						error_log ( "File already exists " . $newFullName  );
+						
+						addMsg("warning", "File already uploaded: $clientName");
+						$problem = true;
+					}
+					else {
+						
+						error_log ( "New file - Uploading now... tmpName: " . $tmpName . ", newFullName: " . $newFullName  );
+
+						$exists = JFile::exists($tmpName);
+						if ( !$exists ) {
+							error_log ( "tmpName file does not exist" );
+						}
+						else {
+							error_log ( "tmpName file does exist" );
+						}
+						$success=	JFile::upload($tmpName, $newFullName);
+						if(!$success){
+							error_log ( "New file - upload failed... "   );
+							addMsg("error","File upload unsuccessful for $clientName");
+							$problem = true;
+						}	
+						else {
+							error_log ( "New file - upload succeded, inserting into db... "   );
+							
+							$accessLevel = Biodiv\SchoolCommunity::PERSON;
+							if ( $isSchoolUpload ) $accessLevel = Biodiv\SchoolCommunity::SCHOOL;
+							
+							error_log ( "Got access level to be " . $accessLevel );
+							
+							$resourceFile = Biodiv\ResourceFile::createResourceFile ( $set_id, $resourceType, $clientName, $newName, 
+												$dirName, $fileSize, $fileType, $accessLevel );
+							
+							if ( !$resourceFile ) {
+								error_log ("Problem creating resource file instance" );
+								JFile::delete($newFullName);
+								$problem = true;
+							}
+						}
+					}
+				}
+				
+				if ( !$success or $problem ) addMsg("error", "Failed to upload resource " . $clientName );
+			
+			}
+		}
+	}
+	else {
+		error_log ("No set id or cannot edit set_id $set_id");
+	}
+
   }
 
   function sequence_photos(){

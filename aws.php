@@ -139,6 +139,36 @@ function post_s3_upload_actions_orig ( $of_id, $filename ) {
 	}
 }
 
+function post_s3_upload_actions_resource ( $resource_id, $filename, $key ) {
+	
+	$folder = get_mammalweb_folder();
+	
+	if ( $folder ) {
+		$full_key = get_mammalweb_folder() . "/" . $key;
+	}
+	else {
+		$full_key = $key;
+	}
+	
+	// update the s3_status to 1 for this of_id
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	$fields = new stdClass();
+	$fields->resource_id = $resource_id;
+	$fields->s3_status = 1;
+	$fields->url = s3ResourceURLFromKey($full_key);
+	$db->updateObject('Resource', $fields, 'resource_id');
+
+	// remove the file from the fileserver
+	try {
+		unlink($filename);
+	}
+	catch (Exception $e) {
+		print ("<br>Couldn't delete file: " . $filename);
+		throw $e;
+	}
+}
+
 function s3URL ( $details ) {
 	$options = awsOptions();
 	$urlstem = $options['s3url'];
@@ -173,6 +203,15 @@ function s3ReportURL ( $details ) {
 	$filename = $details['filename'];
 			
 	return $urlstem . $folder_extra . '/reports/person_' . $person . '/project_' . $project . '/' . $filename;
+}
+
+
+function s3ResourceURLFromKey ( $key ) {
+	
+	$options = awsOptions();
+	$urlstem = $options['s3url'];
+	
+	return $urlstem . '/' . $key; 
 }
 
 
