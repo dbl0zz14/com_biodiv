@@ -11,7 +11,7 @@
 defined('_JEXEC') or die('Restricted access');
 
 // Needed to ensure pick up the correct component files
-set_include_path(JPATH_COMPONENT . get_include_path());
+set_include_path(JPATH_COMPONENT_SITE . PATH_SEPARATOR . get_include_path());
 
 include_once "local.php";
 include_once "BiodivHelper.php";

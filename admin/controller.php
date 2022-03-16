@@ -100,7 +100,7 @@ class BioDivController extends JControllerLegacy
 				// Creates a new csv file and store it in directory
 				// Rename once finished writing to file
 				if (!file_exists($filePath)) {
-					mkdir($filePath, 0600, true);
+					mkdir($filePath, 0700, true);
 				}
 				
 				$tmpCsv = fopen ( $tmpCsvFile, 'w');
