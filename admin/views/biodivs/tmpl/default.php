@@ -87,6 +87,18 @@ print '  <input type="number" id="numUsers" name="numUsers" min="1" max="30">';
 print '<label for="startingNum">Starting number (use when you have some users already):</label>';
 print '  <input type="number" id="startingNum" name="startingNum" min="1" max="2000">';
 
+// print '<label for="userGroup">User group to add (optional):</label>';
+// print '  <input type="number" id="userGroup" name="userGroup" >';
+
+print '<label for="userGroup">Choose a userGroup (optional):</label>';
+print '<select id="userGroup" name="userGroup">';
+
+//print_r ( $this->schools );
+foreach ( $this->userGroups as $id=>$title ) {
+	print '<option value="'.$id.'">'.$title.'</option>';
+}
+print '</select><br>';
+
 print '<label for="project">Choose a project:</label>';
 print '<select id="project" name="project">';
 

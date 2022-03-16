@@ -57,6 +57,15 @@ class BioDivViewBiodivs extends JViewLegacy
 		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
 		
 		$this->schools = $db->loadAssocList("school_id", "name");
+		
+		
+		$joomlaDb = JFactory::getDbo();
+        $joomlaDb->setQuery( 'SELECT id, title' .
+                        ' FROM `#__usergroups`' .
+						' WHERE title like "School%"' );
+                        
+        
+        $this->userGroups = $joomlaDb->loadAssocList ("id", "title");
 
 
 		// Display the template

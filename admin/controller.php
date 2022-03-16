@@ -40,6 +40,7 @@ class BioDivController extends JControllerLegacy
 		$passwordStem = $input->getString('passwordStem', 0);
 		$emailDomain = $input->getString('emailDomain', 0);
 		$numUsers = $input->getInt('numUsers', 0);
+		$userGroup = $input->getInt('userGroup', 0);
 		$startingNum = $input->getInt('startingNum', 1);
 		$project = $input->getInt('project', 0);
 		$addToSchool = $input->getInt('addToSchool', 0);
@@ -179,6 +180,10 @@ class BioDivController extends JControllerLegacy
 						}
 						
 						if ( $userCreated ) {
+							
+							if ( $userGroup > 0 ) {
+								JUserHelper::addUSerToGroup ( $user->id, $userGroup );
+							}
 							
 							fputcsv($tmpCsv, array($username, $password));
 							
