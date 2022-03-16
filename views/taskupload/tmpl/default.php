@@ -102,7 +102,7 @@ else {
 
 		//print '<div class="col-md-3">';
 
-		print '<button class="btn btn-default btn-lg spaced browseBadges">'.$this->translations['back_activities']['translation_text'].'</button>';
+		//print '<button class="btn btn-default btn-lg spaced browseBadges">'.$this->translations['back_activities']['translation_text'].'</button>';
 		//print '<h2></h2>';
 		//print '</div>'; // col-md-3
 		

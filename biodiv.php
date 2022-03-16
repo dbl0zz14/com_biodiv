@@ -37,7 +37,7 @@ include_once "Biodiv/Award.php";
 include_once "Biodiv/SchoolSpecies.php";
 
 
-define('BIODIV_MAX_FILE_SIZE', 50000000);
+define('BIODIV_MAX_FILE_SIZE', 180000000);
 
 // link to javascript stuff
 $document = JFactory::getDocument();

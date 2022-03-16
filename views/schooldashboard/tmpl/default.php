@@ -24,11 +24,14 @@ else if ( $this->firstLoad ) {
 	
 	print '<h2 class="text-center bigSpaced">'.$this->translations['you_are']['translation_text'].'</h2>';
 
+	
+	if ( ($this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE) or ($this->mySchoolRole == Biodiv\SchoolCommunity::ECOLOGIST_ROLE) ) {
 
-	print '<p>'.$this->translations['policies_text']['translation_text'].'</p>';
-		
-	print '<a href="'.$this->translations['policies_link']['translation_text'].'" target="_blank" rel="noopener noreferrer" class="btn btnInSpace">'.
-		$this->translations['policies_btn']['translation_text'].'</a>';
+		print '<h5 class="text-center">'.$this->translations['policies_text']['translation_text'].'</h5>';
+			
+		print '<div class="text-center"><a href="'.$this->translations['policies_link']['translation_text'].'" target="_blank" rel="noopener noreferrer" class="btn btn-primary btnInSpace">'.
+			$this->translations['policies_btn']['translation_text'].'</a></div>';
+	}
 	
 	
 	print '<div id="avatarArea">';

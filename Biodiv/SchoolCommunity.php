@@ -20,7 +20,8 @@ class SchoolCommunity {
 	const ECOLOGIST_ROLE	= 3;
 	const TEACHER_ROLE		= 4;
 	const STUDENT_ROLE		= 5;
-	const SUPPORTER_ROLE	= 6;
+	const ADMIN_ROLE		= 6;
+	const SUPPORTER_ROLE	= 7;
 	
 	private $schools;
 	
@@ -42,7 +43,7 @@ class SchoolCommunity {
 			->select("school_id as schoolId, name as schoolName, 0 as seq, NULL as awardId, NULL as awardType, NULL as awardName from School S")
 			->where("school_id not in ( select school_id from SchoolAwards )");
 		
-		$query->union($query2);
+		$query->union($query2)->order("schoolName");
 		
 		$db->setQuery($query);
 		
@@ -497,6 +498,34 @@ class SchoolCommunity {
 				
 	}
 	
+	public static function isAdmin () {
+		
+		//error_log ( "SchoolCommunity::isAdmin called" );
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("count(*) from SchoolUsers")
+			->where("role_id = " . self::ADMIN_ROLE )
+			->where("person_id = " . $personId );
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$countAdminRoles = $db->loadResult();
+		
+		return $countAdminRoles > 0;
+				
+	}
+	
 	public static function isStudent () {
 		
 		//error_log ( "SchoolCommunity::isStudent called" );
@@ -910,6 +939,31 @@ class SchoolCommunity {
 				}
 			}
 			
+		}
+		else {
+			$query = $db->getQuery(true)
+				->select("SU.school_id, SU.role_id, SU.new_user, U.username, A.image as avatar from SchoolUsers SU")
+				->innerJoin($userDb . "." . $prefix ."users U on U.id = SU.person_id")
+				->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
+				->where("SU.person_id = " . $personId );
+				
+			
+			$db->setQuery($query);
+			
+			//error_log("Set id select query created: " . $query->dump());
+			
+			$userDetails = $db->loadObjectList();
+			
+			if ( count($userDetails) > 0 ) {
+			
+				$schoolUser = $userDetails[0];
+			
+				if ( $schoolUser->role_id == self::ADMIN_ROLE ) {
+					
+					$schoolUser->schoolArray = array();
+					// add schools
+				}
+			}
 		}
 		return $schoolUser;
 				
@@ -1731,7 +1785,7 @@ class SchoolCommunity {
 		
 		$totalPoints = Task::getTotalUserPoints();
 		
-		if ( $schoolUser ) {
+		if ( $schoolUser) {
 			
 			$roleId = $schoolUser->role_id;
 			

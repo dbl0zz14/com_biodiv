@@ -84,8 +84,6 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 		$this->community = new Biodiv\SchoolCommunity();
 		$this->schools = $this->community->getSchools();
 		
-		$errMsg = print_r ( $this->schools, true );
-		error_log ( "schools: " . $errMsg );
 		
 		$this->badgeGroups = codes_getList ( "badgegroup" );
 		$this->badgeColorClasses = array();
@@ -146,10 +144,7 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 				$schoolSummary->awardName = $school->awardName;
 				$schoolSummary->awardSeq = $school->seq ? $school->seq : 0;
 				
-				$errMsg = print_r ( $schoolSummary, true );
-				error_log ( "Got school summary:" );
-				error_log ( $errMsg );
-				
+								
 				$groupSchools[] = $schoolSummary;
 				
 				if ( $schoolSummary->school->weightedPoints > $maxSchoolPoints ) $maxSchoolPoints = $schoolSummary->school->weightedPoints;

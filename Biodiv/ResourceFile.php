@@ -220,11 +220,11 @@ class ResourceFile {
 		
 		$numLikes = $this->numLikes;
 		if ( $numLikes == 1 ) {
-			print '' + $numLikes . ' ' . $translations['single_like']['translation_text'];
+			print '' . $numLikes . ' ' . $translations['single_like']['translation_text'];
 		}
 		else {
 			
-			print '' + $numLikes . ' ' . $translations['many_likes']['translation_text'];
+			print '' . $numLikes . ' ' . $translations['many_likes']['translation_text'];
 		}
 		print '</div>'; // num_likes, col-12
 		
