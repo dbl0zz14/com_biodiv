@@ -16,6 +16,13 @@ set_include_path(JPATH_COMPONENT_SITE . PATH_SEPARATOR . get_include_path());
 include_once "local.php";
 include_once "BiodivHelper.php";
 
+define('BIODIV_ADMIN_ROOT', JURI::base() . '?option=' . BIODIV_COMPONENT);
+$document = JFactory::getDocument();
+$document->addScriptDeclaration('
+var BioDiv = {};
+BioDiv.root = "'. BIODIV_ADMIN_ROOT . '";');
+
+JHtml::_('jquery.framework');
 
 // Get an instance of the controller prefixed by Biodiv
 $controller = JControllerLegacy::getInstance('BioDiv');

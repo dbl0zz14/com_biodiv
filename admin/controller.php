@@ -28,233 +28,247 @@ class BioDivController extends JControllerLegacy
 	protected $default_view = 'biodivs';
 	
 	
-	function createusers() {
+	// function createusers() {
 		
-		$app = JFactory::getApplication();
+		// $app = JFactory::getApplication();
 
-		$input = $app->input;
+		// $input = $app->input;
 				
-		$tandCsChecked = $input->getInt('tandCsChecked', 0);
-		$fileStem = $input->getString('fileStem', 0);
-		$userStem = $input->getString('userStem', 0);
-		$passwordStem = $input->getString('passwordStem', 0);
-		$emailDomain = $input->getString('emailDomain', 0);
-		$numUsers = $input->getInt('numUsers', 0);
-		$userGroup = $input->getInt('userGroup', 0);
-		$startingNum = $input->getInt('startingNum', 1);
-		$project = $input->getInt('project', 0);
-		$addToSchool = $input->getInt('addToSchool', 0);
-		$schoolId = $input->getInt('school', 0);
+		// $tandCsChecked = $input->getInt('tandCsChecked', 0);
+		// $fileStem = $input->getString('fileStem', 0);
+		// $userStem = $input->getString('userStem', 0);
+		// $passwordStem = $input->getString('passwordStem', 0);
+		// $emailDomain = $input->getString('emailDomain', 0);
+		// $numUsers = $input->getInt('numUsers', 0);
+		// $userGroup = $input->getInt('userGroup', 0);
+		// $startingNum = $input->getInt('startingNum', 1);
+		// $project = $input->getInt('project', 0);
+		// $addToSchool = $input->getInt('addToSchool', 0);
+		// $schoolId = $input->getInt('school', 0);
+		
+		// $newUsers = array();
 
-		if ( $tandCsChecked ) {
+		// if ( $tandCsChecked ) {
 			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
+			// $db = \JDatabaseDriver::getInstance(dbOptions());
 			
-			$query = $db->getQuery(true)
-				->select("type, value from Generate" )
-				->order("type");
+			// $query = $db->getQuery(true)
+				// ->select("type, value from Generate" )
+				// ->order("type");
 		
-			$db->setQuery($query);
+			// $db->setQuery($query);
 			
-			error_log("Task getAllStudentTasks select query created: " . $query->dump());
+			// error_log("Task getAllStudentTasks select query created: " . $query->dump());
 			
-			$allGen = $db->loadAssocList();
+			// $allGen = $db->loadAssocList();
 			
-			$firsts = array();
-			$seconds = array();
-			$thirds= array();
-			foreach ( $allGen as $genRow ) {
-				error_log ( "type = " . $genRow["type"] . ", value = " . $genRow["value"] );
-				if ( $genRow["type"] == "first" ) {
-					$firsts[] = $genRow["value"];
-				}
-				else if ( $genRow["type"] == "second" ) {
-					$seconds[] = $genRow["value"];
-				}
-				else if ( $genRow["type"] == "third" ) {
-					$thirds[] = $genRow["value"];
-				}
-			}
+			// $firsts = array();
+			// $seconds = array();
+			// $thirds= array();
+			// foreach ( $allGen as $genRow ) {
+				// error_log ( "type = " . $genRow["type"] . ", value = " . $genRow["value"] );
+				// if ( $genRow["type"] == "first" ) {
+					// $firsts[] = $genRow["value"];
+				// }
+				// else if ( $genRow["type"] == "second" ) {
+					// $seconds[] = $genRow["value"];
+				// }
+				// else if ( $genRow["type"] == "third" ) {
+					// $thirds[] = $genRow["value"];
+				// }
+			// }
 		
-			$usernames = array();
-			foreach ( $firsts as $first ) {
-				foreach ( $seconds as $second ) {
-					$usernames[] = $first . $second;
-				}
-			}
+			// $usernames = array();
+			// foreach ( $firsts as $first ) {
+				// foreach ( $seconds as $second ) {
+					// $usernames[] = $first . $second;
+				// }
+			// }
 		
-			shuffle ( $usernames );
+			// shuffle ( $usernames );
 			
-			$errMsg = print_r ( $usernames, true );
-			error_log ( "Usernames = " . $errMsg );
+			// $errMsg = print_r ( $usernames, true );
+			// error_log ( "Usernames = " . $errMsg );
 			
-			$numThirds = count ( $thirds );
+			// $numThirds = count ( $thirds );
 			
-			$helper = new BiodivHelper();
+			// $helper = new BiodivHelper();
 			
-			$filePath = JPATH_SITE."/biodivimages/reports/school";
-			$tmpCsvFile = $filePath . "/tmp_" . $fileStem . '_' . $schoolId . ".csv";
-			$newCsvFile = $filePath . "/" . $fileStem . "_" . $schoolId . ".csv";
+			// // $filePath = JPATH_SITE."/biodivimages/reports/school";
+			// // $tmpCsvFile = $filePath . "/tmp_" . $fileStem . '_' . $schoolId . ".csv";
+			// // $newCsvFile = $filePath . "/" . $fileStem . "_" . $schoolId . ".csv";
 			
-			if ( !file_exists($newCsvFile) ) {
+			// //if ( !file_exists($newCsvFile) ) {
 			
-				// Creates a new csv file and store it in directory
-				// Rename once finished writing to file
-				if (!file_exists($filePath)) {
-					mkdir($filePath, 0700, true);
-				}
+				// // Creates a new csv file and store it in directory
+				// // Rename once finished writing to file
+				// // if (!file_exists($filePath)) {
+					// // mkdir($filePath, 0700, true);
+				// // }
 				
-				$tmpCsv = fopen ( $tmpCsvFile, 'w');
+				// // $tmpCsv = fopen ( $tmpCsvFile, 'w');
 				
 			
-				for ( $i=$startingNum; $i < $startingNum + $numUsers; $i++ ) {
+				// for ( $i=$startingNum; $i < $startingNum + $numUsers; $i++ ) {
 					
-					$username = $userStem . $usernames[$i] . $i;	
+					// $username = $userStem . $usernames[$i] . $i;	
 					
-					$ind = rand(0,$numThirds-1);
-					$word = $thirds[$ind];
-					$num = rand(1,999);
-					$password = $passwordStem . $word . $num;	
-					$email = $userStem . $i . '@' . $emailDomain;
+					// $ind = rand(0,$numThirds-1);
+					// $word = $thirds[$ind];
+					// $num = rand(1,999);
+					// $password = $passwordStem . $word . $num;	
+					// $email = $userStem . $i . '@' . $emailDomain;
 				
-					$existingUserEmail = $helper->getUser ( $email );
-					if ( $existingUserEmail ) {
-						error_log ( "Email " . $email . " already in use, cannot create" );
-						fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
+					// $existingUserEmail = $helper->getUser ( $email );
+					// if ( $existingUserEmail ) {
+						// error_log ( "Email " . $email . " already in use, cannot create" );
+						// //fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
+						// $newUsers[] = array("error"=>"User num ".$i." already exists - cannot create - use starting number for additional users");
 						
-					}
-					else if ( JUserHelper::getUserId($username) ) {
-						error_log ( "username " . $username . " already in use, cannot create" );
-						fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
-					}
-					else {
+					// }
+					// else if ( JUserHelper::getUserId($username) ) {
+						// error_log ( "username " . $username . " already in use, cannot create" );
+						// //fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
+						// $newUsers[] = array("error"=>"User num ".$i." already exists - cannot create - use starting number for additional users");
+					// }
+					// else {
 					
-						error_log("Creating user " . $email);
+						// error_log("Creating user " . $email);
 						
 					
-						$profileMW = array( 
-							'tos'=>$tandCsChecked,
-							'wherehear'=>$project,	
-							'subscribe'=>0
-							);
+						// $profileMW = array( 
+							// 'tos'=>$tandCsChecked,
+							// 'wherehear'=>$project,	
+							// 'subscribe'=>0
+							// );
 						
-						// Add to Registered group
-						$groups = array("2"=>"2");
+						// // Add to Registered group
+						// $groups = array("2"=>"2");
 						
 						
-						$data = array(
-						'name'=>$username,
-						'username'=>$username,
-						'password'=>$password,
-						'email'=>$email,
-						'block'=>0,
-						'profileMW'=>$profileMW,
-						'groups'=>$groups,
-						);
+						// $data = array(
+						// 'name'=>$username,
+						// 'username'=>$username,
+						// 'password'=>$password,
+						// 'email'=>$email,
+						// 'block'=>0,
+						// 'profileMW'=>$profileMW,
+						// 'groups'=>$groups,
+						// );
 						
-						$user = new JUser;
+						// $user = new JUser;
 						
-						$userCreated = false;
+						// $userCreated = false;
 
-						try{
-							if (!$user->bind($data)){
-								error_log("User bind returned false");
-								error_log($user->getError());
+						// try{
+							// if (!$user->bind($data)){
+								// error_log("User bind returned false");
+								// error_log($user->getError());
 								
-							}
-							if (!$user->save()) {
-								error_log("User save returned false");
-								error_log($user->getError());
+							// }
+							// if (!$user->save()) {
+								// error_log("User save returned false");
+								// error_log($user->getError());
 								
-							}
-							if ( !$user->getError() ) {
-								error_log("User saved");
+							// }
+							// if ( !$user->getError() ) {
+								// error_log("User saved");
 								
-								$userCreated = true;
-							}
+								// $userCreated = true;
+							// }
 							
-						}
-						catch(Exception $e){
-							error_log($e->getMessage());
+						// }
+						// catch(Exception $e){
+							// error_log($e->getMessage());
 							
-						}
+						// }
 						
-						if ( $userCreated ) {
+						// if ( $userCreated ) {
 							
-							if ( $userGroup > 0 ) {
-								JUserHelper::addUSerToGroup ( $user->id, $userGroup );
-							}
+							// if ( $userGroup > 0 ) {
+								// JUserHelper::addUSerToGroup ( $user->id, $userGroup );
+							// }
 							
-							fputcsv($tmpCsv, array($username, $password));
+							// //fputcsv($tmpCsv, array($username, $password));
+							// $newUsers[] = array("username"=>$username, "password"=>$password); 
 							
-							// Link to school project
-							$fields = new \StdClass();
-							$fields->person_id = $user->id;
-							$fields->project_id = $project;
-							$fields->role_id = 2;
+							// // Link to school project
+							// $fields = new \StdClass();
+							// $fields->person_id = $user->id;
+							// $fields->project_id = $project;
+							// $fields->role_id = 2;
 							
-							$success = $db->insertObject("ProjectUserMap", $fields);
-							if(!$success){
-								error_log ( "ProjectUserMap insert failed" );
-							}	
+							// $success = $db->insertObject("ProjectUserMap", $fields);
+							// if(!$success){
+								// error_log ( "ProjectUserMap insert failed" );
+							// }	
 			
 							
-							// Link to school in BES
-							$db = \JDatabaseDriver::getInstance(dbOptions());
+							// // Link to school in BES
+							// $db = \JDatabaseDriver::getInstance(dbOptions());
 			
-							$fields = new \StdClass();
-							$fields->person_id = $user->id;
-							$fields->school_id = $schoolId;
-							$fields->role_id = 5;
+							// $fields = new \StdClass();
+							// $fields->person_id = $user->id;
+							// $fields->school_id = $schoolId;
+							// $fields->role_id = 5;
 							
-							$success = $db->insertObject("SchoolUsers", $fields);
-							if(!$success){
-								error_log ( "SchoolUsers insert failed" );
-							}	
-						}
-					}			
-				}
+							// $success = $db->insertObject("SchoolUsers", $fields);
+							// if(!$success){
+								// error_log ( "SchoolUsers insert failed" );
+							// }	
+						// }
+					// }			
+				// }
 				
-				fclose($tmpCsv);
+				// //fclose($tmpCsv);
 				
-				rename ( $tmpCsvFile, $newCsvFile );
-			}
+				// //rename ( $tmpCsvFile, $newCsvFile );
+				
+			// //}
 			
-		}
-		else {
-			error_log ("Please ensure T&Cs agreement is in place");
-		}
+		// }
+		// else {
+			// error_log ("Please ensure T&Cs agreement is in place");
+			// $newUsers[] = array("error"=>"Please ensure T&Cs agreement is in place"); 
+							
+		// }
+		
+		// $newUsersJson = json_encode ( $newUsers );
 
-		$this->input->set('view', 'biodivs');
+		// $this->input->set('data', $newUsersJson );
+		// //$this->input->set('view', 'biodivs');
+		
+		// $view = $this->getView( 'biodivs', 'html' );
+		// $view->display();
 
-		parent::display();
-	}
+		// //parent::display();
+	// }
 	
 	
-	function deletefiles() {
+	// function deletefiles() {
 		
-		error_log ( "deletefiles called" );
+		// error_log ( "deletefiles called" );
 		
-		$filePath = JPATH_SITE."/biodivimages/reports/school";
+		// $filePath = JPATH_SITE."/biodivimages/reports/school";
 		
-		$files = glob($filePath . '/*.csv');
+		// $files = glob($filePath . '/*.csv');
 
-		//Loop through the file list.
-		foreach($files as $file){
-			//Make sure that this is a file and not a directory.
-			if(is_file($file)){
-				error_log ( "Removing " . $file );
-				//Use the unlink function to delete the file.
-				unlink($file);
-			}
-		}
+		// //Loop through the file list.
+		// foreach($files as $file){
+			// //Make sure that this is a file and not a directory.
+			// if(is_file($file)){
+				// error_log ( "Removing " . $file );
+				// //Use the unlink function to delete the file.
+				// unlink($file);
+			// }
+		// }
 		
-		$this->input->set('deleted', '1');
-		$this->input->set('view', 'biodivs');
+		// $this->input->set('deleted', '1');
+		// $this->input->set('view', 'biodivs');
 
-		parent::display();
+		// parent::display();
 		
-	}
+	// }
   
   
 }

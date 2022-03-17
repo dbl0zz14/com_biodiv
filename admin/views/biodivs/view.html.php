@@ -72,11 +72,11 @@ class BioDivViewBiodivs extends JViewLegacy
 		parent::display($tpl);
 	}
 	
-	protected function addToolBar()
-	{
-		//JToolbarHelper::title(JText::_('COM_BIODIV_MANAGER_BIODIVS'));
+	// protected function addToolBar()
+	// {
+		// //JToolbarHelper::title(JText::_('COM_BIODIV_MANAGER_BIODIVS'));
 		
-	}
+	// }
 	
 	
 }
