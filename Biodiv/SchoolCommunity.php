@@ -1761,10 +1761,10 @@ class SchoolCommunity {
 			print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
 			
 			
-			print '<td class="statusBarElement statusBarStars" ><i class="fa fa-lg fa-star statusIcon"></i><span class="statusBadge">' . $numStars .  '</span></td>';
+			print '<td class="statusBarElement statusBarStars" ><i class="fa fa-lg fa-star statusIcon"></i><span class="label label-primary statusBadge">' . $numStars .  '</span></td>';
 	
 			
-			print '<td class="statusBarElement statusBarBadges" ><i class="fa fa-lg fa-circle statusIcon"></i><span class="statusBadge">' . $numBadges . '</span></td>';
+			print '<td class="statusBarElement statusBarBadges" ><i class="fa fa-lg fa-circle statusIcon"></i><span class="label label-primary statusBadge">' . $numBadges . '</span></td>';
 			
 			
 			print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
