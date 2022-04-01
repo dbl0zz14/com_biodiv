@@ -63,15 +63,15 @@ class BioDivViewEcologistDashboard extends JViewLegacy
 		
 		$this->avatars = Biodiv\SchoolCommunity::getAvatars();
 		// Do the first unlock to get the badges through
-		//$this->completedBadgeGroups = Biodiv\Badge::unlockEcologistBadges();
+		$this->completedBadgeGroups = Biodiv\Badge::unlockEcologistBadges();
 	}
 	
 	
 	// Check whether any system calculated tasks have been completed.
-	//Biodiv\Task::checkSystemTasks();
+	Biodiv\Task::checkSystemTasks();
 	
-	// Teachers don't have locked badges but this will copy any new badges for them
-	//Biodiv\Badge::unlockEcologistBadges();
+	// Ecologists don't have locked badges but this will copy any new badges for them
+	Biodiv\Badge::unlockEcologistBadges();
 	
 	if ( !$this->firstLoad ) {
 		$this->notifications = Biodiv\SchoolCommunity::getNotifications();
@@ -81,7 +81,7 @@ class BioDivViewEcologistDashboard extends JViewLegacy
 		$this->numNewMessages = $messageList->newMessageCount();
 	}
 	
-	//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+	$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 	
 	// Get the pillars: Quizzer etc
 	//$this->badgeGroups = codes_getList ( "badgegroup" );

@@ -79,9 +79,9 @@ else {
 	
 	//print '<div id="studentDashRow" class="row" data-resource_type="'.$this->resourceTypeId.'">';
 	print '<div id="studentDashRow" class="row" >';
-	print '<div class="col-md-12 text-center">';
+	print '<div class="col-md-12">';
 	
-	print '<h2>'.$this->translations['heading']['translation_text'].'</h2>';
+	print '<h2 class="greenHeading">'.$this->translations['heading']['translation_text'].'</h2>';
 	print '<h3 style="margin-bottom:20px;">'.$this->translations['subheading']['translation_text'].'</h3>';
 
 	print '</div>'; // col-12
@@ -179,7 +179,7 @@ else {
 	}
 	
 	
-	
+	/*
 	// ------------------------------------------------------------------- browse tasks
 	
 	print '<div class="col-md-4 col-sm-6 col-xs-12 showWork text-center">';
@@ -296,17 +296,110 @@ else {
 	print '</div>'; // panel
 	
 	print '</div>'; // col-4
+	*/
+	print '<div class="col-md-12">';
+	print '<div class="gridContainer">';
+	
+	print '<div class="findActivity">';
+	
+	print '<a href="'.$this->translations['badges_link']['translation_text'].'" >';
+	print '<div id="findActivityPanel" class="panel panel-default  actionPanel ">';
+	print '<div class="panel-body">';
+	print '<div class="h2">'.$this->translations['browse_tasks']['translation_text'].'</div>';
+	print '<div><img src="'.$findIcon.'"  class="img-responsive" alt="Select activity icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
+	
+	print '</div>'; // findActivity
+	
+	
+	print '<div class="collectBadge">';
+	
+	print '<a href="'.$this->translations['collection_link']['translation_text'].'" >';
+	print '<div id="collectBadgePanel" class="panel panel-default actionPanel">';
+	print '<div class="panel-body">';
+	if ( $this->numToCollect > 0 ) {
+		print '<span class="label label-primary notifyLabel">'.$this->numToCollect.'</span>';
+		
+	}
+	print '<div class="h3 panelHeading">'.$this->translations['collect_badge']['translation_text'].'</div>';
+	print '<div><img src="'.$collectIcon.'" class="img-responsive" alt="Collect badge icon" /></div>';
+	print '</div>';
+	print '</div>';
+	print '</a>';
+	
+	print '</div>'; // collectBadge
+	
+	
+	print '<div class="viewSpecies">';
+	
+	print '<a href="'.$this->translations['wild_space_link']['translation_text'].'" >';
+	print '<div id="viewSpeciesPanel" class="panel panel-default actionPanel">';
+	print '<div class="panel-body">';
+	print '<div class="h3 panelHeading">'.$this->translations['learn_species']['translation_text'].'</div>';
+	print '<div><img src="'.$speciesIcon.'" class="img-responsive" alt="View species icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>';
+	print '</a>';
+	
+	print '</div>'; // viewSpecies
+	
+	
+	print '<div class="reviewWork">';
+	
+	print '<a href="'.$this->translations['schoolwork_link']['translation_text'].'" >';
+	print '<div id="reviewWorkPanel" class="panel panel-default actionPanel">';
+	print '<div class="panel-body">';
+	print '<div class="h3 panelHeading">'.$this->translations['show_work']['translation_text'].'</div>';
+	print '<div><img src="'.$workIcon.'" class="img-responsive" alt="View documents icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
+	
+	print '</div>';
+	
+	print '<div class="visitSchool">';
+	
+	print '<a href="'.$this->translations['school_dash']['translation_text'].'" >';
+	print '<div id="visitSchoolPanel" class="panel panel-default actionPanel">';
+	print '<div class="panel-body">';
+	print '<div class="h3 panelHeading">'.$this->translations['school_page']['translation_text'].'</div>';
+	print '<div><img src="'.$schoolIcon.'" class="img-responsive" alt="My school icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>';
+	print '</a>';
+	
+	print '</div>'; // visitSchool
+	
+	print '<div class="visitCommunity">';
+	
+	print '<a href="'.$this->translations['community_dash']['translation_text'].'" >';
+	print '<div id="visitCommunityPanel" class="panel panel-default actionPanel">';
+	print '<div class="panel-body">';
+	print '<div class="h3 panelHeading">'.$this->translations['community_page']['translation_text'].'</div>';
+	print '<div><img src="'.$communityIcon.'" class="img-responsive" alt="All schools icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
+	
+	print '</div>'; // visitCommunity
+	
+	
+	print '</div>'; // gridContainer
+	print '</div>'; // col-12
+	
 	
 	print '<div class="col-md-12">';
 	if ( $this->encourage ) {
-		print '<div class="h3 text-center bigSpaced">'.$this->encourage.'</div>';
+		print '<div class="h4 text-center bigSpaced" style="margin-top:20px">'.$this->encourage.'</div>';
 	}
 	
 	print '</div>'; // col-12
 	
-	print '</div>'; // row
+	print '</div>'; // row homePageRow
 	
-		
+	print '</div>';	// display area
 	
 }
 

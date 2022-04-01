@@ -160,6 +160,44 @@ class Badge {
 	
 	private function getAllTeacherTasks ( $taskStatus = null ) {
 		
+		return $this->getAllTasks  ( "TEACHER", $taskStatus );
+		
+		// $statusClause = "";
+		// if ( $taskStatus ) {
+			// $statusClause = " and ST.status = " . $taskStatus;
+		// }
+		
+		// $db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// $query = $db->getQuery(true)
+			// ->select("T.task_id, IFNULL(TT.status, ".self::LOCKED.") as status, TT.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon from Task T")
+			// ->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_id = " . $this->badgeId .
+						// " and B.winner_type = 'TEACHER'")
+			// ->innerJoin("BadgeGroup BG on B.badge_group = BG.group_id")
+			// ->leftJoin("TeacherTasks TT on TT.task_id = T.task_id and TT.person_id = " . $this->personId . $statusClause)
+			// ->order("T.task_id");
+			
+		
+		// $db->setQuery($query);
+		
+		// //error_log("getAllTeacherTasks select query created: " . $query->dump());
+		
+		// $tasks = $db->loadAssocList();
+		
+		// return $tasks;
+		
+	}
+	
+	
+	private function getAllEcologistTasks ( $taskStatus = null ) {
+		
+		return $this->getAllTasks  ( "ECOLOGIST", $taskStatus );
+		
+	}
+	
+	
+	private function getAllTasks ( $winnerType, $taskStatus = null ) {
+		
 		$statusClause = "";
 		if ( $taskStatus ) {
 			$statusClause = " and ST.status = " . $taskStatus;
@@ -170,7 +208,7 @@ class Badge {
 		$query = $db->getQuery(true)
 			->select("T.task_id, IFNULL(TT.status, ".self::LOCKED.") as status, TT.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon from Task T")
 			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_id = " . $this->badgeId .
-						" and B.winner_type = 'TEACHER'")
+						" and B.winner_type = " . $db->quote($winnerType) )
 			->innerJoin("BadgeGroup BG on B.badge_group = BG.group_id")
 			->leftJoin("TeacherTasks TT on TT.task_id = T.task_id and TT.person_id = " . $this->personId . $statusClause)
 			->order("T.task_id");
@@ -279,6 +317,9 @@ class Badge {
 		else if ( SchoolCommunity::isTeacher() ) {
 			$tasks = $this->getAllTeacherTasks ( $taskStatus );
 		}
+		else if ( SchoolCommunity::isEcologist() ) {
+			$tasks = $this->getAllEcologistTasks ( $taskStatus );
+		}
 			
 		if ( count($tasks) > 0 ) {
 			$resultsArray["tasks"] = $tasks;
@@ -289,7 +330,7 @@ class Badge {
 		
 	}
 	
-	public static function unlockTeacherBadges () {
+	public static function unlockNonStudentBadges ( $roleId ) {
 		
 		
 		$personId = userID();
@@ -306,6 +347,7 @@ class Badge {
 			->select("B.badge_group, max(lock_level) as lock_level from Badge B")
 			->innerJoin("Task T on B.badge_id = T.badge_id")
 			->innerJoin("TeacherTasks ST on ST.task_id = T.task_id and ST.person_id = " . $personId)
+			->where("T.role_id = " . $roleId )
 			->group("B.badge_group");
 		
 		$db->setQuery($query);
@@ -356,7 +398,7 @@ class Badge {
 					$query = $db->getQuery(true)
 						->select("T.* from Task T")
 						->innerJoin("Badge B on B.badge_id = T.badge_id and badge_group = " . $groupId . " and B.lock_level = " . $newLockLevel .
-							" and T.role_id = " . SchoolCommunity::TEACHER_ROLE )
+							" and T.role_id = " . $roleId )
 						->order("T.task_id");
 						
 					$db->setQuery($query);
@@ -391,6 +433,17 @@ class Badge {
 		return $completedBadgeGroups;
 		
 				
+	}
+	
+	public static function unlockTeacherBadges () {
+		
+		return self::unlockNonStudentBadges ( SchoolCommunity::TEACHER_ROLE );
+		
+	}
+	
+	public static function unlockEcologistBadges () {
+		
+		return self::unlockNonStudentBadges ( SchoolCommunity::ECOLOGIST_ROLE );
 	}
 	
 	public static function unlockBadges ( $personId = null ) {

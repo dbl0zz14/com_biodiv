@@ -191,7 +191,7 @@ class SchoolCommunity {
 			->select("SU.role_id, R.role_name, count(*) as num_users from SchoolUsers SU")
 			->innerJoin("School S on SU.school_id = S.school_id" )
 			->innerJoin("Role R on SU.role_id = R.role_id")
-			->where("SU.school_id = " . $schoolId)
+			->where("SU.school_id = " . $schoolId . " and SU.include_points = 1")
 			->group("SU.role_id");
 			
 		
@@ -268,17 +268,22 @@ class SchoolCommunity {
 			else if ( $roleCount->role_id == self::STUDENT_ROLE ) {
 				$school->studentCount = $roleCount->num_users;
 			}
+			else if ( $roleCount->role_id == self::ECOLOGIST_ROLE ) {
+				$school->ecologistCount = $roleCount->num_users;
+			}
 		}
 		
 		//$possibleAwards = Award::getSchoolAwards( $schoolId );
 		
-		$numUsers = $school->teacherCount + $school->studentCount;
+		$numUsers = $school->teacherCount + $school->studentCount + $school->ecologistCount;
 		
 		$school->totalTeacherPoints = Task::getSchoolTeacherPoints( $schoolId );
 		
 		$school->totalStudentPoints = Task::getSchoolStudentPoints( $schoolId );
 		
-		$school->totalUserPoints = $school->totalTeacherPoints + $school->totalStudentPoints;
+		$school->totalEcologistPoints = Task::getSchoolEcologistPoints( $schoolId );
+		
+		$school->totalUserPoints = $school->totalTeacherPoints + $school->totalStudentPoints + $school->totalEcologistPoints;
 		
 		$school->targetFound = false;
 		
@@ -314,6 +319,7 @@ class SchoolCommunity {
 		
 		$teacherCount = 0;
 		$studentCount = 0;
+		$ecologistCount = 0;
 		
 		$userCount = self::getSchoolUserCount( $schoolId );
 		
@@ -324,9 +330,12 @@ class SchoolCommunity {
 			else if ( $roleCount->role_id == self::STUDENT_ROLE ) {
 				$studentCount = $roleCount->num_users;
 			}
+			else if ( $roleCount->role_id == self::ECOLOGIST_ROLE ) {
+				$ecologistCount = $roleCount->num_users;
+			}
 		}
 		
-		$numUsers = $teacherCount + $studentCount;
+		$numUsers = $teacherCount + $studentCount + $ecologistCount;
 		
 		$possibleAwards = Award::getSchoolAwards( $schoolId );
 		
@@ -470,11 +479,16 @@ class SchoolCommunity {
 		return $celebration;
 	}
 	
-	public static function isEcologist () {
+	public static function isEcologist ( $userId = null ) {
 		
 		//error_log ( "SchoolCommunity::isEcologist called" );
 		
-		$personId = userID();
+		if ( $userId ) {
+			$personId = $userId;
+		}
+		else {
+			$personId = userID();
+		}
 		
 		if ( !$personId ) {
 			return null;
@@ -913,7 +927,7 @@ class SchoolCommunity {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("SU.school_id, S.name as school, SU.role_id, SU.new_user, U.username, A.image as avatar from SchoolUsers SU")
+			->select("SU.school_id, S.name as school, S.project_id, SU.role_id, SU.new_user, U.username, A.image as avatar from SchoolUsers SU")
 			->innerJoin($userDb . "." . $prefix ."users U on U.id = SU.person_id")
 			->innerJoin("School S on S.school_id = SU.school_id")
 			->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
@@ -1655,7 +1669,38 @@ class SchoolCommunity {
 	}
 	
 	
-	public static function generateStudentMasthead ( $helpOptionId = 0, $slogan = null, $totalPoints = 0, $numBadges = 0, $numStars = 0, $backButtonLink = null ) {
+	public static function calcUserStatus ( $roleId ) {
+		
+		$personId = userID();
+		
+		$userTaskTable = "StudentTasks";
+		if ( $roleId != self::STUDENT_ROLE ) {
+			$userTaskTable = "TeacherTasks";
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$selectStars = "select count(*) from UserAwards UA inner join Award A on A.award_id = UA.award_id and A.award_type = 'STAR' where UA.person_id = " . $personId;
+		
+		$query = $db->getQuery(true)
+			->select("SUM(T.points) as numPoints, count(*) as numBadges, (".$selectStars.") as numStars from Task T" )
+			->innerJoin($userTaskTable . " UT on T.task_id = UT.task_id and UT.person_id = " . $personId)
+			->where("UT.status >= " . Badge::COMPLETE );
+			
+		
+		$db->setQuery($query);
+		
+		error_log("Task getTotalUserPoints select query created: " . $query->dump());
+		
+		$userStatus = $db->loadObject();
+		
+		return $userStatus;
+		
+	}
+	
+	
+	
+	public static function generateStudentMasthead ( $helpOptionId = 0, $slogan = null, $totalPoints = 0, $numBadges = 0, $numStars = 0, $backButtonLink = null, $calcStatus = false ) {
 		
 		$translations = getTranslations("schoolcommunity");
 		
@@ -1670,59 +1715,59 @@ class SchoolCommunity {
 			$logoPath = $settingsObj->logo;
 			
 			$roleId = $schoolUser->role_id;
+			
+			if ( $calcStatus ) {
+				$userStatus = self::calcUserStatus ( $roleId );
+				$totalPoints = $userStatus->numPoints;
+				$numBadges = $userStatus->numBadges;
+				$numStars = $userStatus->numStars;
+			}
+			
 			print '<div class="row studentMastheadRow">';
 			
-			print '<div class="col-md-2 col-sm-1 hidden-xs" >';
+			print '<div class="col-md-2 col-sm-3 col-xs-5" >';
 			
-			print '<img src="'.$logoPath.'" class="img-responsive" />';
-			
-			// //print '<div class="text-left"><strong>'.$translations['project_name']['translation_text'].'</strong></div>';
-			// print '</div>';
+			print '<img src="'.$logoPath.'" class="img-responsive brandLogo" />';
 			
 			print '</div>'; // col-2
 			
-			print '<div class="col-md-3 col-sm-3 " >';
-			
-			//print '<div class="appName text-center">ENCOUNTERS</div>';
-			
-			print '</div>'; // col-3
-			
-			print '<div class="col-md-2 col-md-push-5 text-right">';
+			print '<div class="col-lg-2 col-lg-offset-1 col-lg-push-7 col-md-2 col-md-push-8 col-sm-9 col-xs-7 text-right">';
 			
 			if ( $helpOptionId > 0 ) {
-				print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default menuHelpButton h3" data-toggle="modal" data-target="#helpModal">';
+				print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default menuHelpButton h4" data-toggle="modal" data-target="#helpModal">';
 				print ' <i class="fa fa-info"></i> ';
 				print '</div>';
 			}
 			
-			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
+			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-success" >';
 			print $translations['logout']['translation_text'];
 			print '</a>';
 			
-			print '</div>'; // col-2
+			print '</div>'; // col-3
 			
 			
-			print '<div class="col-md-5 col-md-pull-2 col-sm-12 col-xs-12" >';
+			//print '<div class="col-md-6 col-md-offset-1 col-md-pull-3 col-sm-12 col-xs-12 text-center" >';
+			print '<div class="col-lg-6 col-lg-offset-1 col-lg-pull-3 col-md-8 col-md-pull-2 col-sm-12 col-xs-12 text-center" >';
 			
-			print '<table class="table studentStatus" style="position:relative; top:-20px;">';
+			print '<table class="table statusBar" >';
 			
 			print '<tbody>';
 			print '<tr>';
 			
 
-			print '<td style="width:80px"><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
+			print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
 			
 			
-			print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
+			print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
 			
 			
-			print '<td style="vertical-align:middle"><i class="fa fa-lg fa-star"></i> ' . $numStars .  '</td>';
+			print '<td class="statusBarElement statusBarStars" ><i class="fa fa-lg fa-star statusIcon"></i><span class="statusBadge">' . $numStars .  '</span></td>';
 	
 			
-			print '<td style="vertical-align:middle"><i class="fa fa-lg fa-circle"></i> ' . $numBadges . '</td>';
+			print '<td class="statusBarElement statusBarBadges" ><i class="fa fa-lg fa-circle statusIcon"></i><span class="statusBadge">' . $numBadges . '</span></td>';
 			
 			
-			print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
 			
 			
 			print '</tr>';
@@ -1734,7 +1779,21 @@ class SchoolCommunity {
 			
 			print '</div>'; // row
 			
+			if ( $backButtonLink ) {
+				print '<div class="row">';
+				
+				print '<div class="col-md-2 col-sm-4 col-xs-4">';
 			
+				print '<a href="'.$translations['student_dash']['translation_text'].'" class="btn btn-primary homeBtn" >';
+				print '<i class="fa fa-arrow-left"></i> ' . $translations['student_back']['translation_text'];
+				print '</a>';
+				
+				print '</div>'; // col-1
+			
+				print '</div>'; // row
+			}
+			
+			print '<div id="navEnd"></div>';
 		}
 			
 	}
@@ -1778,6 +1837,352 @@ class SchoolCommunity {
 	
 	
 	public static function generateNav ( $activeItem = null, $helpOptionId = 0 ) {
+		
+		$translations = getTranslations("schoolcommunity");
+		
+		$schoolUser = self::getSchoolUser();
+		
+		$totalPoints = Task::getTotalUserPoints();
+		
+		if ( $schoolUser) {
+			
+			$schoolSettings = getSetting ( "school_icons" );
+			
+			$settingsObj = json_decode ( $schoolSettings );
+			
+			$logoPath = $settingsObj->logo;
+			
+			$roleId = $schoolUser->role_id;
+			
+			//print '<div class="text-center">'.$schoolUser->school.'</div>';
+			
+			// print '<div class="row mobileHeader">';
+			// print '<div class="col-md-2 col-sm-2 col-xs-3 text-left">';
+			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
+			// //print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="50px">';
+			// //print '</a>';
+			// print '</div>'; // col-2
+			// print '<div class="col-md-3 col-md-offset-5 col-sm-5 col-sm-offset-3 col-xs-12 ">';
+			// print '<table class="table studentStatus" >';
+			// print '<tbody>';
+			// print '<tr>';
+			// print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" alt="avatar image" /></td>';
+			// print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
+			// print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			// //print '<td style="vertical-align:middle">';
+			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
+			// //print $translations['logout']['translation_text'];
+			// //print '</a>';
+			// //print '</td>';
+			// print '</tr>';
+			// print '</tbody>';
+			// print '</table>';
+			// print '</div>'; // col-3+5
+			// print '<div class="col-md-2 text-right">';
+			// print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
+			// print $translations['logout']['translation_text'];
+			// print '</a>';
+			// print '</div>'; // col-2
+			// print '</div>'; // row
+			
+			
+			print '<nav class="navbar navbar-default">';
+			print '<div class="container-fluid staffNav">';
+			
+			print '<div class="navbar-header">';
+			
+			
+			print '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#besNavbarCollapse" aria-expanded="false">';
+			print '<span class="sr-only">Toggle navigation</span>';
+			print '<i class="fa fa-3x fa-bars "></i>';
+			print '</button>';
+
+			
+			
+			// print '<div class="row " >';
+			// print '<div class="col-md-10 col-md-offset-1 col-sm-3 col-sm-offset-1 hidden-xs">';
+			
+			// print '<div class="besLogo" style="background:white; position:relative; top:-20px;padding:20px 20px 20px;">';
+			// print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" class="img-responsive" />';
+			
+			// print '</div>';
+			
+			// print '</div>'; // col-10
+			// print '</div>'; // row
+			
+		    //print '<a class="navbar-brand" href="#">BES ENCOUNTERS</a>';
+			//print '<a class="navbar-brand" href="https://www.britishecologicalsociety.org"><img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="42px">Encounters</a>';
+			
+			
+        
+			//print $avatarBox;
+			print '</div>'; // navbar-header
+			
+			print '<div class="row studentMastheadRow">';
+			
+			print '<div class="col-md-2 col-sm-3 col-xs-3" >';
+			
+			print '<img src="'.$logoPath.'" class="img-responsive brandLogo" />';
+			
+			print '</div>'; // col-2
+			
+			
+			
+			print '<div class="col-md-4 col-md-offset-4 col-sm-5 col-sm-offset-2 col-xs-7 text-center" >';
+			
+			print '<table class="table statusBar" >';
+			
+			print '<tbody>';
+			print '<tr>';
+			
+
+			print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
+			
+			
+			print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
+			
+			
+			print '<td class="statusBarElement statusBarTeacherPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			
+			
+			print '</tr>';
+			print '</tbody>';
+			
+			print '</table>'; 
+			
+			print '</div>'; // col-8
+			
+			print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
+			
+			if ( $helpOptionId > 0 ) {
+				print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default menuHelpButton h4" data-toggle="modal" data-target="#helpModal">';
+				print ' <i class="fa fa-info"></i> ';
+				print '</div>';
+			}
+			
+			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-success hidden-xs hidden-sm" >';
+			print $translations['logout']['translation_text'];
+			print '</a>';
+			
+			print '</div>'; // col-2
+			
+			print '</div>'; // row
+
+			print '<div class="collapse navbar-collapse" id="besNavbarCollapse">';
+			print '<ul class="nav navbar-nav">';
+			
+			
+			
+			if ( $roleId == self::ECOLOGIST_ROLE ) {
+				
+				// ------------------------ ecologist dash
+				
+				$activeClass = "";
+				if ( $activeItem == "ecologistdashboard" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['ecologist_dash']['translation_text'].'">';
+				print $translations['ecologist_page']['translation_text'];
+				print '</a>';
+				print '</li>';
+				
+				// ------------------------------------------- browse tasks
+				
+				// $activeClass = "";
+				// if ( $activeItem == "managestudents" ) {
+					// $activeClass = "active";
+				// }
+				// print '<li class="besNavbarItem '.$activeClass.'">';
+				// print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageStudents">';
+				// print $translations['student_tasks']['translation_text'];
+				// print '</a>';
+				// print '</li>';
+			
+			}
+			
+			// ------------------------------------------ school page
+			if ( $roleId != self::ECOLOGIST_ROLE ) {
+				$activeClass = "";
+				if ( $activeItem == "schooldashboard" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['school_link']['translation_text'].'">';
+				print $translations['school_page']['translation_text'];
+				print '</a>';
+				print '</li>';
+			}
+			
+			if ( ($roleId == self::TEACHER_ROLE) or ($roleId == self::ECOLOGIST_ROLE)) {
+				
+				$activeClass = "";
+				if ( $activeItem == "managetasks" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageTasks">';
+				print $translations['manage_tasks']['translation_text'];
+				print '</a>';
+				print '</li>';
+				
+			}
+			
+			
+			if ( $roleId == self::TEACHER_ROLE ) {
+				
+				$numToApprove = Task::countMyStudentsTasks ( Badge::PENDING );
+	
+				$activeClass = "";
+				if ( $activeItem == "students" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['students_link']['translation_text'].'" class="students">';
+				print $translations['students']['translation_text'];
+				if ( $numToApprove > 0 ) {
+					print ' <span id="studentsBadge" class="badge notifyBadge">'.$numToApprove.'</span>';
+				}
+				print '</a>';
+				print '</li>';
+			
+			
+			}
+			
+			// ---------------------------------------- community page
+			$activeClass = "";
+			if ( $activeItem == "schoolcommunity" ) {
+				$activeClass = "active";
+			}
+			print '<li class="besNavbarItem '.$activeClass.'">';
+			print '<a href="'.$translations['community_link']['translation_text'].'">';
+			print $translations['community']['translation_text'];
+			print '</a>';
+			print '</li>';
+			
+			// ------------------------------------------ resource hub
+			if ( $roleId != self::STUDENT_ROLE ) {
+				$activeClass = "";
+				if ( $activeItem == "resourcehub" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['hub_link']['translation_text'].'">';
+				print $translations['resource_hub']['translation_text'];
+				print '</a>';
+				print '</li>';
+			
+			
+				$messageList = new MessageList();
+				$numNewMessages = $messageList->newMessageCount();
+	
+				$activeClass = "";
+				if ( $activeItem == "messages" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['messages_link']['translation_text'].'">';
+				print $translations['messages']['translation_text'];
+				if ( $numNewMessages > 0 ) {
+					print ' <span id="messageBadge" class="badge notifyBadge">'.$numNewMessages.'</span>';
+				}
+				print '</a>';
+				print '</li>';
+			
+			}
+			
+			print '<li class="besNavbarItem hidden-md hidden-lg">';
+			print '<a href="'.$translations['logout_link']['translation_text'].'">';
+			print $translations['logout']['translation_text'];
+			print '</a>';
+			print '</li>';
+			
+			print '</ul>';
+			
+			// print '<table class="table studentStatus" >';
+			// print '<tbody>';
+			// print '<tr>';
+			// print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" alt="avatar image" /></td>';
+			// print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
+			// print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			// //print '<td style="vertical-align:middle">';
+			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
+			// //print $translations['logout']['translation_text'];
+			// //print '</a>';
+			// //print '</td>';
+			// print '</tr>';
+			// print '</tbody>';
+			// print '</table>';
+			
+			//print '<div class="teacherStatus pull-right">';
+		
+			// print '<p class="navbar-text">';
+			// print '<img src="'.$schoolUser->avatar.'" class="img-responsive avatar menuAvatar" />';
+			// print '</p>';
+			// // print '<p class="navbar-text">';
+			// // print $schoolUser->username;
+			// // print '</p>';
+			// print '<p class="navbar-text">';
+			// print '<strong>'.$schoolUser->username.'</strong> ' . $totalPoints . ' ' . $translations['points']['translation_text'];
+			// print '</p>';
+
+			// // ------------------------------------- status and logout
+			// print '<li class="besNavbarItem">';
+			// print '<table class="table table-condensed teacherStatus" style="position:relative; top:-10px;">';
+			// print '<tbody>';
+			// print '<tr>';
+			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			// print '<td><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" style="width:60px"/></td>';
+			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
+			// print '</tr>';
+			// print '</tbody>';
+			// print '</table>';
+			// print '</li>';
+			
+				
+			// print '<button class="btn btn-default navbar-btn">';
+			// print '<a href="'.$translations['logout_link']['translation_text'].'">';
+			// print $translations['logout']['translation_text'];
+			// print '</a>';
+			// print '</button>';
+			
+			print '</div>';
+			
+			print '</div>'; // nav collapse
+			
+			print '</div>'; // container-fluid
+			print '</nav>'; // navbar
+			
+			// ------------------------------------ help
+			// if ( $helpOptionId > 0 ) {
+				// print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default helpButton menuPageHelp h3" data-toggle="modal" data-target="#helpModal">';
+				// print ' <i class="fa fa-info"></i> ';
+				// print '</div>';
+			// }
+			
+			// ----------------------------------- avatar and points
+			// print '<div class="row">';
+			// print '<div class="col-md-4 col-md-offset-8">';
+			// print '<table class="table teacherStatus" style="position:relative; top:-20px;">';
+			// print '<tbody>';
+			// print '<tr>';
+			// print '<td style="width:80px"><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
+			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
+			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			// print '</tr>';
+			// print '</tbody>';
+			// print '</table>';
+			// print '</div>'; // col-4
+			// print '</div>'; // row
+			
+			print '</div>';
+			
+			print '<div id="navEnd"></div>';
+		
+		}
+	}
+	
+	public static function generateNavOrig ( $activeItem = null, $helpOptionId = 0 ) {
 		
 		$translations = getTranslations("schoolcommunity");
 		
@@ -1832,17 +2237,7 @@ class SchoolCommunity {
 			print '<i class="fa fa-3x fa-bars "></i>';
 			print '</button>';
 
-			/*
-			print '<div class="row">';
-			print '<div class="col-md-10 col-md-offset-1 col-sm-3 col-sm-offset-1 col-xs-3 col-xs-offset-1">';
-			print '<div class="userInfo">';
-			print '<img src="'.$schoolUser->avatar.'" class="img-responsive avatar" />';
 			
-			print '<div class="text-center"><strong>'.$schoolUser->username.'</strong></div>';
-			print '</div>';
-			print '</div>'; // col-10
-			print '</div>'; // row
-			*/
 			
 			// print '<div class="row " >';
 			// print '<div class="col-md-10 col-md-offset-1 col-sm-3 col-sm-offset-1 hidden-xs">';
@@ -1909,7 +2304,7 @@ class SchoolCommunity {
 				print '</li>';
 			}
 			
-			if ( $roleId == self::TEACHER_ROLE ) {
+			if ( ($roleId == self::TEACHER_ROLE) or ($roleId == self::ECOLOGIST_ROLE)) {
 				
 				$activeClass = "";
 				if ( $activeItem == "managetasks" ) {
@@ -1920,6 +2315,11 @@ class SchoolCommunity {
 				print $translations['manage_tasks']['translation_text'];
 				print '</a>';
 				print '</li>';
+				
+			}
+			
+			
+			if ( $roleId == self::TEACHER_ROLE ) {
 				
 				$numToApprove = Task::countMyStudentsTasks ( Badge::PENDING );
 	

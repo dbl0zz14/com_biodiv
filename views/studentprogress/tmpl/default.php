@@ -24,8 +24,8 @@ else {
 	
 	foreach ( $this->students as $studentId=>$student ) {
 		
-		print '<div class="col-md-3">';
-		print '<div class="panel panel-primary">';
+		print '<div class="col-md-3 col-sm-4 col-xs-6">';
+		print '<div class="panel">';
 		print '<div class="panel-body">';
 		print '<div class="row">';
 		print '<div class="col-md-5 col-sm-5 col-xs-5">';
@@ -47,13 +47,13 @@ else {
 			
 			print '<div class="row">';
 		
-			print '<div class="col-md-5 text-right">';
+			print '<div class="col-md-5 col-sm-5 col-xs-5 text-right">';
 		
 			print '<div>'.$this->badgeGroups[$badgeGroup].'</div>';
 			
 			print '</div>'; // col-5
 		
-			print '<div class="col-md-7">';
+			print '<div class="col-md-7 col-sm-7 col-xs-7">';
 		
 			print '<div class="progress studentProgress" >';
 			print '<div class="progress-bar" role="progressbar" aria-valuenow="'.$numPoints.'" aria-valuemin="2" aria-valuemax="'.$available.'" style="width:'.$width.'%; background-color:'.$this->badgeGroupColour[$badgeGroup].'">'.$numPoints.'</div>';

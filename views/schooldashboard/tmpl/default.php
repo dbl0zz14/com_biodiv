@@ -124,123 +124,63 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
-		Biodiv\SchoolCommunity::generateBackAndLogout();
+		//Biodiv\SchoolCommunity::generateBackAndLogout();
+		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
 	}
 	
 	// -------------------------------  School name and total
 	
 	print '<div id="displayArea">';
 	
+	// if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+		// print '<h1 class="teacherWelcome greenHeading"  >'.$this->translations['welcome']['translation_text'].'</h1>';
+	// }
 	if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-		print '<h1 class="text-center teacherWelcome"  >'.$this->translations['welcome']['translation_text'].'</h1>';
+		$heading = $this->translations['welcome']['translation_text'];
+		$subheading = "";
+	}
+	else {
+		$heading = $this->translations['heading']['translation_text'];
+		$subheading = $this->translations['subheading']['translation_text'];
 	}
 	
-	print '<h2>';
+	//print '<h2>';
 	print '<div class="row">';
-	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print $this->translations['heading']['translation_text'].' <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
-	print '</div>'; // col-10
-	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
+	print '<div class="col-md-8 col-sm-6 col-xs-6 h2">';
+	print '<span class="greenHeading">'.$heading.'</span> <small class="hidden-xs hidden-sm">'.$subheading.'</small>';
+	print '</div>'; // col-8
+	
+	print '<div class="col-md-3 col-sm-5 col-xs-6 text-right">';
+	if ( $this->kioskUrl ) {
+		
+		print '<a href="'.$this->kioskUrl.'" >';
+		print '<button class="btn btn-success projectBtn">'.$this->translations['to_project']['translation_text'].'</button>';
+		print '</a>';
+	}
+	print '</div>'; // col-3
+	print '<div class="col-md-1 col-sm-1 col-xs-12 text-right">';
 	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
-		print '<i class="fa fa-info"></i>';
+		print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-lg fa-info"></i>';
 		print '</div>'; // helpButton
 	}
 	print '</div>'; // col-2
 	print '</div>'; // row
-	print '</h2>';  
-	
-	// print '<div class="row">';	
-	
-	// print '<div class="col-md-10 col-sm-9 col-xs-12">'; 
 	
 	
-	// print '<div class="row" >';
-	// print '<div class="col-md-9">';
-	// print '<div class="h1">'.$this->schoolName.'</div>';
-	// print '</div>'; // col-10
-	// print '<div class="col-md-3">';
-	// print '<div class="dashboardBox schoolPointsBox">';
-	// print '<div class="schoolPoints h5">';
-	// print '<span class="bigText">' . $this->schoolPoints . "</span> " . $this->translations['points']['translation_text'];
-	// print '</div>'; // schoolPoints
-	// print '</div>'; // schoolPointsBox
-	// print '</div>'; // col-3
-	// print '</div>'; // row
-	
-	// print '</div>'; // col-10
-	
-	// print '</div>'; // row
-	
-	
-	// ----------------------------- Pillar progress
+	// ----------------------------- Pillar progress plus target stuff
 	
 	print '<div class="row">';
 	
-	print '<div class="col-md-4">';
+	print '<div class="col-md-8">';
 	
 	print '<div class="panel panel-default schoolProgress">';
 	print '<div class="panel-body">';
-	/*
+	
 	print '<div class="row">';
+	print '<div class="col-md-6">';
 	
-	print '<div class="col-md-7 h3">'.$this->translations['school_progress']['translation_text'].'</div>';
-	
-	print '<div class="col-md-5 text-right"><span class="h3">' . $this->schoolPoints . "</span> " . $this->translations['points']['translation_text'].'</div>';
-	
-	print '</div>'; // row
-
-	print '<div class="row">';
-	foreach ( $this->badgeGroups as $badgeGroup ) {
-		
-		$groupId = $badgeGroup[0];
-		$groupName = $badgeGroup[1];
-		$colorClass = $this->badgeColorClasses[$groupId];
-		$icon = $this->badgeIcons[$groupId];
-		
-		print '<div id="displayBadges_'. $groupId .'" class="col-md-6 col-sm-6 col-xs-6 btn displayBadges">';
-		
-				
-		$totalTasksDone = $this->badgeGroupSummary[$groupId]->student->numTasks + $this->badgeGroupSummary[$groupId]->teacher->numTasks;
-		$totalTasksAvailable = $this->badgeGroupSummary[$groupId]->student->totalTasks + $this->badgeGroupSummary[$groupId]->teacher->totalTasks;
-		$totalNumPoints = $this->badgeGroupSummary[$groupId]->school->weightedPoints;
-
-
-		$progressFrac = 0;
-		if ( $totalTasksAvailable != 0 )  {
-			$progressFrac = $totalTasksDone / $totalTasksAvailable;
-		}
-
-
-		print '<div class="dashboardBox progressBox">';
-		
-		
-		// print '<div class="row">';
-		
-		// //print '<div class="col-md-7 h4 '.$colorClass.'_text">'.$groupName.'</div>';
-		
-		// //print '<div class="col-md-5 '.$colorClass.'_text">'.$totalNumPoints.' '.$this->translations['points']['translation_text'].'</div>';
-		
-		// print '<div class="col-md-7 h4 ">'.$groupName.'</div>';
-		
-		// print '<div class="col-md-5 ">'.$totalNumPoints.' '.$this->translations['points']['translation_text'].'</div>';
-
-		// print '</div>'; // row
-		
-		
-		print '<h4><span class="'.$colorClass.'_text"><i class= "fa '.$icon.'" aria-hidden= "true" ></i></span> '.$groupName.'</h4>';
-		print '<p>'.$totalNumPoints.' '.$this->translations['points']['translation_text'].'</p>';
-		
-
-		print '</div>'; // progressBox
-		
-		print '</div>'; // col-2 displayBadges
-		
-	}
-	
-	print '</div>'; // row with progress by pillar
-	*/
-	print '<h3>'.$this->schoolName.'</h3>';
+	print '<h3 class="panelHeading">'.$this->schoolName.'</h3>';
 	print '<table class="table table-condensed">';
 	
 	print '<thead>';
@@ -274,37 +214,12 @@ else {
 	print '</tbody>';
 	print '</table>';
 	
-	print '</div>'; // panel-body
-	print '</div>'; // panel
+	print '</div>'; // col-6
 	
-		
-	//print '<div class="row">';
+	print '<div class="col-md-6">';
 	
-	// ---------------------------------- School spotlight
-	
-	// print '<div class="col-md-12">';
-	
-	// print '<div class="panel panel-default">';
-	// print '<div class="panel-body">';
-	
-	// print '<div id="schoolSpotlight"></div>';
-	
-	// print '</div>'; // panel-body
-	// print '</div>'; // panel
-	
-	// print '</div>'; // col-12
-	
-	
-	
-	//print '</div>'; // row
-	
-	
-	print '</div>'; // col-4
 	
 	// ---------------------------------- School target
-	
-	print '<div class="col-md-4">';
-	
 	
 	if ( $this->newAward ) {
 		
@@ -312,12 +227,22 @@ else {
 		print '<div class="row">';
 		print '<div class="col-md-12">';
 		//print '<div class="panel panel-default coloredPanel">';
-		print '<div class="panel panel-default ">';
-		print '<div class="panel-body text-center">';
+		print '<div class="panel panel-default yellowPanel ">';
+		print '<div class="panel-body">';
 	
-		print '<h3>'.$this->translations['congrats']['translation_text'].'</h3>';
-		print '<div class="spaced">'.$this->awardIcons[$awardType].'</div>'; //<i class="fa fa-3x fa-trophy"></i>
-		print '<p>'.$this->translations['school_reached']['translation_text'].' '.$this->newAward->awardName. '</p>';
+		print '<h3 class="panelHeading">'.$this->translations['congrats']['translation_text'].'</h3>';
+		
+		print '<div class="row">';
+		
+		print '<div class="col-md-7">';
+		print '<p class="spaced">'.$this->translations['school_reached']['translation_text'].' '.$this->newAward->awardName. '</p>';
+		print '</div>'; // col-7
+		
+		print '<div class="col-md-5">';
+		print '<div class="spaced text-center">'.$this->awardIcons[$awardType].'</div>';
+		print '</div>'; // col-5
+		
+		print '</div>'; // row
 		
 		print '</div>'; // panel-body
 		print '</div>'; // panel
@@ -330,12 +255,22 @@ else {
 		print '<div class="row">';
 		print '<div class="col-md-12">';
 		//print '<div class="panel panel-default coloredPanel">';
-		print '<div class="panel panel-default ">';
-		print '<div class="panel-body text-center">';
+		print '<div class="panel panel-default yellowPanel">';
+		print '<div class="panel-body">';
 	
-		print '<h3>'.$this->translations['congrats']['translation_text'].'</h3>';
-		print '<div class="spaced">'.$this->awardIcons[$awardType].'</div>';
-		print '<p>'.$this->translations['school_reached']['translation_text'].' '.$this->existingAward->awardName. '</p>';
+		print '<h3 class="panelHeading">'.$this->translations['congrats']['translation_text'].'</h3>';
+		
+		print '<div class="row">';
+		
+		print '<div class="col-md-7">';
+		print '<p class="spaced">'.$this->translations['school_reached']['translation_text'].' '.$this->existingAward->awardName. '</p>';
+		print '</div>'; // col-7
+		
+		print '<div class="col-md-5">';
+		print '<div class="spaced text-center">'.$this->awardIcons[$awardType].'</div>';
+		print '</div>'; // col-5
+		
+		print '</div>'; // row
 		
 		print '</div>'; // panel-body
 		print '</div>'; // panel
@@ -347,30 +282,27 @@ else {
 	if ( $this->targetAward ) {
 		print '<div class="row">';
 		print '<div class="col-md-12">';
-		//print '<div class="panel panel-default coloredPanel">';
-		print '<div class="panel panel-default ">';
-		print '<div class="panel-body text-center">';
+		print '<div class="panel panel-default darkPanel">';
+		print '<div class="panel-body">';
 		
-		print '<p>'.$this->translations['current_total']['translation_text'].'</p>';
-			
-		print '<div class="bigText spaced">'.$this->schoolPoints.' '.$this->translations['points']['translation_text'].'</div>';
+		print '<div class="h3 panelHeading">'.$this->schoolPoints.' '.$this->translations['points']['translation_text'].'</div>';
 		
-		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->targetAward->awardName. ' '.$this->translations['school_needs']['translation_text'].'</p>';
+		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->targetAward->awardName. ' '.$this->translations['school_needs']['translation_text'];
 		
-		print '<div class="bigText spaced">'.$this->targetAward->pointsNeeded.' '.$this->translations['points']['translation_text'].'</div>';
+		print ' <strong>'.$this->targetAward->pointsNeeded.' '.$this->translations['points']['translation_text'].'</strong>';
 		
-		print '<p>'.$this->translations['you_help']['translation_text'].'</p>';
+		print ' '.$this->translations['you_help']['translation_text'].'</p>';
 		
 		if ( Biodiv\SchoolCommunity::isStudent() ) {
-			print '<a href="'.$this->translations['badges_link']['translation_text'].'" >';
+			print '<div class="text-center"><a href="'.$this->translations['badges_link']['translation_text'].'" >';
 		}
 		else {
-			print '<a href="'.$this->translations['activity_link']['translation_text'].'" >';
+			print '<div class="text-center"><a href="'.$this->translations['activity_link']['translation_text'].'" >';
 		}
 	
-		print '<button class="btn btn-primary">'.$this->translations['help_get']['translation_text'].'</button>';
+		print '<button class="btn btn-default btn-lg">'.$this->translations['help_get']['translation_text'].'</button>';
 		
-		print '</a>';
+		print '</a></div>';
 		
 		print '</div>'; // panel-body
 		print '</div>'; // panel
@@ -380,9 +312,18 @@ else {
 	}
 	
 	
-	print '</div>'; // col-4
 	
+	print '</div>'; // col-6
 	
+	print '</div>'; // row
+	
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	
+		
+	print '</div>'; // col-8
+	
+		
 	
 	// ------------------- RHS event log
 	
@@ -393,7 +334,7 @@ else {
 	
 	print '<div class="row">';
 	
-	print '<div class="col-md-12 h3">'.$this->translations['events_heading']['translation_text'].'</div>';
+	print '<div class="col-md-12 h3 panelHeading">'.$this->translations['events_heading']['translation_text'].'</div>';
 	
 	print '</div>';
 
@@ -410,21 +351,6 @@ else {
 	print '</div>'; // col-10 or 12
 	
 	print '</div>'; // row
-	
-	/*
-	print '<div class="row">';
-	print '<div class="col-md-9">';
-	print '<div class="row">';
-	print '<div class="col-md-4 col-md-offset-2 text-center">';
-	print '<button class="btn btn-primary btn-lg dash_btn">'.$this->translations['suggest_task']['translation_text'].'</button>';
-	print '</div>'; // col-4
-	print '<div class="col-md-4 text-center">';
-	print '<button class="btn btn-primary btn-lg dash_btn">'.$this->translations['top_species']['translation_text'].'</button></a>';
-	print '</div>'; // col-4
-	print '</div>'; // row
-	print '</div>'; // col-9
-	print '</div>'; // row
-	*/
 
 }
 

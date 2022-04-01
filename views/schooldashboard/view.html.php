@@ -45,25 +45,6 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 			
 		$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 		
-		/*
-		$schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
-			
-		$errMsg = print_r ( $schoolRoles, true );
-		error_log ( "Got school roles:" );
-		error_log ( $errMsg );
-		
-		if ( count($schoolRoles) > 0 ) {
-			error_log ( "Getting school id" );
-			$this->mySchoolId = $schoolRoles[0]["school_id"];
-			$this->mySchoolRole = $schoolRoles[0]["role_id"];
-			error_log ( "School id = " . $this->schoolId );
-		}
-		
-		if ( $this->schoolId == 0 ) {
-			$this->schoolId = $this->mySchoolId;
-		}
-		*/
-		
 		$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 		
 		$this->schoolPoints = 0;
@@ -75,6 +56,7 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 			$this->schoolId = $this->schoolUser->school_id;
 			$this->schoolName = $this->schoolUser->school;
 			$this->mySchoolRole = $this->schoolUser->role_id;
+			$this->schoolProject = $this->schoolUser->project_id;
 		}
 		
 		// Check whether first load - this is teacher home page
@@ -119,12 +101,20 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 	
 		if ( $this->schoolId != 0 ) {
 			
+			$this->kioskUrl = null;
+			if ( $this->schoolProject ) {
+				$projectOptions = getSingleProjectOptions ( $this->schoolProject, "kiosk" );
+				if ( count($projectOptions) > 0 ) { 
+					$this->kioskUrl = $projectOptions[0]["option_name"];
+				}
+			}
+			
 			//$this->schoolName = Biodiv\SchoolCommunity::getSchoolName ( $this->schoolId );
 			
 			$this->awardIcons = array( 'NONE'=>'',
-									'SCHOOL_BRONZE'=>'<span class="bronze"><i class="fa fa-3x fa-trophy"></i></span>',
-									'SCHOOL_SILVER'=>'<span class="silver"><i class="fa fa-3x fa-trophy"></i></span>',
-									'SCHOOL_GOLD'=>'<span class="gold"><i class="fa fa-3x fa-trophy"></i></span>');
+									'SCHOOL_BRONZE'=>'<span class="bronze"><i class="fa fa-5x fa-trophy"></i></span>',
+									'SCHOOL_SILVER'=>'<span class="silver"><i class="fa fa-5x fa-trophy"></i></span>',
+									'SCHOOL_GOLD'=>'<span class="gold"><i class="fa fa-5x fa-trophy"></i></span>');
 		
 			
 			// Get the pillars: Quizzer etc

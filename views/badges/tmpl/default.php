@@ -156,9 +156,10 @@ else {
 					$highlightClass = "";
 					if ( $task->status == Biodiv\Badge::COMPLETE ) {
 						$collectClass = "collectTask";
-						$highlightClass = $colorClass.'_border';
 					}
 					
+					$highlightClass = $colorClass.'_border';
+						
 					// $lockedClass = "";
 					// if ( $task->status == Biodiv\Badge::LOCKED ) {
 						// $lockedClass = "lockedTask";
@@ -246,14 +247,14 @@ else {
 						print '<div class="text-center taskButtons">';
 								
 						if ( $task->status == Biodiv\Badge::COMPLETE ) {
-							print '<div>'.$this->translations['collect']['translation_text'].'</div>';
+							print '<div class="collectMessage">'.$this->translations['collect']['translation_text'].'</div>';
 						}
 						else {
-							print '<div id="task_more_'.$task->task_id.'" class="btn btn-default btn-sm task_btn" data-toggle="modal" data-target="#task_modal">'.
+							print '<div id="task_more_'.$task->task_id.'" class="btn btn-primary btn-sm task_btn" data-toggle="modal" data-target="#task_modal">'.
 										$this->translations['more']['translation_text'].'</div>';
 										
 							if ( !$this->viewOnly and !$isLinkedTask and $task->counted_by == "USER" and $task->status == Biodiv\Badge::UNLOCKED ) {
-								print '<div id="task_done_'.$task->task_id.'" class="btn btn-primary btn-sm task_btn upload_task">'.$this->translations['done']['translation_text'].'</div>';
+								print '<div id="task_done_'.$task->task_id.'" class="btn btn-default btn-sm task_btn upload_task">'.$this->translations['done']['translation_text'].'</div>';
 							}
 						}
 						
@@ -271,10 +272,10 @@ else {
 					}
 					
 					if ( $task->status == Biodiv\Badge::COLLECTED ) {
-						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel" >';
+						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel '.$highlightClass.'" >';
 					}
 					else {
-						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel turnTask" style="display:none; position:absolute; top:0; opacity:0;">';
+						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel turnTask '.$highlightClass.'" style="display:none; position:absolute; top:0; opacity:0;">';
 					}
 						
 					print '<div class="panel-heading taskHeading">';

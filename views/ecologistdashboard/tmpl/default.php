@@ -141,14 +141,26 @@ else {
 		
 		// ---------------------------------- School target
 		
-		print '<div class="dashboardItem">';
+		//print '<div class="dashboardItem">';
 		
-		print '<div class="h3">'.$schoolName.'</div>';
+		print '<div class="panel panel-default">';
+		print '<div class="panel-body">';
+	
+		print '<div class="row">';
+	
+		print '<div class="col-md-12 h3">'.$schoolName.'</div>';
 		
-		print '<div id="schoolData_'.$schoolId.'" class="schoolData"></div>';
+		print '</div>';
+	
+		//print '<div class="h3">'.$schoolName.'</div>';
 		
-		print '</div>'; // dashboardItem
+		print '<div id="schoolData_'.$schoolId.'" class="schoolData text-center"></div>';
 		
+		//print '</div>'; // dashboardItem
+		
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+	
 		print '</div>'; // col-6
 		
 	}
@@ -162,13 +174,26 @@ else {
 	
 	print '<div class="col-md-5">';
 	
-	print '<div class="dashboardItem eventFeed">';
+	//print '<div class="dashboardItem eventFeed">';
 	
-	print '<h3 class="text-center bes_page_heading">'.$this->translations['events_heading']['translation_text'].'</h3>';
+	print '<div class="panel panel-default eventFeed">';
+	print '<div class="panel-body">';
+	
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 h3">'.$this->translations['events_heading']['translation_text'].'</div>';
+	
+	print '</div>';
+	
+	//print '<h3 class="text-center bes_page_heading">'.$this->translations['events_heading']['translation_text'].'</h3>';
 	
 	print '<div id="eventLog"></div>';
 	
-	print '</div>'; // dashboardItem
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	
+	
+	//print '</div>'; // dashboardItem
 	
 	print '</div>'; // col-5
 	

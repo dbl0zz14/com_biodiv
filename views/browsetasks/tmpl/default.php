@@ -33,8 +33,8 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
-		Biodiv\SchoolCommunity::generateBackAndLogout();
-		//Biodiv\SchoolCommunity::generateStudentMasthead();
+		//Biodiv\SchoolCommunity::generateBackAndLogout();
+		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
 	}
 	
 	//print '<h2>'.$this->translations['heading']['translation_text'].' <small>'.$this->translations['subheading']['translation_text'].'</small></h2>';

@@ -1,3 +1,8 @@
+# 1/4/22 - Version 3.6.2
+* style updates
+* include ecologist points in school total
+* allow individual school users to not be included in school points
+
 # 16/3/22 - Version 3.6.1
 * admin page added
 * order schools alphabetically on community page

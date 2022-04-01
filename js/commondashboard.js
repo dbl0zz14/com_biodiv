@@ -100,13 +100,25 @@ function animateAvatar () {
 
 // -------------------------------  Badges
 
-function displayBadges ( badgeGroup, viewOnly = false ) {
+function displayBadges ( badgeGroup, viewOnly = false, viewTeacher = false ) {
 	
 	let url = BioDiv.root + "&view=badges&format=raw&group=" + badgeGroup;
 	
 	if ( viewOnly ) {
 		url += "&viewonly=1";
 	}
+	if ( viewTeacher ) {
+		url += "&teacher=1";
+	}
+	
+	jQuery('#displayBadges').load(url, tasksLoaded);
+	
+};
+
+
+function displayTeacherBadges ( badgeGroup ) {
+	
+	let url = BioDiv.root + "&view=badges&format=raw&group=" + badgeGroup + "&viewonly=1&teacher=1";
 	
 	jQuery('#displayBadges').load(url, tasksLoaded);
 	
@@ -352,6 +364,15 @@ function activatebadgeButtons () {
 		let idbits = buttonId.split("_");
 		let badgeGroupId = idbits.pop();
 		
+		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
 		displayBadges ( badgeGroupId );
 	} );
 	
@@ -360,22 +381,75 @@ function activatebadgeButtons () {
 		let idbits = buttonId.split("_");
 		let badgeGroupId = idbits.pop();
 		
+		jQuery('.viewGroupBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
 		displayBadges ( badgeGroupId, true );
 	} );
 	
+	jQuery('.viewTeacherGroupBtn').click( function () {
+		let buttonId = this.id;
+		let idbits = buttonId.split("_");
+		let badgeGroupId = idbits.pop();
+		
+		jQuery('.viewTeacherGroupBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
+		displayTeacherBadges ( badgeGroupId );
+	} );
+	
 	jQuery('.completeTasks').click( function () {
+		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
 		let url = BioDiv.root + "&view=badges&format=raw&complete=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});
 	
 	
 	jQuery('.unlockedTasks').click( function () {
+		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
 		let url = BioDiv.root + "&view=badges&format=raw&unlocked=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});
 	
 	
 	jQuery('.suggestTask').click( function () {
+		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
+		
+		jQuery(this).find('.panel').addClass("active");
+		
+		jQuery('#navEnd')[0].scrollIntoView({
+			behavior: "smooth", // or "auto" or "instant"
+			block: "start" // or "end"
+		});
+		
 		let url = BioDiv.root + "&view=badges&format=raw&suggest=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});

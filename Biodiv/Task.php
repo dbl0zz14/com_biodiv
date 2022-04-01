@@ -40,6 +40,10 @@ class Task {
 				$this->roleId = SchoolCommunity::TEACHER_ROLE;
 				$this->userTaskTable = "TeacherTasks";
 			}
+			else if ( SchoolCommunity::isEcologist( $this->personId ) ) {
+				$this->roleId = SchoolCommunity::ECOLOGIST_ROLE;
+				$this->userTaskTable = "TeacherTasks";
+			}
 		
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
@@ -122,7 +126,7 @@ class Task {
 		
 		$userTaskTable = "StudentTasks";
 			
-		if ( SchoolCommunity::isTeacher( $userId ) ) {
+		if ( SchoolCommunity::isTeacher( $userId ) or SchoolCommunity::isEcologist( $userId ) ) {
 			$userTaskTable = "TeacherTasks";
 		}
 		
@@ -553,7 +557,7 @@ class Task {
 		$personId = userID();
 		
 		$userTaskTable = "StudentTasks";
-		if ( SchoolCommunity::isTeacher() ) {
+		if ( SchoolCommunity::isTeacher() or SchoolCommunity::isEcologist() ) {
 			$userTaskTable = "TeacherTasks";
 		}
 		
@@ -605,7 +609,7 @@ class Task {
 		
 		$personId = userID();
 		$userTaskTable = "StudentTasks";
-		if ( SchoolCommunity::isTeacher() ) {
+		if ( SchoolCommunity::isTeacher() or SchoolCommunity::isEcologist() ) {
 			$userTaskTable = "TeacherTasks";
 		}
 		
@@ -716,6 +720,35 @@ class Task {
 	}
 	
 	
+	public static function getSchoolEcologistPoints ( $schoolId ) {
+		
+		$personId = userID();
+		
+		$totalPoints = 0;
+		
+		if ( $personId ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true)
+				->select("SUM(T.points) FROM TeacherTasks TT" )
+				->innerJoin("SchoolUsers SU on TT.person_id = SU.person_id and SU.role_id = " .SchoolCommunity::ECOLOGIST_ROLE. " and SU.school_id = " . $schoolId )
+				->innerJoin("Task T on T.task_id = TT.task_id")
+				->where("TT.status > " . Badge::PENDING);
+								
+			
+			$db->setQuery($query);
+			
+			//error_log("Task getSchoolTeacherPoints select query created: " . $query->dump());
+			
+			$totalPoints = $db->loadResult();
+		}
+		
+		return $totalPoints;
+		
+	}
+	
+	
 	public static function getSchoolTeacherPoints ( $schoolId ) {
 		
 		$personId = userID();
@@ -726,19 +759,11 @@ class Task {
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
-			// $studentPointsQuery = "SELECT SUM(T.points) FROM StudentTasks ST " .
-								// "inner join SchoolUsers SU on ST.person_id = SU.person_id and SU.role_id = 5 and SU.school_id = " . $schoolId .
-								// " inner join Task T on T.task_id = ST.task_id where ST.status > 2";
-		
-			// $teacherPointsQuery = "SELECT SUM(T.points) FROM TeacherTasks TT " .
-								// "inner join SchoolUsers SU on TT.person_id = SU.person_id and SU.role_id = 5 and SU.school_id = " . $schoolId .
-								// " inner join Task T on T.task_id = TT.task_id where ST.status > 2";
-								
 			$query = $db->getQuery(true)
 				->select("SUM(T.points) FROM TeacherTasks TT" )
 				->innerJoin("SchoolUsers SU on TT.person_id = SU.person_id and SU.role_id = " .SchoolCommunity::TEACHER_ROLE. " and SU.school_id = " . $schoolId )
 				->innerJoin("Task T on T.task_id = TT.task_id")
-				->where("TT.status > 2");
+				->where("TT.status > " . Badge::PENDING);
 								
 			
 			$db->setQuery($query);
@@ -763,19 +788,11 @@ class Task {
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
-			// $studentPointsQuery = "SELECT SUM(T.points) FROM StudentTasks ST " .
-								// "inner join SchoolUsers SU on ST.person_id = SU.person_id and SU.role_id = 5 and SU.school_id = " . $schoolId .
-								// " inner join Task T on T.task_id = ST.task_id where ST.status > 2";
-		
-			// $teacherPointsQuery = "SELECT SUM(T.points) FROM TeacherTasks TT " .
-								// "inner join SchoolUsers SU on TT.person_id = SU.person_id and SU.role_id = 5 and SU.school_id = " . $schoolId .
-								// " inner join Task T on T.task_id = TT.task_id where ST.status > 2";
-								
 			$query = $db->getQuery(true)
 				->select("SUM(T.points) FROM StudentTasks ST" )
 				->innerJoin("SchoolUsers SU on ST.person_id = SU.person_id and SU.role_id = " .SchoolCommunity::STUDENT_ROLE. " and SU.school_id = " . $schoolId )
 				->innerJoin("Task T on T.task_id = ST.task_id")
-				->where("ST.status > 2");
+				->where("ST.status > " . Badge::PENDING);
 								
 			
 			$db->setQuery($query);
@@ -967,6 +984,43 @@ class Task {
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
 			->where("T.role_id = " . SchoolCommunity::STUDENT_ROLE )
+			->order("B.lock_level");
+		
+		$db->setQuery($query);
+		
+		//error_log("Task getAllStudentTasks select query created: " . $query->dump());
+		
+		$allTasks = $db->loadObjectList();
+		
+		return $allTasks;
+		
+	}
+	
+	
+	// All available student tasks - used eg for teacher or ecologist view of student tasks
+	public static function getAllTeacherTasksToView ( $groupId ) {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return array();
+		}
+		
+		$userTaskTable = "TeacherTasks";
+		
+		$allTasks = array();
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, ".
+			" B.badge_image as badge_image, B.unlocked_image as unlocked_image, B.locked_image as locked_image, BG.icon as icon, " .
+			" T.*, '.Badge::UNLOCKED.' as status from Task T" )
+			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group and BG.group_id = " . $groupId)
+			->innerJoin("Options O on B.badge_group = O.option_id")
+			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
+			->where("T.role_id = " . SchoolCommunity::TEACHER_ROLE )
 			->order("B.lock_level");
 		
 		$db->setQuery($query);

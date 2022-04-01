@@ -51,6 +51,11 @@ class BadgeGroup {
 				$this->userTaskTable = "TeacherTasks";
 				$this->winnerType = 'TEACHER';
 			}
+			else if ( SchoolCommunity::isEcologist() ) {
+				$this->roleId = SchoolCommunity::ECOLOGIST_ROLE;
+				$this->userTaskTable = "TeacherTasks";
+				$this->winnerType = 'ECOLOGIST';
+			}
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
@@ -459,7 +464,7 @@ class BadgeGroup {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		$query = $db->getQuery(true)
-			->select("role_id, count(*) as numUsers from SchoolUsers where school_id = " . $schoolId)
+			->select("role_id, count(*) as numUsers from SchoolUsers where school_id = " . $schoolId . " and include_points = 1")
 			->group("role_id" );
 			
 		
@@ -492,7 +497,7 @@ class BadgeGroup {
 							" inner join Task T1 on T1.task_id = ST1.task_id " .
 							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
 							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId .
-							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE;
+							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";
 		
 				
 		$allTasksQueryString = "select count(*) from Task T4 " .
@@ -507,7 +512,7 @@ class BadgeGroup {
 						. $allTasksQueryString . " ) as totalTasksPerStudent, ( "
 						. $allBadgesQueryString . " ) as totalBadgesPerStudent from StudentTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
-			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId )
+			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
 			->where("ST.status >= " . self::COMPLETE );
 			
@@ -540,8 +545,8 @@ class BadgeGroup {
 		$tasksQueryString = "select count(*) from TeacherTasks ST1 " .
 							" inner join Task T1 on T1.task_id = ST1.task_id " .
 							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
-							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId .
-							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE;					
+							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId . " and SU.role_id = " . SchoolCommunity::TEACHER_ROLE .
+							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
 		
 		
 		$allTasksQueryString = "select count(*) from Task T4 " .
@@ -556,9 +561,10 @@ class BadgeGroup {
 						. $allTasksQueryString . " ) as totalTasksPerTeacher, ( "
 						. $allBadgesQueryString . " ) as totalBadgesPerTeacher from TeacherTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
-			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId )
+			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
-			->where("ST.status >= " . self::COMPLETE );
+			->where("ST.status >= " . self::COMPLETE )
+			->where("SU.role_id = " . SchoolCommunity::TEACHER_ROLE);
 			
 		
 		$db->setQuery($query);
@@ -586,8 +592,59 @@ class BadgeGroup {
 		
 		
 		
+		// Now ecologists
+		$tasksQueryString = "select count(*) from TeacherTasks ST1 " .
+							" inner join Task T1 on T1.task_id = ST1.task_id " .
+							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
+							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId . " and SU.role_id = " . SchoolCommunity::ECOLOGIST_ROLE .
+							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
+		
+		
+		$allTasksQueryString = "select count(*) from Task T4 " .
+							"INNER JOIN Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = 'ECOLOGIST'" .
+							"where B4.badge_group = " . $badgeGroupId;
+		
+		$allBadgesQueryString = "select count(*) from Badge B5 " .
+								"where B5.winner_type = 'ECOLOGIST' and B5.badge_group = " . $badgeGroupId;
+	
+		$query = $db->getQuery(true)
+			->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
+						. $allTasksQueryString . " ) as totalTasksPerTeacher, ( "
+						. $allBadgesQueryString . " ) as totalBadgesPerTeacher from TeacherTasks ST")
+			->innerJoin("Task T on ST.task_id = T.task_id")
+			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
+			->where("ST.status >= " . self::COMPLETE )
+			->where("SU.role_id = " . SchoolCommunity::ECOLOGIST_ROLE);
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$ecologistSummary = $db->loadObject();
+		
+		if ( array_key_exists ( SchoolCommunity::ECOLOGIST_ROLE, $numSchoolUsers ) ) {
+			$numEcologists = $numSchoolUsers[SchoolCommunity::ECOLOGIST_ROLE]->numUsers;
+		}
+		else {
+			$numEcologists = 0;
+		}
+		if ( array_key_exists ( SchoolCommunity::ECOLOGIST_ROLE, $totalAvailablePoints ) ) {
+			$ecologistPointsAvailable = $totalAvailablePoints[SchoolCommunity::ECOLOGIST_ROLE];
+		}
+		else {
+			$ecologistPointsAvailable = 0;
+		}
+		$ecologistSummary->numTeachers = $numTeachers;
+		$ecologistSummary->totalTasks = $ecologistSummary->totalTasksPerTeacher * $numEcologists;
+		$ecologistSummary->totalBadges = $ecologistSummary->totalBadgesPerTeacher * $numEcologists;
+		$ecologistSummary->totalPointsAvailable = $ecologistPointsAvailable * $numEcologists;
+		
+		
+		
 		$school = new \stdClass();
-		$school->numUsers = $numStudents + $numTeachers;
+		$school->numUsers = $numStudents + $numTeachers + $numEcologists;
 		
 		if ( $school->numUsers > 0 ) {
 			//$weighting = 60/$school->numUsers;
@@ -596,21 +653,24 @@ class BadgeGroup {
 			// $studentSummary->weightedPoints = round ( $studentSummary->numPoints*$weighting );
 			
 			$weighting = 1;
-			$school->weightedPoints = $teacherSummary->numPoints + $studentSummary->numPoints;
-			$school->pointsAvailable = $teacherSummary->totalPointsAvailable + $studentSummary->totalPointsAvailable;
+			$school->weightedPoints = $teacherSummary->numPoints + $studentSummary->numPoints + $ecologistSummary->numPoints;
+			$school->pointsAvailable = $teacherSummary->totalPointsAvailable + $studentSummary->totalPointsAvailable + $ecologistSummary->totalPointsAvailable;
 			$teacherSummary->weightedPoints = $teacherSummary->numPoints;
 			$studentSummary->weightedPoints = $studentSummary->numPoints;
+			$ecologistSummary->weightedPoints = $ecologistSummary->numPoints;
 		}
 		else {
 			$school->weightedPoints = 0;
 			$school->pointsAvailable = 0;
 			$teacherSummary->weightedPoints = 0;
 			$studentSummary->weightedPoints = 0;
+			$ecologistSummary->weightedPoints = 0;
 		}
 		
 				
 		$summaryResults->student = $studentSummary;
 		$summaryResults->teacher = $teacherSummary;
+		$summaryResults->ecologist = $ecologistSummary;
 		$summaryResults->school = $school;
 		
 		return $summaryResults;

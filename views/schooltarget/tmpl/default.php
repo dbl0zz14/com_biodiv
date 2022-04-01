@@ -20,17 +20,33 @@ else {
 	print '<div id="schoolStatsRow" class="row">';
 	
 	if ( $this->target->targetFound ) {
-		print '<div class="col-md-12 text-center">';
-		print $this->translations['to_reach']['translation_text'] . ' ' . $this->target->awardName . ' ' . $this->translations['school_needs']['translation_text'];
-		print '</div>';
 		
-		print '<div class="col-md-12 text-center hugeText">';
-		print $this->target->pointsNeeded;
-		print '</div>';
+		print '<p>'.$this->translations['school_has']['translation_text'].'</p>';
+			
+		print '<div class="bigText spaced">'.$this->target->totalUserPoints.' '.$this->translations['points']['translation_text'].'</div>';
 		
-		print '<div class="col-md-12 text-center">';
-		print $this->translations['points']['translation_text'];
-		print '</div>';	
+		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->target->awardName. ' '.$this->translations['school_needs']['translation_text'].'</p>';
+		
+		print '<div class="bigText spaced">'.$this->target->pointsNeeded.' '.$this->translations['points']['translation_text'].'</div>';
+		
+		
+		// print '<div class="col-md-12 h4 text-center">';
+		// print $this->translations['school_has']['translation_text'];
+		// print '</div>';
+		
+		// print '<div class="col-md-12 text-center bigText">';
+		// print $this->target->totalUserPoints . ' ' . $this->translations['points']['translation_text'];
+		// print '</div>';
+		
+		// print '<div class="col-md-12 h4 text-center">';
+		// print $this->translations['to_reach']['translation_text'] . ' ' . $this->target->awardName . ' ' . $this->translations['school_needs']['translation_text'];
+		// print '</div>';
+		
+		// print '<div class="col-md-12 text-center bigText">';
+		// print $this->target->pointsNeeded . ' ' . $this->translations['points']['translation_text'];
+		// print '</div>';
+		
+		
 	}
 	else if ( $this->target->isLatest ) {
 		print '<div class="col-md-12 text-center">';

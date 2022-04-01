@@ -28,6 +28,15 @@ function activateTeacherTabs () {
 		jQuery('#displayArea').load(url, activatebadgeButtons);
 	});
 	
+	jQuery('.allTeacherTasks').click( function () {
+		
+		jQuery(".manageTasksBtn").removeClass("active");
+		jQuery(this).addClass("active");
+		
+		let url = BioDiv.root + "&view=viewbadges&format=raw&teacher=1";
+		jQuery('#displayArea').load(url, activatebadgeButtons);
+	});
+	
 	
 	
 }

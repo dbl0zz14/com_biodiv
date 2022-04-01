@@ -52,17 +52,23 @@ else {
 		$color = $this->badgeColors[$groupId];
 		$image = $this->badgeImages[$groupId];
 		$icon = $this->badgeIcons[$groupId];
+		$noStarsImage = $this->badgeNoStars[$groupId];
 		
-		print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn viewGroupBtn">';
+		if ( $this->teacher ) {
+			print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn viewTeacherGroupBtn">';
+		}
+		else {
+			print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn viewGroupBtn">';
+		}
 		
-		print '<div class="panel panel-default">';
+		print '<div class="panel panel-default '. $colorClass .'_active_bg">';
 		print '<div class="panel-body">';
 		
 		
 		// -------------------------------------- badge group icon
 		print '<div class="row">';
 		
-		$imageSrc = JURI::root().$this->badgeIcons[$groupId];
+		$imageSrc = JURI::root().$noStarsImage;
 		print '<div class="col-md-12 browseBadgeImg '.$colorClass.'_text"><img src="'.$imageSrc.'" class="img-responsive" alt="badge group icon" /></div>';
 
 		print '</div>'; // row
@@ -110,7 +116,7 @@ else {
 		//print '<div id="badgesButton_'.$groupId.'" class="col-md-2 col-sm-4 col-xs-4 btn '. $colorClass . ' text-center browseGroupBadges">';
 		print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center  browseBadgesBtn browseGroupBtn">';
 		
-		print '<div class="panel panel-default">';
+		print '<div class="panel panel-default ">';
 		print '<div class="panel-body">';
 
 		

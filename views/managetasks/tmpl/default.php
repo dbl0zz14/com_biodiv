@@ -49,7 +49,13 @@ else {
 	print $this->translations['my_tasks']['translation_text'];
 	print '</div>';
 	
-	print '<div class="btn btn-info allStudentBadges">';
+	if ( $this->isEcologist ) { 
+		print '<div class="btn btn-info manageTasksBtn allTeacherTasks">';
+		print $this->translations['all_teacher_tasks']['translation_text'];
+		print '</div>';
+	}
+	
+	print '<div class="btn btn-info manageTasksBtn allStudentBadges">';
 	print $this->translations['all_student_tasks']['translation_text'];
 	print '</div>';
 	

@@ -41,12 +41,15 @@ class BioDivViewViewBadges extends JViewLegacy
 		}
 		else {
 			
+			$app = JFactory::getApplication();
+			$input = $app->input;
+			
+			$this->teacher = $input->getInt('teacher', 0);
+			
 			$this->helpOption = codes_getCode ( "viewbadges", "beshelp" );
 		
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	
-			$app = JFactory::getApplication();
-			
 			// Get the pillars: Quizzer etc
 			$this->badgeGroups = codes_getList ( "badgegroup" );
 			
@@ -56,6 +59,7 @@ class BioDivViewViewBadges extends JViewLegacy
 			$this->badgeColors = array();
 			$this->badgeImages = array();
 			$this->badgeIcons = array();
+			$this->badgeNoStars = array();
 			$this->badgeStarImages = array();
 			
 			
@@ -100,23 +104,12 @@ class BioDivViewViewBadges extends JViewLegacy
 				$this->badgeImages[$groupId] = $image;
 				
 				
-				// // ----------------------------- Icons
-				// $iconArray = getOptionData ( $groupId, "icon" ); 
-
-				// $icon = "";
-			
-				// if ( count($iconArray) > 0 ) {
-					// $icon = $iconArray[0];
-				// }
-				
-				// $this->badgeIcons[$groupId] = $icon;
-				
-				
 				$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
 				
 				$imageData = $badgeGroup->getImageData();
 				
 				$this->badgeIcons[$groupId] = $imageData->icon;
+				$this->badgeNoStars[$groupId] = $imageData->no_stars;
 				
 				// $this->badgeStarImages[$groupId] = array();
 				// $this->badgeStarImages[$groupId][0] = $imageData->zero_star;

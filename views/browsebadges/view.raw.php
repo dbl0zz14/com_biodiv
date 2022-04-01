@@ -58,6 +58,7 @@ class BioDivViewBrowseBadges extends JViewLegacy
 			$this->badgeColors = array();
 			$this->badgeImages = array();
 			$this->badgeIcons = array();
+			$this->badgeNoStars = array();
 			$this->badgeStarImages = array();
 			
 			
@@ -119,6 +120,7 @@ class BioDivViewBrowseBadges extends JViewLegacy
 				$imageData = $badgeGroup->getImageData();
 				
 				$this->badgeIcons[$groupId] = $imageData->icon;
+				$this->badgeNoStars[$groupId] = $imageData->no_stars;
 				
 				$this->badgeStarImages[$groupId] = array();
 				$this->badgeStarImages[$groupId][0] = $imageData->zero_star;

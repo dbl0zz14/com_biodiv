@@ -134,6 +134,7 @@ class BioDivViewBatchUsers extends JViewLegacy
 					'username'=>$username,
 					'password'=>$password,
 					'email'=>$email,
+					'sendEmail'=>0,
 					'block'=>0,
 					'profileMW'=>$profileMW,
 					'groups'=>$groups,

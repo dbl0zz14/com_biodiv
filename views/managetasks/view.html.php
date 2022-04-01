@@ -37,15 +37,18 @@ class BioDivViewManageTasks extends JViewLegacy
 			
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 			
-			$this->isTeacher = Biodiv\SchoolCommunity::isTeacher();
+			$this->isTeacher = $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE;
+			$this->isEcologist = $this->schoolUser->role_id == Biodiv\SchoolCommunity::ECOLOGIST_ROLE;
+			
 	
-			if ( $this->isTeacher ) {
+			//if ( $this->isTeacher ) {
 				
-				$this->students = Biodiv\SchoolCommunity::getMyStudents();
+				//$this->students = Biodiv\SchoolCommunity::getMyStudents();
 				
-				$this->tasks = Biodiv\Task::getAllDoneTasks ();
+				//$this->tasks = Biodiv\Task::getAllDoneTasks ();
 				
-			}
+			//}
+			
 		
 		}
 

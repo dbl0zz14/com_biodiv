@@ -20,7 +20,8 @@ if ( !$this->personId ) {
 
 else {
 
-	if ( count ( $this->schoolRoles ) > 1 ) {
+	if ( (count ( $this->schoolRoles ) > 1)  and !(Biodiv\SchoolCommunity::isEcologist()) ) {
+		
 		error_log ("More than one school role found for user " . $this->personId );
 		print '<h2>'.$this->translations['too_many_roles']['translation_text'].'</h2>';
 
@@ -32,12 +33,6 @@ else {
 	}
 	else {
 		
-		//print '<h2>'.$this->translations['you_completed']['translation_text'].' '.$this->taskName.' '.$this->translations['task']['translation_text'].' '.
-		//		$this->translations['from']['translation_text'].' '.$this->badgeGroup.' '.$this->translations['badge']['translation_text'].' '.
-		//		$this->lockLevel. ': '.$this->badgeName.'</h2>';
-
-		
-
 		print '<div class="row">';
 
 		print '<div class="col-md-12">';
@@ -62,19 +57,6 @@ else {
 		print "<input type='hidden' name='uploadName' value='" . $this->uploadName . "'/>";
 		
 		
-		
-
-/*
-		print '<div class="col-md-12">';
-		
-		// Name the upload
-		
-		print '<label for="uploadName"><h4>'.$this->translations['name_upload']['translation_text'].'</h4></label>';
-		print '<input type="text" id="uploadName" name="uploadName">';
-		print '<h2></h2>';
-		print '</div>';
-*/
-
 		print '<div class="col-md-12">';
 		
 		// Describe the upload
@@ -84,27 +66,11 @@ else {
 		print '</div>';
 
 
-
-		//print '<div class="col-md-3">';
-
 		print '<button type="submit" id="readytoupload" class="btn btn-primary btn-lg spaced chooseFiles">'.$this->translations['create_set']['translation_text'].'</button>';
-		//print '<h2></h2>';
-		//print '</div>'; // col-md-3
-
+			
 		
-		
-		//print '<div class="col-md-3">';
-
 		print '<button id="doneNoFiles_'.$this->taskId.'" class="btn btn-default btn-lg spaced doneNoFiles">'.$this->translations['no_files']['translation_text'].'</button>';
-		//print '<h2></h2>';
-		//print '</div>'; // col-md-3
-
-
-		//print '<div class="col-md-3">';
-
-		//print '<button class="btn btn-default btn-lg spaced browseBadges">'.$this->translations['back_activities']['translation_text'].'</button>';
-		//print '<h2></h2>';
-		//print '</div>'; // col-md-3
+		
 		
 		print '</form>';
 

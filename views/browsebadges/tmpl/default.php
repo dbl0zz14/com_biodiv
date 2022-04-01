@@ -24,7 +24,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print $this->translations['heading']['translation_text'].' <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -56,7 +56,7 @@ else {
 		
 		print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn browseGroupBtn">';
 		
-		print '<div class="panel panel-default">';
+		print '<div class="panel panel-default '. $colorClass .'_active_bg">';
 		print '<div class="panel-body">';
 		
 		
@@ -76,9 +76,12 @@ else {
 		
 		//print '<div class="col-md-6 col-md-offset-3 browseBadgeImg"><img class="img-responsive" src="'.$image.'" alt="badge image"/></div>';
 		
-		if ( array_key_exists($groupId, $this->stars) ) {
+		if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE ) {
+			$imageSrc = JURI::root().$this->badgeNoStars[$groupId];
+		}
+		else if ( array_key_exists($groupId, $this->stars) ) {
 			$numStars = $this->stars[$groupId]->num_stars;
-			error_log ( "Group id $groupId, num stars = $numStars" );
+			//error_log ( "Group id $groupId, num stars = $numStars" );
 			$imageSrc = JURI::root().$this->badgeStarImages[$groupId][$numStars];
 		}
 		else {
@@ -127,7 +130,7 @@ else {
 	
 	print '<div class="btn text-center browseBadgesBtn completeTasks">';
 		
-	print '<div class="panel panel-default">';
+	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
 	
 	// ------------------------------------- button name 
@@ -142,13 +145,16 @@ else {
 	print '</div>'; // row
 	
 	
-	print '<div class="row badgeStats">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['done']['translation_text'].'</div>';
+	// print '<div class="row badgeStats">';
+	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['done']['translation_text'].'</div>';
 	
-	// print '<div class="col-md-7 col-sm-7 col-xs-7 text-right ">'.$this->badgeGroupSummary[$groupId]["numPoints"].' '.
-			// $this->translations['points']['translation_text'].'</div>';
+	// // print '<div class="col-md-7 col-sm-7 col-xs-7 text-right ">'.$this->badgeGroupSummary[$groupId]["numPoints"].' '.
+			// // $this->translations['points']['translation_text'].'</div>';
+	// print '</div>'; // row
+	
+	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['done']['translation_text'].'</div>';
 	print '</div>'; // row
-		
 		
 	print '</div>'; // panel-body
 	print '</div>'; // panel
@@ -157,7 +163,7 @@ else {
 	
 	print '<div class="btn text-center browseBadgesBtn unlockedTasks">';
 		
-	print '<div class="panel panel-default">';
+	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
 	
 	// ------------------------------------- button name 
@@ -174,9 +180,13 @@ else {
 	print '</div>'; // row
 	
 	
-	print '<div class="row badgeStats">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['to_do']['translation_text'].'</div>';
+	// print '<div class="row badgeStats">';
+	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['to_do']['translation_text'].'</div>';
 	
+	// print '</div>'; // row
+		
+	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['to_do']['translation_text'].'</div>';
 	print '</div>'; // row
 		
 		
@@ -188,7 +198,7 @@ else {
 	
 	print '<div class="btn text-center browseBadgesBtn suggestTask">';
 		
-	print '<div class="panel panel-default">';
+	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
 	
 	// ------------------------------------- button name 
@@ -199,19 +209,19 @@ else {
 	// -------------------------------------- suggest icon
 	print '<div class="row">';
 	
-	//print '<div class="col-md-12 browseBadgeImg " style="padding:12px;"><i class= "fa fa-2x fa-lightbulb-o" aria-hidden= "true" ></i></div>';
 	print '<div class="col-md-12 browseBadgeImg "><img src="'.$hintIcon.'" class="img-responsive" alt="Get a suggestion icon" /></div>';
 
 	print '</div>'; // row
 	
 	
-	print '<div class="row badgeStats">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['suggest']['translation_text'].'</div>';
+	// print '<div class="row badgeStats">';
+	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['suggest']['translation_text'].'</div>';
 	
-	// print '<div class="col-md-7 col-sm-7 col-xs-7 text-right ">'.$this->badgeGroupSummary[$groupId]["numPoints"].' '.
-			// $this->translations['points']['translation_text'].'</div>';
+	// print '</div>'; // row
+	
+	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['suggest']['translation_text'].'</div>';
 	print '</div>'; // row
-	
 	
 	print '</div>'; // panel-body
 	print '</div>'; // panel

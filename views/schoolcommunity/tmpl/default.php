@@ -32,7 +32,8 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
-		Biodiv\SchoolCommunity::generateBackAndLogout();
+		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
+		//Biodiv\SchoolCommunity::generateBackAndLogout();
 		//Biodiv\SchoolCommunity::generateStudentMasthead();
 	}
 	
@@ -43,7 +44,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print $this->translations['heading']['translation_text'].' <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -114,9 +115,18 @@ else {
 		
 		print '<div class="row">';
 		
-		print '<div class="col-md-2 col-sm-2 col-xs-2 communityTableImg '.$colorClass.'_text"><img src="'.$icon.'" class="img-responsive communityTableIcon" alt="'.$groupName. ' icon" /></div>';
+		// print '<div class="col-md-2 col-sm-2 col-xs-2 communityTableImg '.$colorClass.'_text"><img src="'.$icon.'" class="img-responsive communityTableIcon" alt="'.$groupName. ' icon" /></div>';
 
-		print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left">'.$groupName.'</div>';
+		// print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left"><strong>'.$groupName.'</strong></div>';
+		
+		print '<div class="col-md-12 col-sm-12 col-xs-12 '.$colorClass.'_text">';
+		print '<div class="communityGroupName">';
+		print '<img src="'.$icon.'" class="img-responsive communityTableIcon" alt="'.$groupName. ' icon" /> ';
+		print $groupName;
+		print '</div>';
+		print '</div>';
+
+		//print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left"><strong>'.$groupName.'</strong></div>';
 		
 		print '</div>'; // row
 		

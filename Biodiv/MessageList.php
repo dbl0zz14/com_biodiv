@@ -271,15 +271,29 @@ class MessageList {
 			$translations = getTranslations("MessageList");
 			$mailTo = $translations['report_email']['translation_text'];
 			
-			// Trigger email
-			try {
-				mail( $mailTo, "BES Encounters message reported", "A message has been reported" );
-			}
-			catch ( \Throwable $th ) {
-				error_log ( "Caught throwable" );
-				error_log ("Message report notification failed to send via email: " . $th->getMessage() );
-			}
+			$mailer = \JFactory::getMailer();
+			$config = \JFactory::getConfig();
+			$sender = array( 
+				$config->get( 'mailfrom' ),
+				$config->get( 'fromname' ) 
+			);
 			
+			
+
+			$mailer->setSender($sender);
+			
+			// For more than one email address: $mailTo = array( 'person1@domain.com', 'person2@domain.com', 'person3@domain.com' );
+
+			$mailer->addRecipient($mailTo);
+			
+			$body   = "A message has been reported, message id = " . $reportedMsgId . "\nReport text = " . $reportText;
+			$mailer->setSubject('BES Encounters message reported');
+			$mailer->setBody($body);
+			
+			$send = $mailer->Send();
+			if ( $send !== true ) {
+				error_log ( 'Error sending email reporting message id = ' . $reportedMsgId );
+			} 
 		}
 	}
 }

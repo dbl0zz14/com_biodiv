@@ -103,6 +103,7 @@ class BioDivViewBadges extends JViewLegacy
 			
 			// Is it a teacher or ecologist wanting a view of student badges?
 			$this->viewOnly = $input->getInt('viewonly', 0);			
+			$this->teacher = $input->getInt('teacher', 0);			
 			
 			$this->badgeGroups = array();
 			
@@ -183,7 +184,12 @@ class BioDivViewBadges extends JViewLegacy
 				$allTasks = array();
 				
 				if ( $badgeGroupId ) {
-					$allTasks = Biodiv\Task::getAllStudentTasksToView ( $badgeGroupId );
+					if ( $this->teacher ) {
+						$allTasks = Biodiv\Task::getAllTeacherTasksToView ( $badgeGroupId );
+					}
+					else {
+						$allTasks = Biodiv\Task::getAllStudentTasksToView ( $badgeGroupId );
+					}
 				}
 				
 				foreach ( $allTasks as $task ) {
