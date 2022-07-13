@@ -660,7 +660,7 @@ async function loadPdfThumb () {
 	
 	let pdfOriginalWidth = viewport.width;
 	
-	let scaleRequired = 0.9 * imgWidth / pdfOriginalWidth;
+	let scaleRequired = 1.2 * imgWidth / pdfOriginalWidth;
 	
 	const thumbCanvas = document.getElementById(canvasId);
 	const context = thumbCanvas.getContext("2d");
