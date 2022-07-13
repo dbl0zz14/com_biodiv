@@ -78,19 +78,29 @@ else {
 		$resourceFile = new Biodiv\ResourceFile ( $resourceId, 
 												$resourceFile["resource_type"],
 												$resourceFile["person_id"],
+												$resourceFile["school_id"],
 												$resourceFile["access_level"],
 												$resourceFile["set_id"],
 												$resourceFile["upload_filename"],
+												$resourceFile["title"],
 												$resourceFile["description"],
+												$resourceFile["source"],
+												$resourceFile["external_text"],
 												$resourceFile["filetype"],
 												$resourceFile["is_pin"],
 												$resourceFile["is_fav"],
 												$resourceFile["is_like"],
 												$resourceFile["num_likes"],
+												$resourceFile["num_in_set"],
 												$resourceFile["s3_status"],
 												$resourceFile["url"]);
 		
-		$resourceFile->printHtml();
+		if ( $this->student ) {
+			$resourceFile->printStudentHtml();
+		}
+		else {
+			$resourceFile->printHtml();
+		}
 		
 	}
 

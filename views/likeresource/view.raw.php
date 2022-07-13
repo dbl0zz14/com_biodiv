@@ -26,8 +26,6 @@ class BioDivViewLikeResource extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "LikeResource display function called" );
-		
 		// Get all the text snippets for this view in the current language
 		$this->translations = getTranslations("likeresource");
 		
@@ -46,16 +44,9 @@ class BioDivViewLikeResource extends JViewLegacy
 			
 			$this->isLike = $input->getInt('like', 0);
 			
-			error_log ( "LikeResource resource id = " . $this->resourceId );
-			error_log ( "LikeResource is like = " . $this->isLike );
-			
 			if ( $this->resourceId ) {
 				
-				error_log ( "Got a resource id" );
-				
 				$db = JDatabaseDriver::getInstance(dbOptions());
-				
-				error_log ( "Got db" );
 				
 				$query = $db->getQuery(true)
 						->select("LR.lr_id, LR.resource_id from LikedResource LR")
@@ -67,13 +58,9 @@ class BioDivViewLikeResource extends JViewLegacy
 				$existingLikes = $db->loadAssocList();
 				
 							
-				error_log ( "Got " . count($existingLikes) . " existing favourites for this resource and person" );
-					
 				if ( $this->isLike ) {
 					// add to favourites for this person if not already
 					if ( count($existingLikes) == 0 ) {
-						
-						error_log ( "Inserting new like" );
 						
 						$like = new stdClass();
 						$like->person_id = $this->personId;
@@ -114,6 +101,7 @@ class BioDivViewLikeResource extends JViewLegacy
 				$db->setQuery($query);
 				
 				$this->totalLikes = $db->loadResult();
+				
 			}
 
 		}

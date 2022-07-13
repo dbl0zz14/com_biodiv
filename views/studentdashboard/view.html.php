@@ -78,11 +78,11 @@ class BioDivViewStudentDashboard extends JViewLegacy
 	// Check for award thresholds being reached
 	Biodiv\Award::updateAwards();
 	
-	$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+	//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 	
 	$this->totalBadges = Biodiv\Badge::getTotalBadges();
 		
-	$this->totalStars = Biodiv\Award::getTotalStars();
+	//$this->totalStars = Biodiv\Award::getTotalStars();
 	
 	if ( !$this->firstLoad ) {
 		
@@ -95,7 +95,7 @@ class BioDivViewStudentDashboard extends JViewLegacy
 		$this->notifications = Biodiv\SchoolCommunity::getNotifications();
 		Biodiv\SchoolCommunity::notificationsSeen();
 		
-		if ( count($this->notifications) > 0 ) {
+		if ( $this->notifications && count($this->notifications) > 0 ) {
 			
 			$negatives = array();
 			for ( $i=0; $i<count($this->notifications); $i++ ) {

@@ -33,6 +33,8 @@ else {
 	}
 	else {
 		
+		print '<div id="uploadFiles">';
+		
 		print '<div class="row">';
 
 		print '<div class="col-md-12">';
@@ -43,7 +45,7 @@ else {
 		
 		print '</div>';
 		
-		print '<form id="resourceUploadForm">';
+		print '<form id="taskUploadForm">';
 	
 	
 		$schoolId = $this->schoolRoles[0]['school_id'];
@@ -55,6 +57,8 @@ else {
 		print "<input type='hidden' name='resourceType' value='" . $resourceTypeId . "'/>";
 		print "<input type='hidden' name='task' value='" . $this->taskId . "'/>";
 		print "<input type='hidden' name='uploadName' value='" . $this->uploadName . "'/>";
+		print "<input type='hidden' name='source' value='user'/>";
+		print "<input type='hidden' name='tags' value='[".$this->moduleTagId."]'/>";
 		
 		
 		print '<div class="col-md-12">';
@@ -75,6 +79,8 @@ else {
 		print '</form>';
 
 		print '</div>'; // row
+		
+		print '</div>'; 
 	}
 }
 

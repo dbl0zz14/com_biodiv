@@ -35,6 +35,9 @@ class Badge {
 	
 	private $tasks;
 	
+	private $moduleId;
+	private $moduleIcon;
+	
 	
 	function __construct( $badgeId )
 	{
@@ -50,6 +53,10 @@ class Badge {
 			$this->lockedImage = $details["locked_image"];
 			$this->badgeGroupId = $details["badge_group"];
 			$this->badgeGroupName = codes_getName ( $this->badgeGroupId, "badgegroup" );
+			
+			$this->moduleId = $details["module_id"];
+			$module = Module::getModule($this->moduleId);
+			$this->moduleIcon = $module->icon;
 			
 			$this->personId = userID();
 			
@@ -138,10 +145,11 @@ class Badge {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("T.task_id, IFNULL(ST.status, ".self::LOCKED.") as status, ST.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon from Task T")
+			->select("T.task_id, IFNULL(ST.status, ".self::LOCKED.") as status, ST.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon, M.icon as module_icon from Task T")
 			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_id = " . $this->badgeId .
 						" and B.winner_type = 'STUDENT'")
 			->innerJoin("BadgeGroup BG on B.badge_group = BG.group_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->leftJoin("StudentTasks ST on ST.task_id = T.task_id and ST.person_id = " . $this->personId . $statusClause )
 			->order("T.task_id");
 			
@@ -203,13 +211,21 @@ class Badge {
 			$statusClause = " and ST.status = " . $taskStatus;
 		}
 		
+		if ( $winnerType == "STUDENT" ) {
+			$nullStatus = self::LOCKED;
+		}
+		else {
+			$nullStatus = self::UNLOCKED;
+		}
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("T.task_id, IFNULL(TT.status, ".self::LOCKED.") as status, TT.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon from Task T")
+			->select("T.task_id, IFNULL(TT.status, ".$nullStatus.") as status, TT.species_unlocked, B.name as badge_name, T.name as task_name, T.species as species, T.description, T.points, T.image, T.article_id, T.counted_by, T.linked_task, BG.icon, M.icon as module_icon from Task T")
 			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_id = " . $this->badgeId .
 						" and B.winner_type = " . $db->quote($winnerType) )
 			->innerJoin("BadgeGroup BG on B.badge_group = BG.group_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->leftJoin("TeacherTasks TT on TT.task_id = T.task_id and TT.person_id = " . $this->personId . $statusClause)
 			->order("T.task_id");
 			
@@ -308,6 +324,8 @@ class Badge {
 		$resultsArray["total_tasks"] = $this->totalTasks;
 		$resultsArray["num_points"] = $this->numPoints;
 		$resultsArray["total_points"] = $this->totalPoints;
+		$resultsArray["module_id"] = $this->moduleId;
+		$resultsArray["module_icon"] = $this->moduleIcon;
 		
 		
 		$tasks = null;
@@ -343,6 +361,39 @@ class Badge {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
+		$newTasks = array();
+				
+			
+		// For teachers and ecologists all tasks are unlocked, so just copy any new ones.
+		$query = $db->getQuery(true)
+			->select("T.* from Task T")
+			->innerJoin("Badge B on B.badge_id = T.badge_id " .
+				" and T.role_id = " . $roleId )
+			->where("T.task_id not in (select task_id from TeacherTasks where person_id = " . $personId . ")" )
+			->order("T.task_id");
+			
+		$db->setQuery($query);
+		
+		//error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$newTasks = $db->loadObjectList();
+		
+		
+		foreach ( $newTasks as $newTask ) {
+	
+			$fields = new \StdClass();
+			$fields->person_id = $personId;
+			$fields->task_id = $newTask->task_id;
+			$fields->status = self::UNLOCKED;
+			
+			$success = $db->insertObject("TeacherTasks", $fields);
+			if(!$success){
+				error_log ( "TeacherTasks insert failed" );
+			}
+		}
+		
+		
+		/*
 		$query = $db->getQuery(true)
 			->select("B.badge_group, max(lock_level) as lock_level from Badge B")
 			->innerJoin("Task T on B.badge_id = T.badge_id")
@@ -430,6 +481,9 @@ class Badge {
 			}
 			
 		}
+		*/
+		
+		
 		return $completedBadgeGroups;
 		
 				
@@ -446,7 +500,7 @@ class Badge {
 		return self::unlockNonStudentBadges ( SchoolCommunity::ECOLOGIST_ROLE );
 	}
 	
-	public static function unlockBadges ( $personId = null ) {
+	public static function unlockBadgesOrig ( $personId = null ) {
 		
 		if ( !$personId ) {
 			$personId = userID();
@@ -546,9 +600,133 @@ class Badge {
 		return $completedBadgeGroups;
 	}
 	
-	public static function getTotalBadges ( $module=1 ) {
+	public static function unlockBadges ( $personId = null ) {
+		
+		if ( !$personId ) {
+			$personId = userID();
+		}
+		
+		if ( !$personId ) {
+			return array();
+		}
+		
+		//$modules = Module::getModules();
+		
+		$completedBadgeGroups = array();
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("B.module_id, B.badge_group, max(lock_level) as lock_level from Badge B")
+			->innerJoin("Task T on B.badge_id = T.badge_id")
+			->innerJoin("StudentTasks ST on ST.task_id = T.task_id and ST.person_id = " . $personId)
+			->group("B.module_id, B.badge_group");
+		
+		$db->setQuery($query);
+		
+		//error_log("unlockBadges lock levels query created: " . $query->dump());
+		
+		$allLockLevels = $db->loadObjectList();
+		
+		
+		if ( count($allLockLevels) == 0 ) {
+			// new user
+			$query = $db->getQuery(true)
+				->select("distinct B.module_id, B.badge_group, 0 as lock_level from Badge B");
+			
+			$db->setQuery($query);
+			
+			//error_log("unlockBadges lock levels query created: " . $query->dump());
+			
+			$allLockLevels = $db->loadObjectList();
+			
+		}
+		
+		$lockLevels = array();
+		
+		foreach ( $allLockLevels as $level ) {
+			$moduleId = $level->module_id;
+			$badgeGroup = $level->badge_group;
+			if ( !array_key_exists($moduleId, $lockLevels ) ) {
+				$lockLevels[$moduleId] = array();
+			}
+			$lockLevels[$moduleId][$badgeGroup] = $level->lock_level;
+		}
+		
+		$query = $db->getQuery(true)
+			->select("B.module_id, B.badge_group, count(ST.task_id) as num_incomplete from Badge B")
+			->innerJoin("Task T on B.badge_id = T.badge_id")
+			->leftJoin("StudentTasks ST on ST.task_id = T.task_id and ST.person_id = " . $personId . " and ST.status < " . self::COMPLETE)
+			->group("B.module_id, B.badge_group");	
+		
+		$db->setQuery($query);
+		
+		//error_log("unlockBadges incomplete query created: " . $query->dump());
+		
+		$incompleteBadges = $db->loadAssocList();
+		
+		foreach ( $incompleteBadges as $groupCount ) {
+			
+			if ( $groupCount["num_incomplete"] == 0 ) {
+				
+				$moduleId = $groupCount["module_id"];
+				$groupId = $groupCount["badge_group"];
+				
+				if ( array_key_exists($moduleId, $lockLevels) and array_key_exists($groupId, $lockLevels[$moduleId]) ) {
+					$newLockLevel = $lockLevels[$moduleId][$groupId] + 1;
+				}
+				else {
+					$newLockLevel = 1;
+				}
+			
+				// All tasks complete so unlock the next level by unloading the next level into StudentTasks
+				$query = $db->getQuery(true)
+					->select("T.* from Task T")
+					->innerJoin("Badge B on B.badge_id = T.badge_id and module_id = " .$moduleId. " and badge_group = " . $groupId . " and B.lock_level = " . $newLockLevel .
+						" and T.role_id = " . SchoolCommunity::STUDENT_ROLE )
+					->order("T.task_id");
+					
+				$db->setQuery($query);
+				
+				//error_log("unlockBadges new tasks query created: " . $query->dump());
+				
+				$newTasks = $db->loadObjectList();
+				
+				if ( count($newTasks) == 0 ) {
+					$completedBadgeGroups[] = array($moduleId, $groupCount["badge_group"]);
+				}
+				else {
+					
+					foreach ( $newTasks as $newTask ) {
+				
+						$fields = new \StdClass();
+						$fields->person_id = $personId;
+						$fields->task_id = $newTask->task_id;
+						$fields->status = self::UNLOCKED;
+						
+						$success = $db->insertObject("StudentTasks", $fields);
+						if(!$success){
+							error_log ( "StudentTasks insert failed" );
+						}
+					}
+				}
+				
+			}
+			
+		}
+		return $completedBadgeGroups;
+	}
+	
+	
+	public static function getTotalBadges ( $module=null ) {
 		
 		$personId = userID();
+		
+		$moduleStr = "";
+		
+		if ( $module ) {
+			$moduleStr = " and B.module_id = " . $module;
+		}
 		
 		$numBadges = array();
 		
@@ -559,7 +737,7 @@ class Badge {
 			$query = $db->getQuery(true)
 				->select("COUNT(*) from StudentTasks ST")
 				->innerJoin("Task T on T.task_id = ST.task_id and ST.person_id = ". $personId )
-				->innerJoin("Badge B on B.badge_id = T.badge_id and B.module_id = " . $module)
+				->innerJoin("Badge B on B.badge_id = T.badge_id" . $moduleStr)
 				->where("ST.status >= " . self::COMPLETE )
 				->where("T.role_id = " . SchoolCommunity::STUDENT_ROLE );
 				

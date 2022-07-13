@@ -13,31 +13,40 @@ function uploadDone () {
 
 function activateTeacherTabs () {
 	
-	jQuery('.browseBadges').click( function () {
+	jQuery('.manageTasksBtn').click( function () {
 		
 		jQuery(".manageTasksBtn").removeClass("active");
 		jQuery(this).addClass("active");
 	});
 	
+	/*
 	jQuery('.allStudentBadges').click( function () {
 		
+		let divId = this.id;
+		let idbits = divId.split("_");
+		let moduleId = idbits.pop();
+	
 		jQuery(".manageTasksBtn").removeClass("active");
 		jQuery(this).addClass("active");
 		
-		let url = BioDiv.root + "&view=viewbadges&format=raw";
+		let url = BioDiv.root + "&view=viewbadges&format=raw&module=" + moduleId;
 		jQuery('#displayArea').load(url, activatebadgeButtons);
 	});
 	
 	jQuery('.allTeacherTasks').click( function () {
 		
+		let divId = this.id;
+		let idbits = divId.split("_");
+		let moduleId = idbits.pop();
+	
 		jQuery(".manageTasksBtn").removeClass("active");
 		jQuery(this).addClass("active");
 		
-		let url = BioDiv.root + "&view=viewbadges&format=raw&teacher=1";
+		let url = BioDiv.root + "&view=viewbadges&format=raw&teacher=1&module=" + moduleId;
 		jQuery('#displayArea').load(url, activatebadgeButtons);
 	});
 	
-	
+	*/
 	
 }
 
@@ -46,7 +55,7 @@ jQuery(document).ready(function(){
 	
 	activateTeacherTabs();
 	
-	jQuery(".browseBadges").trigger("click");
+	jQuery(".chooseModule").trigger("click");
 	
 	
 	

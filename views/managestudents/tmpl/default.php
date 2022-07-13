@@ -13,7 +13,7 @@ error_log ( "ManageStudents template called" );
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 	
 }
 
@@ -105,15 +105,20 @@ else {
 			$resourceFile = new Biodiv\ResourceFile ( $resFile["resource_id"], 
 												$resFile["resource_type"],
 												$resFile["person_id"],
+												$resFile["school_id"],
 												$resFile["access_level"],
 												$resFile["set_id"],
 												$resFile["upload_filename"],
+												$resFile["title"],
 												$resFile["description"],
+												$resFile["source"],
+												$resFile["external_text"],
 												$resFile["filetype"],
 												$resFile["is_pin"],
 												$resFile["is_fav"],
 												$resFile["is_like"],
 												$resFile["num_likes"],
+												$resFile["num_in_set"],
 												$resFile["s3_status"],
 												$resFile["url"]);
 			$resourceFile->printHtml( $task->st_id );

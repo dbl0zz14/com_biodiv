@@ -100,9 +100,9 @@ function animateAvatar () {
 
 // -------------------------------  Badges
 
-function displayBadges ( badgeGroup, viewOnly = false, viewTeacher = false ) {
+function displayBadges ( moduleId, badgeGroup, viewOnly = false, viewTeacher = false ) {
 	
-	let url = BioDiv.root + "&view=badges&format=raw&group=" + badgeGroup;
+	let url = BioDiv.root + "&view=badges&format=raw&module=" + moduleId + "&group=" + badgeGroup;
 	
 	if ( viewOnly ) {
 		url += "&viewonly=1";
@@ -116,9 +116,9 @@ function displayBadges ( badgeGroup, viewOnly = false, viewTeacher = false ) {
 };
 
 
-function displayTeacherBadges ( badgeGroup ) {
+function displayTeacherBadges ( moduleId, badgeGroup ) {
 	
-	let url = BioDiv.root + "&view=badges&format=raw&group=" + badgeGroup + "&viewonly=1&teacher=1";
+	let url = BioDiv.root + "&view=badges&format=raw&module=" + moduleId + "&group=" + badgeGroup + "&viewonly=1&teacher=1";
 	
 	jQuery('#displayBadges').load(url, tasksLoaded);
 	
@@ -325,6 +325,7 @@ function unlockSpecies () {
 function setUploadButtons () {
 	
 	setUploadButton();
+	setTaskUploadButton();
 	
 	jQuery(".doneNoFiles").click( function() {
 		let noFilesId = this.id;
@@ -333,6 +334,7 @@ function setUploadButtons () {
 		
 		let url = BioDiv.root + "&view=updatetask&format=raw&done=1&id=" + taskId;
 		jQuery('#displayArea').load(url, taskDoneOrUploaded);
+		//jQuery('#uploadTask').load(url, taskDoneOrUploaded);
 	});
 	
 	
@@ -340,19 +342,41 @@ function setUploadButtons () {
 
 function taskDoneOrUploaded () {
 	
-	jQuery ('.browseTasksButton').click( function () {
-		browseBadges();
+	jQuery ('.reloadBtn').click( function () {
+		reloadCurrentPage();
 	});
 	
 	animateAvatar();
 	
 }
 
-
-function browseBadges () {
+/*
+function browseBadges ( moduleId = 1 ) {
 	
-	let url = BioDiv.root + "&view=browsebadges&format=raw";
+	let url = BioDiv.root + "&view=browsebadges&format=raw&module=" + moduleId;
 	jQuery('#displayArea').load(url, activatebadgeButtons);
+	
+}
+*/
+
+function chooseModule () {
+	
+	let url = BioDiv.root + "&view=choosemodule&format=raw";
+	jQuery('#displayArea').load(url, activateActivityButtons);
+	
+}
+
+function chooseTeacherModule () {
+	
+	let url = BioDiv.root + "&view=choosemodule&format=raw&teacher=1";
+	jQuery('#displayArea').load(url, activateActivityButtons);
+	
+}
+
+function chooseStudentModule () {
+	
+	let url = BioDiv.root + "&view=choosemodule&format=raw&student=1";
+	jQuery('#displayArea').load(url, activateActivityButtons);
 	
 }
 
@@ -363,6 +387,7 @@ function activatebadgeButtons () {
 		let buttonId = this.id;
 		let idbits = buttonId.split("_");
 		let badgeGroupId = idbits.pop();
+		let moduleId = idbits.pop();
 		
 		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
 		
@@ -373,13 +398,14 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		displayBadges ( badgeGroupId );
+		displayBadges ( moduleId, badgeGroupId );
 	} );
 	
 	jQuery('.viewGroupBtn').click( function () {
 		let buttonId = this.id;
 		let idbits = buttonId.split("_");
 		let badgeGroupId = idbits.pop();
+		let moduleId = idbits.pop();
 		
 		jQuery('.viewGroupBtn').find('.panel').removeClass("active");
 		
@@ -390,13 +416,14 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		displayBadges ( badgeGroupId, true );
+		displayBadges ( moduleId, badgeGroupId, true );
 	} );
 	
 	jQuery('.viewTeacherGroupBtn').click( function () {
 		let buttonId = this.id;
 		let idbits = buttonId.split("_");
 		let badgeGroupId = idbits.pop();
+		let moduleId = idbits.pop();
 		
 		jQuery('.viewTeacherGroupBtn').find('.panel').removeClass("active");
 		
@@ -407,10 +434,15 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		displayTeacherBadges ( badgeGroupId );
+		displayTeacherBadges ( moduleId, badgeGroupId );
 	} );
 	
 	jQuery('.completeTasks').click( function () {
+		
+		let buttonId = this.id;
+		let idbits = buttonId.split("_");
+		let moduleId = idbits.pop();
+		
 		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
 		
 		jQuery(this).find('.panel').addClass("active");
@@ -420,12 +452,17 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		let url = BioDiv.root + "&view=badges&format=raw&complete=1";
+		let url = BioDiv.root + "&view=badges&format=raw&module=" + moduleId + "&complete=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});
 	
 	
 	jQuery('.unlockedTasks').click( function () {
+		
+		let buttonId = this.id;
+		let idbits = buttonId.split("_");
+		let moduleId = idbits.pop();
+		
 		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
 		
 		jQuery(this).find('.panel').addClass("active");
@@ -435,12 +472,17 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		let url = BioDiv.root + "&view=badges&format=raw&unlocked=1";
+		let url = BioDiv.root + "&view=badges&format=raw&module=" + moduleId + "&unlocked=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});
 	
 	
 	jQuery('.suggestTask').click( function () {
+		
+		let buttonId = this.id;
+		let idbits = buttonId.split("_");
+		let moduleId = idbits.pop();
+		
 		jQuery('.browseBadgesBtn').find('.panel').removeClass("active");
 		
 		jQuery(this).find('.panel').addClass("active");
@@ -450,11 +492,65 @@ function activatebadgeButtons () {
 			block: "start" // or "end"
 		});
 		
-		let url = BioDiv.root + "&view=badges&format=raw&suggest=1";
+		let url = BioDiv.root + "&view=badges&format=raw&module=" + moduleId + "&suggest=1";
 		jQuery('#displayBadges').load(url, tasksLoaded);
 	});
+	/*
+	jQuery('.browseBadges').click( function () {
+		
+		let id = jQuery(this).attr("id");
+		let idbits = id.split("_");
+		let moduleId = idbits.pop();
+	
+		browseBadges(moduleId);
+		
+	});
+	*/
 	
 	jQuery('.helpButton').click( displayHelpArticle );
+}
+
+
+function activateActivityButtons () {
+	
+	setReloadPage();
+	/*
+	jQuery('.browseBadges').click( function () {
+		
+		let id = jQuery(this).attr("id");
+		let idbits = id.split("_");
+		let moduleId = idbits.pop();
+	
+		browseBadges(moduleId);
+		
+	});
+	
+	jQuery('.allStudentBadges').click( function () {
+		
+		let divId = this.id;
+		let idbits = divId.split("_");
+		let moduleId = idbits.pop();
+	
+		jQuery(".manageTasksBtn").removeClass("active");
+		jQuery(this).addClass("active");
+		
+		let url = BioDiv.root + "&view=viewbadges&format=raw&module=" + moduleId;
+		jQuery('#displayArea').load(url, activatebadgeButtons);
+	});
+	
+	jQuery('.allTeacherTasks').click( function () {
+		
+		let divId = this.id;
+		let idbits = divId.split("_");
+		let moduleId = idbits.pop();
+	
+		jQuery(".manageTasksBtn").removeClass("active");
+		jQuery(this).addClass("active");
+		
+		let url = BioDiv.root + "&view=viewbadges&format=raw&teacher=1&module=" + moduleId;
+		jQuery('#displayArea').load(url, activatebadgeButtons);
+	});
+	*/
 }
 
 // -------------------------------  End of Badges stuff
@@ -525,11 +621,89 @@ function loadStudentCelebration () {
 	}
 	*/	
 
+function triggerForm () {
+	
+	jQuery(this).find("form").trigger("submit");
+}
+	
+
+function reloadCurrentPage () {
+	window.location.reload(true);
+}
+	
+
+function setReloadPage () {	
+	jQuery ('.reloadPage').click( function () {
+		reloadCurrentPage();
+	});
+}
+
+
+async function loadPdfThumb () {
+	
+	let pdfUrl = jQuery(this).data("pdfurl");
+	
+	const canvasId = jQuery(this).find('canvas').attr("id");
+	let pdfThumb = jQuery(this);
+	
+	let imgWidth = pdfThumb.width();
+	
+	const loadingTask = pdfjsLib.getDocument(pdfUrl);
+	
+	const pdf = await loadingTask.promise;
+	
+	const page = await pdf.getPage(1);
+	
+	const scale = 1;
+	const viewport = page.getViewport({ scale });
 	
 	
+	let pdfOriginalWidth = viewport.width;
+	
+	let scaleRequired = 0.9 * imgWidth / pdfOriginalWidth;
+	
+	const thumbCanvas = document.getElementById(canvasId);
+	const context = thumbCanvas.getContext("2d");
+
+	const transform = scaleRequired !== 1 
+	  ? [scaleRequired, 0, 0, scaleRequired, 0, 0] 
+	  : null;
+
+	//
+	// Render PDF page into canvas context
+	//
+	const renderContext = {
+	  canvasContext: context,
+	  transform,
+	  viewport,
+	};
+	page.render(renderContext);
+		
+	
+	
+	/*
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "../media/com_biodiv/js/pdfjs/pdf.worker.js";
+	
+	let pdfUrl = jQuery(this).data("pdfurl");
+		
+	console.log ("pdf url = " + pdfUrl);
+	
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+    '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+	
+	*/
+}
+
+function loadPdfThumbnails () {
+	jQuery(".pdfThumb").each(loadPdfThumb);
+}
 	
 	
 jQuery(document).ready(function(){
+	
+	setReloadPage();
+	
 	
 	// ------------------------------- new userAgent
 	
@@ -577,10 +751,28 @@ jQuery(document).ready(function(){
 		displayBadges ( badgeGroupId );
 		
 	});
-	
+	/*
 	jQuery('.browseBadges').click( function () {
 		
 		browseBadges();
+		
+	});
+	*/
+	jQuery('.chooseModule').click( function () {
+		
+		chooseModule();
+		
+	});
+	
+	jQuery('.chooseTeacherModule').click( function () {
+		
+		chooseTeacherModule();
+		
+	});
+	
+	jQuery('.chooseStudentModule').click( function () {
+		
+		chooseStudentModule();
 		
 	});
 	
@@ -597,6 +789,10 @@ jQuery(document).ready(function(){
 	jQuery('.menuHelpButton').click( displayHelpArticle );
 	
 	
+	jQuery(".formPanel").click( triggerForm );
+	
+	jQuery(".backBtn").click( function () { history.go(-1)} );
+	
 	
 	// ------------------------  End of dashboard controls
 	
@@ -611,6 +807,8 @@ jQuery(document).ready(function(){
 	jQuery(".studentTarget").each(loadStudentTarget);
 	
 	jQuery(".studentCelebration").each(loadStudentCelebration);
+	
+	loadPdfThumbnails();
 	
 	//loadAllProgress();
 	

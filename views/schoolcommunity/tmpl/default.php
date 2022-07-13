@@ -95,6 +95,81 @@ else {
 	
 	print '<div class="col-md-9 col-md-pull-3 col-sm-12 col-xs-12">';
 	
+	print '<div class="row">'; 
+	
+	print '<div id="displaySchoolCharts_Awards" class="col-md-12 col-sm-12 col-xs-12 displaySchoolCharts">';
+	
+	print '<div class="panel panel-default">';
+			
+		print '<div class="panel-body">';
+		
+		print '<div class="row">';
+		
+		$icon = '<span class="gold"><i class="fa fa-trophy"></i></span>';
+		
+		print '<div class="col-md-12 col-sm-12 col-xs-12">';
+		print '<div class="communityGroupName">';
+		print '<span class="gold"><i class="fa fa-trophy"></i></span> ';
+		print $this->translations['awards']['translation_text'];
+		print '</div>';
+		print '</div>';
+
+		//print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left"><strong>'.$groupName.'</strong></div>';
+		
+		print '</div>'; // row
+		
+		
+		//print '<div class="schoolsChartBox">';
+		print '<div class="schoolCharts">';
+		print '<table class="table table-condensed">';
+		print '<thead>';
+		//print '<th></th><th>School</th><th>% done</th>';
+		print '<th>School</th>';
+		
+		foreach ( $this->modules as $module ) {
+			print '<th class="text-center"><img class="img-responsive moduleAwardsIcon'.$module->name.'" src="'.$module->icon.'"></th>';
+		}
+		print '</thead>';
+		print '<tbody>';
+		
+		print '<tr id="displaySelectedCharts_Awards" class="displaySelectedCharts"></tr>';
+		
+		foreach ( $this->schoolAwards as $schoolName=>$schoolAward ) {
+			
+			$schoolId = 0;
+			if ( count($schoolAward) > 0 )
+			{
+				$firstModule = array_keys($schoolAward)[0];
+				$schoolId = $schoolAward[$firstModule]->schoolId;
+			}
+			print '<tr class="schoolProgress_'.$schoolId.'">';
+			
+			//print '<td>'.$position.'</td>';
+			//print '<td>'.$this->awardIcons[$awardType].'</td>';
+			print '<td>'.$schoolName.'</td>';
+			
+			foreach ( $this->moduleIds as $moduleId ) {
+				$awardIcon = '';
+				if ( array_key_exists($moduleId, $schoolAward) ) {
+					$awardType = $schoolAward[$moduleId]->awardType;
+					$awardIcon = $this->awardIcons[$awardType];
+				}
+				print '<td class="text-center">'.$awardIcon.'</td>';
+			}
+		}
+		
+		print '</tr>';
+		
+		print '</tbody>';
+		print '</table>';
+		print '</div>'; //schoolsChartBox
+		
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
 	
 
 
@@ -135,49 +210,68 @@ else {
 		print '<div class="schoolCharts">';
 		print '<table class="table table-condensed">';
 		print '<thead>';
-		print '<th></th><th>School</th><th>% done</th>';
+		//print '<th></th><th>School</th><th>% done</th>';
+		print '<th>School</th>';
+		
+		foreach ( $this->modules as $module ) {
+			print '<th class="text-center"><img class="img-responsive moduleIcon'.$module->name.'" src="'.$module->icon.'"></th>';
+		}
 		print '</thead>';
 		print '<tbody>';
 		//print '<div id="displaySelectedCharts_'. $groupId .'" class="displaySelectedCharts"></div>';
 		print '<tr id="displaySelectedCharts_'. $groupId .'" class="displaySelectedCharts"></tr>';
 		$position = 1;
-		$maxPoints = $this->data[$groupId]["maxPoints"];
+		//$maxPoints = $this->data[$groupId]["maxPoints"];
+		
+		// $errMsg = print_r ( $this->data[$groupId]["schools"], true );
+		// error_log ( "SchoolCommunity: " . $errMsg );
+		
+		
 		foreach ( $this->data[$groupId]["schools"] as $groupSchoolPoints ) {
 			
-			$school =  $groupSchoolPoints->school;
 			$schoolId =  $groupSchoolPoints->schoolId;
 			$schoolName = substr($groupSchoolPoints->schoolName, 0, 20);
-			$weightedPoints = $school->weightedPoints;
-			$pointsAvailable = $school->pointsAvailable;
-			$awardType = $groupSchoolPoints->awardType;
-			if ( !$awardType ) $awardType = 'NONE';
-			
+			$weightedPoints = $groupSchoolPoints->totalPoints;
+			$pointsAvailable = $groupSchoolPoints->totalPointsAvail;
 			
 			if ( $pointsAvailable > 0 ) {
-				$truePercentPoints = round(100*$weightedPoints/$pointsAvailable);
+				$truePercentPointsAll = round(100*$weightedPoints/$pointsAvailable);
 			}
 			else {
-				$truePercentPoints = 0;
+				$truePercentPointsAll = 0;
 			}
-			
-			if ( $maxPoints != 0 ) {
-				$widthPercent = round(100*$weightedPoints/$maxPoints);
-			}
-			else {
-				$widthPercent = 0;
-			}
-			
-			//$styleStr = 'width:'.$widthPercent.'%; background-color:'.$badgeColor;
 			
 			
 			print '<tr class="schoolProgress_'.$schoolId.'">';
 			
 			//print '<td>'.$position.'</td>';
-			print '<td>'.$this->awardIcons[$awardType].'</td>';
+			//print '<td>'.$this->awardIcons[$awardType].'</td>';
 			print '<td>'.$schoolName.'</td>';
-			print '<td>'.$truePercentPoints.'</td>';
+			
+			foreach ( $this->moduleIds as $moduleId ) {
+				
+				$truePercentPoints = 0;
+				if ( array_key_exists($moduleId, $groupSchoolPoints->modules) ) {
+			
+					$weightedPoints = $groupSchoolPoints->modules[$moduleId]->school->weightedPoints;
+					$pointsAvailable = $groupSchoolPoints->modules[$moduleId]->school->pointsAvailable;
+					
+					if ( $pointsAvailable > 0 ) {
+						$truePercentPoints = round(100*$weightedPoints/$pointsAvailable);
+					}
+					else {
+						$truePercentPoints = 0;
+					}
+				}
+			
+				print '<td class="text-center">'.$truePercentPoints.'</td>';
+				
+			}
 			
 			print '</tr>';
+			
+			// print '<td class="text-center">'.$groupSchoolPoints->totalPoints.'</td>';
+			// print '<td class="text-center">'.$groupSchoolPoints->totalPointsAvail.'</td>';
 			
 			/*
 			print '<div class="row schoolProgress_'.$schoolId.'">';
@@ -213,60 +307,8 @@ else {
 	
 	print '</div>'; // row  allSchoolsProgress
 	
-	// print '<div class="row">';
-		
-	// print '<div class="col-md-12">';
-	
-	// // ----------------------------------- School spotlight
-	
-	// print '<div class="panel panel-default">';
-	// print '<div class="panel-body">';
-	// print '<div id="schoolSpotlight">';
-	// print '</div>'; // schoolSpotlight
-	
-	// print '</div>'; // panel-body
-	// print '</div>'; // panel
-	
-	// print '</div>'; // col-12
-	
-	// print '</div>'; // row
-	
 	print '</div>'; // col-9
 	
-	// print '<div class="col-md-3 col-sm-12 col-xs-12">';
-	
-	// // -------------------------- School search 
-	
-	// print '<div class="form-group has-feedback">';
-	// print '  <div class="input-group">';
-	// print '    <span class="input-group-addon" style="background-color:#FFFFFF; border-bottom-left-radius:25px; border-top-left-radius:25px;"><span class="glyphicon glyphicon-search"></span></span>';
-	// print '    <input type="search" class="form-control" id="searchSchools" placeholder="'.
-			// $this->translations['search_schools']['translation_text'].
-			// '" style="border-left: 0px;border-bottom-right-radius:25px; border-top-right-radius:25px;">';
-	// print '  </div>';
-	// print '</div>	';
-	
-	
-	// print '<div class="list-group btn-group-vertical btn-block" role="group" aria-label="Resource Buttons">';
-	
-	// // Pinned resources and latest upload
-	
-	// foreach($this->schools as $school){
-		
-		// $schoolId = $school->schoolId;
-		// $schoolName = $school->schoolName;
-				
-		// print '<button type="button" id="school_'.$schoolId.'" class="list-group-item btn btn-block school_btn" style="white-space: normal;">';
-		
-		// print '<h5>'.$schoolName.'</h5>';
-		
-		// print '</button>';
-	// }
-
-	// print '</div>'; // list-group
-	
-	// print '</div>'; // col-3
-
 	
 	print '</div>'; // row
 	

@@ -42,10 +42,15 @@ class BioDivViewResourceUpload extends JViewLegacy
 		else {
 			
 			// Get the resource types
-			$this->resourceTypes = codes_getList ( "resource" );
+			//$this->resourceTypes = Biodiv\ResourceFile::getResourceTypes();
+			
+			// Get the possible tags
+			//$this->tagGroups = Biodiv\ResourceFile::getResourceTags();
 			
 			// What school id to use?
-			$this->schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
+			//$this->schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
+			
+			//$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
 		}
 
 		// Display the view

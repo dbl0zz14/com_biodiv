@@ -175,7 +175,7 @@ function uploadSchoolTask(e) {
 	
 	jQuery("#schoolTaskMsg").empty();
 	
-	let url = BioDiv.root + "&view=resourceset&format=raw";
+	//let url = BioDiv.root + "&view=resourceset&format=raw";
 	
 	e.preventDefault();
 	
@@ -209,9 +209,14 @@ function uploadSchoolTask(e) {
 		fd.append("uploadDescription", uploadDescription);
 		
 		fd.append("schoolTask", "1");
+		//fd.append("school", "1");
+		
+		fd.append("source", "role");
 		
 		
-		url = BioDiv.root + "&view=resourceset&format=raw";
+		//url = BioDiv.root + "&view=resourceset&format=raw";
+		//url = BioDiv.root + "&view=taskupload&format=raw";
+		let url = BioDiv.root + "&view=newresourceset&format=raw";
 		
 		//jQuery(".loader").removeClass("invisible");
 	
@@ -233,6 +238,7 @@ function uploadSchoolTask(e) {
 
 function schoolResourceSetCreated ( data ) {
 	jQuery("#displayArea").html(data);
+	//jQuery("#uploadFiles").html(data);
 	doSchoolUpload();
 }
 

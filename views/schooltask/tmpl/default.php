@@ -14,7 +14,7 @@ error_log ( "SchoolTasks template called" );
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 	
 }
 else if ( !$this->isTeacher ) {
@@ -48,6 +48,7 @@ else {
 	print '<div id="contentArea" class="row schoolTasksRow">';
 	*/
 	
+	//print '<div id="displayArea">';
 	print '<div class="row">';
 	print '<form id="schoolTaskForm">';
 	
@@ -60,7 +61,8 @@ else {
 	print "<input type='hidden' name='resourceType' value='" . $resourceTypeId . "'/>";
 	//print "<input type='hidden' name='task' value='" . $this->taskId . "'/>";
 	//print "<input type='hidden' name='uploadName' value='" . $this->uploadName . "'/>";
-	
+	//print "<input type='hidden' name='source' value='role'/>";
+		
 
 	print '<div class="col-md-6">';
 	
@@ -76,11 +78,28 @@ else {
 	
 	foreach($this->allTasks as $task){
 		
-		print '<button id="schoolTask_'.$task->task_id.'" type="button" class="list-group-item btn btn-block schoolTask" style="white-space: normal;">';
+		$moduleId = $task->module_id;
+		$moduleImg = $task->icon;
+		$imgClass = "statusModuleIcon" . $task->module_name;
+		$groupImg = $task->badge_icon;
 		
-		print '<h5>'.$task->badge_group. ' ' . $this->translations['badge']['translation_text'] . '. ' .$task->badge_name. ' - ' . $task->name . 
+		print '<button id="schoolTask_'.$task->task_id.'" type="button" class="list-group-item btn btn-block schoolTask " style="white-space: normal;" data-module=".$moduleId.">';
+		print '<div class="row">';
+		print '<div class="col-md-3 col-sm-3 col-xs-3">';
+		print '<div class="row">';
+		print '<div class="col-md-6 col-sm-6 col-xs-6">';
+		print '<img src="'.$moduleImg.'" class="'.$imgClass.'">';
+		print '</div>'; // col-6
+		print '<div class="col-md-6 col-sm-6 col-xs-6">';
+		print '<img src="'.$groupImg.'" class="img-responsive schoolTaskGroupIcon">';
+		print '</div>'; // col-6
+		print '</div>'; // row
+		print '</div>'; // col-3
+		print '<div class="col-md-9 col-sm-9 col-xs-9 text-left">';
+		print '<h5> '.$task->module_name. ' ' . $task->badge_group. ' ' . $this->translations['badge']['translation_text'] . '. ' .$task->badge_name. ' - ' . $task->name . 
 					'</h5><p><small>'.$task->description.'</small></p>';
-			
+		print '</div>'; // col-9
+		print '</div>'; // row	
 		print '</button>';
 	}
 
@@ -136,6 +155,8 @@ else {
 	print '</form>';
 	
 	print '</div>'; // row
+	
+	//print '</div>'; // #displayArea
 	
 }
 

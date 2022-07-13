@@ -51,10 +51,14 @@ class BioDivViewTaskUpload extends JViewLegacy
 			$this->badgeName = $this->task->getBadgeName();
 			$this->lockLevel = $this->task->getLockLevel();
 			$this->taskName = $this->task->getTaskName();
+			$this->moduleTagId = $this->task->getModuleTagId();
 			
 			//error_log ( "Got task details" );
 			
-			$this->uploadName = $this->badgeGroup . ' ' . $this->translations['badge']['translation_text'] . ': ' . $this->badgeName;
+			$this->uploadName = $this->badgeName;
+			
+			// if ( strlen($this->uplo
+			// $this->uploadName = $this->badgeGroup . ': ' . $this->badgeName;
 			
 			//error_log ( "Upload name set to " . $this->uploadName );
 			

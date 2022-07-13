@@ -48,6 +48,7 @@ class BioDivViewResourceFile extends JViewLegacy
 				
 				$this->resourceFile = Biodiv\ResourceFile::createResourceFileFromId($this->resourceId);
 				
+				/*
 				error_log ( "Constructed ResourceFile object" );
 				
 				$this->resourceFiletype = $this->resourceFile->getFiletype ();
@@ -59,7 +60,7 @@ class BioDivViewResourceFile extends JViewLegacy
 				error_log ( "File type main type = " . $this->mainType );
 				
 				$this->resourceUrl = $this->resourceFile->getUrl ();
-				
+				*/
 			}
 
 		}

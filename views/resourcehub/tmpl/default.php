@@ -49,102 +49,231 @@ else {
 	
 	
 	print '<div class="row fullPageHeight">';
-
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	
 	
 	// ---------------------------- Filter buttons, search and new upload
 	
-	print '<div class="col-md-5">';
 	
-	print '<div class="row filterRow">';
-	
-	print '<div class="col-md-12">';
-	
-	print '<div class="btn-group" role="group" aria-label="resource filters">';
-  
-
-	print '<div class="btn btn-info pinned filterButton active ">';
-	print $this->translations['pinned_resources']['translation_text'];
-	print '</div>';
-	
-	print '<div class="btn btn-info favourites filterButton ">';
-	print $this->translations['favourites']['translation_text'];
-	print '</div>';
-	
-	print '<div class="btn btn-info latestUpload filterButton ">';
-	print $this->translations['latest_upload']['translation_text'];
-	print '</div>';
-	
-	print '<div class="btn-group">';
-	print '<button type="button" class="btn btn-info dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    '.$this->translations['choose_type']['translation_text'].' <span class="caret"></span>';
-	print '  </button>';
-	print '  <ul class="dropdown-menu">';
-	foreach($this->resourceTypes as $resType){
-		
-		$resTypeId = $resType[0];
-		$resTypeName = $resType[1];
-		
-		print '<li><button type="button" class="btn btn-info btn-block resource-btn" data-resource-type="'.$resTypeId.'" >';
-		
-		print $resTypeName;
-		
-		print '</button></li>';
-	}
-	print '  </ul>';
-	print '</div>'; // btn-group
-	
-	print '</div>'; // btn-group
-	
-	print '</div>'; // col-12
-	
-	print '</div>'; // row
-	
-	print '</div>'; // col-5
-	
-	print '<div class="col-md-5">';
-
 	// ----------------- Search and upload button-------------------- 
 	
-	print '<div class="row searchResourcesRow">';
+	print '<div class="row searchRow">';
+
+	print '<div class="col-md-4 col-md-push-8 col-sm-4 col-sm-push-8 col-xs-12 text-right">';
+	print '<button type="button" class="btn btn-primary resourceUpload" data-toggle="modal" data-target="#uploadModal" >'.$this->translations['upload']['translation_text'].'</button>';
+	print '</div>'; // col-4
 	
-	print '<div class="form-group col-md-12 col-sm-12 col-xs-12">';
-	print '<div class="form-group has-feedback">';
+	print '<div class="col-md-8 col-md-pull-4 col-sm-8 col-sm-pull-4 col-xs-12">';
+
+	print '<div class="searchRes">';
+
+	$searchPage = JURI::root() . "/" . $this->translations['search_page']['translation_text'];
+
+	print '<form class="form-inline hidden-xs" action="'.$searchPage.'" method = "GET">';
+	
+	print '    <input type="search" name="search" class="form-control" id="searchResources" placeholder="Search..." style="border-right: 0px;border-bottom-left-radius:25px; border-top-left-radius:25px;">';
+	
+	print '<button class="btn btn-info searchResourcesBtn" type="submit" ><span class="glyphicon glyphicon-search" ></span></button>';
+	
+	
+	print '</form>';
+	
+	print '<form class="vSpaced hidden-lg hidden-sm" action="'.$searchPage.'" method = "GET">';
+	
 	print '  <div class="input-group">';
 	print '    <span class="input-group-addon" style="background-color:#FFFFFF; border-bottom-left-radius:25px; border-top-left-radius:25px;"><span class="glyphicon glyphicon-search"></span></span>';
-	print '    <input type="search" class="form-control" id="searchResources" placeholder="Search..." style="border-left: 0px;border-bottom-right-radius:25px; border-top-right-radius:25px;">';
-	print '  </div>'; // input-group
-	print '</div>	'; // form-group
+	print '    <input type="search" name="search" class="form-control" id="searchResourcesSmall" placeholder="Search..." style="border-top-right-radius:25px;border-bottom-right-radius:25px;">';
+	print '</div>'; // input-group
+	//print '<button class="btn btn-info searchResourcesBtn" type="submit" ><span class="glyphicon glyphicon-search" ></span></button>';
+	
+	
+	//print '<div class=" col-md-10 col-sm-10 col-xs-8">';
+	//print '<div class="form-group searchFormGroup">';
+	//print '<div class="form-group has-feedback">';
+	//print '  <div class="input-group">';
+	//print '    <span class="input-group-addon" style="background-color:#FFFFFF; border-bottom-left-radius:25px; border-top-left-radius:25px;"><span class="glyphicon glyphicon-search"></span></span>';
+	//print '    <input type="search" name="search" class="form-control" id="searchResources" placeholder="Search..." style="border-left: 0px;border-bottom-right-radius:25px; border-top-right-radius:25px;">';
+	//print '    <input type="search" name="search" class="form-control" id="searchResources" placeholder="Search..." style="border-right: 0px;border-bottom-left-radius:25px; border-top-left-radius:25px;">';
+	//print '    <span class="input-group-addon btn btn-sm"  type="submit" style="background-color:#FFFFFF; border-bottom-right-radius:25px; border-top-right-radius:25px;"><span class="glyphicon glyphicon-search" ></span></span>';
+	//print '<button class="btn btn-info searchResourcesBtn" type="submit" ><span class="glyphicon glyphicon-search" ></span></button>';
+	//print '  </div>'; // input-group
+	//print '</div>	'; // form-group
+	//print '</div>'; // col-10
+	//print '<div class=" col-md-2 col-sm-2 col-xs-4 text-left">';
+	//print '<button class="btn btn-info" type="submit">'.$this->translations['search']['translation_text'].'</button>';
+	//print '</div>'; // col-2
+	
+	print '</form>'; 
+
+	print '</div>'; // searchRes
+	
 	print '</div>'; // col-8
 	
-	// print '<div class="col-md-2 text-right">';
-	// print '<button class="btn btn-secondary btn-lg resourceUpload" style="background-color:#8e288c;color:white">'.$this->translations['upload']['translation_text'].'</button>';
-	// print '</div>'; // col-2
 	
-	print '</div>'; // row
+	print '</div>'; // searchRow 
 	
-	print '</div>'; // col-5
-	
-	print '<div class="col-md-2 col-sm-4 col-xs-4 text-right">';
-	print '<button class="btn btn-primary resourceUpload" >'.$this->translations['upload']['translation_text'].'</button>';
-	print '</div>'; // col-2
-	
-	// print '</div>'; // row
-	
-	// print '<div class="row">';
+	print '<div class="row findRow">';
 	
 	print '<div class="col-md-12">';
 	
-	// ------------------------ Where resources are displayed
+	// ------------------------ Various quick find options plus featured resources
 
-	print '<div id="displayArea">';
-
+	print '<div class="findResourcesGrid">';
+	
+	
+	
+	print '<div class="findByGroup">';
+	
+	print '<div class="panel panel-default findByGroupPanel">';
+	print '<div class="panel-body">';
+	
+	
+	print '<div class="findByGroupGrid">';
+	
+	print '<div class="findBookmarked">';
+	print '<a href="'.$searchPage.'?fav=1">';
+	print '<div class="panel panel-default actionPanel defaultColor">';
+	print '<div class="panel-body">';
+	print '<div class="h5 panelHeading">'.$this->translations['find_bookmarked']['translation_text'].'</div>';
+	print '<div class="findByGroupIcon text-center"><img src="'.$this->bookmarkedImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
 	print '</div>';
+	
+	print '<div class="findOwnResources">';
+	print '<a href="'.$searchPage.'?mine=1">';
+	print '<div class="panel panel-default actionPanel defaultColor">';
+	print '<div class="panel-body">';
+	print '<div class="h5 panelHeading">'.$this->translations['find_my_uploads']['translation_text'].'</div>';
+	print '<div class="findByGroupIcon text-center"><img src="'.$this->myUploadsImg.'"  class="img-responsive" alt="Find my uploads icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
+	print '</div>';
+	
+	print '<div class="findNewResources">';
+	print '<a href="'.$searchPage.'?new=1">';
+	print '<div class="panel panel-default actionPanel defaultColor">';
+	print '<div class="panel-body">';
+	print '<div class="h5 panelHeading">'.$this->translations['find_new']['translation_text'].'</div>';
+	print '<div class="findByGroupIcon text-center"><img src="'.$this->newImg.'"  class="img-responsive" alt="Find new resources icon" /></div>';
+	print '</div>'; // panel-body
+	print '</div>'; // panel
+	print '</a>';
+	print '</div>';
+	
+	print '</div>'; // findByGroupGrid
+	
+	print '</div>'; // panel-body
+	
+	print '</div>'; // findByGroupPanel
+	
+	print '</div>'; // findByGroup
+	
+	
+	print '<div class="findByType">';
+	
+	print '<div class="panel panel-default findByTypePanel">';
+	print '<div class="panel-body">';
+	
+	//print '<div class="h4 panelHeading">'.$this->translations['find_by_type']['translation_text'].'</div>';
+	
+	print '<div class="findByTypeGrid">';
+	
+	foreach ( $this->resourceTypes as $type ) {
+		print '<div class="'.$type->class_stem.'">';
+		print '<a href="'.$searchPage.'?type='.$type->type_id.'">';
+		//print '<div id="'.$type->class_stem.'Panel" class="panel panel-default actionPanel ">';
+		print '<div class="panel panel-default actionPanel '.$type->class_stem.'Color">';
+		print '<div class="panel-body">';
+		print '<div class="h3 panelHeading"><h3>'.$type->name.'</h3></div>';
+		print '<div class="text-center"><img src="'.$type->icon.'"  class="img-responsive '.$type->class_stem.'Img" alt="Find '.strtolower($type->name).' icon" /></div>';
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
+		print '</div>';
+	}
+	
+	print '</div>'; // findByTypeGrid
+	
+	print '</div>'; // panel-body
+	
+	print '</div>'; // findByTypePanel
+	
+	print '</div>'; // findByType
 
-	//print '</div>'; // col-12
+
+
+	print '<div class="featuredResources">';
+	print '<div class="panel panel-default findByGroupPanel">';
+	print '<div class="panel-body">';
 	
-	print '</div>'; // row
+	print '<div class="h4 panelHeading">'.$this->translations['featured']['translation_text'].'</div>';
 	
+	$maxResources = 2;
+	$featuredCount = 0;
+	foreach ( $this->featured as $resourceData ) {
+		if ( $featuredCount < $maxResources ) {
+			$resource = new Biodiv\ResourceFile ( $resourceData["resource_id"], 
+												$resourceData["resource_type"],
+												$resourceData["person_id"],
+												$resourceData["school_id"],
+												$resourceData["access_level"],
+												$resourceData["set_id"],
+												$resourceData["upload_filename"],
+												$resourceData["title"],
+												$resourceData["description"],
+												$resourceData["source"],
+												$resourceData["external_text"],
+												$resourceData["filetype"],
+												$resourceData["is_pin"],
+												$resourceData["is_fav"],
+												$resourceData["is_like"],
+												$resourceData["num_likes"],
+												$resourceData["num_in_set"],
+												$resourceData["s3_status"],
+												$resourceData["url"]);
+		
+			$resourceId = $resourceData["resource_id"];
+		
+			$resourcePage = $this->translations['resource_page']['translation_text'];
+			print '<a href="'.$resourcePage.'?id='.$resourceId.'">';
+		
+			$resource->printCard();
+			
+			print '</a>';
+			
+			$featuredCount += 1;
+		}
+	}
+	
+	print '<div class="text-center">';
+	print '<a href="'.$searchPage.'" class="btn btn-primary">';
+	print '<div class="h4 panelHeading">'.$this->translations['more']['translation_text'].'</div>';
+	print '</a>';
+	print '</div>';
+	
+	print '</div>'; // panel-body
+	
+	print '</div>'; // findByGroupPanel
+	
+	print '</div>'; // featuredResources
+
+
+	print '</div>'; // findResourcesGrid
+
 	print '</div>'; // col-12
+	
+	print '</div>'; // row findRow
+	
+	print '</div>'; // col-12 
+	
+	print '</div>'; // row fullPageHeight
+	
+	print '</div>'; // col-12 end of main content
 	
 	print '</div>'; // row
 }
@@ -169,6 +298,27 @@ print '    </div>';
 
 print '  </div>';
 print '</div>';
+
+
+print '<div id="uploadModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header">';
+print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="uploadArea" ></div>';
+print '      </div>';
+print '	  <div class="modal-footer">';
+print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+print '      </div>';
+	  	  
+print '    </div>'; // modal-content
+
+print '  </div>'; // modal dialog
+print '</div>'; // uploadModal
 
 
 

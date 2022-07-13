@@ -74,7 +74,8 @@ else if ( $this->firstLoad ) {
 }
 else {
 		
-	Biodiv\SchoolCommunity::generateStudentMasthead( $this->helpOption, null, $this->myTotalPoints, $this->totalBadges, $this->totalStars ); 
+	//Biodiv\SchoolCommunity::generateStudentMasthead( $this->helpOption, null, $this->myTotalPoints, $this->totalBadges, $this->totalStars ); 
+	Biodiv\SchoolCommunity::generateStudentMasthead( $this->helpOption, null, 0, 0, 0, false, true );
 	
 	
 	//print '<div id="studentDashRow" class="row" data-resource_type="'.$this->resourceTypeId.'">';
@@ -117,41 +118,7 @@ else {
 	print '<div class="row homePageRow">';
 	
 	
-	/*
-	print '<div class="col-md-3">';
-	
-	// ---------------------------------- Celebration
-	
-	//print '<div class="col-md-3">';
-	
-	print '<div class="panel panel-default greenPanel">';
-	print '<div class="panel-body">';
-	
-	print '<div id="studentCelebration" class="studentCelebration"></div>';
-	
-	print '</div>'; // panel-body
-	print '</div>'; // panel
-	
-	//print '</div>'; // col-3
-	
-	// ---------------------------------- Student target
-	
-	//print '<div class="col-md-3">';
-	
-	print '<div class="panel panel-default bluePanel">';
-	print '<div class="panel-body">';
-	
-	print '<div id="studentTarget" class="studentTarget"></div>';
-	
-	print '</div>'; // panel-body
-	print '</div>'; // panel
-	
-	//print '</div>'; // col-3
-	
-	print '</div>'; // col-3
-	
-	*/
-	
+		
 	
 	$findIcon = "";
 	if (property_exists($settingsObj, 'find')) {
@@ -179,124 +146,7 @@ else {
 	}
 	
 	
-	/*
-	// ------------------------------------------------------------------- browse tasks
 	
-	print '<div class="col-md-4 col-sm-6 col-xs-12 showWork text-center">';
-	print '<a href="'.$this->translations['badges_link']['translation_text'].'" >';
-	print '<div class="panel panel-default  actionPanel ">';
-	
-	print '<div class="panel-body">';
-	print '<div><img src="'.$findIcon.'"  class="img-responsive" alt="Select activity icon" /></div>';
-	print '</div>'; // panel-body
-	
-	print '<div class="panel-footer h4">';
-	print $this->translations['browse_tasks']['translation_text'];
-	print '</div>';
-	
-	print '</div>'; // panel
-	print '</a>';
-	print '</div>'; //col-4
-	
-	
-	// -------------------------------------- complete tasks - collect badges
-	
-	print '<div class="col-md-4 col-sm-6 col-xs-12 showComplete text-center">';
-	
-	print '<a href="'.$this->translations['collection_link']['translation_text'].'" >';
-	
-	print '<div class="panel panel-default actionPanel">';
-	
-	print '<div class="panel-body">';
-	if ( $this->numToCollect > 0 ) {
-		print '<span class="label label-primary notifyLabel">'.$this->numToCollect.'</span>';
-		
-	}
-	print '<div><img src="'.$collectIcon.'" class="img-responsive" alt="Collect badge icon" /></div>';
-	print '</div>';
-	print '<div class="panel-footer h4">';
-	print $this->translations['collect_badge']['translation_text'];
-	print '</div>';
-	print '</div>';
-	print '</a>';
-	
-	print '</div>';
-	
-	
-	// ------------------------------------------------------------------- show my work
-	
-	print '<div class="col-md-4 col-sm-6 col-xs-12 showWork text-center">';
-	print '<a href="'.$this->translations['schoolwork_link']['translation_text'].'" >';
-	print '<div class="panel panel-default actionPanel">';
-	print '<div class="panel-body">';
-
-	print '<div><img src="'.$workIcon.'" class="img-responsive" alt="View documents icon" /></div>';
-	
-	print '</div>'; // panel-body
-	
-	print '<div class="panel-footer h4">';
-	print $this->translations['show_work']['translation_text'];
-	print '</div>';
-	
-	print '</div>'; // panel
-	print '</a>';
-	print '</div>';
-
-
-	// ------------------------------------------------------------- wild space / learn about species
-	print '<div class="col-md-4 col-sm-6 col-xs-12 text-center">';
-	print '<a href="'.$this->translations['wild_space_link']['translation_text'].'" >';
-	print '<div class="panel panel-default actionPanel">';
-	print '<div class="panel-body">';
-	
-	print '<div><img src="'.$speciesIcon.'" class="img-responsive" alt="View species icon" /></div>';
-	
-	
-	print '</div>'; // panel-body
-	
-	print '<div class="panel-footer h4">';
-	print $this->translations['learn_species']['translation_text'];
-	print '</div>';
-	print '</div>';
-	print '</a>';
-	print '</div>'; // col-4
-	
-	
-	// ------------------------------------------------------------- my school
-	print '<div class="col-md-4 col-sm-6 col-xs-12 text-center">';
-	print '<a href="'.$this->translations['school_dash']['translation_text'].'" >';
-	print '<div class="panel panel-default actionPanel">';
-	print '<div class="panel-body">';
-	
-	print '<div><img src="'.$schoolIcon.'" class="img-responsive" alt="My school icon" /></div>';
-	
-	
-	print '</div>'; // panel-body
-	
-	print '<div class="panel-footer h4">';
-	print $this->translations['school_page']['translation_text'];
-	print '</div>';
-	print '</div>';
-	print '</a>';
-	print '</div>'; // col-4
-	
-	
-	// ----------------------------------------------------------- community
-	print '<div class="col-md-4 col-sm-6 col-xs-12 text-center">';
-	print '<a href="'.$this->translations['community_dash']['translation_text'].'" >';
-	print '<div class="panel panel-default actionPanel">';
-	print '<div class="panel-body">';
-	
-	print '<div><img src="'.$communityIcon.'" class="img-responsive" alt="All schools icon" /></div>';
-	
-	print '</div>'; // panel-body
-	print '<div class="panel-footer h4">';
-	print $this->translations['community_page']['translation_text'];
-	print '</div>';
-	print '</div>'; // panel
-	
-	print '</div>'; // col-4
-	*/
 	print '<div class="col-md-12">';
 	print '<div class="gridContainer">';
 	
@@ -401,6 +251,10 @@ else {
 	
 	print '</div>';	// display area
 	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row 
+	
 }
 
 
@@ -418,12 +272,12 @@ print '	    <div id="helpArticle" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
 print '        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>';
-print '      </div>';
+print '      </div>'; // modal-footer
 	  	  
-print '    </div>';
+print '    </div>'; // modal-content
 
-print '  </div>';
-print '</div>';
+print '  </div>'; // modal-dialog
+print '</div>'; // helpModal
 
 
 JHTML::script("com_biodiv/commondashboard.js", true, true);

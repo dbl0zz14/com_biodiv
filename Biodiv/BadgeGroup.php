@@ -32,13 +32,18 @@ class BadgeGroup {
 	
 	private $imageData;
 	
+	private $moduleId;
 	
-	function __construct( $badgeGroupId )
+	
+	function __construct( $badgeGroupId, $moduleId )
 	{
 		if ( $badgeGroupId  ) {
 			
 			$this->badgeGroupId = $badgeGroupId;
 			$this->badgeGroupName = codes_getName ( $badgeGroupId, "badgegroup" );
+			
+			$this->moduleId = $moduleId;
+			
 			$this->personId = userID();
 			
 			
@@ -76,47 +81,96 @@ class BadgeGroup {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
-		
-		$tasksQueryString = "select count(*) from " . $this->userTaskTable . " ST1 " .
-							"inner join Task T1 on T1.task_id = ST1.task_id " .
-							"INNER JOIN Badge B1 on B1.badge_id = T1.badge_id " .
-							"where B1.badge_group = " . $this->badgeGroupId . " and ST1.person_id = " . $this->personId . " AND ST1.status >= " . self::COMPLETE;
-		
-		$badgesQueryString = "select count(distinct B2.badge_id) from Badge B2 " .
-								"inner join Task T2 on T2.badge_id = B2.badge_id " .
-								"inner join " . $this->userTaskTable . " ST2 on ST2.task_id = T2.task_id " .
-								"where B2.badge_group = " . $this->badgeGroupId . " and ST2.person_id = " . $this->personId . " and ST2.status >= " . self::COMPLETE  .
-								" and not exists ( " .
-								"select ST3.task_id from Badge B3 " .
-								"inner join Task T3 on T3.badge_id = B3.badge_id " .
-								"inner join " . $this->userTaskTable . " ST3 on ST3.task_id = T3.task_id " .
-								"where B3.badge_group = " . $this->badgeGroupId . " and B3.badge_id = B2.badge_id and ST3.person_id = " . 
-									$this->personId . " and ST3.status = " . self::UNLOCKED . ")";
-								
-		
-		
-		$allTasksQueryString = "select count(*) from Task T4 " .
-							" inner join Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = '" . $this->winnerType .
-							"' where B4.badge_group = " . $this->badgeGroupId;
-		
-		$allTaskPointsQueryString = "select SUM(T5.points) from Task T5 " .
-							" inner join Badge B5 on B5.badge_id = T5.badge_id and B5.winner_type = '" . $this->winnerType .
-							"' where B5.badge_group = " . $this->badgeGroupId;
-		
-		$allBadgesQueryString = "select count(*) from Badge B5 " .
-								"where B5.winner_type = '" . $this->winnerType . "' and B5.badge_group = " . $this->badgeGroupId;
-	
-		$query = $db->getQuery(true)
-			->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
-						. $badgesQueryString . " ) as numBadges, ( " 
-						. $allTasksQueryString . " ) as totalTasks, ( "
-						. $allTaskPointsQueryString . " ) as totalPoints, ( "
-						. $allBadgesQueryString . " ) as totalBadges from " . $this->userTaskTable . " ST")
-			->innerJoin("Task T on ST.task_id = T.task_id")
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId )
-			->where("ST.person_id = " . $this->personId )
-			->where("ST.status >= " . self::COMPLETE );
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
 			
+			$tasksQueryString = "select count(*) from " . $this->userTaskTable . " ST1 " .
+								"inner join Task T1 on T1.task_id = ST1.task_id " .
+								"INNER JOIN Badge B1 on B1.badge_id = T1.badge_id " .
+								"where B1.badge_group = " . $this->badgeGroupId . " and ST1.person_id = " . $this->personId . " and B1.module_id = " . $this->moduleId . " AND ST1.status >= " . self::COMPLETE;
+			
+			$badgesQueryString = "select count(distinct B2.badge_id) from Badge B2 " .
+									"inner join Task T2 on T2.badge_id = B2.badge_id " .
+									"inner join " . $this->userTaskTable . " ST2 on ST2.task_id = T2.task_id " .
+									"where B2.badge_group = " . $this->badgeGroupId . " and B2.module_id = " . $this->moduleId . " and ST2.person_id = " . $this->personId . " and ST2.status >= " . self::COMPLETE  .
+									" and not exists ( " .
+									"select ST3.task_id from Badge B3 " .
+									"inner join Task T3 on T3.badge_id = B3.badge_id " .
+									"inner join " . $this->userTaskTable . " ST3 on ST3.task_id = T3.task_id " .
+									"where B3.badge_group = " . $this->badgeGroupId . " and B3.module_id = " . $this->moduleId . " and B3.badge_id = B2.badge_id and ST3.person_id = " . 
+										$this->personId . " and ST3.status = " . self::UNLOCKED . ")";
+									
+			
+			
+			$allTasksQueryString = "select count(*) from Task T4 " .
+								" inner join Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = '" . $this->winnerType .
+								"' where B4.badge_group = " . $this->badgeGroupId . " and B4.module_id = " . $this->moduleId ;
+			
+			$allTaskPointsQueryString = "select SUM(T5.points) from Task T5 " .
+								" inner join Badge B5 on B5.badge_id = T5.badge_id and B5.winner_type = '" . $this->winnerType .
+								"' where B5.badge_group = " . $this->badgeGroupId. " and B5.module_id = " . $this->moduleId ;
+			
+			$allBadgesQueryString = "select count(*) from Badge B5 " .
+									"where B5.winner_type = '" . $this->winnerType . "' and B5.badge_group = " . $this->badgeGroupId. " and B5.module_id = " . $this->moduleId ;
+		
+			$query = $db->getQuery(true)
+				->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
+							. $badgesQueryString . " ) as numBadges, ( " 
+							. $allTasksQueryString . " ) as totalTasks, ( "
+							. $allTaskPointsQueryString . " ) as totalPoints, ( "
+							. $allBadgesQueryString . " ) as totalBadges from " . $this->userTaskTable . " ST")
+				->innerJoin("Task T on ST.task_id = T.task_id")
+				->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId )
+				->where("B.module_id = " . $this->moduleId )
+				->where("ST.person_id = " . $this->personId )
+				->where("ST.status >= " . self::COMPLETE );
+				
+		
+		}
+		
+		else {
+		
+			$tasksQueryString = "select count(*) from " . $this->userTaskTable . " ST1 " .
+								"inner join Task T1 on T1.task_id = ST1.task_id " .
+								"INNER JOIN Badge B1 on B1.badge_id = T1.badge_id " .
+								"where B1.badge_group = " . $this->badgeGroupId . " and ST1.person_id = " . $this->personId . " AND ST1.status >= " . self::COMPLETE;
+			
+			$badgesQueryString = "select count(distinct B2.badge_id) from Badge B2 " .
+									"inner join Task T2 on T2.badge_id = B2.badge_id " .
+									"inner join " . $this->userTaskTable . " ST2 on ST2.task_id = T2.task_id " .
+									"where B2.badge_group = " . $this->badgeGroupId . " and ST2.person_id = " . $this->personId . " and ST2.status >= " . self::COMPLETE  .
+									" and not exists ( " .
+									"select ST3.task_id from Badge B3 " .
+									"inner join Task T3 on T3.badge_id = B3.badge_id " .
+									"inner join " . $this->userTaskTable . " ST3 on ST3.task_id = T3.task_id " .
+									"where B3.badge_group = " . $this->badgeGroupId . " and B3.badge_id = B2.badge_id and ST3.person_id = " . 
+										$this->personId . " and ST3.status = " . self::UNLOCKED . ")";
+									
+			
+			
+			$allTasksQueryString = "select count(*) from Task T4 " .
+								" inner join Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = '" . $this->winnerType .
+								"' where B4.badge_group = " . $this->badgeGroupId;
+			
+			$allTaskPointsQueryString = "select SUM(T5.points) from Task T5 " .
+								" inner join Badge B5 on B5.badge_id = T5.badge_id and B5.winner_type = '" . $this->winnerType .
+								"' where B5.badge_group = " . $this->badgeGroupId;
+			
+			$allBadgesQueryString = "select count(*) from Badge B5 " .
+									"where B5.winner_type = '" . $this->winnerType . "' and B5.badge_group = " . $this->badgeGroupId;
+		
+			$query = $db->getQuery(true)
+				->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
+							. $badgesQueryString . " ) as numBadges, ( " 
+							. $allTasksQueryString . " ) as totalTasks, ( "
+							. $allTaskPointsQueryString . " ) as totalPoints, ( "
+							. $allBadgesQueryString . " ) as totalBadges from " . $this->userTaskTable . " ST")
+				->innerJoin("Task T on ST.task_id = T.task_id")
+				->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId )
+				->where("ST.person_id = " . $this->personId )
+				->where("ST.status >= " . self::COMPLETE );
+				
+		}
 		
 		$db->setQuery($query);
 		
@@ -138,12 +192,17 @@ class BadgeGroup {
 	
 	private function getStudentTasks ( $lockLevel ) {
 		
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
+			$moduleQueryText = " and B.module_id = " . $this->moduleId;
+		}
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
 			->select("ST.task_id, ST.status, T.name, T.description, T.points, T.image, T.article_id from StudentTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId . " and B.lock_level = " . $lockLevel .
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId . $moduleQueryText . " and B.lock_level = " . $lockLevel .
 						" and B.winner_type = 'STUDENT'")
 			->where("ST.person_id = " . $this->personId );
 			
@@ -160,12 +219,17 @@ class BadgeGroup {
 	
 	private function getAllStudentTasks () {
 		
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
+			$moduleQueryText = " and B.module_id = " . $this->moduleId;
+		}
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
 			->select("B.lock_level, B.badge_id, B.name as badge_name, B.badge_image, T.task_id, IFNULL(ST.status, ".self::LOCKED.
 				") as status, T.name as task_name, T.description, T.points, T.image, T.article_id from Task T")
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId .
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId . $moduleQueryText .
 						" and B.winner_type = 'STUDENT'")
 			->leftJoin("StudentTasks ST on ST.task_id = T.task_id and ST.person_id = " . $this->personId)
 			->order("B.lock_level, T.task_id");
@@ -183,11 +247,16 @@ class BadgeGroup {
 	
 	private function getStudentBadgeDetails ( $lockLevel ) {
 		
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
+			$moduleQueryText = " and B.module_id = " . $this->moduleId;
+		}
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
 			->select("badge_id, name from Badge B")
-			->where("B.badge_group = " . $this->badgeGroupId . " and B.lock_level = " . $lockLevel  .
+			->where("B.badge_group = " . $this->badgeGroupId . $moduleQueryText . " and B.lock_level = " . $lockLevel  .
 						" and B.winner_type = 'STUDENT'" );			
 		
 		$db->setQuery($query);
@@ -208,11 +277,16 @@ class BadgeGroup {
 	
 	private function getTasks ( $lockLevel ) {
 		
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
+			$moduleQueryText = " and B.module_id = " . $this->moduleId;
+		}
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
 			->select("T.task_id, T.name, T.description, T.points, T.image, T.article_id from Task T")
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId . " and B.lock_level = " . $lockLevel );			
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $this->badgeGroupId . $moduleQueryText . " and B.lock_level = " . $lockLevel );			
 		
 		$db->setQuery($query);
 		
@@ -224,7 +298,7 @@ class BadgeGroup {
 	}
 	
 	
-	private function getBadgeIds ( $roleId = 0, $module = 1 ) {
+	private function getBadgeIds ( $roleId = 0 ) {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
@@ -247,14 +321,19 @@ class BadgeGroup {
 			}
 		}
 		
+		$moduleQueryText = "";
+		if ( $this->moduleId ) {
+			$moduleQueryText = " and B.module_id = " . $this->moduleId;
+		}
+		
 		$query = $db->getQuery(true)
 			->select("B.badge_id from Badge B where B.winner_type = '".$winnerType."' and B.badge_group = " . $this->badgeGroupId . 
-				" and B.module_id = " . $module )
+				$moduleQueryText )
 			->order("B.lock_level");
 			
 		$db->setQuery($query);
 		
-		//error_log("getBadgeIds select query created: " . $query->dump());
+		error_log("getBadgeIds select query created: " . $query->dump());
 		
 		$badgeIds = $db->loadColumn();
 		
@@ -404,7 +483,7 @@ class BadgeGroup {
 	}
 		
 	
-	public function getAllBadgesJSON ( $module=1 ) {
+	public function getAllBadgesJSON () {
 		
 		$resultsArray = $this->getAllBadges();
 			
@@ -412,11 +491,11 @@ class BadgeGroup {
 		
 	}
 	
-	public function getAllBadges ( $module=1 ) {
+	public function getAllBadges () {
 		
 		$this->setSummary();
 		
-		$badgeIds = $this->getBadgeIds ( $module );
+		$badgeIds = $this->getBadgeIds ();
 		
 		
 		$resultsArray = array();
@@ -454,7 +533,36 @@ class BadgeGroup {
 	}
 	
 	
-	public static function getSchoolSummary ( $schoolId, $badgeGroupId ) {
+	
+	public static function getSchoolAwards ( $schoolId, $moduleId ) {
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+
+		$maxSelect = "select SA.school_id, max(seq) as seq from Award A inner join SchoolAwards SA using (award_id) where A.module_id = ".$moduleId." group by SA.school_id";
+
+		$query = $db->getQuery(true)
+			->select("S.school_id as schoolId, S.name as schoolName, A.seq as seq, A.award_id as awardId, A.award_type as awardType, A.award_name as awardName from School S")
+			->leftJoin("(".$maxSelect.") SA on S.school_id = SA.school_id")
+			->leftJoin("SchoolAwards SA2 on S.school_id = SA2.school_id")
+			->leftJoin("Award A on A.award_id = SA2.award_id and A.award_winner = 'SCHOOL'")
+			->where("A.module_id = ".$moduleId." and A.seq = SA.seq");
+			
+		$query2 = $db->getQuery(true)
+			->select("school_id as schoolId, name as schoolName, 0 as seq, NULL as awardId, NULL as awardType, NULL as awardName from School S")
+			->where("school_id not in ( select school_id from SchoolAwards )");
+		
+		$query->union($query2)->order("schoolName");
+		
+		$db->setQuery($query);
+		
+		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
+		
+		$this->schools = $db->loadObjectList();
+
+	}
+	
+	
+	public static function getSchoolSummary ( $schoolId, $badgeGroupId, $moduleId ) {
 		
 		// NB for school points we weight the points to be equivalent to 100 school users in total.
 		// Actually going with no weighting for clarity
@@ -479,6 +587,7 @@ class BadgeGroup {
 		$query = $db->getQuery(true)
 				->select("T.role_id, SUM(T.points) as points from Task T" )
 				->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId)
+				->where("B.module_id = " . $moduleId)
 				->group("T.role_id" );
 				
 				
@@ -497,15 +606,15 @@ class BadgeGroup {
 							" inner join Task T1 on T1.task_id = ST1.task_id " .
 							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
 							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId .
-							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";
+							" where B1.badge_group = " . $badgeGroupId . " and B1.module_id = " . $moduleId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";
 		
 				
 		$allTasksQueryString = "select count(*) from Task T4 " .
 							"INNER JOIN Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = 'STUDENT'" .
-							"where B4.badge_group = " . $badgeGroupId;
+							"where B4.badge_group = " . $badgeGroupId . " and B4.module_id = " . $moduleId;
 		
 		$allBadgesQueryString = "select count(*) from Badge B5 " .
-								"where B5.winner_type = 'STUDENT' and B5.badge_group = " . $badgeGroupId;
+								"where B5.winner_type = 'STUDENT' and B5.badge_group = " . $badgeGroupId . " and B5.module_id = " . $moduleId;
 	
 		$query = $db->getQuery(true)
 			->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
@@ -513,7 +622,7 @@ class BadgeGroup {
 						. $allBadgesQueryString . " ) as totalBadgesPerStudent from StudentTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
 			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId . " and B.module_id = " . $moduleId)
 			->where("ST.status >= " . self::COMPLETE );
 			
 		
@@ -529,7 +638,7 @@ class BadgeGroup {
 		else {
 			$numStudents = 0;
 		}
-		if ( array_key_exists ( SchoolCommunity::STUDENT_ROLE, $numSchoolUsers ) ) {
+		if ( array_key_exists ( SchoolCommunity::STUDENT_ROLE, $totalAvailablePoints ) ) {
 			$studentPointsAvailable = $totalAvailablePoints[SchoolCommunity::STUDENT_ROLE];
 		}
 		else {
@@ -546,15 +655,15 @@ class BadgeGroup {
 							" inner join Task T1 on T1.task_id = ST1.task_id " .
 							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
 							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId . " and SU.role_id = " . SchoolCommunity::TEACHER_ROLE .
-							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
+							" where B1.badge_group = " . $badgeGroupId . " and B1.module_id = " . $moduleId. " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
 		
 		
 		$allTasksQueryString = "select count(*) from Task T4 " .
 							"INNER JOIN Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = 'TEACHER'" .
-							"where B4.badge_group = " . $badgeGroupId;
+							"where B4.badge_group = " . $badgeGroupId . " and B4.module_id = " . $moduleId;
 		
 		$allBadgesQueryString = "select count(*) from Badge B5 " .
-								"where B5.winner_type = 'TEACHER' and B5.badge_group = " . $badgeGroupId;
+								"where B5.winner_type = 'TEACHER' and B5.badge_group = " . $badgeGroupId . " and B5.module_id = " . $moduleId;
 	
 		$query = $db->getQuery(true)
 			->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
@@ -562,7 +671,7 @@ class BadgeGroup {
 						. $allBadgesQueryString . " ) as totalBadgesPerTeacher from TeacherTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
 			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId . " and B.module_id = " . $moduleId)
 			->where("ST.status >= " . self::COMPLETE )
 			->where("SU.role_id = " . SchoolCommunity::TEACHER_ROLE);
 			
@@ -597,15 +706,15 @@ class BadgeGroup {
 							" inner join Task T1 on T1.task_id = ST1.task_id " .
 							" inner join Badge B1 on B1.badge_id = T1.badge_id " .
 							" inner join SchoolUsers SU on SU.person_id = ST1.person_id and SU.school_id = " . $schoolId . " and SU.role_id = " . SchoolCommunity::ECOLOGIST_ROLE .
-							" where B1.badge_group = " . $badgeGroupId . " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
+							" where B1.badge_group = " . $badgeGroupId . " and B1.module_id = " . $moduleId. " and ST1.status >= " . self::COMPLETE . " and SU.include_points = 1";					
 		
 		
 		$allTasksQueryString = "select count(*) from Task T4 " .
 							"INNER JOIN Badge B4 on B4.badge_id = T4.badge_id and B4.winner_type = 'ECOLOGIST'" .
-							"where B4.badge_group = " . $badgeGroupId;
+							"where B4.badge_group = " . $badgeGroupId . " and B4.module_id = " . $moduleId;
 		
 		$allBadgesQueryString = "select count(*) from Badge B5 " .
-								"where B5.winner_type = 'ECOLOGIST' and B5.badge_group = " . $badgeGroupId;
+								"where B5.winner_type = 'ECOLOGIST' and B5.badge_group = " . $badgeGroupId . " and B5.module_id = " . $moduleId;
 	
 		$query = $db->getQuery(true)
 			->select("IFNULL(SUM(T.points),0) as numPoints, ( " . $tasksQueryString . " ) as numTasks, ( " 
@@ -613,7 +722,7 @@ class BadgeGroup {
 						. $allBadgesQueryString . " ) as totalBadgesPerTeacher from TeacherTasks ST")
 			->innerJoin("Task T on ST.task_id = T.task_id")
 			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id and SU.school_id = " . $schoolId . " and SU.include_points = 1" )
-			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId )
+			->innerJoin("Badge B on B.badge_id = T.badge_id and B.badge_group = " . $badgeGroupId . " and B.module_id = " . $moduleId)
 			->where("ST.status >= " . self::COMPLETE )
 			->where("SU.role_id = " . SchoolCommunity::ECOLOGIST_ROLE);
 			

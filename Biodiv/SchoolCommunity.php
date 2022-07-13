@@ -27,7 +27,10 @@ class SchoolCommunity {
 	
 	function __construct( )
 	{
+		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		/*
 
 
 		$maxSelect = "select SA.school_id, max(seq) as seq from Award A inner join SchoolAwards SA using (award_id) group by SA.school_id";
@@ -44,6 +47,17 @@ class SchoolCommunity {
 			->where("school_id not in ( select school_id from SchoolAwards )");
 		
 		$query->union($query2)->order("schoolName");
+		
+		$db->setQuery($query);
+		
+		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
+		
+		$this->schools = $db->loadObjectList();
+		*/
+		
+		$query = $db->getQuery(true)
+			->select("S.school_id as schoolId, S.name as schoolName from School S")->order("schoolName");
+			
 		
 		$db->setQuery($query);
 		
@@ -73,7 +87,7 @@ class SchoolCommunity {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("SU.school_id, S.name, SU.role_id, R.role_name from SchoolUsers SU")
+			->select("SU.school_id, S.name, SU.role_id, R.role_name, R.display_text from SchoolUsers SU")
 			->innerJoin("School S on SU.school_id = S.school_id" )
 			->innerJoin("Role R on SU.role_id = R.role_id")
 			->where("person_id = " . $personId);
@@ -143,6 +157,18 @@ class SchoolCommunity {
 		return $username;
 		
 				
+	}
+	
+	public static function getRoleText () {
+		
+		$schoolRoles = self::getSchoolRoles ();
+		$roleText = null;
+		
+		if ( count($schoolRoles) > 0 ) {
+			$roleText = $schoolRoles[0]['display_text'];
+		}
+		
+		return $roleText;
 	}
 	
 	
@@ -247,7 +273,7 @@ class SchoolCommunity {
 				
 	}
 	
-	public static function getSchoolTarget ( $schoolId ) {
+	public static function getSchoolTargetOrig ( $schoolId ) {
 		
 		$personId = userID();
 		
@@ -276,6 +302,10 @@ class SchoolCommunity {
 		//$possibleAwards = Award::getSchoolAwards( $schoolId );
 		
 		$numUsers = $school->teacherCount + $school->studentCount + $school->ecologistCount;
+		
+		// $modules = Biodiv\Module::getModules();
+		// $moduleIds = array_keys ( $this->modules );
+		
 		
 		$school->totalTeacherPoints = Task::getSchoolTeacherPoints( $schoolId );
 		
@@ -313,9 +343,301 @@ class SchoolCommunity {
 				
 	}
 	
-	public static function checkSchoolAwards($schoolId, $schoolPoints) {
+	public static function getSchoolStatus ( $schoolId ) {
 		
-		$possibleAwards = Award::getSchoolTargetAwards( $schoolId );
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$school = new \StdClass();
+		$school->teacherCount = 0;
+		$school->studentCount = 0;
+		$school->points = array();
+		
+		$userCount = self::getSchoolUserCount( $schoolId );
+		
+		foreach ( $userCount as $roleCount ) {
+			if ( $roleCount->role_id == self::TEACHER_ROLE ) {
+				$school->teacherCount = $roleCount->num_users;
+			}
+			else if ( $roleCount->role_id == self::STUDENT_ROLE ) {
+				$school->studentCount = $roleCount->num_users;
+			}
+			else if ( $roleCount->role_id == self::ECOLOGIST_ROLE ) {
+				$school->ecologistCount = $roleCount->num_users;
+			}
+		}
+		
+		//$possibleAwards = Award::getSchoolAwards( $schoolId );
+		
+		//$numUsers = $school->teacherCount + $school->studentCount + $school->ecologistCount;
+		
+		$modules = Module::getModules();
+		$moduleIds = array_keys ( $modules );
+		
+		// Get the pillars: Quizzer etc
+		$badgeGroups = codes_getList ( "badgegroup" );
+		
+		// Get the current status for each badge group.
+		$badgeGroupSummary = array();
+		
+		$existingModuleAward = array();
+		$newModuleAward = array();
+		$targetModuleAward = array();
+		
+		$existingAward = null;
+		$newAward = null;
+		$targetAward = null;
+	
+		foreach ( $moduleIds as $moduleId ) {
+				
+			$badgeGroupSummary[$moduleId] = array();
+			$schoolPoints[$moduleId] = 0;
+			
+			foreach ( $badgeGroups as $badgeGroup ) {
+				
+				$groupId = $badgeGroup[0];
+			
+				$badgeGroupSummary[$moduleId][$groupId] = BadgeGroup::getSchoolSummary ( $schoolId, $groupId, $moduleId );
+				
+				$schoolPoints[$moduleId] += $badgeGroupSummary[$moduleId][$groupId]->school->weightedPoints;
+			}
+			
+			$targetAwards = self::checkSchoolAwards($schoolId, $schoolPoints[$moduleId], $moduleId);
+			
+			$errMsg = print_r ( $targetAwards, true );
+			error_log ( "Target awards for module " . $moduleId . ": " . $errMsg );
+			
+			if ( property_exists ( $targetAwards, "existingAward" ) ) {
+				$existingModuleAward[$moduleId] = $targetAwards->existingAward;
+				
+				if ( $targetAwards->existingAward ) {
+					if ( $existingAward == null ) {
+						$existingAward = $targetAwards->existingAward;
+					}
+					else if ( $targetAwards->existingAward->award_time > $existingAward->award_time  ) {
+						$existingAward = $targetAwards->existingAward;
+					}
+				}
+			}
+			
+			if ( property_exists ( $targetAwards, "latestAward" ) ) {
+				$newModuleAward[$moduleId] = $targetAwards->latestAward;
+				
+				if ( $targetAwards->latestAward ) {
+					if ( $newAward == null ) {
+						$newAward = $targetAwards->latestAward;
+					}
+					else if ( $targetAwards->latestAward->award_time > $newAward->award_time  ) {
+						$newAward = $targetAwards->latestAward;
+					}
+				}
+			}
+			
+			if ( property_exists ( $targetAwards, "targetAward" ) ) {
+				$targetModuleAward[$moduleId] = $targetAwards->targetAward;
+				
+				if ( $targetAwards->targetAward ) {
+					if ( $targetAward == null ) {
+						$targetAward = $targetAwards->targetAward;
+					}
+					else if ( $targetAwards->targetAward->threshold_per_user < $targetAward->threshold_per_user  ) {
+						$targetAward = $targetAwards->targetAward;
+					}
+				}
+			}
+			$school->points[$moduleId] = $schoolPoints[$moduleId];
+		}
+		
+		$school->badgeGroupSummary = $badgeGroupSummary;
+		$school->existingAward = $existingAward;
+		$school->newAward = $newAward;
+		$school->targetAward = $targetAward;
+		
+		
+		return $school;
+	}
+	
+	/*
+	public static function getSchoolTarget ( $schoolId ) {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$school = new \StdClass();
+		$school->teacherCount = 0;
+		$school->studentCount = 0;
+		
+		$userCount = self::getSchoolUserCount( $schoolId );
+		
+		foreach ( $userCount as $roleCount ) {
+			if ( $roleCount->role_id == self::TEACHER_ROLE ) {
+				$school->teacherCount = $roleCount->num_users;
+			}
+			else if ( $roleCount->role_id == self::STUDENT_ROLE ) {
+				$school->studentCount = $roleCount->num_users;
+			}
+			else if ( $roleCount->role_id == self::ECOLOGIST_ROLE ) {
+				$school->ecologistCount = $roleCount->num_users;
+			}
+		}
+		
+		//$possibleAwards = Award::getSchoolAwards( $schoolId );
+		
+		$numUsers = $school->teacherCount + $school->studentCount + $school->ecologistCount;
+		
+		$modules = Biodiv\Module::getModules();
+		$moduleIds = array_keys ( $this->modules );
+		
+		// Get the pillars: Quizzer etc
+		$badgeGroups = codes_getList ( "badgegroup" );
+		
+		// Get the current status for each badge group.
+		$badgeGroupSummary = array();
+		$badgeColorClasses = array();
+		$badgeIcons = array();
+		
+		$existingModuleAward = array();
+		$newModuleAward = array();
+		$targetModuleAward = array();
+		
+		$existingAward = null;
+		$newAward = null;
+		$targetAward = null;
+	
+		foreach ( $moduleIds as $moduleId ) {
+				
+			$badgeGroupSummary[$moduleId] = array();
+			$schoolPoints[$moduleId] = 0;
+			
+			foreach ( $badgeGroups as $badgeGroup ) {
+				
+				$groupId = $badgeGroup[0];
+			
+				// $newBadgeGroup = new Biodiv\BadgeGroup ( $groupId, $moduleId );
+				
+				// if ( !array_key_exists ( $groupId, $this->badgeIcons ) ) {
+					// $imageData = $newBadgeGroup->getImageData();
+				
+					// $this->badgeIcons[$groupId] = $imageData->icon;
+				// }
+				
+				// //$this->badgeGroupSummary[$moduleId][$groupId] = $badgeGroup->getSummary();
+				
+				$badgeGroupSummary[$moduleId][$groupId] = Biodiv\BadgeGroup::getSchoolSummary ( $schoolId, $groupId, $moduleId );
+				
+				$schoolPoints[$moduleId] += $badgeGroupSummary[$moduleId][$groupId]->school->weightedPoints;
+			}
+			
+			$targetAwards = Biodiv\SchoolCommunity::checkSchoolAwards($schoolId, $schoolPoints[$moduleId], $moduleId);
+			
+			$errMsg = print_r ( $targetAwards, true );
+			error_log ( "Target awards for module " . $moduleId . ": " . $errMsg );
+			
+			if ( property_exists ( $targetAwards, "existingAward" ) ) {
+				$existingModuleAward[$moduleId] = $targetAwards->existingAward;
+				
+				if ( $targetAwards->existingAward ) {
+					if ( $existingAward == null ) {
+						$existingAward = $targetAwards->existingAward;
+					}
+					else if ( $targetAwards->existingAward->award_time > $existingAward->award_time  ) {
+						$existingAward = $targetAwards->existingAward;
+					}
+				}
+			}
+			
+			if ( property_exists ( $targetAwards, "latestAward" ) ) {
+				$newModuleAward[$moduleId] = $targetAwards->latestAward;
+				
+				if ( $targetAwards->latestAward ) {
+					if ( $newAward == null ) {
+						$newAward = $targetAwards->latestAward;
+					}
+					else if ( $targetAwards->latestAward->award_time > $newAward->award_time  ) {
+						$newAward = $targetAwards->latestAward;
+					}
+				}
+			}
+			
+			if ( property_exists ( $targetAwards, "targetAward" ) ) {
+				$targetModuleAward[$moduleId] = $targetAwards->targetAward;
+				
+				if ( $targetAwards->targetAward ) {
+					if ( $targetAward == null ) {
+						$targetAward = $targetAwards->targetAward;
+					}
+					else if ( $targetAwards->targetAward->threshold_per_user < $targetAward->threshold_per_user  ) {
+						$targetAward = $targetAwards->targetAward;
+					}
+				}
+			}
+		}
+		
+		if ( $target ) {
+			$school->awardName = $target->award_name;
+			$school->pointsNeeded = $target->pointsNeeded;
+			$school->targetFound = true;
+			$school->isLatest = false;
+		}
+		else {
+			$latest = $awards->existingAward;
+			if ( $latest ) {
+				$school->awardName = $latest->award_name;
+				$school->pointsNeeded = 0;
+				$school->isLatest = true;
+			}
+			
+		}
+		
+		
+		// $school->totalTeacherPoints = Task::getSchoolTeacherPoints( $schoolId );
+		
+		// $school->totalStudentPoints = Task::getSchoolStudentPoints( $schoolId );
+		
+		// $school->totalEcologistPoints = Task::getSchoolEcologistPoints( $schoolId );
+		
+		// $school->totalUserPoints = $school->totalTeacherPoints + $school->totalStudentPoints + $school->totalEcologistPoints;
+		
+		// $school->targetFound = false;
+		
+		// $awards = self::checkSchoolAwards ( $schoolId, $school->totalUserPoints );
+		// $target = $awards->targetAward;
+		
+		// if ( $target ) {
+			// $school->awardName = $target->award_name;
+			// $school->pointsNeeded = $target->pointsNeeded;
+			// $school->targetFound = true;
+			// $school->isLatest = false;
+		// }
+		// else {
+			// $latest = $awards->existingAward;
+			// if ( $latest ) {
+				// $school->awardName = $latest->award_name;
+				// $school->pointsNeeded = 0;
+				// $school->isLatest = true;
+			// }
+			
+		// }
+		
+		
+		
+		
+		
+		
+		return $school;
+				
+	}
+	*/
+	
+	public static function checkSchoolAwards($schoolId, $schoolPoints, $moduleId) {
+		
+		//$possibleAwards = Award::getSchoolTargetAwards( $schoolId, $moduleId );
 		
 		$teacherCount = 0;
 		$studentCount = 0;
@@ -337,7 +659,7 @@ class SchoolCommunity {
 		
 		$numUsers = $teacherCount + $studentCount + $ecologistCount;
 		
-		$possibleAwards = Award::getSchoolAwards( $schoolId );
+		$possibleAwards = Award::getSchoolAwards( $schoolId, $moduleId );
 		
 		$returnAwards = new \StdClass();
 		
@@ -354,7 +676,14 @@ class SchoolCommunity {
 			}
 			else {
 				// Check and update where achieved. 
-				$schoolThreshold = $award->threshold_per_user * $numUsers;
+				if ( $award->override ) {
+					error_log ("Got threshold override");
+					$schoolThreshold = $award->override * $numUsers;
+				}
+				else {
+					error_log ("No threshold override");
+					$schoolThreshold = $award->threshold_per_user * $numUsers;
+				}
 				if ( $schoolPoints >= $schoolThreshold ) {
 					
 					$db = \JDatabaseDriver::getInstance(dbOptions());
@@ -565,6 +894,34 @@ class SchoolCommunity {
 		$countStudentRoles = $db->loadResult();
 		
 		return $countStudentRoles > 0;
+				
+	}
+	
+	public static function isStaff () {
+		
+		//error_log ( "SchoolCommunity::isStudent called" );
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("count(*) from SchoolUsers")
+			->where("role_id != " . self::STUDENT_ROLE )
+			->where("person_id = " . $personId );
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("isStudent select query created: " . $query->dump());
+		
+		$countNonStudentRoles = $db->loadResult();
+		
+		return $countNonStudentRoles > 0;
 				
 	}
 	
@@ -1036,17 +1393,19 @@ class SchoolCommunity {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
+		
 		$query = $db->getQuery(true)
-			->select("SU.school_id, SU.person_id, U.username, U.name, A.image as avatar, B.badge_group, SUM(T.points) as num_points from SchoolUsers SU")
+			->select("SU.school_id, SU.person_id, U.username, U.name, A.image as avatar, M.module_id, B.badge_group, SUM(T.points) as num_points from SchoolUsers SU")
 			->innerJoin("StudentTasks ST on ST.person_id = SU.person_id")
 			->innerJoin("Task T on T.task_id = ST.task_id and ST.status > " . Badge::PENDING)
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->innerJoin( "SchoolUsers SU2 on SU2.school_id = SU.school_id and SU2.person_id = " . $personId . " and SU2.role_id = " . self::TEACHER_ROLE )
 			->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
 			->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
 			->where("SU.role_id = " . self::STUDENT_ROLE )
 			->where("SU2.person_id = " . $personId)
-			->group("SU.school_id, SU.person_id, U.username, U.name, A.image, B.badge_group");
+			->group("SU.school_id, SU.person_id, U.username, U.name, A.image, M.module_id, B.badge_group");
 			
 		
 		$db->setQuery($query);
@@ -1061,8 +1420,23 @@ class SchoolCommunity {
 			if ( array_key_exists ( $student->person_id, $studentProgress ) ) {
 				
 				$st = $studentProgress[$student->person_id];
-				$st->progress[$student->badge_group] = $student->num_points;
-				$st->totalPoints += $student->num_points;
+				
+				if ( !array_key_exists($student->badge_group, $st) ) {
+					$st->progress[$student->badge_group] = array();
+				}
+				$st->progress[$student->badge_group][$student->module_id] = $student->num_points;
+				// if ( !property_exists($st, "totalPoints") ) {
+					// $st->totalPoints = array();
+					// $st->totalPoints[$student->module_id] = $student->num_points;
+				// }
+				if ( !array_key_exists($student->module_id, $st->totalPoints) ) {
+					$st->totalPoints[$student->module_id] = $student->num_points;
+				}
+				else {
+					$st->totalPoints[$student->module_id] += $student->num_points;
+				}
+				$st->grandTotal += $student->num_points;
+				
 			}
 			else {
 				
@@ -1071,10 +1445,14 @@ class SchoolCommunity {
 				$st->username = $student->username;
 				$st->name = $student->name;
 				$st->avatar = $student->avatar;
+				$st->grandTotal = 0;
 				
 				$st->progress = array();
-				$st->progress[$student->badge_group] = $student->num_points;
-				$st->totalPoints = $student->num_points;
+				$st->progress[$student->badge_group] = array();
+				$st->progress[$student->badge_group][$student->module_id] = $student->num_points;
+				$st->totalPoints = array();
+				$st->totalPoints[$student->module_id] = $student->num_points;
+				$st->grandTotal += $student->num_points;
 				$studentProgress[$student->person_id] = $st;
 			}
 		}
@@ -1706,6 +2084,9 @@ class SchoolCommunity {
 		
 		$schoolUser = self::getSchoolUser();
 		
+		$totalPointsByModule = Task::getTotalUserPointsByModule();
+		
+		
 		if ( $schoolUser ) {
 			
 			$schoolSettings = getSetting ( "school_icons" );
@@ -1715,6 +2096,8 @@ class SchoolCommunity {
 			$logoPath = $settingsObj->logo;
 			
 			$roleId = $schoolUser->role_id;
+			
+			$modules = Module::getModules();
 			
 			if ( $calcStatus ) {
 				$userStatus = self::calcUserStatus ( $roleId );
@@ -1731,7 +2114,7 @@ class SchoolCommunity {
 			
 			print '</div>'; // col-2
 			
-			print '<div class="col-lg-2 col-lg-offset-1 col-lg-push-7 col-md-2 col-md-push-8 col-sm-9 col-xs-7 text-right">';
+			print '<div class="col-lg-2 col-lg-push-8 col-md-2 col-md-push-8 col-sm-9 col-xs-7 text-right">';
 			
 			if ( $helpOptionId > 0 ) {
 				print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default menuHelpButton h4" data-toggle="modal" data-target="#helpModal">';
@@ -1747,7 +2130,7 @@ class SchoolCommunity {
 			
 			
 			//print '<div class="col-md-6 col-md-offset-1 col-md-pull-3 col-sm-12 col-xs-12 text-center" >';
-			print '<div class="col-lg-6 col-lg-offset-1 col-lg-pull-3 col-md-8 col-md-pull-2 col-sm-12 col-xs-12 text-center" >';
+			print '<div class="col-lg-8 col-lg-pull-2 col-md-8 col-md-pull-2 col-sm-12 col-xs-12 text-center" >';
 			
 			print '<table class="table statusBar" >';
 			
@@ -1758,7 +2141,7 @@ class SchoolCommunity {
 			print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
 			
 			
-			print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
+			print '<td class="text-center statusBarElement statusBarUsername" ><span class="hidden-xs">'.$schoolUser->username.'</span></td>';
 			
 			
 			print '<td class="statusBarElement statusBarStars" ><i class="fa fa-lg fa-star statusIcon"></i><span class="label label-primary statusBadge">' . $numStars .  '</span></td>';
@@ -1767,8 +2150,21 @@ class SchoolCommunity {
 			print '<td class="statusBarElement statusBarBadges" ><i class="fa fa-lg fa-circle statusIcon"></i><span class="label label-primary statusBadge">' . $numBadges . '</span></td>';
 			
 			
-			print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			//print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
 			
+			$numModules = count($totalPointsByModule);
+			$moduleNum = 1;
+			foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
+				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
+				$extraClass = "";
+				if ( $moduleNum == $numModules ) {
+					$extraClass .= " statusBarTeacherPointsRight";
+				}
+				
+				print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
+				
+				$moduleNum++;
+			}
 			
 			print '</tr>';
 			print '</tbody>';
@@ -1842,7 +2238,7 @@ class SchoolCommunity {
 		
 		$schoolUser = self::getSchoolUser();
 		
-		$totalPoints = Task::getTotalUserPoints();
+		$totalPointsByModule = Task::getTotalUserPointsByModule();
 		
 		if ( $schoolUser) {
 			
@@ -1854,38 +2250,9 @@ class SchoolCommunity {
 			
 			$roleId = $schoolUser->role_id;
 			
-			//print '<div class="text-center">'.$schoolUser->school.'</div>';
-			
-			// print '<div class="row mobileHeader">';
-			// print '<div class="col-md-2 col-sm-2 col-xs-3 text-left">';
-			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			// //print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="50px">';
-			// //print '</a>';
-			// print '</div>'; // col-2
-			// print '<div class="col-md-3 col-md-offset-5 col-sm-5 col-sm-offset-3 col-xs-12 ">';
-			// print '<table class="table studentStatus" >';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" alt="avatar image" /></td>';
-			// print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
-			// print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// //print '<td style="vertical-align:middle">';
-			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			// //print $translations['logout']['translation_text'];
-			// //print '</a>';
-			// //print '</td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			// print '</div>'; // col-3+5
-			// print '<div class="col-md-2 text-right">';
-			// print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			// print $translations['logout']['translation_text'];
-			// print '</a>';
-			// print '</div>'; // col-2
-			// print '</div>'; // row
-			
-			
+			$modules = Module::getModules();
+			$moduleIds = array_keys($modules);
+						
 			print '<nav class="navbar navbar-default">';
 			print '<div class="container-fluid staffNav">';
 			
@@ -1920,7 +2287,7 @@ class SchoolCommunity {
 			
 			print '<div class="row studentMastheadRow">';
 			
-			print '<div class="col-md-2 col-sm-3 col-xs-3" >';
+			print '<div class="col-md-2 col-sm-3 col-xs-4" >';
 			
 			print '<img src="'.$logoPath.'" class="img-responsive brandLogo" />';
 			
@@ -1928,7 +2295,7 @@ class SchoolCommunity {
 			
 			
 			
-			print '<div class="col-md-4 col-md-offset-4 col-sm-5 col-sm-offset-2 col-xs-7 text-center" >';
+			print '<div class="col-lg-5 col-lg-offset-3 col-md-6 col-md-offset-2 col-sm-7 col-xs-12 text-center" >';
 			
 			print '<table class="table statusBar" >';
 			
@@ -1939,10 +2306,31 @@ class SchoolCommunity {
 			print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
 			
 			
-			print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
+			print '<td class="text-center statusBarElement statusBarUsername" ><span class="hidden-xs">'.$schoolUser->username.'</span></td>';
 			
-			
-			print '<td class="statusBarElement statusBarTeacherPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
+			$numModules = count($moduleIds);
+			$moduleNum = 1;
+			foreach ( $moduleIds as $moduleId ) {
+			//foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
+				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
+				if ( array_key_exists( $moduleId, $totalPointsByModule ) ){
+					$modulePoints = $totalPointsByModule[$moduleId];
+				}
+				else {
+					$modulePoints = (object)array("points" => 0);
+				}
+				$extraClass = "";
+				if ( $moduleNum == 1 ) {
+					$extraClass .= "statusBarTeacherPointsLeft";
+				}
+				if ( $moduleNum == $numModules ) {
+					$extraClass .= " statusBarTeacherPointsRight";
+				}
+				
+				print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
+				
+				$moduleNum++;
+			}
 			
 			
 			print '</tr>';

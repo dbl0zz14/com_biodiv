@@ -6,15 +6,44 @@ function createGuid()
 	});
 }
 
+
+
 function setUploadButton () {
 	
-	//jQuery('#resourceuploader').click(createResourceSet);
+	jQuery(".resourceNextBtn").click(resourceNext);
+	jQuery(".resourceBackBtn").click(resourceBack);
+	
+	setInputCounters();
+	setHideMetaError();
+	
+	jQuery(".hideMetaError").click(()=>{
+		jQuery("#resourceMetaErrorMsg").hide();
+	});
+	
+	jQuery("input[name=source]").change(function(e) {
+		
+		let checkedRadio = jQuery('input[name=source]:checked', '#resourceUploadForm').val();
+		
+		if ( checkedRadio == "external" ) {
+			jQuery(".externalExtras").show();
+		}
+		else {
+			jQuery(".externalExtras").hide();
+		}
+	});
+	
 	jQuery('#resourceUploadForm').submit(createResourceSet);
+	
+}
+
+function setTaskUploadButton () {
+	
+	jQuery('#taskUploadForm').submit(createResourceSet);
 }
 
 function createResourceSet(e) {
 	
-	let url = BioDiv.root + "&view=resourceset&format=raw";
+	let url = BioDiv.root + "&view=newresourceset&format=raw";
 	
 	e.preventDefault();
 	
@@ -31,7 +60,7 @@ function createResourceSet(e) {
 	
 	if ( success ) {
 		
-		url = BioDiv.root + "&view=resourceset&format=raw";
+		url = BioDiv.root + "&view=newresourceset&format=raw";
 		
 		//jQuery(".loader").removeClass("invisible");
 	
@@ -44,33 +73,19 @@ function createResourceSet(e) {
 		}).done(resourceSetCreated);
 		
 	}
+	else {
+		jQuery("#resourceMetaErrorMsg").show();
+	}
 	
 }
 
 function resourceSetCreated ( data ) {
-	jQuery("#displayArea").html(data);
+	jQuery("#uploadFiles").html(data);
+	jQuery(".metaPage").hide();
+	jQuery("#uploadFilesPage").show();
 	doUpload();
 }
 
-
-function validateResourceForm ( fd ) {
-	
-	let success = true;
-	
-	// For resourceUploadForm, check values
-	if ( fd.has("uploadName") ) {
-		jQuery ('[name=uploadName]').removeClass('invalid');
-	}
-	else {
-		console.log ( "Form has no uploadName: " + fd.get("uploadName") );
-		
-		success = false;
-		jQuery ('[name=uploadName]').addClass('invalid');
-		
-	}
-	
-	return success;
-}
 
 
 function doUpload ( isSchool = false ) {
@@ -87,7 +102,7 @@ function doUpload ( isSchool = false ) {
 		
 		sequential: true,
 		
-		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A,pdf,PDF,docx,AVI",
+		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A,pdf,PDF,docx,AVI,pptx,doc,DOC,odp,ODP",
 
 		url: uploadUrl,
 		
@@ -131,7 +146,7 @@ function doSchoolUpload () {
 		
 		sequential: true,
 		
-		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A,pdf,PDF,docx,AVI",
+		allowedTypes: "jpg,JPG,JPEG,mp4,MP4,mp3,MP3,m4a,M4A,pdf,PDF,docx,AVI,pptx,doc,DOC,odp,ODP",
 
 		url: uploadUrl,
 		

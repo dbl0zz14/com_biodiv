@@ -49,9 +49,10 @@ class Task {
 			
 			$query = $db->getQuery(true)
 				->select("T.*, B.badge_group, O.option_name as group_name, B.name as badge_name, B.winner_type, " .
-					"B.module_id, B.lock_level, ST.task_type, ST.related_json, ST.threshold, UT.status, UT.set_id from Task T")
+					"B.module_id, M.icon as module_icon, M.tag_id as module_tag_id, B.lock_level, ST.task_type, ST.related_json, ST.threshold, UT.status, UT.set_id from Task T")
 				->innerJoin("Badge B on B.badge_id = T.badge_id")
 				->innerJoin("Options O on O.option_id = B.badge_group")
+				->innerJoin("Module M on M.module_id = B.module_id")
 				->leftJoin("SystemTasks ST on T.task_id = ST.task_id")
 				->leftJoin($this->userTaskTable . " UT on UT.task_id = T.task_id and UT.person_id = " . $this->personId )
 				->where("T.task_id = " . $this->taskId );
@@ -104,7 +105,8 @@ class Task {
 		$query = $db->getQuery(true)
 			->select("UT.task_id from " . $userTaskTable . " UT ")
 			->innerJoin("Resource R on R.set_id = UT.set_id and R.resource_id = " . $resourceFileId )
-			->where("UT.person_id = " . $userId  );
+			->where("UT.person_id = " . $userId  )
+			->where("R.deleted = 0");
 		
 		$db->setQuery($query);
 		
@@ -225,6 +227,11 @@ class Task {
 	public function getBadgeName() {
 		
 		return $this->taskDetail->badge_name;
+	}
+	
+	public function getModuleTagId() {
+		
+		return $this->taskDetail->module_tag_id;
 	}
 	
 	public function getSpecies() {
@@ -632,6 +639,35 @@ class Task {
 	}
 	
 	
+	public static function getTotalUserPointsByModule () {
+		
+		$personId = userID();
+		$userTaskTable = "StudentTasks";
+		if ( SchoolCommunity::isTeacher() or SchoolCommunity::isEcologist() ) {
+			$userTaskTable = "TeacherTasks";
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("B.module_id as module_id, SUM(T.points) as points from Task T" )
+			->innerJoin("Badge B on B.badge_id = T.badge_id" )
+			->innerJoin($userTaskTable . " UT on T.task_id = UT.task_id and UT.person_id = " . $personId)
+			->where("UT.status >= " . Badge::COMPLETE )
+			->group("module_id");
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("Task getTotalUserPoints select query created: " . $query->dump());
+		
+		$totalPoints = $db->loadObjectList("module_id");
+		
+		return $totalPoints;
+		
+	}
+	
+	
 	public static function getTotalAvailablePoints () {
 		
 		$personId = userID();
@@ -659,7 +695,7 @@ class Task {
 	}
 	
 	
-	public static function getUserPointsByGroup ( $roleId ) {
+	public static function getUserPointsByGroupOrig ( $roleId ) {
 		
 		$personId = userID();
 		$userTaskTable = "StudentTasks";
@@ -691,6 +727,49 @@ class Task {
 	}
 	
 	
+	public static function getUserPointsByGroup ( $roleId ) {
+		
+		$personId = userID();
+		$userTaskTable = "StudentTasks";
+		if ( SchoolCommunity::isTeacher() ) {
+			$userTaskTable = "TeacherTasks";
+		}
+		
+		
+		if ( $personId ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true)
+			->select("B.module_id, B.badge_group, SUM(T.points) as points from Task T" )
+			->innerJoin("Badge B on T.badge_id = B.badge_id")
+			->innerJoin($userTaskTable . " UT on T.task_id = UT.task_id and UT.person_id = " . $personId)
+			->where("UT.status >= " . Badge::COMPLETE )
+			->group("B.module_id, B.badge_group");
+			
+			$db->setQuery($query);
+			
+			//error_log("Task getUserPointsByGroup select query created: " . $query->dump());
+			
+			$userPoints = $db->loadObjectList();
+		}
+		
+		$userPointsArray = array();
+		
+		foreach ( $userPoints as $points ) {
+			$moduleId = $points->module_id;
+			$badgeGroup = $points->badge_group;
+			if ( !array_key_exists($moduleId, $userPointsArray ) ) {
+				$userPointsArray[$moduleId] = array();
+			}
+			$userPointsArray[$moduleId][$badgeGroup] = $points->points;
+		}
+		
+		return $userPointsArray;
+		
+	}
+	
+	
 	public static function getAvailablePointsByGroup ( $roleId ) {
 		
 		$personId = userID();
@@ -702,17 +781,28 @@ class Task {
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
 			$query = $db->getQuery(true)
-				->select("B.badge_group, SUM(T.points) as points from Task T" )
+				->select("M.module_id, BG.group_id as badge_group, SUM(T.points) as points from Task T" )
 				->innerJoin("Badge B on B.badge_id = T.badge_id")
+				->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
+				->innerJoin("Module M on M.module_id = B.module_id")
 				->where("T.role_id = " . $roleId )
-				->group("B.badge_group" );
+				->group("M.module_id, BG.group_id" );
 				
 				
 			$db->setQuery($query);
 			
 			//error_log("Task getAvailablePointsByGroup select query created: " . $query->dump());
 			
-			$totalPoints = $db->loadAssocList("badge_group", "points");
+			//$totalPoints = $db->loadAssocList("badge_group", "points");
+			$moduleGroupPoints = $db->loadObjectList();
+		}
+		
+		$totalPoints = array();
+		foreach ( $moduleGroupPoints as $row ) {
+			if ( !array_key_exists($row->badge_group, $totalPoints) ) {
+				$totalPoints[$row->badge_group] = array();
+			}
+			$totalPoints[$row->badge_group][$row->module_id] = $row->points;
 		}
 		
 		return $totalPoints;
@@ -873,12 +963,15 @@ class Task {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, T.* from Task T" )
+			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.module_id as module_id, M.class_stem, M.icon, M.name as module_name, B.badge_id as badge_id, B.name as badge_name, BG.icon as badge_icon, T.* from Task T" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("Module M on B.module_id = M.module_id")
+			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
-			->where("T.counted_by = 'USER' and T.role_id = " . SchoolCommunity::STUDENT_ROLE )
-			->order("O.option_id, B.lock_level");
+			->where("T.role_id = " . SchoolCommunity::STUDENT_ROLE )
+			->where("M.active = 1")
+			->order("B.module_id, O.option_id, B.lock_level");
 		
 		$db->setQuery($query);
 		
@@ -961,7 +1054,7 @@ class Task {
 	
 	
 	// All available student tasks - used eg for teacher or ecologist view of student tasks
-	public static function getAllStudentTasksToView ( $groupId ) {
+	public static function getAllStudentTasksToView ( $groupId, $moduleId = 1 ) {
 		
 		$personId = userID();
 		
@@ -976,14 +1069,16 @@ class Task {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, ".
+			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.module_id as module_id, M.class_stem, M.icon as module_icon, M.name as module_name, B.badge_id as badge_id, B.name as badge_name, ".
 			" B.badge_image as badge_image, B.unlocked_image as unlocked_image, B.locked_image as locked_image, BG.icon as icon, " .
 			" T.*, '.Badge::UNLOCKED.' as status from Task T" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
 			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group and BG.group_id = " . $groupId)
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
 			->where("T.role_id = " . SchoolCommunity::STUDENT_ROLE )
+			->where("B.module_id = " . $moduleId )
 			->order("B.lock_level");
 		
 		$db->setQuery($query);
@@ -998,7 +1093,7 @@ class Task {
 	
 	
 	// All available student tasks - used eg for teacher or ecologist view of student tasks
-	public static function getAllTeacherTasksToView ( $groupId ) {
+	public static function getAllTeacherTasksToView ( $groupId, $moduleId = 1 ) {
 		
 		$personId = userID();
 		
@@ -1013,14 +1108,16 @@ class Task {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, ".
+			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.module_id as module_id, M.class_stem, M.icon as module_icon, M.name as module_name, B.badge_id as badge_id, B.name as badge_name, ".
 			" B.badge_image as badge_image, B.unlocked_image as unlocked_image, B.locked_image as locked_image, BG.icon as icon, " .
 			" T.*, '.Badge::UNLOCKED.' as status from Task T" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
 			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group and BG.group_id = " . $groupId)
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
 			->where("T.role_id = " . SchoolCommunity::TEACHER_ROLE )
+			->where("B.module_id = " . $moduleId )
 			->order("B.lock_level");
 		
 		$db->setQuery($query);
@@ -1055,10 +1152,11 @@ class Task {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("UT.st_id, UT.person_id, UT.set_id, UT.status, O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, T.* from Task T" )
+			->select("UT.st_id, UT.person_id, UT.set_id, UT.status, O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.module_id as module_id, M.class_stem, M.icon as module_icon, M.name as module_name, B.badge_id as badge_id, B.name as badge_name, T.* from Task T" )
 			->innerJoin($userTaskTable . " UT on UT.task_id = T.task_id and UT.status > " . Badge::UNLOCKED )
 			->innerJoin("SchoolUsers SU on SU.person_id = UT.person_id and SU.school_id in (".$schoolStr.")" )
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
 			->where("T.role_id = " . SchoolCommunity::STUDENT_ROLE )
@@ -1159,11 +1257,12 @@ class Task {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.badge_id as badge_id, B.name as badge_name, " .
+			->select("O.option_id as group_id, O.option_name as badge_group, OD.value as color_class, B.module_id as module_id, M.class_stem, M.icon as module_icon, M.name as module_name, B.badge_id as badge_id, B.name as badge_name, " .
 				" B.badge_image as badge_image, B.unlocked_image as unlocked_image, B.locked_image as locked_image, BG.icon as icon, UT.status, T.name as task_name, T.* from Task T" )
 			->innerJoin($userTaskTable . " UT on UT.task_id = T.task_id and UT.status = " . Badge::UNLOCKED . " and UT.person_id = " . $personId )
 			->innerJoin("Badge B on B.badge_id = T.badge_id")
 			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
+			->innerJoin("Module M on M.module_id = B.module_id")
 			->innerJoin("Options O on B.badge_group = O.option_id")
 			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote("colorclass") )
 			->where("B.module_id = " . $module )

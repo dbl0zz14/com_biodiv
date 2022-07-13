@@ -39,6 +39,9 @@ class BioDivViewStudentProgress extends JViewLegacy
 	
 			if ( $this->isTeacher ) {
 				
+				$this->modules = Biodiv\Module::getModules();
+				$this->moduleIds = array_keys($this->modules);
+				
 				$this->badgeGroups = array();
 			
 				$badgeGroups = codes_getList ( "badgegroup" );

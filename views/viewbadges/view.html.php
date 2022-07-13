@@ -27,7 +27,7 @@ class BioDivViewViewBadges extends JViewLegacy
     public function display($tpl = null) 
     {
 		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("browsebadges");
+		$this->translations = getTranslations("viewbadges");
 	
 		$this->personId = (int)userID();
 		
@@ -46,12 +46,17 @@ class BioDivViewViewBadges extends JViewLegacy
 			
 			$this->teacher = $input->getInt('teacher', 0);
 			
+			$this->moduleId = $input->getInt('module', 0);
+			
 			$this->helpOption = codes_getCode ( "viewbadges", "beshelp" );
 		
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	
 			// Get the pillars: Quizzer etc
 			$this->badgeGroups = codes_getList ( "badgegroup" );
+			
+			$this->allModules = Biodiv\Module::getModules();
+			
 			
 			$this->stars = Biodiv\Award::getStudentStars();
 			
@@ -104,7 +109,7 @@ class BioDivViewViewBadges extends JViewLegacy
 				$this->badgeImages[$groupId] = $image;
 				
 				
-				$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
+				$badgeGroup = new Biodiv\BadgeGroup ( $groupId, $this->moduleId );
 				
 				$imageData = $badgeGroup->getImageData();
 				

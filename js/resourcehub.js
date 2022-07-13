@@ -3,8 +3,11 @@
 function uploadDone () {
 	
 	let setId = jQuery("#resourceSet").data("set_id");
-	let url = BioDiv.root + "&view=resourcelist&format=raw&set_id=" + setId;
-	jQuery("#displayArea").load(url, resourceListLoaded);
+	//let url = BioDiv.root + "&view=resourceset&set_id=" + setId;
+	//jQuery("#displayArea").load(url, resourceListLoaded);
+	
+	let url = "bes-resource-set?set_id=" + setId;
+	window.location.href = url;
 	
 }
 
@@ -43,7 +46,7 @@ jQuery(document).ready(function(){
 		emptySearchBox();
 		
 		let url = BioDiv.root + "&view=resourceupload&format=raw";
-		jQuery('#displayArea').load(url, setUploadButton);
+		jQuery('#uploadArea').load(url, setUploadButton);
 		
 	});
 	
@@ -78,7 +81,7 @@ jQuery(document).ready(function(){
 		jQuery(".filterButton").removeClass("active");
 		jQuery(this).addClass("active");
 		
-		let listUrl = BioDiv.root + "&view=resourcelist&format=raw&latest=1";
+		let listUrl = BioDiv.root + "&view=resourcelist&format=raw&mine=1";
 		jQuery('#displayArea').load(listUrl, resourceListLoaded);
 		
 	});
@@ -86,8 +89,8 @@ jQuery(document).ready(function(){
 	jQuery(".resource-btn").click(getResourcesByType);
 	
 	jQuery("#searchResources").on ("keyup", searchCurrentResources);
-	jQuery("#searchResources").on ("search", searchAllResources);
+	//jQuery("#searchResources").on ("search", searchAllResources);
 	
-	let listUrl = BioDiv.root + "&view=resourcelist&format=raw";
-	jQuery("#displayArea").load(listUrl, resourceListLoaded);
+	//let listUrl = BioDiv.root + "&view=resourcelist&format=raw";
+	//jQuery("#displayArea").load(listUrl, resourceListLoaded);
 });

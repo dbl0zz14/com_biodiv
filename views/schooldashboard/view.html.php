@@ -43,11 +43,16 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 		
 		$this->helpOption = codes_getCode ( "schooldashboard", "beshelp" );
 			
-		$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+		//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+		
+		$this->moduleAwardIcons = array( 'NONE'=>'',
+									'SCHOOL_BRONZE'=>'<span class="bronze"><i class="fa fa-lg fa-trophy"></i></span>',
+									'SCHOOL_SILVER'=>'<span class="bronze"><i class="fa fa-lg fa-trophy"></i></span><span class="silver"><i class="fa fa-lg fa-trophy"></i></span>',
+									'SCHOOL_GOLD'=>'<span class="bronze"><i class="fa fa-lg fa-trophy"></i></span><span class="silver"><i class="fa fa-lg fa-trophy"></i></span><span class="gold"><i class="fa fa-lg fa-trophy"></i></span>');
 		
 		$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 		
-		$this->schoolPoints = 0;
+		$this->schoolPoints = array();
 		$this->schoolId = 0;
 		$this->school = "";
 		$this->mySchoolRole = 0;
@@ -116,6 +121,10 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 									'SCHOOL_SILVER'=>'<span class="silver"><i class="fa fa-5x fa-trophy"></i></span>',
 									'SCHOOL_GOLD'=>'<span class="gold"><i class="fa fa-5x fa-trophy"></i></span>');
 		
+			$this->moduleAwards = Biodiv\Award::getSchoolModuleAwards ( $this->schoolId );
+			
+			$this->modules = Biodiv\Module::getModules();
+			$this->moduleIds = array_keys ( $this->modules );
 			
 			// Get the pillars: Quizzer etc
 			$this->badgeGroups = codes_getList ( "badgegroup" );
@@ -124,6 +133,16 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 			$this->badgeGroupSummary = array();
 			$this->badgeColorClasses = array();
 			$this->badgeIcons = array();
+			
+			$this->existingModuleAward = array();
+			$this->newModuleAward = array();
+			$this->targetModuleAward = array();
+			
+			$this->existingAward = null;
+			$this->newAward = null;
+			$this->targetAward = null;
+			
+			$this->badgeIcons = Biodiv\BadgeGroup::getGroupIcons();
 			
 			foreach ( $this->badgeGroups as $badgeGroup ) {
 				$groupId = $badgeGroup[0];
@@ -140,48 +159,98 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 				$this->badgeColorClasses[$groupId] = $colorClass;
 				
 				// ----------------------------- Icons
-				$iconArray = getOptionData ( $groupId, "icon" ); 
+				// $iconArray = getOptionData ( $groupId, "icon" ); 
 
-				$icon = "";
+				// $icon = "";
 			
-				if ( count($iconArray) > 0 ) {
-					$icon = $iconArray[0];
+				// if ( count($iconArray) > 0 ) {
+					// $icon = $iconArray[0];
+				// }
+				
+			}
+			
+			/*
+			foreach ( $this->moduleIds as $moduleId ) {
+				
+				$this->badgeGroupSummary[$moduleId] = array();
+				$this->schoolPoints[$moduleId] = 0;
+				
+				foreach ( $this->badgeGroups as $badgeGroup ) {
+					
+					$groupId = $badgeGroup[0];
+				
+					$newBadgeGroup = new Biodiv\BadgeGroup ( $groupId, $moduleId );
+					
+					if ( !array_key_exists ( $groupId, $this->badgeIcons ) ) {
+						$imageData = $newBadgeGroup->getImageData();
+					
+						$this->badgeIcons[$groupId] = $imageData->icon;
+					}
+					
+					//$this->badgeGroupSummary[$moduleId][$groupId] = $badgeGroup->getSummary();
+					
+					$this->badgeGroupSummary[$moduleId][$groupId] = Biodiv\BadgeGroup::getSchoolSummary ( $this->schoolId, $groupId, $moduleId );
+					
+					$this->schoolPoints[$moduleId] += $this->badgeGroupSummary[$moduleId][$groupId]->school->weightedPoints;
 				}
 				
-				//$this->badgeIcons[$groupId] = $icon;
+				$targetAwards = Biodiv\SchoolCommunity::checkSchoolAwards($this->schoolId, $this->schoolPoints[$moduleId], $moduleId);
 				
-				$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
+				$errMsg = print_r ( $targetAwards, true );
+				error_log ( "Target awards for module " . $moduleId . ": " . $errMsg );
 				
-				$imageData = $badgeGroup->getImageData();
+				if ( property_exists ( $targetAwards, "existingAward" ) ) {
+					$this->existingModuleAward[$moduleId] = $targetAwards->existingAward;
+					
+					if ( $targetAwards->existingAward ) {
+						if ( $this->existingAward == null ) {
+							$this->existingAward = $targetAwards->existingAward;
+						}
+						else if ( $targetAwards->existingAward->award_time > $this->existingAward->award_time  ) {
+							$this->existingAward = $targetAwards->existingAward;
+						}
+					}
+				}
 				
-				$this->badgeIcons[$groupId] = $imageData->icon;
+				if ( property_exists ( $targetAwards, "latestAward" ) ) {
+					$this->newModuleAward[$moduleId] = $targetAwards->latestAward;
+					
+					if ( $targetAwards->latestAward ) {
+						if ( $this->newAward == null ) {
+							$this->newAward = $targetAwards->latestAward;
+						}
+						else if ( $targetAwards->latestAward->award_time > $this->newAward->award_time  ) {
+							$this->newAward = $targetAwards->latestAward;
+						}
+					}
+				}
 				
-				$this->badgeGroupSummary[$groupId] = $badgeGroup->getSummary();
-				
-				$this->badgeGroupSummary[$groupId] = Biodiv\BadgeGroup::getSchoolSummary ( $this->schoolId, $groupId );
-				
-				$this->schoolPoints += $this->badgeGroupSummary[$groupId]->school->weightedPoints;
-				
+				if ( property_exists ( $targetAwards, "targetAward" ) ) {
+					$this->targetModuleAward[$moduleId] = $targetAwards->targetAward;
+					
+					if ( $targetAwards->targetAward ) {
+						if ( $this->targetAward == null ) {
+							$this->targetAward = $targetAwards->targetAward;
+						}
+						else if ( $targetAwards->targetAward->threshold_per_user < $this->targetAward->threshold_per_user  ) {
+							$this->targetAward = $targetAwards->targetAward;
+						}
+					}
+				}
 			}
+			*/
 			
-			$targetAwards = Biodiv\SchoolCommunity::checkSchoolAwards($this->schoolId, $this->schoolPoints);
+			$schoolStatus = Biodiv\SchoolCommunity::getSchoolStatus($this->schoolId);
 			
-			$this->existingAward = null;
-			$this->newAward = null;
-			$this->targetAward = null;
+			$this->badgeGroupSummary = $schoolStatus->badgeGroupSummary;
+			$this->schoolPoints = $schoolStatus->points;
+			$this->existingAward = $schoolStatus->existingAward;
+			$this->newAward = $schoolStatus->newAward;
+			$this->targetAward = $schoolStatus->targetAward;
 			
-			if ( property_exists ( $targetAwards, "existingAward" ) ) {
-				$this->existingAward = $targetAwards->existingAward;
-			}
 			
-			if ( property_exists ( $targetAwards, "latestAward" ) ) {
-				$this->newAward = $targetAwards->latestAward;
-			}
-			
-			if ( property_exists ( $targetAwards, "targetAward" ) ) {
-				$this->targetAward = $targetAwards->targetAward;
-			}
-			
+			//$errMsg = print_r ( $this->badgeGroupSummary, true );
+			//error_log ( "Badge groupsummary: " . $errMsg );
 		}
 		
 	}

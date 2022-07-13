@@ -35,6 +35,9 @@ class BioDivViewManageTasks extends JViewLegacy
 		
 		if ( $this->personId ) {
 			
+			$app = JFactory::getApplication();
+			$input = $app->input;
+			
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 			
 			$this->isTeacher = $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE;

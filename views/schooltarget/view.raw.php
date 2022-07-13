@@ -42,13 +42,38 @@ class BioDivViewSchoolTarget extends JViewLegacy
 		}
 		else {
 			
+			$this->modules = Biodiv\Module::getModules();
+			
 			$input = JFactory::getApplication()->input;
 	
 			$this->schoolId = $input->getInt('id', 0);
 	
 			$this->school = Biodiv\SchoolCommunity::getSchool ( $this->schoolId );
 			
-			$this->target = Biodiv\SchoolCommunity::getSchoolTarget ( $this->schoolId );
+			$this->schoolStatus = Biodiv\SchoolCommunity::getSchoolStatus ( $this->schoolId );
+			
+			$this->schoolPoints = $this->schoolStatus->points;
+			
+			$this->targetAward = $this->schoolStatus->targetAward;
+			
+			$this->targetFound = false;
+			
+			if ( $this->targetAward ) {
+				$this->awardName = $this->targetAward->award_name;
+				$this->pointsNeeded = $this->targetAward->pointsNeeded;
+				$this->targetFound = true;
+				$this->isLatest = false;
+			}
+			else {
+				$latest = $this->schoolStatus->existingAward;
+				if ( $latest ) {
+					$this->awardName = $latest->award_name;
+					$this->pointsNeeded = 0;
+					$this->isLatest = true;
+				}
+				
+			}
+		
 					
 		}
 

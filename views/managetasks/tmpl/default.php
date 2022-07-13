@@ -42,20 +42,22 @@ else {
 	
 	print '<div class="col-md-12">';
 
-	print '<div class="btn-group" role="group" aria-label="message filters">';
+	print '<div class="btn-group" role="group" aria-label="Toggle tasks buttons">';
   
 
-	print '<div class="btn btn-info browseBadges manageTasksBtn">';
+	print '<div id="viewMyTasks" class="btn btn-info chooseModule manageTasksBtn">';
 	print $this->translations['my_tasks']['translation_text'];
 	print '</div>';
 	
 	if ( $this->isEcologist ) { 
-		print '<div class="btn btn-info manageTasksBtn allTeacherTasks">';
+		//print '<div id="viewTeacherTasks_'.$this->moduleId.'" class="btn btn-info manageTasksBtn allTeacherTasks">';
+		print '<div id="viewTeacherTasks" class="btn btn-info manageTasksBtn chooseTeacherModule">';
 		print $this->translations['all_teacher_tasks']['translation_text'];
 		print '</div>';
 	}
 	
-	print '<div class="btn btn-info manageTasksBtn allStudentBadges">';
+	//print '<div id="viewStudentTasks" class="btn btn-info manageTasksBtn allStudentBadges">';
+	print '<div id="viewStudentTasks" class="btn btn-info manageTasksBtn chooseStudentModule">';
 	print $this->translations['all_student_tasks']['translation_text'];
 	print '</div>';
 	

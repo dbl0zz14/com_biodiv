@@ -46,7 +46,7 @@ class BioDivViewBrowseTasks extends JViewLegacy
 			$this->helpOption = codes_getCode ( "browsetasks", "beshelp" );
 		
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
-	
+	/*
 			$app = JFactory::getApplication();
 			
 			// Get the pillars: Quizzer etc
@@ -102,12 +102,23 @@ class BioDivViewBrowseTasks extends JViewLegacy
 				
 				$this->badgeIcons[$groupId] = $icon;
 				
+			}
+			
+			foreach ( $this->moduleIds as $moduleId ) {
 				
-				$badgeResults = new Biodiv\BadgeGroup ( $groupId );
+				$this->badgeGroupSummary[$moduleId] = array();
+				
+				foreach ( $this->badgeGroups as $badgeGroup ) {
+					$groupId = $badgeGroup[0];
+				
+					$newBadgeGroup = new Biodiv\BadgeGroup ( $groupId, $moduleId );
 		
-				$this->badgeGroupSummary[$groupId] = $badgeResults->getSummary();
+					$this->badgeGroupSummary[$modleId][$groupId] = $newBadgeGroup->getSummary();
+				}
 		
 			}
+			
+	*/
 		}
 
 		// Display the view

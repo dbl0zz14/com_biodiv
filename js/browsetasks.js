@@ -1,4 +1,4 @@
-
+/*
 function uploadDone () {
 		
 	let setId = jQuery("#resourceSet").data("set_id");
@@ -8,6 +8,11 @@ function uploadDone () {
 	let url = BioDiv.root + "&view=updatetask&format=raw&uploaded=" + setId;
 	jQuery("#displayArea").load(url, taskDoneOrUploaded);
 }	
+*/
 
-
+jQuery(document).ready(function(){
+	
+	chooseModule();
+	
+});
 

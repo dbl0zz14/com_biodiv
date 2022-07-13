@@ -29,6 +29,7 @@ else {
 		print '<h4>'.$this->translations['could_try']['translation_text'].'</h4>';
 	}
 	
+	
 	if ( $this->displayBadges ) {
 		
 		if ( $this->numToCollect == 0 ) {
@@ -106,7 +107,6 @@ else {
 		
 		$taskCount = 0;
 		
-			
 		foreach ( $this->badgeGroupData as $groupId=>$data ) {
 			
 			$colorClassArray = getOptionData ( $groupId, "colorclass" );
@@ -124,7 +124,10 @@ else {
 				print $this->translations['no_activities']['translation_text'];
 			}
 			
-			error_log ( "Total num badges = " . $totalNumBadges );
+			
+			
+			
+			//error_log ( "Total num badges = " . $totalNumBadges );
 			
 			if ( !$this->onOneLine  ) {
 				if ( $totalNumBadges > 4 ) {
@@ -138,7 +141,7 @@ else {
 				
 			
 			foreach ( $badges as $badge ) {
-			
+				
 				foreach ( $badge->tasks as $task ) {
 					
 					if ( $this->completeOnly and $task->status < Biodiv\Badge::COMPLETE ) {
@@ -180,20 +183,29 @@ else {
 						
 						print '<div class="panel-heading taskHeading">';
 						
-						print '<div class="row">';
+						print '<div class="row small-gutter">';
 						
-						print '<div class="col-md-4 col-sm-4 col-xs-4 text-left">';
-						//print '<span class="'.$colorClass.'_text"><i class= "fa '.$icon.'" aria-hidden= "true" ></i></span>';
+						// print '<div class="col-md-4 col-sm-4 col-xs-4 text-left">';
+						// //print '<span class="'.$colorClass.'_text"><i class= "fa '.$icon.'" aria-hidden= "true" ></i></span>';
+						// print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
+						// print '</div>';
+						// print '<div class="col-md-8 col-sm-8 col-xs-8 text-right" style="color:#aaaaaa;"><strong>';
+						// print $task->points . ' ' . $this->translations['points']['translation_text'];
+						// print '</strong></div>'; // col-12
+						// print '<div class="col-md-12 col-sm-10 col-xs-10 h5 text-center taskText"><strong>';
+						// print $badge->badge_name;
+						// print '</strong></div>'; // col-12
+						
+						print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
 						print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
 						print '</div>';
-						print '<div class="col-md-8 col-sm-8 col-xs-8 text-right" style="color:#aaaaaa;"><strong>';
+						print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
 						print $task->points . ' ' . $this->translations['points']['translation_text'];
-						print '</strong></div>'; // col-12
-						print '<div class="col-md-12 col-sm-10 col-xs-10 h5 text-center taskText"><strong>';
-						print $badge->badge_name;
-						print '</strong></div>'; // col-12
-						
-						
+						print '</strong></div>'; // col-6
+						print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
+						print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
+						print '</div>';
+					
 						print '</div>'; // row
 							
 						print '</div>'; // panel heading
@@ -280,14 +292,26 @@ else {
 						
 					print '<div class="panel-heading taskHeading">';
 					
-					print '<div class="row">';
+					print '<div class="row small-gutter">';
 						
-					print '<div class="col-md-4 col-sm-4 col-xs-4 h4 text-left">';
+					// print '<div class="col-md-4 col-sm-4 col-xs-4 h4 text-left">';
+					// print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
+					// print '</div>';
+					// print '<div class="col-md-8 col-sm-8 col-xs-8 text-right"><strong>';
+					// print $task->points . ' ' . $this->translations['points']['translation_text'];
+					// print '</strong></div>'; // col-8
+					
+					print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
 					print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
 					print '</div>';
-					print '<div class="col-md-8 col-sm-8 col-xs-8 text-right"><strong>';
+					print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
 					print $task->points . ' ' . $this->translations['points']['translation_text'];
-					print '</strong></div>'; // col-12
+					print '</strong></div>'; // col-6
+					print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
+					print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
+					print '</div>';
+					
+					
 					print '<div class="col-md-12 col-sm-10 col-xs-10 h5 text-center taskText"><strong>';
 					print $badge->badge_name;
 					print '</strong></div>'; // col-12
@@ -347,6 +371,16 @@ else {
 			}
 			
 		}
+		
+		if ( $this->completeOnly and $taskCount == 0  ) {
+			print $this->translations['no_complete_mod']['translation_text'];
+		}
+		else if ( $this->unlockedOnly and $taskCount == 0  ) {
+			print $this->translations['no_unlocked']['translation_text'];
+		}
+		else if ( $this->suggest and $taskCount == 0  ) {
+			print $this->translations['no_suggest']['translation_text'];
+		}
 	
 		if ( $this->onOneLine ) {
 			print '</div>'; // row
@@ -403,4 +437,6 @@ print '</div>';
 
 
 
+
 ?>
+

@@ -968,20 +968,22 @@ class BioDivController extends JControllerLegacy
 
   function verify_resource_set(){
     
-	error_log ( "verify_resource_set called" );
-	
 	$app = JFactory::getApplication();
     $set_id = $app->getUserStateFromRequest("com_biodiv.resource_set_id", "resource_set_id", 0);
     
 	if(!canEdit($set_id, 'resourceset')){
       die("Cannot edit resource set " . $set_id);
     }
+	
+	
     $guid = JRequest::getString('guid');
     if(!$guid){
       die("No guid");
     }
-    $done = JRequest::getBool('done');
-
+	
+	$done = JRequest::getBool('done');
+	
+	
     $db = JDatabase::getInstance(dbOptions());
 
 
@@ -998,43 +1000,36 @@ class BioDivController extends JControllerLegacy
       $verify->guid = $guid;
       $success = $db->insertObject("ResourceSetVerify", $verify);
     }
+
   }
   
   // handle individual or multiple files 
   function upload_resource_set(){
 	  
-	error_log ( "upload_resource_set called" );
-	
 	$app = JFactory::getApplication();
 	$set_id = $app->getUserState('com_biodiv.resource_set_id', 0);
     $isSchoolUpload = JRequest::getInt('school');
 	
-	error_log ( "Set id = " . $set_id );
+	if ( $set_id and canEdit($set_id, "resourceset") ) {
 	
-    if ( $set_id and canEdit($set_id, "resourceset") ) {
-	
-		error_log ( "Can edit set id = " . $set_id );
-		
 		$problem = false;
 	
 		$setDetails = codes_getDetails($set_id, "resourceset");
 	
-		$errMsg = print_r ( $setDetails, true );
-		error_log ( "Got resource set details:" );
-		error_log ( $errMsg );
+		// $errMsg = print_r ( $setDetails, true );
+		// error_log ( "Got resource set details:" );
+		// error_log ( $errMsg );
 	
 		$resource_type = $setDetails['resource_type'];
 		$resource_type or die ("No resource_type");
 
 		$fail = 0;
 	
-		error_log ( "About to do upload" );
-
 		$files = JRequest::getVar('myfile', null, 'files', 'array'); 
 		
-		$errMsg = print_r ( $files, true );
-		error_log ( "Got files: " );
-		error_log ( $errMsg );
+		// $errMsg = print_r ( $files, true );
+		// error_log ( "Got files: " );
+		// error_log ( $errMsg );
 		
 		
 		if(!isset($files['tmp_name'])){
@@ -1054,24 +1049,22 @@ class BioDivController extends JControllerLegacy
 		}
 		if(!$fail){
 			
-			error_log ("Uploading resources for $set_id" );
-			
 			$resourceSet = new Biodiv\ResourceSet ( $set_id );
 			
 			//$details = codes_getDetails($set_id, "resourceset");
 			$resourceType = $resourceSet->getResourceType();
 			$dirPath = $resourceSet->getDirPath();
 			$dirName = $resourceSet->getDirName();
+			//$uploadParamsJson = $resourceSet->getUploadParamsJson();
+			//$uploadParams = json_decode($uploadParamsJson);
 			
 			foreach($tmpNames as $index => $tmpName){
 			  
-				error_log ("Uploading next file, tmp name = " . $tmpName );
-				
 				$clientName = $clientNames[$index];
 				$fileSize = $fileSizes[$index];
 				$fileType = $fileTypes[$index];
 				
-				error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
+				//error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
 				
 				//$success = $resourceSet->uploadResourceFile ( $resource_type, $tmpName, $clientName, $fileSize, $fileType );
 				
@@ -1086,35 +1079,25 @@ class BioDivController extends JControllerLegacy
 				//	$tmpName = JFile::makeSafe($tmpName);
 				// NB can get this error if PHP max dilsize and upload size are too small:
 				else if(!is_uploaded_file($tmpName)){
-					error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
+					//error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
 					addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem");
 					$problem = true;
 				}
 				else {
 					
-					error_log ( "File size ok" );
-
 					$ext = strtolower(JFile::getExt($clientName));
 					$newName = md5_file($tmpName) . "." . $ext;
 
-					error_log ( "Uploading file " . $clientName . ", extension is " . $ext );
-					
-					error_log ("Resource set dir = " . $dirName );
-					
 					//$newFullName = "$dirPath/$newName";
 					$newFullName = "$dirName/$newName";
 					
-					error_log ("New full name = " . $newFullName );
-
 					if(JFile::exists($newFullName)){
-						error_log ( "File already exists " . $newFullName  );
-						
 						addMsg("warning", "File already uploaded: $clientName");
 						$problem = true;
 					}
 					else {
 						
-						error_log ( "New file - Uploading now... tmpName: " . $tmpName . ", newFullName: " . $newFullName  );
+						$tmpName . ", newFullName: " . $newFullName  );
 
 						$exists = JFile::exists($tmpName);
 						if ( !$exists ) {
@@ -1130,16 +1113,17 @@ class BioDivController extends JControllerLegacy
 							$problem = true;
 						}	
 						else {
-							error_log ( "New file - upload succeded, inserting into db... "   );
 							
-							$accessLevel = Biodiv\SchoolCommunity::PERSON;
-							if ( $isSchoolUpload ) $accessLevel = Biodiv\SchoolCommunity::SCHOOL;
+							// $accessLevel = Biodiv\SchoolCommunity::PERSON;
+							// if ( $isSchoolUpload ) $accessLevel = Biodiv\SchoolCommunity::SCHOOL;
 							
-							error_log ( "Got access level to be " . $accessLevel );
+							//$accessLevel = $uploadParams->shareLevel;
+							
+							//error_log ( "Got access level to be " . $accessLevel );
 							
 							$resourceFile = Biodiv\ResourceFile::createResourceFile ( $set_id, $resourceType, $clientName, $newName, 
-												$dirName, $fileSize, $fileType, $accessLevel );
-							
+												$dirName, $fileSize, $fileType );
+												
 							if ( !$resourceFile ) {
 								error_log ("Problem creating resource file instance" );
 								JFile::delete($newFullName);
@@ -1158,6 +1142,78 @@ class BioDivController extends JControllerLegacy
 		error_log ("No set id or cannot edit set_id $set_id");
 	}
 
+  }
+  
+  function save_resource () {
+	  
+	$success = true;
+	
+	$resourceId = $this->input->getInt('resourceId', 0 );
+	
+	if ( $resourceId ) {
+		
+		if ( Biodiv\ResourceFile::canEdit ( $resourceId ) ) {
+			
+			$school = $this->input->getInt('school', 0 );
+			$title = $this->input->getString('uploadName', 0 );
+			$description = $this->input->getString('uploadDescription', 0 );
+			$resourceType = $this->input->getInt('resourceType', 0 );
+			$source = $this->input->getString('source', 0 );
+			$externalText = $this->input->getString('externalText', 0 );
+			$shareLevel = $this->input->getInt('shareLevel', 0 );
+			
+			$fields = new stdClass();
+			$fields->resource_id = $resourceId;
+			if ($school ) $fields->school_id = $school;
+			if ($title ) $fields->title = $title;
+			if ($description ) $fields->description = $description;
+			if ($resourceType ) $fields->resource_type = $resourceType;
+			if ($source ) $fields->source = $source;
+			
+			if ( $source == "external" && $externalText ) {
+				$fields->external_text = $externalText;
+			}
+			if ($shareLevel ) $fields->access_level = $shareLevel;
+						
+			$db = JDatabase::getInstance(dbOptions());
+
+			$success = $db->updateObject('Resource', $fields, 'resource_id');
+			if(!$success){
+				error_log ( "Resource update failed" );
+			}
+			
+			$tags = $this->input->get('tag', array(), 'ARRAY');
+			
+			if ( $tags ) {
+				$conditions = array(
+					$db->quoteName('resource_id') . ' = ' . $resourceId );
+				$query = $db->getQuery(true)
+					->delete($db->quoteName('ResourceTag'))
+					->where($conditions);
+				$db->setQuery($query);
+				$result = $db->execute();
+				
+				foreach ( $tags as $tagId ) {
+					$tagFields = (object) [
+						'resource_id' => $resourceId,
+						'tag_id' => $tagId ];
+						
+					$success = $db->insertObject("ResourceTag", $tagFields);
+					if(!$success){
+						error_log ( "ResourceTag insert failed" );
+					}
+					
+				}
+			}
+			
+			if ( $success ) {
+				$success = Biodiv\ResourceFile::updateReadable ( $resourceId );
+			}
+		}
+	}
+
+	return $success;
+	  
   }
 
   function sequence_photos(){

@@ -69,6 +69,12 @@ if ( $this->findActivityButton ) {
 	
 }
 
+if ( $this->reloadButton ) {
+	
+	print '<button class="btn btn-primary btnInSpace reloadBtn">'.$this->translations['find_another']['translation_text'].'</button>';
+	
+}
+
 if ( $this->reviewWorkButton ) {
 	
 	print '<a href="'.$this->translations['schoolwork_link']['translation_text'].'" class="btn btn-primary btnInSpace">';

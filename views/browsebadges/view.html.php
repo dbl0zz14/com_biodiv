@@ -26,7 +26,6 @@ class BioDivViewBrowseBadges extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BadgeProgress display function called" );
 		
 		// Get all the text snippets for this view in the current language
 		$this->translations = getTranslations("browsebadges");
@@ -47,12 +46,15 @@ class BioDivViewBrowseBadges extends JViewLegacy
 		
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	
-			$app = JFactory::getApplication();
+			$input = JFactory::getApplication()->input;
+			$this->moduleId = $input->getInt('module', 0);
+			
+			$this->allModules = Biodiv\Module::getModules();
 			
 			// Get the pillars: Quizzer etc
 			$this->badgeGroups = codes_getList ( "badgegroup" );
 			
-			$this->stars = Biodiv\Award::getStudentStars();
+			$this->stars = Biodiv\Award::getStudentStars($this->moduleId);
 			
 			$this->badgeColorClasses = array();
 			$this->badgeColors = array();
@@ -115,7 +117,7 @@ class BioDivViewBrowseBadges extends JViewLegacy
 				// $this->badgeIcons[$groupId] = $icon;
 				
 				
-				$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
+				$badgeGroup = new Biodiv\BadgeGroup ( $groupId, $this->moduleId );
 				
 				$imageData = $badgeGroup->getImageData();
 				

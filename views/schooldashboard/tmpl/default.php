@@ -178,7 +178,7 @@ else {
 	print '<div class="panel-body">';
 	
 	print '<div class="row">';
-	print '<div class="col-md-6">';
+	print '<div class="col-md-7">';
 	
 	print '<h3 class="panelHeading">'.$this->schoolName.'</h3>';
 	print '<table class="table table-condensed">';
@@ -187,8 +187,13 @@ else {
 	print '<tr class="schoolGroupData">';
 		
 	print '<th></th>';
-	print '<th>'.$this->translations['school_total']['translation_text'].'</th>';
-	print '<th class="text-right">'.$this->schoolPoints.'</th>';
+	print '<th></th>';
+	//print '<th>'.$this->translations['school_total']['translation_text'].'</th>';
+	//print '<th class="text-right">'.$this->schoolPoints.'</th>';
+	foreach ( $this->modules as $module ) {
+
+		print '<th class="text-center"><img class="img-responsive moduleIcon'.$module->name.'" src="'.$module->icon.'"></th>';
+	}
 	
 	print '</tr>';
 	print '</thead>';
@@ -199,24 +204,63 @@ else {
 		$groupId = $badgeGroup[0];
 		$groupName = $badgeGroup[1];
 		$icon = $this->badgeIcons[$groupId];
-		$totalNumPoints = $this->badgeGroupSummary[$groupId]->school->weightedPoints;
-
+		
 	
 		print '<tr id="schoolGroupData_'. $groupId .'" class="schoolGroupData">';
 		
 		print '<td><img src="'.$icon.'" class="img-responsive tableGroupIcon" alt="'.$groupName. ' icon" /></td>';
 		print '<td>'.$groupName.'</td>';
-		print '<td class="text-right">'.$totalNumPoints.'</td>';
+		
+		foreach ( $this->moduleIds as $moduleId ) {
+			$totalNumPoints = $this->badgeGroupSummary[$moduleId][$groupId]->school->weightedPoints;
+
+			print '<td class="text-center">'.$totalNumPoints.'</td>';
+		}
 		
 		print '</tr>';
 	}
 	
+	print '<tr class="schoolGroupData">';
+		
+	print '<td></td>';
+	print '<td>'.$this->translations['totals']['translation_text'].'</td>';
+	
+	foreach ( $this->moduleIds as $moduleId ) {
+		
+		if ( array_key_exists ( $moduleId, $this->schoolPoints ) ) {
+			print '<td class="text-center">'.$this->schoolPoints[$moduleId].'</td>';
+		}
+		else {
+			print '<td></td>';
+		}
+
+	}
+	
+	print '<tr class="schoolGroupData">';
+		
+	print '<td></td>';
+	print '<td>'.$this->translations['awards']['translation_text'].'</td>';
+	
+	foreach ( $this->moduleIds as $moduleId ) {
+		
+		if ( array_key_exists ( $moduleId, $this->moduleAwards ) ) {
+			$awardType = $this->moduleAwards[$moduleId]->awardType;
+			print '<td class="text-center">'.$this->moduleAwardIcons[$awardType].'</td>';
+		}
+		else {
+			print '<td></td>';
+		}
+
+	}
+	
+	print '</tr>';
+	
 	print '</tbody>';
 	print '</table>';
 	
-	print '</div>'; // col-6
+	print '</div>'; // col-7
 	
-	print '<div class="col-md-6">';
+	print '<div class="col-md-5">';
 	
 	
 	// ---------------------------------- School target
@@ -280,12 +324,14 @@ else {
 	}
 	
 	if ( $this->targetAward ) {
+		$targetModule = $this->targetAward->module_id;
 		print '<div class="row">';
 		print '<div class="col-md-12">';
 		print '<div class="panel panel-default darkPanel">';
 		print '<div class="panel-body">';
 		
-		print '<div class="h3 panelHeading">'.$this->schoolPoints.' '.$this->translations['points']['translation_text'].'</div>';
+		$imgSrc = $this->modules[$targetModule]->white_icon;
+		print '<div class="h3 panelHeading"><img class="img-responsive targetModuleIcon" src="'.$imgSrc.'"> '.$this->schoolPoints[$targetModule].' '.$this->translations['points']['translation_text'].'</div>';
 		
 		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->targetAward->awardName. ' '.$this->translations['school_needs']['translation_text'];
 		
@@ -313,7 +359,7 @@ else {
 	
 	
 	
-	print '</div>'; // col-6
+	print '</div>'; // col-5
 	
 	print '</div>'; // row
 	

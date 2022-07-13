@@ -35,6 +35,7 @@ include_once "Biodiv/EventLog.php";
 include_once "Biodiv/MessageList.php";
 include_once "Biodiv/Award.php";
 include_once "Biodiv/SchoolSpecies.php";
+include_once "Biodiv/Module.php";
 
 
 define('BIODIV_MAX_FILE_SIZE', 180000000);
@@ -1282,9 +1283,6 @@ function myProjectDetails( $project_id ){
   $projectdetails = $db->loadAssocList("project_id");
   
   
-  //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
-  //print implode(",", $projectdetails);
-  
   return $projectdetails;
 }
 
@@ -1295,12 +1293,9 @@ function projectDetails ( $project_id ) {
   $query = $db->getQuery(true);
   $query->select("DISTINCT P.project_id, P.project_prettyname, P.project_description, P.dirname, P.image_file, P.project_text")->from("Project P");
   $query->where("P.project_id = " . $project_id );
-  $query->where("P.access_level < 3" );
+  $query->where("(P.access_level < 3) or (P.parent_project_id = 194)" );
   $db->setQuery($query);
   $projectdetails = $db->loadObject();
-  
-  //print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
-  //print implode(",", $projectdetails);
   
   return $projectdetails;
 }

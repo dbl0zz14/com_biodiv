@@ -19,12 +19,72 @@ if ( !$this->personId ) {
 
 else {
 	
+	print '<div class="row">';
+	if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE ) {
+		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+		Biodiv\SchoolCommunity::generateNav("managetasks");
+		
+		print '</div>';
+		
+		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	}
+	else {
+		
+		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+		
+		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
+	}
+	
+	print '<div id="displayArea">'; 
+	
+	print '<div class="row moduleButtons">';
+	
+	print '<div class="col-md-12">';
+	
+	print '<div class="btn-group moduleBtnGroup pull-right" role="group" aria-label="Switch module buttons">';
+	
+	foreach ( $this->allModules as $module ) {
+		print '<div id="moduleButton_' . $module->module_id.'" class="btn moduleBtn">';
+		
+		$activeClass = '';
+		$imageSrc = $module->icon;
+		
+		if ( $module->module_id == $this->moduleId ) {
+			$activeClass = 'active'.$module->name;
+			$imageSrc = $module->white_icon;
+		}
+		print '<a href="'.$module->badge_url.'">';
+		print '<div class="panel panel-default '.$activeClass.'">';
+		print '<div class="panel-body">';
+		
+		// -------------------------------------- module icon
+		print '<div class="row">';
+		
+		print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="switchModuleIcon'.$module->name.' " alt="module icon" /></div>';
+
+		print '</div>'; // row
+		
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
+		
+		//print $module->name;
+		print '</div>';
+	}
+	
+	print '</div>'; // moduleBtnGrp
+	print '</div>'; // col-12
+	print '</div>'; // row
+	
+	$module = $this->allModules[$this->moduleId];
 	
 	//print '<h2>'.$this->translations['heading']['translation_text'].' <small>'.$this->translations['subheading']['translation_text'].'</small></h2>';
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.$this->translations['heading_'.$module->class_stem]['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -37,6 +97,7 @@ else {
 	print '</h2>';  
 	
 
+
 	print '<div class="row largeBrowseButtons">';
 	
 	print '<div class="col-md-12">';
@@ -45,6 +106,7 @@ else {
 	
 	//print '<div class="browseBtnGroupHeading">'.$this->translations['by_type']['translation_text'].'</div>';
 	
+	$moduleId = $this->moduleId;
 	foreach ( $this->badgeGroups as $badgeGroup ) {
 	
 		$groupId = $badgeGroup[0];
@@ -54,7 +116,7 @@ else {
 		$image = $this->badgeImages[$groupId];
 		$icon = $this->badgeIcons[$groupId];
 		
-		print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn browseGroupBtn">';
+		print '<div id="badgesButton_'.$moduleId.'_'.$groupId.'" class="btn '. $colorClass . ' text-center browseBadgesBtn browseGroupBtn">';
 		
 		print '<div class="panel panel-default '. $colorClass .'_active_bg">';
 		print '<div class="panel-body">';
@@ -128,7 +190,7 @@ else {
 	
 	print '<div class="btn-group browseBtnGroup pull-right" role="group" aria-label="Filter tasks">';
 	
-	print '<div class="btn text-center browseBadgesBtn completeTasks">';
+	print '<div id="completeTasks_' . $module->module_id.'" class="btn text-center browseBadgesBtn completeTasks">';
 		
 	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
@@ -161,7 +223,7 @@ else {
 		
 	print '</div>'; // complete btn
 	
-	print '<div class="btn text-center browseBadgesBtn unlockedTasks">';
+	print '<div id="unlockedTasks_' . $module->module_id.'"  class="btn text-center browseBadgesBtn unlockedTasks">';
 		
 	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
@@ -196,7 +258,7 @@ else {
 	print '</div>'; // suggest btn
 		
 	
-	print '<div class="btn text-center browseBadgesBtn suggestTask">';
+	print '<div id="suggestTask_' . $module->module_id.'"  class="btn text-center browseBadgesBtn suggestTask">';
 		
 	print '<div class="panel panel-default filter_active_bg">';
 	print '<div class="panel-body">';
@@ -252,7 +314,7 @@ else {
 		//$zeroStar = $this->badgeZeroStar[$groupId];
 			
 		//print '<div id="badgesButton_'.$groupId.'" class="col-md-2 col-sm-4 col-xs-4 btn '. $colorClass . ' text-center browseGroupBadges">';
-		print '<div id="badgesButton_'.$groupId.'" class="btn '. $colorClass . ' text-center  browseBadgesBtn browseGroupBtn">';
+		print '<div id="smbadgesButton_'.$moduleId.'_'.$groupId.'" class="btn '. $colorClass . ' text-center  browseBadgesBtn browseGroupBtn">';
 		
 		print '<div class="panel panel-default">';
 		print '<div class="panel-body">';
@@ -347,13 +409,26 @@ else {
 	
 	
 	print '<div id="displayBadges"><div class="noBadges"></div></div>';
-	//print '</div>'; // row
 	
-	//print '</div>'; // col-10 or 12
 	
-	//print '</div>'; // row
+	print '</div>'; // displayArea
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
 }
 
 
+JHTML::script("com_biodiv/commondashboard.js", true, true);
+JHTML::script("com_biodiv/resourcelist.js", true, true);
+JHTML::script("com_biodiv/resourceupload.js", true, true);
+JHTML::script("com_biodiv/browsebadges.js", true, true);
+JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
+JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js", true, true);
 
 ?>
+
+
+
+
+

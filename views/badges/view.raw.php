@@ -47,6 +47,8 @@ class BioDivViewBadges extends JViewLegacy
 			$app = JFactory::getApplication();
 			$input = $app->input;
 			
+			$this->moduleId = $input->getInt('module', 0);
+			
 			
 			// Get badge group (pillar), if no group get all
 			$this->singleBadgeGroup = false;
@@ -152,7 +154,7 @@ class BioDivViewBadges extends JViewLegacy
 				$groups = array();
 				
 				$maxTasks = 3;
-				$suggestedTasks = Biodiv\Task::getSuggestedTasks ( $maxTasks );
+				$suggestedTasks = Biodiv\Task::getSuggestedTasks ( $maxTasks, $this->moduleId );
 				
 				foreach ( $suggestedTasks as $task ) {
 					
@@ -168,6 +170,7 @@ class BioDivViewBadges extends JViewLegacy
 					$badge->unlocked_image = $task->unlocked_image;
 					$badge->locked_image = $task->locked_image;
 					$badge->icon = $task->icon;
+					$badge->module_icon = $task->module_icon;
 					$badge->tasks = array ( $task );
 					
 					$groups[$badgeGroup]->badges[$task->badge_id] = $badge;
@@ -185,10 +188,10 @@ class BioDivViewBadges extends JViewLegacy
 				
 				if ( $badgeGroupId ) {
 					if ( $this->teacher ) {
-						$allTasks = Biodiv\Task::getAllTeacherTasksToView ( $badgeGroupId );
+						$allTasks = Biodiv\Task::getAllTeacherTasksToView ( $badgeGroupId, $this->moduleId );
 					}
 					else {
-						$allTasks = Biodiv\Task::getAllStudentTasksToView ( $badgeGroupId );
+						$allTasks = Biodiv\Task::getAllStudentTasksToView ( $badgeGroupId, $this->moduleId );
 					}
 				}
 				
@@ -221,7 +224,7 @@ class BioDivViewBadges extends JViewLegacy
 				
 				foreach ( $this->badgeGroups as $groupId=>$badgeGroupName ) {
 					
-					$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
+					$badgeGroup = new Biodiv\BadgeGroup ( $groupId, $this->moduleId );
 					
 					// If complete only, only include badge groups with completed tasks
 					if ( $this->completeOnly ) {
@@ -231,6 +234,7 @@ class BioDivViewBadges extends JViewLegacy
 					}
 					
 					$this->badgeGroupData[$groupId] = $badgeGroup->getAllBadgesJSON();
+					
 					//$this->badgeGroupData[$groupId] = $badgeGroup->getAllBadges();
 					
 					//error_log ( "Got badges from BadgeGroup class" );

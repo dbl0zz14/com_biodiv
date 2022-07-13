@@ -33,27 +33,39 @@ class BioDivViewResourceHub extends JViewLegacy
 	// Get all the text snippets for this view in the current language
 	$this->translations = getTranslations("resourcehub");
 	
-	// Get the user type and school.
-	
-	// Get the resource types
-	$this->resourceTypes = codes_getList ( "resource" );
-	
-	$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
-	
-/*	
-	$schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
-	if ( count($schoolRoles) > 0 ) {
-		$this->mySchoolId = $schoolRoles[0]["school_id"];
-		$this->mySchoolName = $schoolRoles[0]["name"];
-		$this->mySchoolRole = $schoolRoles[0]["role_id"];
+	$schoolSettings = getSetting ( "school_icons" );
+	$settingsObj = json_decode ( $schoolSettings );
+	$this->bookmarkedImg = "";
+	if (property_exists($settingsObj, 'bookmarked')) {
+		$this->bookmarkedImg = $settingsObj->bookmarked;
 	}
-*/
+	$this->myUploadsImg = "";
+	if (property_exists($settingsObj, 'my_uploads')) {
+		$this->myUploadsImg = $settingsObj->my_uploads;
+	}
+	$this->newImg = "";
+	if (property_exists($settingsObj, 'new_resources')) {
+		$this->newImg = $settingsObj->new_resources;
+	}
+	$this->featuredImg = "";
+	if (property_exists($settingsObj, 'featured')) {
+		$this->featuredImg = $settingsObj->featured;
+	}
+			
+			
+	// Get the resource types
+	$allResourceTypes = Biodiv\ResourceFile::getResourceTypes();
+	$this->resourceTypes = array_slice($allResourceTypes, 0, 7);
+	
+	//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+	
 	$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 		
 	$this->schoolPoints = 0;
 	$this->mySchoolId = 0;
 	$this->mySchoolName = "";
 	$this->mySchoolRole = 0;
+	$this->featured = array();
 	
 	if ( $this->schoolUser ) {
 		
@@ -62,6 +74,13 @@ class BioDivViewResourceHub extends JViewLegacy
 		$this->mySchoolId = $this->schoolUser->school_id;
 		$this->mySchoolName = $this->schoolUser->school;
 		$this->mySchoolRole = $this->schoolUser->role_id;
+		
+		$searchResults = Biodiv\ResourceFile::getPinnedResources(null, 1, 1);
+		//$searchResults = Biodiv\ResourceFile::getPinnedResources( $this->filter, $this->page );
+				
+		$this->featured = $searchResults->resources;
+		
+		
 	}
 
 			

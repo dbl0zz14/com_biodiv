@@ -76,21 +76,7 @@ else {
 		'<li class="btn btn-info prev-page">'.
 		'<i class="fa fa-backward"></i>'.
 		'</li>';
-		/*
-		for ( $i = 0; $i < $numPages; $i++ ) {	
-			$activeFlag = "";
-			$lastFlag = "";
-			if ( $i == $this->page ) {
-				$activeFlag = "active";
-			}
-			if ( $i == $numPages-1 ) {
-				$lastFlag = "last-page";
-			}
-			print '    <li class="btn btn-info '. $activeFlag . ' ' . $lastFlag . '">'.
-			strVal($i+1).
-			'   </li>';
-		}
-		*/
+		
 		for ( $i = $startPage; $i < $endPage; $i++ ) {	
 			$activeFlag = "";
 			$lastFlag = "";

@@ -56,6 +56,15 @@ function resourceListLoaded () {
 	jQuery(".unlike_resource").click(unlikeResource);
 	jQuery(".pin_resource").click(pinResource);
 	jQuery(".unpin_resource").click(unpinResource);
+	jQuery(".more_resource").click(moreResource);
+	jQuery(".edit_resource").click(editResource);
+	jQuery(".deleteResource").click(deleteResource);
+	jQuery(".addFilesToSet").click(addResourcesToSet);
+	//jQuery(".viewSet").click(viewSet);
+	
+	jQuery(".share_resource_btn").click(setShareLevel);
+	
+	jQuery(".hideMiniMenu").click(hideMiniMenu);
 	
 }
 
@@ -141,7 +150,11 @@ function unpinResource () {
 	jQuery.ajax(url);
 }
 
-function shareResource () {
+function shareResource() {
+	jQuery("#shareMenu").show();
+}
+
+function setShareLevel () {
 	let id = jQuery(this).attr("id");
 	let idbits = id.split("_");
 	let resourceId = idbits.pop();
@@ -170,7 +183,7 @@ function shareResource () {
 	
 	let url = BioDiv.root + "&view=shareresource&format=raw&share=" + accessLevel + "&id=" + resourceId;
 	
-	jQuery.ajax(url);
+	jQuery.ajax(url).done(reloadCurrentPage);
 }
 
 
@@ -190,8 +203,10 @@ function searchAllResources () {
 	let searchStr = jQuery(this).val();
 	
 	let searchStrPlus = searchStr.replace(/ /g, "%20");
+	
+	// Trigger submit on the form?
 
-	let listUrl = BioDiv.root + "&view=resourcelist&format=raw&search=" + searchStrPlus;
+	let listUrl = BioDiv.root + "&view=resourcegrid&format=raw&search=" + searchStrPlus;
 	jQuery('#displayArea').load(listUrl, resourceListLoaded);
 		
 }
@@ -200,4 +215,251 @@ function searchAllResources () {
 function emptySearchBox () {
 	jQuery("#searchResources").val("");
 }
+
+
+function editResource () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let resourceId = idbits.pop();
+
+	let url = BioDiv.root + "&view=resourceedit&format=raw&id=" + resourceId;
+	jQuery('#editArea').load(url, setSaveEditButton);
+	
+}
+
+function deleteResource () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let resourceId = idbits.pop();
+
+	let url = BioDiv.root + "&view=resourcedelete&format=raw&id=" + resourceId;
+	jQuery('#displayArea').load(url, setDeletedButtons);
+	
+}
+
+function addResourcesToSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+
+	let url = BioDiv.root + "&view=resourceadd&format=raw&set=" + setId;
+	jQuery('#addArea').load(url, doUpload);
+	
+}
+
+
+/*
+function viewSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+
+	let url = BioDiv.root + "&view=resourceset&set_id=" + setId;
+	window.location.href = url;
+	
+}
+*/
+
+
+function moreResource () {
+	jQuery("#moreMenu").show();
+}
+	
+	
+function hideMiniMenu () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let menuName = idbits.pop();
+			
+	jQuery("#" + menuName).hide();
+}
+
+function setHideMetaError () {
+	
+	jQuery(".hideMetaError").click(()=>{
+		jQuery("#resourceMetaErrorMsg").hide();
+	});
+	
+}
+
+function setSaveEditButton () {
+	
+	jQuery(".resourceNextBtn").click(resourceNext);
+	jQuery(".resourceBackBtn").click(resourceBack);
+	
+	setInputCounters();
+	setHideMetaError();
+	
+	jQuery("input[name=source]").change(function(e) {
+		
+		let checkedRadio = jQuery('input[name=source]:checked', '#resourceEditForm').val();
+		
+		if ( checkedRadio == "external" ) {
+			jQuery(".externalExtras").show();
+		}
+		else {
+			jQuery(".externalExtras").hide();
+		}
+	});
+	
+	jQuery('#resourceEditForm').submit(saveResource);
+}
+
+function setDeletedButtons () {
+}
+
+
+function resourceNext () {
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let thisPage = idbits.pop();
+	
+	let nextPage = parseInt(thisPage) + 1;
+	
+	jQuery("#resourceMeta_" + thisPage).hide();
+	jQuery("#resourceMeta_" + nextPage).show();
+}
+
+
+function resourceBack () {
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let thisPage = idbits.pop();
+	
+	let prevPage = parseInt(thisPage) - 1;
+	
+	jQuery("#resourceMeta_" + thisPage).hide();
+	jQuery("#resourceMeta_" + prevPage).show();
+}
+
+
+function validateResourceForm ( fd ) {
+	
+	let success = true;
+	
+	// For resourceUploadForm, check values
+	if ( fd.has("uploadName") ) {
+		
+		let maxChars = jQuery("#uploadNameCount").data("maxchars");
+		let actualChars = fd.get("uploadName").length;
+		
+		if ( actualChars <= maxChars ) {
+			jQuery ('[name=uploadName]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Title has too many chars: " + fd.get("uploadName") );
+			success = false;
+			jQuery ('[name=uploadName]').addClass('invalid');
+		}
+	}
+	else {
+		console.log ( "Form has no uploadName: " + fd.get("uploadName") );
+		success = false;
+		jQuery ('[name=uploadName]').addClass('invalid');
+		
+	}
+	
+	if ( fd.has("uploadDescription") ) {
+		
+		let maxChars = jQuery("#uploadDescriptionCount").data("maxchars");
+		let actualChars = fd.get("uploadDescription").length;
+		
+		if ( actualChars <= maxChars ) {
+			jQuery ('[name=uploadDescription]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Description has too many chars: " + fd.get("uploadDescription") );
+			success = false;
+			jQuery ('[name=uploadDescription]').addClass('invalid');
+		}
+	}
+	
+	
+	if ( fd.has("source") && (fd.get("source") == "external") ) {
+		if ( fd.has("externalPermission") && fd.get("externalPermission") == true ) {
+			jQuery ('[name=externalPermission]').removeClass('invalid');
+			if ( fd.has("externalText") && (fd.get("externalText").length > 0) ) {
+				jQuery ('[name=externalText]').removeClass('invalid');
+			}
+			else {
+				success = false;
+				jQuery ('[name=externalText]').addClass('invalid');
+			}
+		}
+		else {
+			success = false;
+			jQuery ('[name=externalPermission]').addClass('invalid');
+		}
+	}
+	
+	return success;
+}
+
+
+
+function saveResource(e) {
+	
+	let url = BioDiv.root + "&task=save_resource";
+	
+	e.preventDefault();
+	
+	let formId = jQuery(this).attr('id');
+	
+	let fd = new FormData(this);
+	
+	let success = true;
+	
+	if ( formId == "resourceEditForm" ) {
+		
+		success = validateResourceForm(fd);
+	}
+	
+	if ( success ) {
+		
+		jQuery.ajax({
+			type: 'POST',
+			url: url,
+			data: fd,
+			processData: false,
+			contentType: false
+		}).done(reloadCurrentPage);
+		
+	}
+	else {
+		jQuery("#resourceMetaErrorMsg").show();
+	}
+	
+}
+
+function countInputChars() {
+	let id = jQuery(this).attr("id");
+	let countDivIdStr = "#" + id + "Count";
+	let countDiv = jQuery(countDivIdStr);
+	let countMax = countDiv.data("maxchars");
+	let theInput = jQuery(this)[0].value;
+	let numChars = theInput.length;
+	
+	if ( numChars > countMax ) {
+		countDiv.addClass("tooManyChars");
+	}
+	else {
+		countDiv.removeClass("tooManyChars");
+	}
+	countDiv.text(numChars + '/' + countMax);
+
+}
+
+function setInputCounters() {
+	
+	jQuery("#uploadName").on('keyup', countInputChars);
+
+	jQuery("#uploadDescription").on('keyup', countInputChars);
+
+}
+
 

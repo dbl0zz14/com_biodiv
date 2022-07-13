@@ -41,7 +41,7 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 		
 		$this->helpOption = codes_getCode ( "schoolcommunity", "beshelp" );
 			
-		$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
+		//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 		
 		$schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
 		
@@ -62,8 +62,17 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 		// Sort the schools from highest to lowest points
 		function school_sort($a,$b)
 		{
-			if ($a->school->weightedPoints==$b->school->weightedPoints) return 0;
-			return ($a->school->weightedPoints<$b->school->weightedPoints)?1:-1;
+			// if ($a->school->weightedPoints==$b->school->weightedPoints) return 0;
+			// return ($a->school->weightedPoints<$b->school->weightedPoints)?1:-1;
+			
+			if ( $a->totalPointsAvail > 0 ) $aAvg = round((100*$a->totalPoints)/$a->totalPointsAvail, 1);
+			else $aAvg = 0;
+			
+			if ( $b->totalPointsAvail > 0 ) $bAvg = round((100*$b->totalPoints)/$b->totalPointsAvail, 1);
+			else $bAvg = 0;
+			
+			if ($aAvg==$bAvg) return 0;
+			return ($aAvg<$bAvg)?1:-1;
 		}
 		
 		// Sort the schools on award, then alphabetical
@@ -80,9 +89,13 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 									'SCHOOL_SILVER'=>'<span class="bronze"><i class="fa fa-trophy"></i></span><span class="silver"><i class="fa fa-trophy"></i></span>',
 									'SCHOOL_GOLD'=>'<span class="bronze"><i class="fa fa-trophy"></i></span><span class="silver"><i class="fa fa-trophy"></i></span><span class="gold"><i class="fa fa-trophy"></i></span>');
 		
+		$this->modules = Biodiv\Module::getModules();
+		$this->moduleIds = array_keys ( $this->modules );
+			
 		// Get all schools and summaries for each.
 		$this->community = new Biodiv\SchoolCommunity();
 		$this->schools = $this->community->getSchools();
+		$this->schoolAwards = Biodiv\Award::getMaxSchoolModuleAwards();
 		
 		
 		$this->badgeGroups = codes_getList ( "badgegroup" );
@@ -94,9 +107,6 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 			$badgeGroupId = $badgeGroup[0];
 			$badgeGroupName = $badgeGroup[1];
 			
-			$maxSchoolPoints = 0;
-			
-			$this->data[$badgeGroupId] = array("schools"=>array());
 			
 			// --------------------------- Colors
 			$colorClassArray = getOptionData ( $badgeGroupId, "colorclass" ); 
@@ -108,8 +118,22 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 			}
 			
 			$this->badgeColorClasses[$badgeGroupId] = $colorClass;
-				
-				
+		
+		}
+		
+		//foreach ( $this->moduleIds as $moduleId ) {
+			
+		$this->data = array();
+			
+		foreach ( $this->badgeGroups as $badgeGroup ) {
+			
+			$badgeGroupId = $badgeGroup[0];
+			$badgeGroupName = $badgeGroup[1];
+			
+			$this->data[$badgeGroupId] = array("schools"=>array());
+			$maxSchoolPoints = 0;
+		
+					
 			// ----------------------------- Icons
 			// $iconArray = getOptionData ( $badgeGroupId, "icon" ); 
 
@@ -121,42 +145,49 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 			
 			// $this->badgeIcons[$badgeGroupId] = $icon;
 			
-			
-			$badgeGroup = new Biodiv\BadgeGroup ( $badgeGroupId );
-				
-			$imageData = $badgeGroup->getImageData();
-			
-			$this->badgeIcons[$badgeGroupId] = $imageData->icon;
-			
-				
-			
 			$groupSchools = array();
 			foreach ( $this->schools as $school ) {
 				
-				$schoolId = $school->schoolId;
-				$schoolName = $school->schoolName;
-				$schoolAward = $school->awardId;
-				$schoolSummary = Biodiv\BadgeGroup::getSchoolSummary ( $schoolId, $badgeGroupId );
+				$newSchool = clone $school;
 				
-				$schoolSummary->schoolName = $schoolName;
-				$schoolSummary->schoolId = $schoolId;
-				$schoolSummary->awardType = $school->awardType;
-				$schoolSummary->awardName = $school->awardName;
-				$schoolSummary->awardSeq = $school->seq ? $school->seq : 0;
+				$newSchool->modules = array();
 				
-								
-				$groupSchools[] = $schoolSummary;
+				$newSchool->totalPoints = 0;
+				$newSchool->totalPointsAvail = 0;
+									
+				foreach ( $this->moduleIds as $moduleId ) {
+					
+					if ( !array_key_exists($badgeGroupId, $this->badgeIcons) ) {
+						$badgeGroup = new Biodiv\BadgeGroup ( $badgeGroupId, $moduleId );
+						
+						$imageData = $badgeGroup->getImageData();
+					
+						$this->badgeIcons[$badgeGroupId] = $imageData->icon;
+					
+					}
+			
+					$moduleSummary = Biodiv\BadgeGroup::getSchoolSummary ( $newSchool->schoolId, $badgeGroupId, $moduleId );
 				
-				if ( $schoolSummary->school->weightedPoints > $maxSchoolPoints ) $maxSchoolPoints = $schoolSummary->school->weightedPoints;
+					//$schoolSummary->awardType = $school->awardType;
+					//$schoolSummary->awardName = $school->awardName;
+					//$schoolSummary->awardSeq = $school->seq ? $school->seq : 0;
+									
+					//if ( $schoolSummary->school->weightedPoints > $maxSchoolPoints ) $maxSchoolPoints = $schoolSummary->school->weightedPoints;
+					
+					$newSchool->modules[$moduleId] = $moduleSummary;
+					$newSchool->totalPoints += $moduleSummary->school->weightedPoints;
+					$newSchool->totalPointsAvail += $moduleSummary->school->pointsAvailable;
+				}
+				
+				$groupSchools[] = $newSchool;
 			}
 			
-			
-
-			uasort($groupSchools,"school_sort_award");
+			uasort($groupSchools,"school_sort");
 			
 			$this->data[$badgeGroupId]["schools"] = $groupSchools;
-			$this->data[$badgeGroupId]["maxPoints"] = $maxSchoolPoints;
+			//$this->data[$badgeGroupId]["maxPoints"] = $maxSchoolPoints;
 		}
+		//}
 		
 	}
 	

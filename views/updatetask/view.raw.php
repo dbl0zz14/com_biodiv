@@ -65,6 +65,7 @@ class BioDivViewUpdateTask extends JViewLegacy
 			$this->nextStep = null;
 			$this->findActivityButton = null;
 			$this->reviewWorkButton = null;
+			$this->reloadButton = null;
 			
 			if ( $unlock ) {
 				
@@ -97,7 +98,7 @@ class BioDivViewUpdateTask extends JViewLegacy
 					$this->nextStep = $this->translations['once_approved']['translation_text'];
 				}	
 				
-				$this->findActivityButton = true;
+				$this->reloadButton = true;
 				
 			}
 			else if ( $approve ) {
@@ -137,7 +138,7 @@ class BioDivViewUpdateTask extends JViewLegacy
 					$this->nextStep = $this->translations['once_approved']['translation_text'];
 				}	
 				
-				$this->findActivityButton = true;
+				$this->reloadButton = true;
 				
 				if ( Biodiv\SchoolCommunity::isStudent() ) {
 					$this->reviewWorkButton = true;
@@ -156,7 +157,7 @@ class BioDivViewUpdateTask extends JViewLegacy
 					$this->message = $this->translations['done_msg']['translation_text'] . ' ' . $task->getTaskName() . ' ' . 
 						$this->translations['activity']['translation_text'];
 					
-					$this->findActivityButton = true;
+					$this->reloadButton = true;
 				}
 				else {
 					$this->message = $this->translations['problem']['translation_text'];
