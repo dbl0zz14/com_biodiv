@@ -1010,7 +1010,9 @@ class BioDivController extends JControllerLegacy
 	$set_id = $app->getUserState('com_biodiv.resource_set_id', 0);
     $isSchoolUpload = JRequest::getInt('school');
 	
-	if ( $set_id and canEdit($set_id, "resourceset") ) {
+	error_log ( "Set id = " . $set_id );
+	
+    if ( $set_id and canEdit($set_id, "resourceset") ) {
 	
 		$problem = false;
 	
@@ -1097,8 +1099,6 @@ class BioDivController extends JControllerLegacy
 					}
 					else {
 						
-						$tmpName . ", newFullName: " . $newFullName  );
-
 						$exists = JFile::exists($tmpName);
 						if ( !$exists ) {
 							error_log ( "tmpName file does not exist" );
