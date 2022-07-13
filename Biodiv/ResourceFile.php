@@ -913,7 +913,7 @@ class ResourceFile {
 		print '<div class="fullResourceShare">';
 		if ( $resourcePerson == $userId ) {
 			print '<div id="share_resource_'.$tagStr.$resourceId.'" class="share_resource share_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					$translations['share']['translation_text'].'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4>'.$translations['share']['translation_text'].'</div>';
+					$translations['share']['translation_text'].'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4><div class="hidden-xs">'.$translations['share']['translation_text'].'</div></div>';
 					
 			print '<div id="shareMenu" class="miniMenu" style="display:none;">';
 				
@@ -937,23 +937,23 @@ class ResourceFile {
 		if ( $this->isLike ) {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4>'.$translations['like']['translation_text'].'</div>';
+				$translations['like']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['like']['translation_text'].'</div></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"><h4 ><i class="fa fa-heart fa-lg"></i></h4>'.$translations['unlike']['translation_text'].'</div>';
+				$translations['like']['translation_text'].'"><h4 ><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.$translations['unlike']['translation_text'].'</div></div>';
 		}
 		else {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4>'.$translations['like']['translation_text'].'</div>';
+				$translations['like']['translation_text'].'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['like']['translation_text'].'</div></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4>'.$translations['unlike']['translation_text'].'</div>';
+				$translations['like']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.$translations['unlike']['translation_text'].'</div></div>';
 		}
 		print '</div>';
 		
 		print '<div class="fullResourceDownload">';
 		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="download_resource text-center" role="button" data-toggle="tooltip" title="'.
 			$translations['download']['translation_text'].'" ><a href="'.$this->url.
-			'" download="'.$this->filename.'"><h4><i class="fa fa-download fa-lg"></i></h4></a>'.$translations['download']['translation_text'].'</div>';
+			'" download="'.$this->filename.'"><h4><i class="fa fa-download fa-lg"></i></h4></a><div class="hidden-xs">'.$translations['download']['translation_text'].'</div></div>';
 		print '</div>';
 		
 		print '<div class="fullResourceBookmark">';
@@ -961,19 +961,19 @@ class ResourceFile {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4>'.$translations['favourite']['translation_text'].'</div>';
+				$translations['favourite']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['favourite']['translation_text'].'</div></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['unfavourite']['translation_text'].'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4>'.$translations['unfavourite']['translation_text'].'</div>';
+				$translations['unfavourite']['translation_text'].'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.$translations['unfavourite']['translation_text'].'</div></div>';
 		}
 		else {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4>'.$translations['favourite']['translation_text'].'</div>';
+				$translations['favourite']['translation_text'].'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['favourite']['translation_text'].'</div></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4>'.$translations['unfavourite']['translation_text'].'</div>';
+				$translations['favourite']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.$translations['unfavourite']['translation_text'].'</div></div>';
 		}
 		print '</div>';
 		
@@ -982,7 +982,7 @@ class ResourceFile {
 			print '<div class="fullResourceMoreOptions">';
 		
 			print '<div id="more_resource_'.$tagStr.$resourceId.'" class="more_resource more_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					$translations['more_options']['translation_text'].'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4>'.$translations['more_options']['translation_text'].'</div>';
+					$translations['more_options']['translation_text'].'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4><div class="hidden-xs">'.$translations['more_options']['translation_text'].'</div></div>';
 			
 			print '<div id="moreMenu" class="miniMenu" style="display:none;">';
 			
@@ -1011,8 +1011,8 @@ class ResourceFile {
 		else {
 			print '<div class="fullResourceMoreOptions">';
 			print '<div id="viewSet_'.$this->setId.'" class="viewSet text-center">';
-			print '<a href="'.$translations['resource_set_page']['translation_text'].'?set_id='.$this->setId.'" ><h4><i class="fa fa-files-o fa-lg"></i></h4>'.$translations['view_set']['translation_text'].'</a>';
-			print '</div>';
+			print '<a href="'.$translations['resource_set_page']['translation_text'].'?set_id='.$this->setId.'" ><h4><i class="fa fa-files-o fa-lg"></i></h4></a><div class="hidden-xs">'.$translations['view_set']['translation_text'];
+			print '</div></div>';
 			print '</div>'; // moreOptions
 		}
 		
