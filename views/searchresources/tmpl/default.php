@@ -366,8 +366,8 @@ print '  <div class="modal-dialog modal-lg"  >';
 
 print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+print '      <div class="modal-header text-right">';
+print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
 print '      </div>';
 print '     <div class="modal-body">';
 
@@ -460,19 +460,12 @@ print '</div>'; // filterModal
 
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
-//JHTML::script("https://cdnjs.com/libraries/pdf.js");
-//JHTML::script("com_biodiv/pdfThumbnail/pdf.js/build/pdf.js");
 JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
 // JHTML::script("com_biodiv/pdfjs/pdf.worker.js", true, true);
 
 JHTML::script("com_biodiv/searchresources.js", true, true);
 
-//JHTML::script("//npmcdn.com/pdfjs-dist/build/pdf.js");
-//JHTML::script("//npmcdn.com/pdfjs-dist/build/pdf.worker.js");
 
-//JHTML::script('src="com_biodiv/js/pdfThumbnail/pdfThumbnails.js" data-pdfjs-src="com_biodiv/js/pdfThumbnail/pdf.js/build/pdf.js"');
-
-//print '<script src="com_biodiv/js/pdfThumbnail/pdfThumbnails.js" data-pdfjs-src="com_biodiv/js/pdfThumbnail/pdf.js/build/pdf.js"></script>';
 
 
 ?>

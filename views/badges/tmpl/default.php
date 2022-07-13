@@ -399,9 +399,9 @@ print '  <div class="modal-dialog"  >';
 
 print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+print '      <div class="modal-header text-right">';
+print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="task_article" ></div>';
@@ -422,9 +422,9 @@ print '  <div class="modal-dialog"  >';
 
 print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+print '      <div class="modal-header text-right">';
+print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="species_article" ></div>';

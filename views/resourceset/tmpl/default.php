@@ -160,7 +160,7 @@ else {
 	print '    <!-- Modal content-->';
 	print '    <div class="modal-content">';
 	print '      <div class="modal-header">';
-	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
 	print '      </div>';
 	print '     <div class="modal-body">';
 	print '	    <div id="editArea" ></div>';
@@ -180,8 +180,8 @@ else {
 
 	print '    <!-- Modal content-->';
 	print '    <div class="modal-content">';
-	print '      <div class="modal-header">';
-	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '      <div class="modal-header text-right">';
+	print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
 	print '      </div>';
 	print '     <div class="modal-body">';
 	print '	    <div id="addArea" ></div>';

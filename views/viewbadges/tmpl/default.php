@@ -8,7 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "BadgeProgress template called" );
 
 if ( !$this->personId ) {
 	

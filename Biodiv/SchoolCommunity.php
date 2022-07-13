@@ -2098,6 +2098,7 @@ class SchoolCommunity {
 			$roleId = $schoolUser->role_id;
 			
 			$modules = Module::getModules();
+			$moduleIds = array_keys($modules);
 			
 			if ( $calcStatus ) {
 				$userStatus = self::calcUserStatus ( $roleId );
@@ -2151,7 +2152,7 @@ class SchoolCommunity {
 			
 			
 			//print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
-			
+			/*
 			$numModules = count($totalPointsByModule);
 			$moduleNum = 1;
 			foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
@@ -2165,6 +2166,28 @@ class SchoolCommunity {
 				
 				$moduleNum++;
 			}
+			*/
+			$numModules = count($moduleIds);
+			$moduleNum = 1;
+			foreach ( $moduleIds as $moduleId ) {
+			//foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
+				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
+				if ( array_key_exists( $moduleId, $totalPointsByModule ) ){
+					$modulePoints = $totalPointsByModule[$moduleId];
+				}
+				else {
+					$modulePoints = (object)array("points" => 0);
+				}
+				$extraClass = "";
+				if ( $moduleNum == $numModules ) {
+					$extraClass .= " statusBarTeacherPointsRight";
+				}
+				
+				print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
+				
+				$moduleNum++;
+			}
+			
 			
 			print '</tr>';
 			print '</tbody>';
