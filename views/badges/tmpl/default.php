@@ -205,6 +205,10 @@ else {
 						print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
 						print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
 						print '</div>';
+						
+						print '<div class="col-md-12 col-sm-12 col-xs-12 h5 text-center taskText"><strong>';
+						print $badge->badge_name;
+						print '</strong></div>'; // col-12
 					
 						print '</div>'; // row
 							
