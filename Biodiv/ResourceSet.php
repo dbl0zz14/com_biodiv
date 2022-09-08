@@ -154,7 +154,39 @@ class ResourceSet {
 		}
 	}
 	
-	
+	public static function canEdit ( $setId ) {
+		
+		$returnValue = false;
+		
+		if ( SchoolCommunity::isAdmin() ) {
+			$returnValue = true;
+		}
+		else {
+		
+			$user = userID();
+			
+			$options = dbOptions();
+			$db = \JDatabaseDriver::getInstance($options);
+		
+			$query = $db->getQuery(true)
+					->select("person_id from ResourceSet")
+					->where("set_id = " . $setId);
+					
+			$db->setQuery($query);
+				
+			//error_log("Set id select query created: " . $query->dump());
+				
+			$resourceSetPerson = $db->loadResult();
+			
+			
+			if ( $user == $resourceSetPerson ) {
+				$returnValue = true;
+			}
+		}
+		
+		return $returnValue;
+			
+	}
 	
 }
 

@@ -38,7 +38,8 @@ include_once "Biodiv/SchoolSpecies.php";
 include_once "Biodiv/Module.php";
 
 
-define('BIODIV_MAX_FILE_SIZE', 180000000);
+define('BIODIV_MAX_FILE_SIZE', 50000000);
+define('BIODIV_ADMIN_MAX_FILE_SIZE', 180000000);
 
 // link to javascript stuff
 $document = JFactory::getDocument();
@@ -510,11 +511,17 @@ function canEdit($id, $struc, $allow = 0){
   case 'photo':
   case 'site':
   case 'animal':
-  case 'resourceset':
-  case 'resourcefile':
     return $details['person_id'] == userID();
   break;
-    
+  
+  case 'resourceset':
+    return Biodiv\ResourceSet::canEdit($id);
+  break;
+  
+  case 'resourcefile':
+    return Biodiv\ResourceFile::canEdit($id);
+  break;
+  
   case 'sequence':
     return canEdit($details['upload_id'], 'upload');
     break;
@@ -5235,6 +5242,11 @@ function someMsgs($type){
   return count($msgs[$type]);
 }
 
+function totalMsgs(){
+  $msgs = getMsgs();
+  return count($msgs['success']) + count($msgs['warning']) + count($msgs['error']);
+}
+
 function showMessages(){
 	
   $app = JFactory::getApplication();
@@ -5606,7 +5618,7 @@ function allSpecies () {
 			
 			$query->select("O.option_id as id, O.option_name as name")
 				->from("Options O")
-				->where( "O.struc in ( 'mammal', 'bird', 'notinlist' )" );
+				->where( "O.struc in ( 'mammal', 'bird', 'invertebrate', 'notinlist' )" );
 				
 			$db->setQuery($query);
 			
@@ -5619,7 +5631,7 @@ function allSpecies () {
 			
 			$query->select("OD.option_id as id, OD.value as name")
 				->from("OptionData OD")
-				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','notinlist' )")
+				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','invertebrate','notinlist' )")
 				->where("OD.data_type = " . $db->quote($lang) );
 				
 			$db->setQuery($query);
@@ -5677,7 +5689,7 @@ function getSpeciesOrig ( $filterid, $onePage ) {
 					"page" => $details['seq']);
 					
 		// For species to all fit on one page - we want them grouped as mammals (alphabetical), birds (alphabetical), notinlist (may want to change this to go to Mammal or Bird list?).
-		if ( $onePage && ($details['struc'] == "mammal" or $details['struc'] == "bird") )
+		if ( $onePage && ($details['struc'] == "mammal" or $details['struc'] == "bird"  or $details['struc'] == "invertebrate"))
 		{
 			$speciesList[$details['struc']][$id]["page"] = 1;
 		}
@@ -5837,6 +5849,7 @@ function getSpecies ( $filterId, $onePage ) {
 	
 	$mammalArray = null;
 	$birdArray = null;
+	$invertArray = null;
 	$notinlistArray = null;
 	
 	// Check the language tag and work differently if English
@@ -5874,6 +5887,21 @@ function getSpecies ( $filterId, $onePage ) {
 		
 		//error_log ( "Got bird names" );
 		
+		$query = $db->getQuery(true);
+		
+		$query->select("O.option_id as id, O.option_name as name, O.struc as type")
+			->from("Options O")
+			->innerJoin("SpeciesList SL on O.option_id = SL.species_id")
+			->where( "O.struc = 'invertebrate'" )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$invertArray = $db->loadAssocList("id");
+		
+		
+		
 	}
 	else {
 		
@@ -5905,10 +5933,25 @@ function getSpecies ( $filterId, $onePage ) {
 		
 		$birdArray = $db->loadAssocList("id");
 		
+		$query = $db->getQuery(true);
+		
+		$query->select("OD.option_id as id, OD.value as name, O.struc as type")
+			->from("OptionData OD")
+			->innerJoin("SpeciesList SL on OD.option_id = SL.species_id")
+			->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'invertebrate'")
+			->where("OD.data_type = " . $db->quote($lang) )
+			->where( "SL.list_id = " . $filterId )
+			->order("O.option_name");
+			
+		$db->setQuery($query);
+		
+		$invertArray = $db->loadAssocList("id");
+		
 	}
 	
 	if ( $mammalArray ) $speciesList['mammal'] = $mammalArray;
 	if ( $birdArray ) $speciesList['bird'] = $birdArray;
+	if ( $invertArray ) $speciesList['invertebrate'] = $invertArray;
 	
 	//$err_msg = print_r ( $mammalArray, true );
 	//error_log ( "mammal list for filter " . $filterId . ": " . $err_msg );
@@ -6071,6 +6114,7 @@ function printSpeciesList ( $filterId, $speciesList, $useSeq=false, $largeButton
 				break;
 
 			case 'bird':  
+			case 'invertebrate':
 				$btnClass = 'btn-info';
 				break;
 
@@ -6363,6 +6407,7 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 				break;
 
 			case 'bird':  
+			case 'invertebrate':
 				$btnClass = 'btn-info';
 				
 				// For birds have a button to view the article and a song and call quick classify button
@@ -6469,6 +6514,7 @@ function printBirdSpeciesListOrig ( $filterId, $speciesList, $useSeq=false, $dat
 				break;
 
 			case 'bird':  
+			case 'invertebrate':
 				$btnClass = 'btn-info';
 				
 				// For birds have a button to view the article and a song and call quick classify button

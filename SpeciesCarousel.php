@@ -49,7 +49,7 @@ class SpeciesCarousel {
 			
 			$query->select("O.option_id as id, O.option_name as name")
 				->from("Options O")
-				->where( "O.struc in ( 'mammal', 'bird', 'notinlist' )" );
+				->where( "O.struc in ( 'mammal', 'bird', 'invertebrate', 'notinlist' )" );
 				
 			$db->setQuery($query);
 			
@@ -62,7 +62,7 @@ class SpeciesCarousel {
 			
 			$query->select("OD.option_id as id, OD.value as name")
 				->from("OptionData OD")
-				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','notinlist' )")
+				->innerJoin("Options O on O.option_id = OD.option_id and O.struc in ( 'mammal','bird','invertebrate','notinlist' )")
 				->where("OD.data_type = " . $db->quote($lang) );
 				
 			$db->setQuery($query);

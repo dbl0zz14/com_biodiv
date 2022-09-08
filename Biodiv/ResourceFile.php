@@ -977,7 +977,8 @@ class ResourceFile {
 		}
 		print '</div>';
 		
-		if ( $resourcePerson == $userId ) {
+		//if ( $resourcePerson == $userId ) {
+		if ( self::canEdit($resourceId) ) {
 			
 			print '<div class="fullResourceMoreOptions">';
 		
@@ -1622,14 +1623,10 @@ class ResourceFile {
 			
 			$readable = $typeName . ' ' . $tagNames;
 			
-			//error_log ( "Readable = " . $readable );
-			
 			// To start with
 			$articleId = 0;
 			
 			$url = $dirName."/".$newName;
-			
-			//error_log ("Creating resourceFile object");
 			
 			$resourceFields = (object) [
 				'access_level' => $accessLevel,
@@ -1653,13 +1650,8 @@ class ResourceFile {
 			
 			$struc = 'resourcefile';
 			
-			//error_log ("Inserting resource");
-			
-
 			if($resourceId = codes_insertObject($resourceFields, $struc)){
 				
-				//error_log ("Resource inserted ok");
-			
 				$problem = false;
 				addMsg('success', "Uploaded $clientName");
 				$instance = new self( $resourceId, 
@@ -1683,8 +1675,6 @@ class ResourceFile {
 							$url );
 							
 				
-				//error_log ("New ResourceFile instance created");
-				
 				if ( $tags ) {
 					
 					foreach ( $tags as $tagId ) {
@@ -1706,8 +1696,6 @@ class ResourceFile {
 			}
 		
 		}
-		
-		//error_log ("Returning instance");
 		
 		return $instance;
 		
@@ -2164,17 +2152,63 @@ class ResourceFile {
 		// Loop through my school roles and add files accordingly
 		$schoolRoles = SchoolCommunity::getSchoolRoles();
 		
+		$isAdmin = false;
+		$ecolSchools = array();
+		$teacherSchools = array();
+		$allSchools = array();
+		foreach ( $schoolRoles as $schoolRole ) {
+			if ( $schoolRole['role_id'] == SchoolCommunity::ADMIN_ROLE ) {
+				$isAdmin = true;
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::TEACHER_ROLE ) {
+				$teacherSchools[] = $schoolRole['school_id'];
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::ECOLOGIST_ROLE ) {
+				$ecolSchools[] = $schoolRole['school_id'];
+			}
+			$allSchools[] = $schoolRole['school_id'];
+		}
+		
+		$ecolSchoolsStr = "";
+		$teacherSchoolsStr = "";
+		$allSchoolsStr = "";
+		if ( count($ecolSchools) > 0 ) {
+			$ecolSchoolsStr = implode (',', $ecolSchools);
+		}
+		if ( count($teacherSchools) > 0 ) {
+			$teacherSchoolsStr = implode (',', $teacherSchools);
+		}
+		if ( count($allSchools) > 0 ) {
+			$allSchoolsStr = implode (',', $allSchools);
+		}
+		
 		$allFavResources = array();
 		$finalQuery = null;
 		
-		foreach ( $schoolRoles as $schoolRole ) {
+		// foreach ( $schoolRoles as $schoolRole ) {
 			
-			$schoolId = $schoolRole['school_id'];
-			$roleId = $schoolRole['role_id'];
+			// $schoolId = $schoolRole['school_id'];
+			// $roleId = $schoolRole['role_id'];
 			$favResources = null;
 			
+		if ( $isAdmin ) {
+			$finalQuery = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->where("R.deleted = 0");
+
+				
+				if ( $filters ) {
+					$finalQuery->where($whereStr);
+				}
+		}
+		else {
 			
-			if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+			if ( count($teacherSchools) > 0 or count($ecolSchools) > 0 ) {
 			
 				// My own resources
 				$query = $db->getQuery(true)
@@ -2199,7 +2233,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
+					->where("R.school_id in ( " . $allSchoolsStr . ") and R.access_level = " . SchoolCommunity::SCHOOL )
 					->where("R.deleted = 0");
 				
 				if ( $filters ) {
@@ -2225,15 +2259,6 @@ class ResourceFile {
 				
 
 				$query4 = $query->union($query2)->union($query3) ;
-				
-				// $db->setQuery($query4);
-				
-				// //error_log("ResourceFile::getResourcesByType query created: " . $query4->dump());
-						
-				// $favResources  = $db->loadAssocList("resource_id");
-				
-				// // Key based union..
-				// $allFavResources = $allFavResources + $favResources;
 		
 			}
 			if ( $finalQuery ) {
@@ -2242,28 +2267,34 @@ class ResourceFile {
 			else {
 				$finalQuery = $query4;
 			}
-		}
-		if ( SchoolCommunity::isEcologist() ) {
-			// Ecologist resources
-			$query = $db->getQuery(true)
-				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-				->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-				->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
-				->where("R.deleted = 0");
+		
+			if ( count($ecolSchools) > 0 ) {
+				// Ecologist resources
+				$query = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
+					->where("R.deleted = 0");
 
-			
-			if ( $filters ) {
-				$query->where($whereStr);
-			}
-			
-			$finalQuery = $finalQuery->union($query);
-		};
+				
+				if ( $filters ) {
+					$query->where($whereStr);
+				}
+				
+				$finalQuery = $finalQuery->union($query);
+			};
+		
+		}
+		
+		$finalQuery->order("tstamp DESC");
 		
 		$db->setQuery($finalQuery);
+		
+		//error_log("ResourceFile::getResourcesByType query created: " . $finalQuery->dump());
 		
 		$db->execute();
 		$totalRows = $db->getNumRows();
@@ -2296,17 +2327,66 @@ class ResourceFile {
 		// Loop through my school roles and add files accordingly
 		$schoolRoles = SchoolCommunity::getSchoolRoles();
 		
+		$ecolSchools = array();
+		$teacherSchools = array();
+		$allSchools = array();
+		$isStudent = false;
+		$isAdmin = false;
+		foreach ( $schoolRoles as $schoolRole ) {
+			if ( $schoolRole['role_id'] == SchoolCommunity::ADMIN_ROLE ) {
+				$isAdmin = true;
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::TEACHER_ROLE ) {
+				$teacherSchools[] = $schoolRole['school_id'];
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::ECOLOGIST_ROLE ) {
+				$ecolSchools[] = $schoolRole['school_id'];
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::STUDENT_ROLE ) {
+				$isStudent = true;
+			}
+			$allSchools[] = $schoolRole['school_id'];
+		}
+		
+		$ecolSchoolsStr = "";
+		$teacherSchoolsStr = "";
+		$allSchoolsStr = "";
+		$isTeacher = false;
+		$isEcologist = false;
+		if ( count($ecolSchools) > 0 ) {
+			$isEcologist = true;
+			$ecolSchoolsStr = implode (',', $ecolSchools);
+		}
+		if ( count($teacherSchools) > 0 ) {
+			$isTeacher = true;
+			$teacherSchoolsStr = implode (',', $teacherSchools);
+		}
+		if ( count($allSchools) > 0 ) {
+			$allSchoolsStr = implode (',', $allSchools);
+		}
+		
 		$allTypeResources = array();
 		$finalQuery = null;
 		
-		foreach ( $schoolRoles as $schoolRole ) {
+		$typeResources = null;
+		if ( $isAdmin ) {
+			$finalQuery = $db->getQuery(true)
+				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->where("R.resource_type = ". $resourceType )
+				->where("R.deleted = 0");
+					
+			if ( $filters ) {
+				$finalQuery->where($whereStr);
+			}
+		}
+		else {
 			
-			$schoolId = $schoolRole['school_id'];
-			$roleId = $schoolRole['role_id'];
-			$typeResources = null;
-			
-			
-			if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+			if ( $isTeacher or $isEcologist ) {
 			
 				// My own resources
 				$query = $db->getQuery(true)
@@ -2317,8 +2397,8 @@ class ResourceFile {
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
 					->where("R.person_id = " . $personId )
-					->where("R.deleted = 0")
-					->where("R.resource_type = ". $resourceType );
+					->where("R.resource_type = ". $resourceType )
+					->where("R.deleted = 0");
 				
 				if ( $filters ) {
 					$query->where($whereStr);
@@ -2333,7 +2413,7 @@ class ResourceFile {
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
+					->where("R.school_id in (" . $allSchoolsStr . ") and R.access_level = " . SchoolCommunity::SCHOOL )
 					->where("R.resource_type = ". $resourceType )
 					->where("R.deleted = 0");
 				
@@ -2364,7 +2444,7 @@ class ResourceFile {
 				
 				
 			}
-			else if ( $roleId == SchoolCommunity::STUDENT_ROLE ) {
+			else if ( $isStudent ) {
 			
 				// Just my own resources for now
 				$query4 = $db->getQuery(true)
@@ -2390,30 +2470,33 @@ class ResourceFile {
 			else {
 				$finalQuery = $query4;
 			}
+		
+			if ( $isEcologist ) {
+				// Ecologist resources
+				$query = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
+					->where("R.resource_type = ". $resourceType )
+					->where("R.deleted = 0");
+
+				if ( $filters ) {
+					$query->where($whereStr);
+				}
+				
+				
+				$finalQuery = $finalQuery->union($query);
+			};
 		}
 		
-		if ( SchoolCommunity::isEcologist() ) {
-			// Ecologist resources
-			$query = $db->getQuery(true)
-				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-				->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
-				->where("R.resource_type = ". $resourceType )
-				->where("R.deleted = 0");
-
-			if ( $filters ) {
-				$query->where($whereStr);
-			}
-			
-			
-			$finalQuery = $finalQuery->union($query4);
-		};
-		
 		$finalQuery->order("tstamp DESC");
+		
+		//error_log("ResourceFile::getResourcesByType query created: " . $finalQuery->dump());
+		
 		
 		$db->setQuery($finalQuery);
 		$db->execute();
@@ -2628,17 +2711,95 @@ class ResourceFile {
 		
 		$allSearchResources = array();
 		
-		foreach ( $schoolRoles as $schoolRole ) {
+		$finalQuery = null;
+		
+		if ( SchoolCommunity::isAdmin() ) {
 			
-			$schoolId = $schoolRole['school_id'];
-			$roleId = $schoolRole['role_id'];
-			$searchResources = null;
+			$finalQuery = $db->getQuery(true)
+				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->where("R.deleted = 0")
+				->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+				
+			if ( $filters ) {
+				$query->where($whereStr);
+			}
+		}
+		else {	
+			foreach ( $schoolRoles as $schoolRole ) {
+				
+				$schoolId = $schoolRole['school_id'];
+				$roleId = $schoolRole['role_id'];
+				
+				if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+				
+					// My own resources
+					$query = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.person_id = " . $personId )
+						->where("R.deleted = 0")
+						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+						
+					if ( $filters ) {
+						$query->where($whereStr);
+					}
+						
+					
+					// School resources
+					$query2 = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
+						->where("R.deleted = 0")
+						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+						
+					if ( $filters ) {
+						$query2->where($whereStr);
+					}
+					
+					// Community resources
+					$query3 = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.access_level = " . SchoolCommunity::COMMUNITY )
+						->where("R.deleted = 0")
+						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+						
+					if ( $filters ) {
+						$query3->where($whereStr);
+					}
+					
+
+					$query4 = $query->union($query2)->union($query3) ;
+					
+				}
+			}
+			if ( $finalQuery ) {
+				$finalQuery = $finalQuery->union($query4);
+			}
+			else {
+				$finalQuery = $query4;
+			}
 			
-			$finalQuery = null;
-			
-			if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
-			
-				// My own resources
+			if ( SchoolCommunity::isEcologist() ) {
+				// Ecologist resources
 				$query = $db->getQuery(true)
 					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
 						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
@@ -2646,7 +2807,7 @@ class ResourceFile {
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.person_id = " . $personId )
+					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
 					->where("R.deleted = 0")
 					->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
 					
@@ -2654,73 +2815,12 @@ class ResourceFile {
 					$query->where($whereStr);
 				}
 					
-				
-				// School resources
-				$query2 = $db->getQuery(true)
-					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
-					->where("R.deleted = 0")
-					->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
-					
-				if ( $filters ) {
-					$query2->where($whereStr);
-				}
-				
-				// Community resources
-				$query3 = $db->getQuery(true)
-					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.access_level = " . SchoolCommunity::COMMUNITY )
-					->where("R.deleted = 0")
-					->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
-					
-				if ( $filters ) {
-					$query3->where($whereStr);
-				}
-				
 
-				$query4 = $query->union($query2)->union($query3) ;
+				//error_log("ResourceFile::getResourcesByType query created: " . $query->dump());
 				
-			}
+				$finalQuery = $finalQuery->union($query);
+			};
 		}
-		if ( $finalQuery ) {
-			$finalQuery = $finalQuery->union($query4);
-		}
-		else {
-			$finalQuery = $query4;
-		}
-		
-		if ( SchoolCommunity::isEcologist() ) {
-			// Ecologist resources
-			$query = $db->getQuery(true)
-				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-				->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
-				->where("R.deleted = 0")
-				->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
-				
-			if ( $filters ) {
-				$query->where($whereStr);
-			}
-				
-
-			//error_log("ResourceFile::getResourcesByType query created: " . $query->dump());
-			
-			$finalQuery = $finalQuery->union($query);
-		};
 		
 		$finalQuery->order("tstamp DESC");
 		
@@ -2768,17 +2868,98 @@ class ResourceFile {
 		$newResources = array();
 		$finalQuery = null;
 		
-		foreach ( $schoolRoles as $schoolRole ) {
+		if ( SchoolCommunity::isAdmin() ) {
 			
-			$schoolId = $schoolRole['school_id'];
-			$roleId = $schoolRole['role_id'];
-			$searchResources = null;
+			$finalQuery = $db->getQuery(true)
+				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->where("R.deleted = 0")
+				->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
 			
-			$finalQuery = null;
+			if ( $filters ) {
+				$finalQuery->where($whereStr);
+			}
+		}
+		else {
+		
+			foreach ( $schoolRoles as $schoolRole ) {
+				
+				$schoolId = $schoolRole['school_id'];
+				$roleId = $schoolRole['role_id'];
+				$searchResources = null;
+				
+				$finalQuery = null;
+				
+				if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+				
+					// My own resources
+					$query = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.person_id = " . $personId )
+						->where("R.deleted = 0")
+						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
+					
+					if ( $filters ) {
+						$query->where($whereStr);
+					}
+					
+					
+					// School resources
+					$query2 = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
+						->where("R.deleted = 0")
+						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
+						
+					if ( $filters ) {
+						$query2->where($whereStr);
+					}
+					
+					
+					// Community resources
+					$query3 = $db->getQuery(true)
+						->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+							"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+							"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->where("R.access_level = " . SchoolCommunity::COMMUNITY )
+						->where("R.deleted = 0")
+						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
+						
+					if ( $filters ) {
+						$query3->where($whereStr);
+					}
+					
+					
+					$query4 = $query->union($query2)->union($query3) ;
+					
+				}
+			}
+			if ( $finalQuery ) {
+				$finalQuery = $finalQuery->union($query4);
+			}
+			else {
+				$finalQuery = $query4;
+			}
 			
-			if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
-			
-				// My own resources
+			if ( SchoolCommunity::isEcologist() ) {
+				// Ecologist resources
 				$query = $db->getQuery(true)
 					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
 						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
@@ -2786,82 +2967,21 @@ class ResourceFile {
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.person_id = " . $personId )
+					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
 					->where("R.deleted = 0")
 					->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
-				
+					
 				if ( $filters ) {
 					$query->where($whereStr);
 				}
-				
-				
-				// School resources
-				$query2 = $db->getQuery(true)
-					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
-					->where("R.deleted = 0")
-					->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
 					
-				if ( $filters ) {
-					$query2->where($whereStr);
-				}
-				
-				
-				// Community resources
-				$query3 = $db->getQuery(true)
-					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-					->where("R.access_level = " . SchoolCommunity::COMMUNITY )
-					->where("R.deleted = 0")
-					->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
 					
-				if ( $filters ) {
-					$query3->where($whereStr);
-				}
+				//error_log("ResourceFile::getResourcesByType query created: " . $query->dump());
 				
-				
-				$query4 = $query->union($query2)->union($query3) ;
-				
-			}
-		}
-		if ( $finalQuery ) {
-			$finalQuery = $finalQuery->union($query4);
-		}
-		else {
-			$finalQuery = $query4;
-		}
+				$finalQuery = $finalQuery->union($query);
+			};
 		
-		if ( SchoolCommunity::isEcologist() ) {
-			// Ecologist resources
-			$query = $db->getQuery(true)
-				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
-					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
-					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
-				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
-				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
-				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
-				->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
-				->where("R.deleted = 0")
-				->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
-				
-			if ( $filters ) {
-				$query->where($whereStr);
-			}
-				
-				
-			//error_log("ResourceFile::getResourcesByType query created: " . $query->dump());
-			
-			$finalQuery = $finalQuery->union($query);
-		};
+		}
 		
 		$finalQuery->order("tstamp DESC");
 		
@@ -2915,7 +3035,7 @@ class ResourceFile {
 		
 		$query = null;
 		
-		if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+		if ( $roleId == SchoolCommunity::ADMIN_ROLE or $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
 		
 			// My own resources
 			$query = $db->getQuery(true)
@@ -2987,24 +3107,31 @@ class ResourceFile {
 	
 	public static function canEdit ( $resourceId ) {
 		
-		$user = userID();
-		
-		$options = dbOptions();
-		$db = \JDatabaseDriver::getInstance($options);
-	
-		$query = $db->getQuery(true)
-				->select("person_id from Resource")
-				->where("resource_id = " . $resourceId);
-				
-		$db->setQuery($query);
-			
-		//error_log("Set id select query created: " . $query->dump());
-			
-		$resourcePerson = $db->loadResult();
-		
 		$returnValue = false;
-		if ( $user == $resourcePerson ) {
+		
+		if ( SchoolCommunity::isAdmin() ) {
 			$returnValue = true;
+		}
+		else {
+			$user = userID();
+		
+			$options = dbOptions();
+			$db = \JDatabaseDriver::getInstance($options);
+		
+			$query = $db->getQuery(true)
+					->select("person_id from Resource")
+					->where("resource_id = " . $resourceId);
+					
+			$db->setQuery($query);
+				
+			//error_log("Set id select query created: " . $query->dump());
+				
+			$resourcePerson = $db->loadResult();
+			
+			$returnValue = false;
+			if ( $user == $resourcePerson ) {
+				$returnValue = true;
+			}
 		}
 		
 		return $returnValue;

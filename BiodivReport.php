@@ -20,12 +20,15 @@ class BiodivReport {
 	// This is also used as the max num of rows to write at a time to avoid memory limits
 	const REPORT_FILE_THRESHOLD = 4000;
 	
+	private static $translations = null;
+	
 	private $projectId;
 	private $projectName;
 	
 	// The option_id of this report type in the database
 	private $reportType;
 	private $reportTypeName;
+	private $reportTypeText;
 	
 	private $reportId;
 	private $personId;
@@ -35,6 +38,8 @@ class BiodivReport {
 	private $pageLength;
 	
 	private $filename;
+	
+	private $reportFilters;
 	
 	
 	// Note that projectId can be null if this is a user report
@@ -46,6 +51,16 @@ class BiodivReport {
 		$typeName = getOptionData($reportType, 'reporttype');
 		$this->reportTypeName = $typeName[0];
 		$this->reportTypeText = codes_getName( $reportType, 'reporttypetran');
+		
+		$reportFilters = getOptionData($reportType, 'reportfilters');
+		$this->reportFilters = null;
+		if ( $reportFilters ) {
+			$this->reportFilters = array();
+			$filterArray = json_decode ( $reportFilters[0] );
+			foreach ( $filterArray as $filter ) {
+				$this->reportFilters[$filter->id] = $filter->type;
+			}
+		}
 		
 		$this->projectId = $projectId;
 		
@@ -172,6 +187,12 @@ class BiodivReport {
 				case "ALLEFFORT":
 					$this->generateAllEffortData ();
 					break;
+				case "RESOURCE":
+					$this->generateResourceData ();
+					break;
+				case "ACTIVITY":
+					$this->generateActivityData ();
+					break;
 				default:
 					error_log ("No report type found for " . $this->reportTypeName );
 			}
@@ -197,8 +218,110 @@ class BiodivReport {
         return $instance;
 	}
 	
+	
 		
+	public static function getTranslations () {
 		
+		if ( self::$translations == null ) {
+			self::$translations = getTranslations ( "BiodivReport" );
+		}
+		return self::$translations;
+	}
+	
+	
+	public static function getFilterValues ( $type ) {
+		
+		$translations = self::getTranslations();
+		
+		if ( $type == "module" ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+			$query = $db->getQuery(true)
+			->select("module_id as id, name as name from Module M" )
+			->order("seq");
+		
+			$db->setQuery($query);
+		
+			$filterValues = $db->loadAssocList("id", "name");
+			
+			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			
+			return $filterValues;
+		}
+		if ( $type == "school" ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+			$query = $db->getQuery(true)
+			->select("school_id as id, name as name from School S" )
+			->order("name");
+		
+			$db->setQuery($query);
+		
+			$filterValues = $db->loadAssocList("id", "name");
+			
+			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			
+			return $filterValues;
+		}
+		if ( $type == "role" ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+			$query = $db->getQuery(true)
+			->select("role_id as id, display_text as name from Role R" )
+			->order("name");
+		
+			$db->setQuery($query);
+		
+			$filterValues = $db->loadAssocList("id", "name");
+			
+			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			
+			return $filterValues;
+		}
+	}
+	
+	
+	public static function getSelectedValue ( $type, $filter ) {
+		
+		$translations = self::getTranslations();
+		
+		$selectedValue = 0;
+		
+		if ( $type == "module" ) {
+			
+			$filterObject = json_decode ( $filter );
+			
+			if ( property_exists($filterObject, "module") ) {
+				$selectedValue = $filterObject->module;
+			}
+
+		}
+		else if ( $type == "school" ) {
+			
+			$filterObject = json_decode ( $filter );
+			
+			if ( property_exists($filterObject, "school") ) {
+				$selectedValue = $filterObject->school;
+			}
+
+		}
+		else if ( $type == "role" ) {
+			
+			$filterObject = json_decode ( $filter );
+			
+			if ( property_exists($filterObject, "role") ) {
+				$selectedValue = $filterObject->role;
+			}
+
+		}
+		
+		return $selectedValue;
+	}
+	
+	
 	// List of the available project reports
 	public static function listReports () {
 		
@@ -247,6 +370,15 @@ class BiodivReport {
 	}
 	
 	
+	// List of the available school reports
+	public static function listSchoolReports () {
+		
+		$reports = codes_getList('schoolreporttypetran');
+		
+		return $reports;
+	}
+	
+	
 	// Remove any reports created for this person
 	public static function removeExistingReports ( $personId ) {
 		
@@ -283,6 +415,16 @@ class BiodivReport {
 	}
 	
 	
+	public function getReportTypeText() {
+		return $this->reportTypeText;
+	}
+	
+	
+	
+	public function getReportFilters () {
+		return $this->reportFilters;
+	}
+	
 	
 	
 	public function getFilename() {
@@ -291,10 +433,62 @@ class BiodivReport {
 	
 	
 	
+	private function getFilterClause( $filter ) {
+		
+		$filterClause = null;
+		if ( $filter != null ) {
+			$db = JDatabase::getInstance(dbOptions());
+			switch ( $this->reportTypeName ) {
+					case "ACTIVITY":
+						error_log ( "filter = " . $filter );
+						
+						$filterObject = json_decode($filter);
+						
+						$errMsg = print_r ( $filterObject, true );
+						error_log ( "Filter object: " . $errMsg );
+						
+						if ( property_exists($filterObject, "module") and ($filterObject->module != 0 )) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter1 = " . $db->quote($filterObject->module);
+							
+						}
+						if ( property_exists($filterObject, "school") and ($filterObject->school != 0 ) ) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter2 = " . $db->quote($filterObject->school);
+						}
+						if ( property_exists($filterObject, "role") and ($filterObject->role != 0 ) ) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter3 = " . $db->quote($filterObject->role);
+						}
+						if ( $filterClause == null ) {
+							$filterClause = "1";
+						}
+						break;
+					default:
+						$filterClause = "1";
+						break;
+			}
+		}
+		else {
+			$filterClause = "1";
+		}
+		return $filterClause;
+	}
 	
-	public function rows ( $pageNum, $pageLength = null ) {
+	public function rows ( $pageNum, $pageLength = null, $filter = null ) {
 		
 		if ( $pageLength != null ) $this->pageLength = $pageLength;
+		
+		$filterClause = null;
+		if ( $filter ) {
+			$filterClause = $this->getFilterClause($filter);
+		}
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
@@ -302,6 +496,10 @@ class BiodivReport {
 		$query->select("row_csv")
 			->from("ReportRows RR")
 			->where("RR.report_id = " . $this->reportId);
+		
+		if ( $filterClause ) {
+			$query->where($filterClause);
+		}
 			
 		$start = ($pageNum) * $this->pageLength;
 		
@@ -346,9 +544,14 @@ class BiodivReport {
 		
 	}
 	
-	public function totalRows () {
+	public function totalRows ( $filter = null ) {
 		
 		$db = JDatabase::getInstance(dbOptions());
+		
+		$filterClause = null;
+		if ( $filter ) {
+			$filterClause = $this->getFilterClause($filter);
+		}
 		
 		if ( $this->totalRows == null ) {
 			$query = $db->getQuery(true);
@@ -356,6 +559,10 @@ class BiodivReport {
 				->from("ReportRows RR")
 				->where("RR.report_id = " . $this->reportId);
 				
+			if ( $filterClause ) {
+				$query->where($filterClause);
+			}
+			
 			$db->setQuery($query);
 			$this->totalRows = $db->loadResult();
 			
@@ -376,13 +583,19 @@ class BiodivReport {
 	}
 	
 	
-	public function createDownloadFile () {
+	public function createDownloadFile ( $filter = null ) {
 		
 		//$filePath = "/person_".$this->personId."/project_".$this->projectId."/".$this->filename;
 		$filePath = reportRoot()."/person_".$this->personId."/project_".$this->projectId;
 		
 		$tmpCsvFile = $filePath . "/tmp_" . $this->filename;
 		$newCsvFile = $filePath . "/" . $this->filename;
+		
+		$filterClause = null;
+		if ( $filter ) {
+			$filterClause = $this->getFilterClause($filter);
+		}
+		
 		
 		// Has the report already been created?
 		if ( !file_exists($newCsvFile) ) {
@@ -410,7 +623,11 @@ class BiodivReport {
 				$query->select("row_csv")
 					->from("ReportRows RR")
 					->where("RR.report_id = " . $this->reportId);
-					
+				
+				if ( $filterClause ) {
+					$query->where($filterClause);
+				}
+						
 				//$db->setQuery($query);
 				$db->setQuery($query, $i, BiodivReport::REPORT_FILE_THRESHOLD); // LIMIT query results to avoid memory limits
 		
@@ -1940,6 +2157,119 @@ private function generateUserSequenceData () {
 		
 		//error_log("About to execute");
 
+		$db->execute();
+
+	}
+		
+	// Get resources uploaded
+	private function generateResourceData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		$options = dbOptions();
+		$db = JDatabaseDriver::getInstance($options);
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query1 = null;
+		
+		$query1 = $db->getQuery(true)
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('ViewSet',R.set_id), O.option_name, R.title, S.name, U.username, R.timestamp) as report_csv")
+			->from("Resource R")
+			->innerJoin("Options O on O.option_id = R.resource_type")
+			->innerJoin("School S on S.school_id = R.school_id")
+			->innerJoin($userDb . "." . $prefix ."users U on R.person_id = U.id")
+			->order("R.timestamp DESC");
+		
+		error_log("query1 created: " . $query1->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv')))
+			->values($query1);
+		
+		error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		error_log("About to execute");
+
+		$db->execute();
+
+	}
+		
+	// Get activities completed
+	private function generateActivityData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		
+		$options = dbOptions();
+		$db = JDatabaseDriver::getInstance($options);
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query1 = $db->getQuery(true)
+			->select( "IFNULL(ST.set_id,0) as set_id, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, T.points as points, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, ST.complete_date as date")
+			->from("StudentTasks ST")
+			->innerJoin("Task T on T.task_id = ST.task_id")
+			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("SchoolUsers SU on SU.person_id = ST.person_id") 
+			->innerJoin("School S on S.school_id = SU.school_id")
+			->innerJoin("Role R on R.role_id = SU.role_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
+			->innerJoin($userDb . "." . $prefix ."users U on ST.person_id = U.id")
+			->where("ST.status > " . Biodiv\Badge::PENDING);
+		
+			
+		$query2 = $db->getQuery(true)
+			->select( "IFNULL(TT.set_id,0) as set_id, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, T.points as points, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, TT.complete_date as date")
+			->from("TeacherTasks TT")
+			->innerJoin("Task T on T.task_id = TT.task_id")
+			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("SchoolUsers SU on SU.person_id = TT.person_id") 
+			->innerJoin("School S on S.school_id = SU.school_id")
+			->innerJoin("Role R on R.role_id = SU.role_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
+			->innerJoin($userDb . "." . $prefix ."users U on TT.person_id = U.id")
+			->where("TT.status > " . Biodiv\Badge::PENDING);
+		
+			
+		$query = $query1->union($query2)->order("date DESC");
+		
+		error_log("Activity report query created: " . $query->dump() );
+		
+		$concatQuery = $db->getQuery(true)
+			//->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', O.option_name, B.name, S.name, R.display_text, U.username, ST.complete_date) as report_csv")
+			
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('ViewSet',set_id), module_name, badge_group, badge_name, points, school, role, person, date) as report_csv, module_id as filter1, school_id as filter2, role_id as filter3")
+			->from("(" . (string)$query . " ) AS Temp");
+			
+		
+		//error_log("concatQuery created: " . $concatQuery->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv','filter1','filter2','filter3')))
+			->values($concatQuery);
+		
+		error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
 		$db->execute();
 
 	}

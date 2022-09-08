@@ -15,7 +15,7 @@ jimport('joomla.application.component.view');
 *
 * @since 0.0.1
 */
-class BioDivViewResourceSet extends JViewLegacy
+class BioDivViewStudentAccounts extends JViewLegacy
 {
     /**
      *
@@ -26,38 +26,25 @@ class BioDivViewResourceSet extends JViewLegacy
 
     public function display($tpl = null) 
     {
+		error_log ( "StudentAccounts display function called" );
+		
 		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("resourceset");
+		$this->translations = getTranslations("studentaccounts");
 		
 		$this->personId = userID();
 		
-		$this->isEcologist = false;
-		
 		if ( $this->personId ) {
 			
-			$input = JFactory::getApplication()->input;
-			$this->setId = $input->getInt('set_id', 0);
-			
-			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
-			
-			$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
-			
-			$this->helpOption = codes_getCode ( "searchresources", "beshelp" );
-			
-			$this->canEdit = false;
-			
-			if ( $this->setId ) {
+			$this->isTeacher = Biodiv\SchoolCommunity::isTeacher();
+	
+			if ( $this->isTeacher ) {
 				
-				$this->resourceSet = new Biodiv\ResourceSet($this->setId);
+				$this->students = Biodiv\SchoolCommunity::getMyStudents();
 				
-				$this->resourceFiles = $this->resourceSet->getFiles();
-				
-				$this->canEdit = Biodiv\ResourceSet::canEdit( $this->setId );
 			}
-			
-			
-		}
 		
+		}
+
 		// Display the view
 		parent::display($tpl);
 		

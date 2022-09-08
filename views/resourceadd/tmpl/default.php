@@ -52,6 +52,8 @@ else if ( $this->isStaff ) {
 	print '<button id="resourceuploader" >'.$this->translations['choose_files']['translation_text'].'</button>';
 	//print '<div id="resourceuploader"></div>';
 	print '<div id="fileuploadspinner"  style="display:none"><i class="fa fa-spinner fa-spin fa-4x"></i></div>';
+	
+	print '<div id="errorMessage" class="h4"></div>';
 
 
 	print '</div>'; // col-md-12

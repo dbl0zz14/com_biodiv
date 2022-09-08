@@ -120,6 +120,7 @@ class BioDivViewSearchResources extends JViewLegacy
 			
 			$this->includeSet = false;
 			$this->includeDoneTasks = false;
+			$this->noArgs = false;
 			
 			$this->resourceFiles = array();
 			$this->doneTasksNoFiles = array();
@@ -264,6 +265,8 @@ class BioDivViewSearchResources extends JViewLegacy
 				
 			}
 			else {
+				
+				$this->noArgs = true;
 				
 				// If no parameters get the default resources for this person
 				// Default is any pinned resources.

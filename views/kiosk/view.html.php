@@ -55,6 +55,17 @@ class BioDivViewKiosk extends JViewLegacy
 		// Get the text snippets - enables multilingual
 		$this->translations = getTranslations("kiosk");
 		
+		$this->isSchoolUser = Biodiv\SchoolCommunity::isSchoolUser();
+		$this->logoPath = null;
+		if ( $this->isSchoolUser ) {
+			
+			$schoolSettings = getSetting ( "school_icons" );
+			
+			$settingsObj = json_decode ( $schoolSettings );
+			
+			$this->logoPath = $settingsObj->logo;
+		}
+		
 		// Display the view
 		parent::display($tpl);
     }

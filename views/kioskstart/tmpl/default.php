@@ -19,6 +19,7 @@ print '  <h1>'.$this->project->project_prettyname.'</h1>';
 print '</div>'; // opaque-bg
 
 
+print '<div class="row">';
 
 print '<div class="col-md-4">';
 
@@ -48,7 +49,6 @@ print '	<button id="kiosk_classify" class="btn btn-lg btn-block btn-success h2" 
 print '</div>';
 
 
-
 print '<div class="col-md-4">';
 
 print '	<button id="kiosk_quiz" class="btn btn-lg btn-block btn-success h2" >'.$this->translations['take_quiz']['translation_text'].'</button>';
@@ -73,11 +73,17 @@ print '</div>';
 
 
 
+
+print '</div>'; // row
+
+
 // Add logos
 print '<div class="row opaque-logo-row">';
+print '<div class="col-md-12">';
 foreach ( $this->logos as $logo ) {
 	print '<img src="' . $logo . '">';
 }
+print '</div>'; // col-12
 print '</div>'; // opaque-logo-row
 
 

@@ -7,7 +7,10 @@ jQuery(document).ready(function(){
 	
 	let currentReportType = null;
 	let currentReportId = null;
+	let currentFilter = null;
 	let currentProjectId = jQuery("#project_select").children("option:selected").val();
+	
+	if ( !currentProjectId ) currentProjectId = 0;
 	
 	// Keep track of reports generated so we can just reload them rather than recreating.
 	// User should refresh to start again.
@@ -32,14 +35,29 @@ jQuery(document).ready(function(){
 			if ( existingReportId != 0 ) {
 				// Load a previously generated report
 				url = BioDiv.root + "&view=report&format=raw&project_id=" + currentProjectId + "&report_id=" + existingReportId + "&page=" + pageNum;
+				
+				if ( currentFilter != null ) {
+					url += "&filter=" + currentFilter;
+				}
 			}
 			else {		
 				url = BioDiv.root + "&view=report&format=raw&project_id=" + currentProjectId + "&report_type=" + currentReportType + "&page=" + pageNum;
+				
+				if ( currentFilter != null ) {
+					//url += "&filter=" + JSON.parse(currentFilter);
+					url += "&filter=" + currentFilter;
+				}
 			}
 		}
 		else {
 			url = BioDiv.root + "&view=report&format=raw&project_id=" + currentProjectId + "&report_id=" + currentReportId + "&page=" + pageNum;
+			
+			if ( currentFilter != null ) {
+				//url += "&filter=" + JSON.parse(currentFilter);
+				url += "&filter=" + currentFilter;
+			}
 		}
+		jQuery("#adminReportPanel").show();
 		jQuery('#report_display').load(url, updateReportStatus);
 		
 	};
@@ -56,6 +74,7 @@ jQuery(document).ready(function(){
 		
 		updatePagination();
 		updateDownload();
+		updateReportSelect();
 		
 		// From mediacarousel.js
 		addPlayMedia();
@@ -63,6 +82,32 @@ jQuery(document).ready(function(){
 		// When it's a user dash board report this warning about the data div is available
 		jQuery("#data_warning").show();
 	};
+	
+	
+	updateReportSelect = function () {
+		
+		jQuery('.report_select').change(function (){
+		
+			let allSelects = jQuery('.report_select');
+			
+			const filterObj = {};
+			
+			jQuery('.report_select').each( function () {
+				
+				let id = jQuery(this).attr("id");
+				const idbits = id.split("_");
+				let filterType = idbits.pop();
+			
+				filterObj[filterType] = jQuery(this).val();
+			});
+			
+			currentFilter = JSON.stringify(filterObj);
+			
+			displayReport(0);
+		
+		});
+		
+	}
 	
 	
 	addReport = function () {
@@ -119,6 +164,8 @@ jQuery(document).ready(function(){
 		currentReportType = jQuery(this).attr('data-report-type');
 		currentReportId = null;
 		
+		currentFilter = jQuery(this).attr('data-filter');
+		
 		jQuery('.report-btn h4').removeClass('text-info');
 		jQuery(this).children("h4").addClass('text-info');
 		
@@ -127,6 +174,8 @@ jQuery(document).ready(function(){
 		displayReport(0);
 		
 	});
+	
+	
 	
 	updateDownload = function () {
 		jQuery('#reportdownload').click(function (){
@@ -140,6 +189,10 @@ jQuery(document).ready(function(){
 			let reportId = jQuery(this).attr("data-report-id");
 			//let url = BioDiv.root + "&view=reportdownload&format=raw&project_id=" + project_id + "&report_id=" + currentReportId;
 			let url = BioDiv.root + "&view=reportdownload&format=raw" + "&report_id=" + reportId;
+			
+			if ( currentFilter != null ) {
+				url += "&filter=" + currentFilter;
+			}
 			
 			jQuery.get(url, function(data){
 				var reportObj = JSON.parse(data);
@@ -186,6 +239,10 @@ jQuery(document).ready(function(){
 			let reportId = jQuery(this).attr("data-report-id");
 			//let url = BioDiv.root + "&view=rptfiledownload&format=raw&project_id=" + project_id + "&report_id=" + currentReportId;
 			let url = BioDiv.root + "&view=rptfiledownload&format=raw" + "&report_id=" + reportId;
+			
+			if ( currentFilter != null ) {
+				url += "&filter=" + currentFilter;
+			}
 			
 			jQuery.get(url, function(data){
 				

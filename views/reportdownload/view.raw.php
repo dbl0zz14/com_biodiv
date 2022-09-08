@@ -31,23 +31,21 @@ class BioDivViewReportDownload extends JViewLegacy
 		($person_id = (int)userID()) or die("No person_id");
 		
 		$app = JFactory::getApplication();
+		$input = $app->input;
 		
 		$this->reportId =
 		(int)$app->getUserStateFromRequest('com_biodiv.report_id', 'report_id');
-		error_log ( "ReportDownload view.  Report_id = " . $this->reportId );
+		
+		$this->filter = $input->getString('filter', 0);
+			
 		
 		// Check user is project admin for this project or if no project that users match
 		$details = codes_getDetails($this->reportId, 'report');
 		$this->projectId = $details['project_id'];
-		error_log ( "Project id = " . $this->projectId );
 		
 		$allProjects = myAdminProjects();
-		$err_msg = print_r ( $allProjects, true );
-		error_log ( $err_msg );
 		
 		$allIds = array_keys ( $allProjects );
-		$err_msg = print_r ( $allIds, true );
-		error_log ( $err_msg );
 		
 		$this->reportURL = null;
 		
@@ -58,7 +56,7 @@ class BioDivViewReportDownload extends JViewLegacy
 			
 			$this->reportName = $biodivReport->getFilename();
 			$this->headings = $biodivReport->headings();
-			$this->data = $biodivReport->rows(0, $biodivReport->totalRows());
+			$this->data = $biodivReport->rows(0, $biodivReport->totalRows(), $this->filter);
 		}
 		else if ( $this->projectId && in_array ($this->projectId, $allIds ) ) {
 			
@@ -68,7 +66,7 @@ class BioDivViewReportDownload extends JViewLegacy
 			
 			$this->reportName = $biodivReport->getFilename();
 			$this->headings = $biodivReport->headings();
-			$this->data = $biodivReport->rows(0, $biodivReport->totalRows());
+			$this->data = $biodivReport->rows(0, $biodivReport->totalRows(), $this->filter);
 			
 		}
 		else {

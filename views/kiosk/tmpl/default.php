@@ -14,6 +14,13 @@ $document->addScriptDeclaration("BioDiv.kiosk = '".$this->kiosk."';");
 
 print '	<button id="home_button" class="btn btn-success h2" data-dismiss="modal"> <span class="fa fa-3x fa-home"> </button>';
 
+if ( $this->isSchoolUser and $this->logoPath ) {
+	
+	print '<div id="besButton"><a href="'.$this->translations['bes_link']['translation_text'].'" class="noLineLink"><button class="btn btn-default h3" ><img src="'.$this->logoPath.'" class="img-responsive besButtonImg" /></button></a></div>';
+
+}
+
+
 print '<div id="kiosk"></div>';
 
 //print '<div id="discovermap" style="width:100%; height:500px;"></div>';

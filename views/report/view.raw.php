@@ -26,8 +26,6 @@ class BioDivViewReport extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		//error_log ( "Report view display called" );
-		
 		$this->personId = (int)userID();
 		
 		// Get all the text snippets for this view in the current language
@@ -39,73 +37,57 @@ class BioDivViewReport extends JViewLegacy
 			$app = JFactory::getApplication();
 			$this->project_id =
 			(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id');
-			//error_log ( "Report view.  Project id = " . $this->project_id );
-			
-			//$this->report_id =
-			//(int)$app->getUserStateFromRequest('com_biodiv.report_id', 'report_id');
-			//error_log ( "Report view.  Report_id = " . $this->report_id );
 			
 			$input = $app->input;
 			
 			$this->report_id = $input->get('report_id', 0, 'INT');
-			//error_log ( "Report view.  Report_id = " . $this->report_id );
-
+			
+			$this->filter = $input->getString('filter', 0);
+			
 			$this->report_type =
 			(int)$app->getUserStateFromRequest('com_biodiv.report_type', 'report_type');
-			//error_log ( "Report view.  Report_type = " . $this->report_type );
 			
 			$this->page =
 			(int)$app->getUserStateFromRequest('com_biodiv.page', 'page');
-			//error_log ( "Report view.  Page = " . $this->page );
-			
-			/* refinement
-			$this->pageLength =
-			(int)$app->getUserStateFromRequest('com_biodiv.page_len', 'page');
-			error_log ( "Report view.  Page = " . $this->pageLength );
-			
-			if ( $this->pageLength == 0 ) $this->pageLength = BiodivReport::PAGE_LENGTH;
-			*/
 			
 				
 			// Check user is project admin for this project
 			$allProjects = myAdminProjects();
-			//$err_msg = print_r ( $allProjects, true );
-			//error_log ( $err_msg );
 			
 			$allIds = array_keys ( $allProjects );
 			
-			//$err_msg = print_r ( $allIds, true );
-			//error_log ( $err_msg );
 			
 			if ( $this->project_id == 0 ) {
-				
-				//error_log ( "No project id - user report" );
 				
 				$biodivReport = null;
 				
 				// Could be a new report or a new page of existing report
 				if ( $this->report_id == 0 ) {
-					$biodivReport = new BiodivReport( null, $this->report_type, $this->personId );
+					$biodivReport = new BiodivReport( null, $this->report_type, $this->personId, null, $this->filter );
 					$this->report_id = $biodivReport->getReportId();
 				}
 				else {
 					$biodivReport = BiodivReport::createFromId ( $this->report_id );
 				}
 				
-				//error_log ("Getting report data");
-				
+				$this->reportTitle = $biodivReport->getReportTypeText();
 				$this->headings = $biodivReport->headings();
-				$this->totalRows = $biodivReport->totalRows();
+				$this->totalRows = $biodivReport->totalRows( $this->filter );
 				$this->pageLength = $biodivReport->pageLength();
+				$this->filterColumns = $biodivReport->getReportFilters();
 				
-				//$this->data = $biodivReport->getData( $this->page );
-				$this->rows = $biodivReport->rows( $this->page );
+				$this->filterValues = array();
+				if ( $this->filterColumns ) {
+					foreach ( $this->filterColumns as $id=>$type ) {
+						$this->filterValues[$id] = BiodivReport::getFilterValues($type);
+						$this->filterSelected[$id] = BiodivReport::getSelectedValue ( $type, $this->filter );
+					}
+				}
 				
-				//error_log ("Got rows");
+				$this->rows = $biodivReport->rows( $this->page, null, $this->filter );
+				
 			}
 			else if ( in_array ($this->project_id, $allIds ) ) {
-				
-				//error_log ( "valid project, creating report" );
 				
 				$biodivReport = null;
 				
@@ -118,16 +100,21 @@ class BioDivViewReport extends JViewLegacy
 					$biodivReport = BiodivReport::createFromId ( $this->report_id );
 				}
 				
-				//error_log ("Getting report data");
-				
 				$this->headings = $biodivReport->headings();
-				$this->totalRows = $biodivReport->totalRows();
+				$this->totalRows = $biodivReport->totalRows( $this->filter );
 				$this->pageLength = $biodivReport->pageLength();
+				$this->filterColumns = $biodivReport->getReportFilters();
 				
-				//$this->data = $biodivReport->getData( $this->page );
-				$this->rows = $biodivReport->rows( $this->page );
+				$this->filterValues = array();
+				if ( $this->filterColumns ) {
+					foreach ( $this->filterColumns as $filterCol ) {
+						$this->filterValues[$filterCol->id] = BiodivReport::getFilterValues($filterCol->type);
+					}
+				}
 				
-				//error_log ("Got rows");
+				$this->rows = $biodivReport->rows( $this->page, null, $this->filter );
+				
+				
 			}
 			else {
 				$this->data = "Sorry you do not have access";

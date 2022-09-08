@@ -23,7 +23,7 @@ else if ( $this->resourceId ) {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-		Biodiv\SchoolCommunity::generateNav("schooldashboard");
+		Biodiv\SchoolCommunity::generateNav("resourcehub");
 		
 		print '</div>';
 		
@@ -80,6 +80,29 @@ else if ( $this->resourceId ) {
 else {
 	print ('<div class="col-md-12" >'.$this->translations['no_file']['translation_text'].'</div>');
 }
+
+
+print '<div id="helpModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header">';
+print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="helpArticle" ></div>';
+print '      </div>';
+print '	  <div class="modal-footer">';
+print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
 
 
 JHTML::script("com_biodiv/commondashboard.js", true, true);

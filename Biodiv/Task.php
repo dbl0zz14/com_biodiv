@@ -321,7 +321,8 @@ class Task {
 			
 			$fields = array(
 				$db->quoteName('status') . ' = ' . $newStatus,
-				$db->quoteName('timestamp') . ' = ' . "NOW()"
+				$db->quoteName('timestamp') . ' = ' . "NOW()",
+				$db->quoteName('complete_date') . ' = ' . "DATE(NOW())"
 			);
 
 			// Conditions for which records should be updated.
@@ -331,6 +332,8 @@ class Task {
 			);
 
 			$query->update($this->userTaskTable)->set($fields)->where($conditions);
+			
+			//error_log("query created: " . $query->dump());
 			
 			$db->setQuery($query);
 			$result = $db->execute();

@@ -31,20 +31,19 @@ class BioDivViewRptFileDownload extends JViewLegacy
 		($person_id = (int)userID()) or die("No person_id");
 		
 		$app = JFactory::getApplication();
+		$input = $app->input;
 		
 		$this->reportId =
 		(int)$app->getUserStateFromRequest('com_biodiv.report_id', 'report_id');
 		error_log ( "ReportDownload view.  Report_id = " . $this->reportId );
 		
+		$this->filter = $input->getString('filter', 0);
+		
 		// Check user is project admin for this project
 		$allProjects = myAdminProjects();
-		$err_msg = print_r ( $allProjects, true );
-		error_log ( $err_msg );
 		
 		$allIds = array_keys ( $allProjects );
 		
-		$err_msg = print_r ( $allIds, true );
-		error_log ( $err_msg );
 		
 		$details = codes_getDetails($this->reportId, 'report');
 		$this->projectId = $details['project_id'];
@@ -57,7 +56,7 @@ class BioDivViewRptFileDownload extends JViewLegacy
 			
 			$biodivReport = BiodivReport::createFromId ( $this->reportId );
 			
-			$biodivReport->createDownloadFile();
+			$biodivReport->createDownloadFile( $this->filter );
 			
 			$this->reportURL = $biodivReport->reportURL();
 			
@@ -71,7 +70,7 @@ class BioDivViewRptFileDownload extends JViewLegacy
 			
 			$biodivReport = BiodivReport::createFromId ( $this->reportId );
 			
-			$biodivReport->createDownloadFile();
+			$biodivReport->createDownloadFile( $this->filter );
 			
 			$this->reportURL = $biodivReport->reportURL();
 			

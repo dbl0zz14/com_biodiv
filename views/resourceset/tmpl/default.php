@@ -22,7 +22,7 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-		Biodiv\SchoolCommunity::generateNav("schooldashboard");
+		Biodiv\SchoolCommunity::generateNav("resourcehub");
 		
 		print '</div>';
 		
@@ -78,15 +78,13 @@ else {
 	print '</div>'; // col-10
 	print '<div class="col-md-2">';
 	
-	
-	print '<div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.$this->translations['add_files']['translation_text'].'</div>';
-	
+	if ( $this->canEdit ) {
+		print '<div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.$this->translations['add_files']['translation_text'].'</div>';
+	}
 	
 	print '</div>'; // col-2
 	print '</div>'; // row
 	
-	
-	//print '<div class="h4">'.$this->translations['please_edit']['translation_text'].'</div>';
 	
 	// Resource files rows
 	$i = 0;
@@ -194,6 +192,52 @@ else {
 
 	print '  </div>'; // modal dialog
 	print '</div>'; // addFilesModal
+
+
+	if ( totalMsgs() > 0 ) {
+		print '<div id="errorsModal" class="modal fade" role="dialog">';
+		print '  <div class="modal-dialog"  >';
+
+		print '    <!-- Modal content-->';
+		print '    <div class="modal-content">';
+		print '      <div class="modal-header text-right">';
+		print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+		print '        <h4 class="modal-title text-left">'.$this->translations['upload_errors']['translation_text'].'</h4>';
+		print '      </div>';
+		print '     <div class="modal-body">';
+		showMessages();
+		print '      </div>';
+		print '	  <div class="modal-footer">';
+		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '      </div>';
+				  
+		print '    </div>'; // modal-content
+
+		print '  </div>'; // modal dialog
+		print '</div>'; // errorsModal
+	}
+	
+	
+	print '<div id="helpModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '	    <div id="helpArticle" ></div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+	print '      </div>';
+			  
+	print '    </div>';
+
+	print '  </div>';
+	print '</div>';
 
 
 }

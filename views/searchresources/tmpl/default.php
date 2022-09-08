@@ -24,7 +24,7 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-		Biodiv\SchoolCommunity::generateNav("schooldashboard");
+		Biodiv\SchoolCommunity::generateNav("resourcehub");
 		
 		print '</div>';
 		
@@ -344,7 +344,12 @@ else {
 			if ( $this->page == $i ){
 				$activeClass = "active";
 			}
-			print '<li class="'.$activeClass.'"><a href="'.$this->href.'&page='.$i.'">'.$this->translations['page']['translation_text'].' '.$i.'</a></li>';
+			if ( $this->noArgs ) {
+				print '<li class="'.$activeClass.'"><a href="'.$this->href.'?page='.$i.'">'.$this->translations['page']['translation_text'].' '.$i.'</a></li>';
+			}
+			else {
+				print '<li class="'.$activeClass.'"><a href="'.$this->href.'&page='.$i.'">'.$this->translations['page']['translation_text'].' '.$i.'</a></li>';
+			}
 		}
 		print '</ul>';
 		print '</div>';

@@ -6,5 +6,7 @@ function uploadDone () {
 jQuery(document).ready(function(){
 	
 	resourceListLoaded();
+	
+	jQuery("#errorsModal").modal('show');
 
 });

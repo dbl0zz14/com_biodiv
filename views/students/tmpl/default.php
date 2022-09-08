@@ -73,6 +73,10 @@ else {
 	print $this->translations['student_progress']['translation_text'];
 	print '</div>';
 	
+	print '<div class="btn btn-info studentAccountsTab  manageTasksBtn ">';
+	print $this->translations['student_users']['translation_text'];
+	print '</div>';
+	
 	print '</div>'; // btn-group
 	
 	print '</div>'; // col-12
@@ -98,7 +102,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

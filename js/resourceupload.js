@@ -123,6 +123,7 @@ function doUpload ( isSchool = false ) {
 
 		onError: function(files,status,errMsg,pd){
 			console.log("upload resource file error: " + errMsg);
+			jQuery("#errorMessage").text(errMsg);
 		},
 
 		afterUploadAll: function(){

@@ -106,6 +106,15 @@ function activateStudentTabs () {
 		
 	});
 	
+	jQuery('.studentAccountsTab').click( function () {
+		
+		jQuery(".manageTasksBtn").removeClass("active");
+		jQuery(this).addClass("active");
+		let url = BioDiv.root + "&view=studentaccounts&format=raw";
+		jQuery("#displayArea").load(url, activateStudentAccountButtons);
+		
+	});
+	
 }
 
 function activateManageStudents () {
@@ -137,11 +146,20 @@ function activateSchoolTaskButtons () {
 	
 	jQuery('#schoolTaskForm').submit(uploadSchoolTask);
 	
+	
 }
 
 
-
 function activateStudentProgressButtons () {
+	
+}
+
+
+function activateStudentAccountButtons () {
+	
+	
+	jQuery(".editStudent").click(setStudentFields);
+	jQuery('#editStudentForm').submit(editStudent);
 	
 }
 
@@ -275,6 +293,96 @@ function validateSchoolTaskForm ( fd ) {
 function setSchoolUploadButtons () {
 	
 
+}
+
+
+function setStudentFields () {
+	
+	let id = jQuery(this).attr("id");
+	const idbits = id.split("_");
+	let studentId = idbits.pop();
+	
+	let studentUsername = jQuery("#studentUsername_" + studentId).text();
+	let studentName = jQuery("#studentName_" + studentId).text();
+	let studentActive = jQuery("#studentActive_" + studentId).attr('data-isActive');
+	
+	jQuery("#studentId").attr('value', studentId);
+	jQuery("#studentUsername").text(studentUsername);
+	jQuery("#studentName").val(studentName);
+	if ( studentActive != "0" ) {
+		jQuery("#studentActive").prop("checked", true);
+	}
+	
+}
+
+
+
+
+function editStudent(e) {
+	
+	let url = BioDiv.root + "&task=edit_student";
+	
+	e.preventDefault();
+	
+	let formId = jQuery(this).attr('id');
+	
+	let fd = new FormData(this);
+	
+	let success = true;
+	
+	if ( formId == "editStudentForm" ) {
+		
+		success = validateEditStudentForm ( fd );
+	}
+	
+	if ( success ) {
+		
+		
+		jQuery.ajax({
+			type: 'POST',
+			url: url,
+			data: fd,
+			processData: false,
+			contentType: false
+		}).done(editStudentComplete);
+		
+	}
+	
+	
+}
+
+function validateEditStudentForm ( fd ) {
+	
+	let success = true;
+	
+	// For resourceUploadForm, check values
+	if ( fd.has("studentName") ) {
+		
+		let actualChars = fd.get("studentName").length;
+		
+		if ( actualChars > 2 ) {
+			jQuery ('[name=uploadName]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Student name too short : " + fd.get("studentName") );
+			success = false;
+			jQuery ('[name=studentName]').addClass('invalid');
+		}
+	}
+	else {
+		console.log ( "Form has no studentName: " + fd.get("studentName") );
+		success = false;
+		jQuery ('[name=studentName]').addClass('invalid');
+		
+	}
+	return success;
+	
+}
+
+function editStudentComplete () {
+	
+	jQuery("#editStudentModal").modal('hide');
+	jQuery(".studentAccountsTab").trigger("click");
 }
 
 

@@ -20,8 +20,8 @@ class SchoolCommunity {
 	const ECOLOGIST_ROLE	= 3;
 	const TEACHER_ROLE		= 4;
 	const STUDENT_ROLE		= 5;
-	const ADMIN_ROLE		= 6;
-	const SUPPORTER_ROLE	= 7;
+	const ADMIN_ROLE		= 7;
+	const SUPPORTER_ROLE	= 6;
 	
 	private $schools;
 	
@@ -73,10 +73,24 @@ class SchoolCommunity {
 	}
 	
 	
+	public static function getAllSchools () {
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("S.school_id as id, S.name as name from School S")->order("name");
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
+		
+		$schools = $db->loadObjectList();
+		
+		return $schools;
+	}
+	
 	public static function getSchoolRoles () {
-		
-		//error_log ( "SchoolCommunity::getSchoolRoles called" );
-		
 		
 		$personId = userID();
 		
@@ -106,9 +120,6 @@ class SchoolCommunity {
 	
 	public static function getSchoolName ( $schoolId ) {
 		
-		//error_log ( "SchoolCommunity::getSchoolName called" );
-		
-		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
@@ -128,8 +139,6 @@ class SchoolCommunity {
 	}
 	
 	public static function getUserName ( $personId = null ) {
-		
-		//error_log ( "SchoolCommunity::getUserName called" );
 		
 		if ( !$personId ) {
 			$personId = userID();
@@ -173,9 +182,6 @@ class SchoolCommunity {
 	
 	
 	public static function getSchoolUsers ( $schoolId ) {
-		
-		//error_log ( "SchoolCommunity::getSchoolUsers called" );
-		
 		
 		$personId = userID();
 		
@@ -406,9 +412,6 @@ class SchoolCommunity {
 			}
 			
 			$targetAwards = self::checkSchoolAwards($schoolId, $schoolPoints[$moduleId], $moduleId);
-			
-			$errMsg = print_r ( $targetAwards, true );
-			error_log ( "Target awards for module " . $moduleId . ": " . $errMsg );
 			
 			if ( property_exists ( $targetAwards, "existingAward" ) ) {
 				$existingModuleAward[$moduleId] = $targetAwards->existingAward;
@@ -677,11 +680,9 @@ class SchoolCommunity {
 			else {
 				// Check and update where achieved. 
 				if ( $award->override ) {
-					error_log ("Got threshold override");
 					$schoolThreshold = $award->override * $numUsers;
 				}
 				else {
-					error_log ("No threshold override");
 					$schoolThreshold = $award->threshold_per_user * $numUsers;
 				}
 				if ( $schoolPoints >= $schoolThreshold ) {
@@ -808,9 +809,38 @@ class SchoolCommunity {
 		return $celebration;
 	}
 	
-	public static function isEcologist ( $userId = null ) {
+	public static function isSchoolUser ( $userId = null ) {
 		
-		//error_log ( "SchoolCommunity::isEcologist called" );
+		
+		if ( $userId ) {
+			$personId = $userId;
+		}
+		else {
+			$personId = userID();
+		}
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("count(*) from SchoolUsers")
+			->where("person_id = " . $personId );
+			
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$countRoles = $db->loadResult();
+		
+		return $countRoles > 0;
+				
+	}
+	
+	public static function isEcologist ( $userId = null ) {
 		
 		if ( $userId ) {
 			$personId = $userId;
@@ -843,8 +873,6 @@ class SchoolCommunity {
 	
 	public static function isAdmin () {
 		
-		//error_log ( "SchoolCommunity::isAdmin called" );
-		
 		$personId = userID();
 		
 		if ( !$personId ) {
@@ -870,8 +898,6 @@ class SchoolCommunity {
 	}
 	
 	public static function isStudent () {
-		
-		//error_log ( "SchoolCommunity::isStudent called" );
 		
 		$personId = userID();
 		
@@ -899,8 +925,6 @@ class SchoolCommunity {
 	
 	public static function isStaff () {
 		
-		//error_log ( "SchoolCommunity::isStudent called" );
-		
 		$personId = userID();
 		
 		if ( !$personId ) {
@@ -926,8 +950,6 @@ class SchoolCommunity {
 	}
 	
 	public static function isTeacher ( $userId = null ) {
-		
-		//error_log ( "SchoolCommunity::isTeacher called" );
 		
 		if ( $userId ) {
 			$personId = $userId;
@@ -959,8 +981,6 @@ class SchoolCommunity {
 	}
 	
 	public static function isMyStudent ( $studentId ) {
-		
-		//error_log ( "SchoolCommunity::isMyStudent called" );
 		
 		if ( !$studentId ) {
 			return null;
@@ -995,8 +1015,6 @@ class SchoolCommunity {
 	
 	public static function isNewUser ( $personId = null ) {
 		
-		//error_log ( "SchoolCommunity::isNewUser called" );
-		
 		if ( !$personId ) {
 			$personId = userID();
 		}
@@ -1023,8 +1041,6 @@ class SchoolCommunity {
 	}
 	
 	public static function setNewUser ( $newValue ) {
-		
-		//error_log ( "SchoolCommunity::setNewUser called" );
 		
 		$personId = userID();
 		
@@ -1053,8 +1069,6 @@ class SchoolCommunity {
 	}
 	
 	public static function addNotification ( $message, $personId = null, $is_positive = true ) {
-		
-		//error_log ( "SchoolCommunity::addNotification called" );
 		
 		$loggedInPerson = userID();
 		
@@ -1357,7 +1371,7 @@ class SchoolCommunity {
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
 		$query = $db->getQuery(true)
-			->select("SU.school_id, SU.person_id, U.username, A.image from SchoolUsers SU")
+			->select("SU.school_id, SU.person_id, U.name, U.username, A.image, SU.include_points from SchoolUsers SU")
 			->innerJoin( "SchoolUsers SU2 on SU2.school_id = SU.school_id and SU2.person_id = " . $personId . " and SU2.role_id = " . self::TEACHER_ROLE )
 			->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
 			->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
@@ -1478,37 +1492,281 @@ class SchoolCommunity {
 		
 		$db = \JDatabaseDriver::getInstance(dbOptions());
 		
-		$query1 = $db->getQuery(true)
-			->select("SU.school_id, SU.person_id, U.username, U.name, A.image from SchoolUsers SU")
-			->innerJoin( "SchoolUsers SU2 on SU2.school_id = SU.school_id and SU2.person_id = " . $personId . " and SU2.role_id in (" . 
-					self::TEACHER_ROLE . ", " . self::ECOLOGIST_ROLE . ")" )
-			->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
-			->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
-			->where("SU.role_id in (" . self::TEACHER_ROLE . ", " . self::ECOLOGIST_ROLE . ")" );
-		
-		$db->setQuery($query1);
-		
-		/*
-		if ( self::isEcologist() ) {
-			$query2 = $db->getQuery(true)
+		if ( self::isAdmin() ) {
+			
+			$query1 = $db->getQuery(true)
 				->select("SU.school_id, SU.person_id, U.username, U.name, A.image from SchoolUsers SU")
 				->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
 				->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
-				->where("SU.role_id = " . self::ECOLOGIST_ROLE );
-			
-			$db->setQuery ( $query1->union($query2) );
-			//error_log("getAdults select query created: " . $query->dump());
+				->where("SU.role_id in (" . self::TEACHER_ROLE . ", " . self::ECOLOGIST_ROLE . ", " . self::ADMIN_ROLE . ")" );
 		}
 		else {
-			$db->setQuery($query1);
-			//error_log("getAdults select query created: " . $query1->dump());
+			
+			$query1 = $db->getQuery(true)
+				->select("SU.school_id, SU.person_id, U.username, U.name, A.image from SchoolUsers SU")
+				->innerJoin( "SchoolUsers SU2 on SU2.school_id = SU.school_id and SU2.person_id = " . $personId . " and SU2.role_id in (" . 
+						self::TEACHER_ROLE . ", " . self::ECOLOGIST_ROLE . ")" )
+				->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
+				->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
+				->where("SU.role_id in (" . self::TEACHER_ROLE . ", " . self::ECOLOGIST_ROLE . ")" );
 		}
-		*/
+		
+		$db->setQuery($query1);
 		
 		
 		$adults = $db->loadObjectList("person_id");
 		
 		return $adults;
+		
+				
+	}
+	
+	
+	public static function pairEcologist ( $ecologistId, $schoolIds ) {
+		
+		if ( self::isAdmin() ) {
+			
+			$schoolStr = "";
+		
+			if ( $schoolIds ) {
+				$schoolStr = implode ( ',', $schoolIds );
+			}
+			
+			$db = \JDatabase::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true);
+			$query->select("count(*)")
+				->from( "SchoolUsers" )
+				->where( "person_id = " . $ecologistId )
+				->where( "role_id != " . self::ECOLOGIST_ROLE );
+			$db->setQuery($query);
+			
+			$otherRoles = $db->loadResult(); 
+			
+			if ( $otherRoles > 0 ) {
+				$err_str = "Cannot add ecologist as user exists with other role";
+				error_log ( "SchoolUsers insert failed: " . $err_str );
+			}
+			else {
+			
+				$query = $db->getQuery(true);
+				$query->select("*")
+					->from( "SchoolUsers" )
+					->where( "person_id = " . $ecologistId )
+					->where( "school_id in ( " . $schoolStr . ' )' )
+					->where( "role_id = " . self::ECOLOGIST_ROLE );
+				$db->setQuery($query);
+				
+				$existingPairs = $db->loadObjectList("school_id");
+				
+				
+				$existingSchoolIds = array_keys ( $existingPairs );
+			
+				
+				foreach ( $schoolIds as $schoolId ) {
+					
+					if ( !in_array( $schoolId, $existingSchoolIds ) ) {
+						
+						error_log ( "Adding school " . $schoolId );
+						$fields = new \stdClass();
+						$fields->school_id = $schoolId;
+						$fields->person_id = $ecologistId;
+						$fields->role_id = self::ECOLOGIST_ROLE;
+						
+						$success = $db->insertObject("SchoolUsers", $fields);
+						
+						if(!$success){
+							$err_str = print_r ( $fields, true );
+							error_log ( "SchoolUsers insert failed: " . $err_str );
+						}
+				
+					}
+				}
+				
+				$conditions = array('person_id = ' . $ecologistId,
+						 'school_id not in ( ' . $schoolStr . ' )',
+						 'role_id = ' . self::ECOLOGIST_ROLE);
+
+				$query = $db->getQuery(true);
+				$query->delete($db->quoteName('SchoolUsers'));
+				$query->where($conditions);
+			 
+				$db->setQuery($query);
+				$result = $db->execute();
+			}
+		}
+	}
+	
+	
+	public static function getEcologists () {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$users = array();
+		
+		if ( self::isAdmin($personId) ) {
+		
+			$options = dbOptions();
+			$userDb = $options['userdb'];
+			$prefix = $options['userdbprefix'];
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query1 = $db->getQuery(true)
+				->select("SU.person_id, U.username, U.name, A.image, SU.school_id, S.name as school_name from SchoolUsers SU")
+				->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
+				->innerJoin( "School S on S.school_id = SU.school_id" )
+				->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
+				->where("SU.role_id = " . self::ECOLOGIST_ROLE );
+			
+			$db->setQuery($query1);
+		
+		
+			$rows = $db->loadObjectList();
+			
+			foreach ( $rows as $row ) {
+				
+				if ( array_key_exists ( $row->person_id, $users ) ) {
+					
+					$existingUser = $users[$row->person_id];
+					$existingUser->schools[$row->school_id] = $row->school_name;
+					
+				}
+				else {
+					$newUser = new \StdClass();
+					$newUser->personId = $row->person_id;
+					$newUser->name = $row->name;
+					$newUser->username = $row->username;
+					$newUser->avatar = $row->image;
+					$newUser->schools = array();
+					$newUser->schools[$row->school_id] = $row->school_name;
+					
+					$users[$row->person_id] = $newUser;
+				}
+			}
+			
+		}
+		
+		$errMsg = print_r ( $users, true );
+		error_log ( "Ecologists: " . $errMsg );
+		
+		return $users;
+				
+	}
+	
+	
+	public static function editStudent ( $studentId, $studentName, $includePoints ) {
+		
+		if ( self::isTeacher() ) {
+			
+			if ( self::isMyStudent ( $studentId ) ) {
+		
+				$data = array(
+					'name'=>$studentName
+					);
+				
+				//$user = new \Joomla\CMS\User ( $studentId );
+				$user = null;
+				
+				try {
+					//$user = new \Joomla\CMS\User ( $studentId );
+					$user = new \JUser ( $studentId );
+				} 
+				catch ( Exception $e ) {
+					error_log($e->getMessage());
+				}
+				
+				$userUpdated = false;
+
+				try{
+					
+					if (!$user->bind($data)){
+						error_log("User bind returned false");
+						error_log($user->getError());
+						
+					}
+					
+					if (!$user->save()) {
+						error_log("User save returned false");
+						error_log($user->getError());
+						
+					}
+					
+					if ( !$user->getError() ) {
+						error_log("User saved");
+						
+						$userUpdated = true;
+					}
+					
+				}
+				catch(Exception $e){
+					error_log($e->getMessage());
+				}
+				
+				if ( $userUpdated ) {
+					
+					$options = dbOptions();
+					
+					$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+					$query = $db->getQuery(true);
+							
+					$fields = array(
+						$db->quoteName('include_points') . ' = ' . $includePoints
+					);
+
+					// Conditions for which records should be updated.
+					$conditions = array(
+						$db->quoteName('person_id') . ' = ' . $studentId
+					);
+
+					$query->update('SchoolUsers')->set($fields)->where($conditions);
+					
+					$db->setQuery($query);
+					$result = $db->execute();
+					
+					
+				}
+			}
+		}
+	}
+	
+	
+	public static function getUsersByRole ( $roleId ) {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$users = array();
+		
+		if ( self::isAdmin($personId) ) {
+		
+			$options = dbOptions();
+			$userDb = $options['userdb'];
+			$prefix = $options['userdbprefix'];
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query1 = $db->getQuery(true)
+				->select("SU.school_id, SU.person_id, U.username, U.name, A.image from SchoolUsers SU")
+				->innerJoin( "Avatar A on A.avatar_id = SU.avatar" )
+				->innerJoin($userDb . "." . $prefix ."users U on SU.person_id = U.id")
+				->where("SU.role_id = " . $roleId );
+			
+			$db->setQuery($query1);
+		
+		
+			$users = $db->loadObjectList("person_id");
+		}
+		
+		return $users;
 		
 				
 	}
@@ -1547,6 +1805,76 @@ class SchoolCommunity {
 				
 	}
 	
+	public static function getAdminSummary () {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		if ( !self::isAdmin() ) {
+			return null;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("count(*) from Resource where deleted = 0");	
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$numResources = $db->loadResult();
+		
+		
+		$query = $db->getQuery(true)
+			->select("B.module_id, count(*) as numTasks from StudentTasks ST")
+			->innerJoin("Task T on T.task_id = ST.task_id")
+			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->where("ST.status >= " . Badge::COMPLETE )
+			->group("B.module_id");	
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$studentBadges = $db->loadAssocList("module_id", "numTasks");
+		
+		
+		$query = $db->getQuery(true)
+			->select("B.module_id, count(*) as numTasks from TeacherTasks TT")
+			->innerJoin("Task T on T.task_id = TT.task_id")
+			->innerJoin("Badge B on B.badge_id = T.badge_id")
+			->where("TT.status >= " . Badge::COMPLETE )
+			->group("B.module_id");	
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$teacherBadges = $db->loadAssocList("module_id", "numTasks");
+		
+		
+		$query = $db->getQuery(true)
+			->select("count(*) from SchoolUsers where new_user = 0 and include_points = 1");
+		
+		$db->setQuery($query);
+		
+		//error_log("Set id select query created: " . $query->dump());
+		
+		$numActiveUsers = $db->loadResult();
+		
+		
+		$summary = new \StdClass();
+		$summary->numResources = $numResources;
+		$summary->studentBadges = $studentBadges;
+		$summary->teacherBadges = $teacherBadges;
+		$summary->numActiveUsers = $numActiveUsers;
+		
+		return $summary;
+	}
 	
 	public static function logEvent ( $isSchoolEvent, $accessLevel, $message ) {
 		
@@ -2287,25 +2615,6 @@ class SchoolCommunity {
 			print '<i class="fa fa-3x fa-bars "></i>';
 			print '</button>';
 
-			
-			
-			// print '<div class="row " >';
-			// print '<div class="col-md-10 col-md-offset-1 col-sm-3 col-sm-offset-1 hidden-xs">';
-			
-			// print '<div class="besLogo" style="background:white; position:relative; top:-20px;padding:20px 20px 20px;">';
-			// print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" class="img-responsive" />';
-			
-			// print '</div>';
-			
-			// print '</div>'; // col-10
-			// print '</div>'; // row
-			
-		    //print '<a class="navbar-brand" href="#">BES ENCOUNTERS</a>';
-			//print '<a class="navbar-brand" href="https://www.britishecologicalsociety.org"><img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="42px">Encounters</a>';
-			
-			
-        
-			//print $avatarBox;
 			print '</div>'; // navbar-header
 			
 			print '<div class="row studentMastheadRow">';
@@ -2318,7 +2627,7 @@ class SchoolCommunity {
 			
 			
 			
-			print '<div class="col-lg-5 col-lg-offset-3 col-md-6 col-md-offset-2 col-sm-7 col-xs-12 text-center" >';
+			print '<div class="col-lg-6 col-lg-offset-2 col-md-7 col-md-offset-1 col-sm-7 col-xs-12 text-center" >';
 			
 			print '<table class="table statusBar" >';
 			
@@ -2331,30 +2640,33 @@ class SchoolCommunity {
 			
 			print '<td class="text-center statusBarElement statusBarUsername" ><span class="hidden-xs">'.$schoolUser->username.'</span></td>';
 			
-			$numModules = count($moduleIds);
-			$moduleNum = 1;
-			foreach ( $moduleIds as $moduleId ) {
-			//foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
-				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
-				if ( array_key_exists( $moduleId, $totalPointsByModule ) ){
-					$modulePoints = $totalPointsByModule[$moduleId];
-				}
-				else {
-					$modulePoints = (object)array("points" => 0);
-				}
-				$extraClass = "";
-				if ( $moduleNum == 1 ) {
-					$extraClass .= "statusBarTeacherPointsLeft";
-				}
-				if ( $moduleNum == $numModules ) {
-					$extraClass .= " statusBarTeacherPointsRight";
-				}
-				
-				print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
-				
-				$moduleNum++;
+			if ( $roleId == self::ADMIN_ROLE ) {
+				print '<td class="statusBarElement statusBarTeacherPoints statusBarTeacherPointsLeft statusBarTeacherPointsRight text-center"> ' . $translations['admin_user']['translation_text'] . ' </td>';
 			}
-			
+			else {
+				$numModules = count($moduleIds);
+				$moduleNum = 1;
+				foreach ( $moduleIds as $moduleId ) {
+				
+					if ( array_key_exists( $moduleId, $totalPointsByModule ) ){
+						$modulePoints = $totalPointsByModule[$moduleId];
+					}
+					else {
+						$modulePoints = (object)array("points" => 0);
+					}
+					$extraClass = "";
+					if ( $moduleNum == 1 ) {
+						$extraClass .= "statusBarTeacherPointsLeft";
+					}
+					if ( $moduleNum == $numModules ) {
+						$extraClass .= " statusBarTeacherPointsRight";
+					}
+					
+					print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
+					
+					$moduleNum++;
+				}
+			}
 			
 			print '</tr>';
 			print '</tbody>';
@@ -2397,23 +2709,27 @@ class SchoolCommunity {
 				print $translations['ecologist_page']['translation_text'];
 				print '</a>';
 				print '</li>';
+			
+			}
+			
+			if ( $roleId == self::ADMIN_ROLE ) {
 				
-				// ------------------------------------------- browse tasks
+				// ------------------------ admin dash
 				
-				// $activeClass = "";
-				// if ( $activeItem == "managestudents" ) {
-					// $activeClass = "active";
-				// }
-				// print '<li class="besNavbarItem '.$activeClass.'">';
-				// print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageStudents">';
-				// print $translations['student_tasks']['translation_text'];
-				// print '</a>';
-				// print '</li>';
+				$activeClass = "";
+				if ( $activeItem == "admindashboard" ) {
+					$activeClass = "active";
+				}
+				print '<li class="besNavbarItem '.$activeClass.'">';
+				print '<a href="'.$translations['admin_dash']['translation_text'].'">';
+				print $translations['admin_page']['translation_text'];
+				print '</a>';
+				print '</li>';
 			
 			}
 			
 			// ------------------------------------------ school page
-			if ( $roleId != self::ECOLOGIST_ROLE ) {
+			if ( ($roleId == self::TEACHER_ROLE) or ($roleId == self::STUDENT_ROLE) ) {
 				$activeClass = "";
 				if ( $activeItem == "schooldashboard" ) {
 					$activeClass = "active";
@@ -2510,52 +2826,6 @@ class SchoolCommunity {
 			
 			print '</ul>';
 			
-			// print '<table class="table studentStatus" >';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td class="statusBarElement statusBarAvatar" ><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" alt="avatar image" /></td>';
-			// print '<td class="text-center statusBarElement statusBarUsername" ><strong>'.$schoolUser->username.'</strong></td>';
-			// print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// //print '<td style="vertical-align:middle">';
-			// //print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			// //print $translations['logout']['translation_text'];
-			// //print '</a>';
-			// //print '</td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			
-			//print '<div class="teacherStatus pull-right">';
-		
-			// print '<p class="navbar-text">';
-			// print '<img src="'.$schoolUser->avatar.'" class="img-responsive avatar menuAvatar" />';
-			// print '</p>';
-			// // print '<p class="navbar-text">';
-			// // print $schoolUser->username;
-			// // print '</p>';
-			// print '<p class="navbar-text">';
-			// print '<strong>'.$schoolUser->username.'</strong> ' . $totalPoints . ' ' . $translations['points']['translation_text'];
-			// print '</p>';
-
-			// // ------------------------------------- status and logout
-			// print '<li class="besNavbarItem">';
-			// print '<table class="table table-condensed teacherStatus" style="position:relative; top:-10px;">';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// print '<td><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" style="width:60px"/></td>';
-			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			// print '</li>';
-			
-				
-			// print '<button class="btn btn-default navbar-btn">';
-			// print '<a href="'.$translations['logout_link']['translation_text'].'">';
-			// print $translations['logout']['translation_text'];
-			// print '</a>';
-			// print '</button>';
 			
 			print '</div>';
 			
@@ -2564,27 +2834,6 @@ class SchoolCommunity {
 			print '</div>'; // container-fluid
 			print '</nav>'; // navbar
 			
-			// ------------------------------------ help
-			// if ( $helpOptionId > 0 ) {
-				// print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default helpButton menuPageHelp h3" data-toggle="modal" data-target="#helpModal">';
-				// print ' <i class="fa fa-info"></i> ';
-				// print '</div>';
-			// }
-			
-			// ----------------------------------- avatar and points
-			// print '<div class="row">';
-			// print '<div class="col-md-4 col-md-offset-8">';
-			// print '<table class="table teacherStatus" style="position:relative; top:-20px;">';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td style="width:80px"><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
-			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
-			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			// print '</div>'; // col-4
-			// print '</div>'; // row
 			
 			print '</div>';
 			

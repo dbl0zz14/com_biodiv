@@ -1012,7 +1012,8 @@ class BioDivController extends JControllerLegacy
 	
 	error_log ( "Set id = " . $set_id );
 	
-    if ( $set_id and canEdit($set_id, "resourceset") ) {
+    //if ( $set_id and canEdit($set_id, "resourceset") ) {
+	if ( $set_id and Biodiv\ResourceSet::canEdit($set_id) ) {
 	
 		$problem = false;
 	
@@ -1070,19 +1071,33 @@ class BioDivController extends JControllerLegacy
 				
 				//$success = $resourceSet->uploadResourceFile ( $resource_type, $tmpName, $clientName, $fileSize, $fileType );
 				
-				if($fileSize > BIODIV_MAX_FILE_SIZE){
-					error_log ( "Filesize too big" );
-					addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
-					$problem = true;
+				$isAdmin = Biodiv\SchoolCommunity::isAdmin();
+				
+				if ( $isAdmin and $fileSize > BIODIV_ADMIN_MAX_FILE_SIZE ) {
+						error_log ( "Filesize too big" );
+						addMsg("error",  "File " . $clientName ." too large: admin max " . BIODIV_ADMIN_MAX_FILE_SIZE/1000000 . "MB");
+						$problem = true;
+						
 				}
-				
-				
+				else if (!$isAdmin and $fileSize > BIODIV_MAX_FILE_SIZE ){
+					error_log ( "Filesize too big" );
+					addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE/1000000 . "MB");
+					$problem = true;
+					
+				}
 				
 				//	$tmpName = JFile::makeSafe($tmpName);
 				// NB can get this error if PHP max dilsize and upload size are too small:
 				else if(!is_uploaded_file($tmpName)){
 					//error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
-					addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem");
+					
+					if ( Biodiv\SchoolCommunity::isAdmin() ) {
+						$maxSize = BIODIV_ADMIN_MAX_FILE_SIZE/1000000;
+					}
+					else {
+						$maxSize = BIODIV_MAX_FILE_SIZE/1000000;
+					}
+					addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". $maxSize . "MB) or there may be a network problem");
 					$problem = true;
 				}
 				else {
@@ -1133,7 +1148,7 @@ class BioDivController extends JControllerLegacy
 					}
 				}
 				
-				if ( !$success or $problem ) addMsg("error", "Failed to upload resource " . $clientName );
+				if ( $problem ) addMsg("error", "Failed to upload resource " . $clientName );
 			
 			}
 		}
@@ -1421,6 +1436,39 @@ class BioDivController extends JControllerLegacy
     parent::display();
 	
   }
+  
+  function pair_ecologist () {
+	  
+	if ( Biodiv\SchoolCommunity::isAdmin() ) {
+		
+		$app = JFactory::getApplication();
+		$input = $app->input;
+			
+		$ecolId = $input->getInt("ecol", 0);
+		$schoolIds = $input->get('school', array(), 'ARRAY');
+		
+		Biodiv\SchoolCommunity::pairEcologist ( $ecolId, $schoolIds );
+			
+		
+	}
+  }
+  
+  
+  function edit_student () {
+	  
+	if ( Biodiv\SchoolCommunity::isTeacher() ) {
+		  
+		$app = JFactory::getApplication();
+		$input = $app->input;
+			
+		$studentId = $input->getInt("studentId", 0);
+		$studentName = $input->getString("studentName", 0);
+		$includePoints = $input->getInt('studentActive', 0);
+		
+		Biodiv\SchoolCommunity::editStudent ( $studentId, $studentName, $includePoints );
+		
+	}
+  }
 
   
   // upload more files with same deployment, collection dates as those given
@@ -1488,66 +1536,6 @@ class BioDivController extends JControllerLegacy
 	else{
 	  $this->input->set('view', 'uploadm');
 	}
-	
-	/*
-	$fields = new StdClass();
-	
-	// For audio no need for deployment start and end times, camera only
-	if ( $isCamera ) {
-		foreach(array("deployment", "collection") as $dt){
-		  $date = JRequest::getString("${dt}_date");
-		  if(!strlen($date)){
-			addMsg('error', "No $dt date specified");
-		  }
-		  $hours = JRequest::getString("${dt}_hours");
-		  if(!strlen($hours)){
-			addMsg('error', "No $dt hours specified");
-		  }
-		  $mins = JRequest::getString("${dt}_mins");
-		  if(!strlen($mins)){
-			addMsg('error', "No $dt mins specified: $mins ");
-		  }
-		  $datetime[$dt] = $date . " " . $hours . ":" . $mins;
-		}
-		
-		$fields->deployment_date = $datetime['deployment'];
-		$fields->collection_date = $datetime['collection'];
-		
-	}
-	
-	// These are the common fields
-	$camera_tz = JRequest::getString('timezone');
-	$tz = 0;
-	$is_dst = 0;
-	$utc_offset = 0;
-	if(!strlen($camera_tz)){
-		addMsg('error', "No camera timezone specified");
-	}
-	// Get the offset
-	$tz = IntlTimeZone::createTimeZone($camera_tz);
-	$utc_offset = $tz->getRawOffset()/60000;
-	
-	$is_dst = JRequest::getInt('dst');
-	if ($is_dst == 1 ) {
-		// Adjust the offset from UTC for daylight saving time
-		$utc_offset += $tz->getDSTSavings()/60000;
-	}
-	
-		
-	if(someMsgs("error")){
-	  $this->input->set('view', 'upload');
-	}
-	else{
-	  $fields->person_id = userID();
-	  $fields->site_id = $site_id;
-	  $fields->camera_tz = $camera_tz;
-	  $fields->is_dst = $is_dst;
-	  $fields->utc_offset = $utc_offset;
-	  $upload_id = codes_insertObject($fields, 'upload');
-	  $app->setUserState('com_biodiv.upload_id', $upload_id);
-	  $this->input->set('view', 'uploadm');
-	}
-	*/
 	
 	parent::display();
 

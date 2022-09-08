@@ -14,6 +14,8 @@ if ( !$this->personId ) {
 else {
 
 	//error_log("report tmpl printing data");
+	
+	print '<div class="col-xs-12 col-sm-12 col-md-12 h3">'.$this->reportTitle.'</div>';
 
 	print '<div class="col-xs-12 col-sm-12 col-md-12">';
 	
@@ -109,9 +111,35 @@ else {
 	print  '<table class="table" style="white-space:nowrap">
 	  <thead>
 		<tr>';
-		
+			
 	foreach ( $this->headings as $heading_id=>$heading_name ) {
-		print '<th scope="col">'.$heading_name.'</th>';
+		
+		print '<th scope="col" class="align-top">';
+		
+		if ( ( $this->filterColumns ) and ( array_key_exists ( $heading_id, $this->filterColumns ) ) ) {
+			
+			$filterType = $this->filterColumns[$heading_id];
+			print '<label for="filter_'.$filterType.'">'.$heading_name.'</label>';
+		
+			print '<select id = "filter_'.$filterType.'" name = "filter_'.$filterType.'" class = "form-control report_select">';
+			
+			foreach( $this->filterValues[$heading_id] as $selVal=>$selStr ){
+				if ( $selVal == $this->filterSelected[$heading_id] ) {
+					// Show this as selected
+					print '<option value="'.$selVal.'" selected>'.$selStr.'</option>';
+				}
+				else {
+					print '<option value="'.$selVal.'">'.$selStr.'</option>';
+				}
+			}
+
+			print '</select>';
+		}
+		else {
+			print $heading_name;
+		}
+		
+		print '</th>';
 	}
 
 	print '</tr>
@@ -128,6 +156,17 @@ else {
 				$seqId = 0;
 				if ( strlen($rowField) > 7 ) $seqId = substr($rowField,7);
 				print '<td><button class="media-btn" data-seq_id="'. $seqId . '"><i class="fa fa-play"></i></button></td>';
+			}
+			else if ( strpos($rowField,"ViewSet") === 0 ) {
+				$setId = 0;
+				if ( strlen($rowField) > 7 ) $setId = substr($rowField,7);
+				if ( $setId > 0 ) {
+					//print '<td><button class="resource-set-btn" data-set_id="'. $setId . '"><i class="fa fa-files-o"></i></button></td>';
+					print '<td><a href="'.$this->translations['set_page']['translation_text'].'?set_id='.$setId.'" class="resource-set-btn" role="button" ><i class="fa fa-files-o"></i></a></td>';
+				}
+				else {
+					print '<td></td>';
+				}
 			}
 			else {
 				print '<td class="text-nowrap">'.$rowField.'</td>';
