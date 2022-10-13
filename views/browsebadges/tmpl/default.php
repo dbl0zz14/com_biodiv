@@ -8,13 +8,11 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "BadgeProgress template called" );
 
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<a type="button" href="'.$this->translations['hub_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
-	
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 
 else {
@@ -419,6 +417,29 @@ else {
 }
 
 
+print '<div id="helpModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header">';
+print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="helpArticle" ></div>';
+print '      </div>';
+print '	  <div class="modal-footer">';
+print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
+
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/resourceupload.js", true, true);

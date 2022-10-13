@@ -1,3 +1,12 @@
+# 13/10/22 - Version 3.6.5
+* BES Encounters changes for Module 3 - birds
+* BES Encounters changes - admin pages to create and edit projects 
+* BES Encounters changes - admin pages to create and edit schools
+* BES Encounters changes - move and increase size of new resource upload button
+* BES Encounters changes - show resource set on select resource 
+* BES Encounters changes - improve spacing on search resources page
+* BES Encounters changes - add missing titles to find activities
+
 # 8/9/22 - Version 3.6.4
 * BES Encounters changes - admin user: resource and activity reports 
 * BES Encounters changes - admin user school/ecologist pairing
@@ -5,7 +14,6 @@
 * BES Encounters changes - teacher admin of student accounts
 * BES Encounters changes - link back to Encounters from kiosk if a school user
 * Add invertebrate animal type
-
 
 # 13/7/22 - Version 3.6.3
 * BES Encounters changes to improve resource hub

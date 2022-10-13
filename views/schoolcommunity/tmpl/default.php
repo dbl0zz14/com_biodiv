@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 else if ( !$this->mySchoolId ) {
 	print '<h2>'.$this->translations['no_school']['translation_text'].'</h2>';
@@ -348,6 +348,7 @@ print '</div>';
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/schoolcommunity.js", true, true);
 

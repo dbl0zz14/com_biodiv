@@ -1435,14 +1435,12 @@ class SchoolCommunity {
 				
 				$st = $studentProgress[$student->person_id];
 				
-				if ( !array_key_exists($student->badge_group, $st) ) {
+				if ( !array_key_exists($student->badge_group, $st->progress) ) {
 					$st->progress[$student->badge_group] = array();
 				}
+				
+				
 				$st->progress[$student->badge_group][$student->module_id] = $student->num_points;
-				// if ( !property_exists($st, "totalPoints") ) {
-					// $st->totalPoints = array();
-					// $st->totalPoints[$student->module_id] = $student->num_points;
-				// }
 				if ( !array_key_exists($student->module_id, $st->totalPoints) ) {
 					$st->totalPoints[$student->module_id] = $student->num_points;
 				}

@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 else if ( !$this->isStudent ) {
 	print '<h2>'.$this->translations['not_student']['translation_text'].'</h2>';
@@ -280,6 +280,7 @@ print '  </div>'; // modal-dialog
 print '</div>'; // helpModal
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/studentdashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
@@ -292,32 +293,7 @@ JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js
 
 ?>
 
-<!-- svg xmlns="http://www.w3.org/2000/svg" viewBox="-25 0 150 100" width="150" height="100">
 
-<path id="path" stroke="none" fill="none" d="m -678.90932,548.92826 c 110.28708,-51.92087 220.57404,-103.84167 294.8748,-159.16471 74.30077,-55.32304 112.61398,-114.0461 144.66191,-184.05043 32.04792,-70.00433 57.82877,-151.285628 57.29154,-207.5035801 -0.53723,-56.2179519 -27.39228,-87.3698119 -51.92059,-103.6623499 -24.52831,-16.29254 -46.72848,-17.72481 -59.08223,1.61173 -12.35376,19.336541 -14.86023,59.440085 9.66856,86.295729 24.52879,26.8556433 76.09049,40.462202 182.61923,34.911743 106.5287412,-5.55046 268.01712,-30.257108 408.0254,-69.824895 140.00828,-39.567788 258.52859,-93.994027 306.15235,-128.727287 47.62377,-34.73326 24.34938,-49.77209 -7.34065,-54.78519 -31.69003,-5.01311 -71.79359,-1.6e-4 -94.35246,17.904 -22.55888,17.90415 -27.57182,48.69794 6.62521,74.6585 34.19704,25.96055 107.60084,47.086523 187.09417,46.011998 79.49334,-1.074524 165.07144,-24.348908 220.03602,-52.995158 54.96458,-28.64625 79.31316,-62.66265 103.66226,-96.67978" />
-
-
-</svg>
-
-
-<svg id="bee" viewBox="-10.5 -10.5 21 21" style="width: 50px; height: auto;">
-  <g transform="rotate(90) translate(0 -4)">
-    <g stroke="currentColor">
-      <circle fill="currentColor" r="4" stroke-width="2.5" />
-      <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path transform="rotate(45) translate(0 -4)" d="M 0 0 v -3" />
-        <path transform="rotate(-45) translate(0 -4)" d="M 0 0 v -3" />
-        <g fill="hsl(200, 80%, 90%)">
-          <path transform="rotate(15)" d="M 0 0 h 7 a 3 3 0 0 1 0 6 q -4 0 -7 -6" />
-          <path transform="scale(-1 1) rotate(15)" d="M 0 0 h 7 a 3 3 0 0 1 0 6 q -4 0 -7 -6" />
-        </g>
-        <g fill="hsl(50, 80%, 50%)">
-          <path d="M 0 0 c 2 6 8 10 0 12 -8 -2 -2 -6 0 -12" />
-        </g>
-      </g>
-    </g>
-  </g>
-</svg -->
 
 
 

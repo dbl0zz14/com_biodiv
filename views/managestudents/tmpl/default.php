@@ -8,8 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "ManageStudents template called" );
-
 
 if ( !$this->personId ) {
 	// Please log in button

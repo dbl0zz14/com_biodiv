@@ -75,14 +75,6 @@ else {
 }
 
 
-// JHTML::script("com_biodiv/commondashboard.js", true, true);
-// JHTML::script("com_biodiv/studentdashboard.js", true, true);
-// JHTML::script("com_biodiv/resourcelist.js", true, true);
-// JHTML::script("com_biodiv/resourceupload.js", true, true);
-// JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
-// JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js", true, true);
-
-
 
 
 ?>

@@ -72,14 +72,14 @@ jQuery(document).ready(function(){
 		
 		let url = BioDiv.root + "&view=schoolspotlight&format=raw&name=1&id=" + schoolId;
 	
-		jQuery("#schoolSpotlight").load(url);
+		jQuery("#schoolSpotlight").load(url, setReloadPage);
 	
 	});
 	
 	
 	let url = BioDiv.root + "&view=schoolspotlight&format=raw&name=1";
 	
-	jQuery("#schoolSpotlight").load(url);
+	jQuery("#schoolSpotlight").load(url, setReloadPage);
 	
 });
 

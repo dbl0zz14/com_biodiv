@@ -19,35 +19,7 @@ function activateTeacherTabs () {
 		jQuery(this).addClass("active");
 	});
 	
-	/*
-	jQuery('.allStudentBadges').click( function () {
 		
-		let divId = this.id;
-		let idbits = divId.split("_");
-		let moduleId = idbits.pop();
-	
-		jQuery(".manageTasksBtn").removeClass("active");
-		jQuery(this).addClass("active");
-		
-		let url = BioDiv.root + "&view=viewbadges&format=raw&module=" + moduleId;
-		jQuery('#displayArea').load(url, activatebadgeButtons);
-	});
-	
-	jQuery('.allTeacherTasks').click( function () {
-		
-		let divId = this.id;
-		let idbits = divId.split("_");
-		let moduleId = idbits.pop();
-	
-		jQuery(".manageTasksBtn").removeClass("active");
-		jQuery(this).addClass("active");
-		
-		let url = BioDiv.root + "&view=viewbadges&format=raw&teacher=1&module=" + moduleId;
-		jQuery('#displayArea').load(url, activatebadgeButtons);
-	});
-	
-	*/
-	
 }
 
 

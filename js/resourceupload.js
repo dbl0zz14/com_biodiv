@@ -10,6 +10,8 @@ function createGuid()
 
 function setUploadButton () {
 	
+	setReloadPage();
+	
 	jQuery(".resourceNextBtn").click(resourceNext);
 	jQuery(".resourceBackBtn").click(resourceBack);
 	
@@ -90,7 +92,7 @@ function resourceSetCreated ( data ) {
 
 function doUpload ( isSchool = false ) {
 	
-	console.log("doUpload");
+	setReloadPage();
 	
 	let guid = createGuid();
 	let checkUploadUrl = BioDiv.root + "&task=verify_resource_set&guid=" + guid;

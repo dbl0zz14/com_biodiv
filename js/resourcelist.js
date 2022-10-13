@@ -1,6 +1,8 @@
 
 function resourceListLoaded () {
 	
+	setReloadPage();
+	
 	jQuery(".show_resource").click(function (){
 		
 		let id = jQuery(this).attr("id");
@@ -21,7 +23,7 @@ function resourceListLoaded () {
 		
 		if ( jQuery(resourceDivId).is(':empty') ) {
 			let url = BioDiv.root + "&view=resourcefile&format=raw&resource_id=" + resourceId;
-			jQuery(resourceDivId).load(url);
+			jQuery(resourceDivId).load(url, setReloadPage);
 		}
 		
 		jQuery(resourceDivId).parent().show();
@@ -251,18 +253,6 @@ function addResourcesToSet () {
 }
 
 
-/*
-function viewSet () {
-	
-	let id = jQuery(this).attr("id");
-	let idbits = id.split("_");
-	let setId = idbits.pop();
-
-	let url = BioDiv.root + "&view=resourceset&set_id=" + setId;
-	window.location.href = url;
-	
-}
-*/
 
 
 function moreResource () {
@@ -288,6 +278,8 @@ function setHideMetaError () {
 }
 
 function setSaveEditButton () {
+	
+	setReloadPage();
 	
 	jQuery(".resourceNextBtn").click(resourceNext);
 	jQuery(".resourceBackBtn").click(resourceBack);

@@ -34,29 +34,20 @@ class BioDivViewBiodivs extends JViewLegacy
 		$this->deleted = $input->getInt('deleted', 0);
 		
 		
-		$db = \JDatabaseDriver::getInstance(dbOptions());
+		$this->projects = getAllProjects();
+		
+		$this->schools = getAllSchools();
 
 
-		$query = $db->getQuery(true)
-			->select("P.project_id, P.project_prettyname as name from Project P")
-			->order("name");
+		// $query = $db->getQuery(true)
+			// ->select("S.school_id, S.name from School S")
+			// ->order("S.name");
 			
-		$db->setQuery($query);
+		// $db->setQuery($query);
 		
-		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
+		// //error_log("SchoolCommunity constructor select query created: " . $query->dump());
 		
-		$this->projects = $db->loadAssocList("project_id", "name");
-
-
-		$query = $db->getQuery(true)
-			->select("S.school_id, S.name from School S")
-			->order("S.name");
-			
-		$db->setQuery($query);
-		
-		//error_log("SchoolCommunity constructor select query created: " . $query->dump());
-		
-		$this->schools = $db->loadAssocList("school_id", "name");
+		// $this->schools = $db->loadAssocList("school_id", "name");
 		
 		
 		$joomlaDb = JFactory::getDbo();

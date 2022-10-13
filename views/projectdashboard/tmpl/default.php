@@ -64,6 +64,17 @@ else {
 		}
 
 		print "</select>";
+		
+		
+		// View and add users
+		print '<h3>'.$this->translations['setup']['translation_text'].'</h3>';
+		
+		$tooltipText = ' data-toggle="tooltip" title="'.$this->translations['add_users']['translation_text'].'"';
+		print '<button id="projectUsersBtn" type="button" class="list-group-item btn btn-block" ' . $tooltipText . ' style="white-space: normal;">';
+			
+		print '<h4>'.$this->translations['users']['translation_text'].'</h4>';
+		
+		print '</button>';
 
 
 
@@ -153,6 +164,7 @@ print '</div>';
 
 
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/projectdashboard.js", true, true);
 JHTML::script("com_biodiv/mediacarousel.js", true, true);
 JHTML::script("com_biodiv/report.js", true, true);

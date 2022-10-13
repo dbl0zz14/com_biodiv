@@ -1,7 +1,7 @@
 <?php 
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 if($this->title ){
 	//print "<div class='well'>\n";

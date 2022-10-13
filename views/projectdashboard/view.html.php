@@ -31,7 +31,7 @@ class BioDivViewProjectDashboard extends JViewLegacy
     $app = JFactory::getApplication();
 	
 	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("project");
+	$this->translations = getTranslations("projectdashboard");
 	
 	// Get all the projects that this user is admin for
 	$this->projects = myAdminProjects();
@@ -41,7 +41,7 @@ class BioDivViewProjectDashboard extends JViewLegacy
 	
 	$this->reports = BiodivReport::listReports();
 	
-	$err_msg = print_r ( $this->reports , true );
+	//$err_msg = print_r ( $this->reports , true );
 	//error_log ( "reports: " . $err_msg );
 	
 	$this->reportText = array();

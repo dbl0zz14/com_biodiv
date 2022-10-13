@@ -8,7 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "Resource set template called" );
 
 //print '<h2>'.$this->translations['upload']['translation_text'].'</h2>';
 //print '<h3>'.$this->translations['choose_files']['translation_text'].'</h3>';

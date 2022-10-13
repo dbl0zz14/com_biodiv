@@ -3995,11 +3995,11 @@ function getAccessProjectsWithSubs ( $access ) {
 		}		
 	}
 	
-	//$errMsg = print_r ( $controlledAccess, true );
-	//error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
+	// $errMsg = print_r ( $controlledAccess, true );
+	// error_log ( "getProjectWithSubs controlled access tree: " . $errMsg );
 	
-	//$errMsg = print_r ( $privateAccess, true );
-	//error_log ( "getProjectWithSubs private access tree: " . $errMsg );
+	// $errMsg = print_r ( $privateAccess, true );
+	// error_log ( "getProjectWithSubs private access tree: " . $errMsg );
 	
 	// Now to get the access for this user
 	$personId = userID();
@@ -4055,18 +4055,36 @@ function getAccessProjectsWithSubs ( $access ) {
 		
 	}
 	
-	$fullUserList = array() + $userAccessList;
+	if ( $access == 'ADMIN' ) {
+		$fullUserList = array() + $adminAccessList;
+	}
+	else {
+		$fullUserList = array() + $userAccessList;
+	}
+	
 	
 	// Add additional subs to full user list
 	foreach ( array_keys($controlledAccess) as $controlledParent ) {
 		
-		if  (in_array($controlledParent, $userAccessList) ) {
-			
-			//error_log ( "Controlled project " . $controlledProject . " in access array" );
-			
-			$controlledSubs = array_keys($controlledAccess[$controlledParent]);
-			
-			$fullUserList = array_merge ( $fullUserList, $controlledSubs );
+		if ($access == 'ADMIN' ) {
+			if  (in_array($controlledParent, $adminAccessList) ) {
+				
+				//error_log ( "Controlled project " . $controlledProject . " in access array" );
+				
+				$controlledSubs = array_keys($controlledAccess[$controlledParent]);
+				
+				$fullUserList = array_merge ( $fullUserList, $controlledSubs );
+			}
+		}
+		else {
+			if  (in_array($controlledParent, $userAccessList) ) {
+				
+				//error_log ( "Controlled project " . $controlledProject . " in access array" );
+				
+				$controlledSubs = array_keys($controlledAccess[$controlledParent]);
+				
+				$fullUserList = array_merge ( $fullUserList, $controlledSubs );
+			}
 		}
 	}
 	// Add additional from private list to full user list
@@ -4152,8 +4170,8 @@ function getAccessProjectsWithSubs ( $access ) {
 		}	
 	}
 	
-	//$errMsg = print_r ( $allProjects, true );
-	//error_log ( "getAccessProjectsWithSubs got allProjects: " . $errMsg );
+	// $errMsg = print_r ( $allProjects, true );
+	// error_log ( "getAccessProjectsWithSubs got allProjects: " . $errMsg );
 	
 	
 	return $allProjects;
@@ -7364,7 +7382,7 @@ function addSite () {
 	$query = $db->getQuery(true);
 	$query->select("site_id")
 		->from("Site")
-		->where("person_id = " . $fields->person_id . " and site_name = '" . $fields->site_name . "'" );
+		->where("person_id = " . $fields->person_id . " and site_name = " . $db->quote($fields->site_name) );
 	
 	$db->setQuery($query);
 	$result = $db->loadRow();

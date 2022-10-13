@@ -138,67 +138,10 @@ function validateStudentTaskForm ( fd ) {
 }
 
 
-// function suggestedLoaded () {
-	
-	// jQuery("#backToDash").show();
-	// tasksLoaded();
-// }
-
-
-// function setBackToDash () {
-	// jQuery("#backToDash").show();
-// }
-
-
-// function badgeGroupsReady () {
-	// setBackToDash();
-// }
-
-
-// function tasksReady () {
-	// setBackToDash();
-// }
 
 
 jQuery(document).ready(function(){
 	
 		
-	// -------------------------------  
-	/*
-	jQuery('.suggestTask').click( function () {
 		
-		let url = BioDiv.root + "&view=badges&format=raw&suggest=1";
-		//jQuery("#displayArea").load(url, tasksLoaded);
-		jQuery("#displayArea").load(url, suggestedLoaded);
-		
-	});
-	*/
-	/*
-	jQuery('.logTask').click( function () {
-		
-		let url = BioDiv.root + "&view=studenttask&format=raw";
-		jQuery("#displayArea").load(url, activateStudentTaskButtons);
-		
-	});
-	*/
-	/*
-	jQuery('.showWork').click( function () {
-		
-		let url = BioDiv.root + "&view=resourcelist&format=raw&student=1";
-		jQuery("#displayArea").load(url, resourceListLoaded);
-		
-	});
-	*/
-	/*
-	jQuery('.showComplete').click( function () {
-		
-		let url = BioDiv.root + "&view=badges&format=raw&complete=1";
-		jQuery("#displayArea").load(url, tasksLoaded);
-		
-	});
-	*/
-	
-	
-	
-	
 });

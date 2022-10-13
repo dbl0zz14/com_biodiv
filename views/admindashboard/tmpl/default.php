@@ -15,7 +15,7 @@ $document->addScriptDeclaration("BioDiv.doneText = '".$this->doneText."';");
 $document->addScriptDeclaration("BioDiv.genText = '".$this->genText."';");
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 else if ( $this->firstLoad ) {
 	
@@ -141,13 +141,13 @@ else {
 		
 		print '<div class="summaryItemGrid">';
 		
-		print '<div class="summaryItemIcon  h3 text-center vSpaced">';
+		print '<div class="summaryItemIcon  h3 text-center bigSpaced">';
 		
-		print '<i class="fa fa-files-o fa-3x"></i>';
+		print '<i class="fa fa-files-o fa-2x"></i>';
 		
 		print '</div>'; // summaryIcon
 		
-		print '<div class="summaryItemName h3 panelHeading">';
+		print '<div class="summaryItemName h3 panelHeading text-center">';
 		
 		print $this->translations['resources']['translation_text'];
 		
@@ -188,13 +188,13 @@ else {
 		
 		print '<div class="summaryItemGrid">';
 		
-		print '<div class="summaryItemIcon h3 text-center vSpaced">';
+		print '<div class="summaryItemIcon h3 text-center bigSpaced">';
 		
-		print '<i class="fa fa-user-o fa-3x"></i>';
+		print '<i class="fa fa-user-o fa-2x"></i>';
 		
 		print '</div>'; // summaryIcon
 		
-		print '<div class="summaryItemName h3 panelHeading">';
+		print '<div class="summaryItemName h3 panelHeading text-center">';
 		
 		print $this->translations['user_admin']['translation_text'];
 		
@@ -258,7 +258,7 @@ else {
 			
 			print '</div>'; // summaryIcon
 			
-			print '<div class="summaryItemName h3 panelHeading">';
+			print '<div class="summaryItemName h3 panelHeading text-center">';
 		
 			print $module->name;
 			
@@ -353,6 +353,7 @@ print '</div>';
 
 
 	
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/admindashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);

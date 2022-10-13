@@ -289,17 +289,23 @@ else {
 	// Resource files rows
 		
 	$i = 0;
-	print '<div class="row">';
+	$numFiles = count($this->resourceFiles);
+	//print '<div class="row">';
 	foreach ( $this->resourceFiles as $resourceFile ) {
 		
-		print '<div class="col-md-3 col-sm-4 col-xs-12 resourceCardColumn">';
+		if ( $i % 4 == 0 ) {
+			print '<div class="row">';
+		}
+		
+		print '<div class="col-md-3 col-sm-6 col-xs-12 resourceCardColumn">';
 		
 		print '<div class="resourceCardContainer">';
 		
 		$resourceId = $resourceFile["resource_id"];
+		$setId = $resourceFile["set_id"];
 		
-		$resourcePage = $this->translations['resource_page']['translation_text'];
-		print '<a href="'.$resourcePage.'?id='.$resourceId.'">';
+		$resourceSetPage = $this->translations['set_page']['translation_text'];
+		print '<a href="'.$resourceSetPage.'?set_id='.$setId.'">';
 		
 		
 		$resourceFile = new Biodiv\ResourceFile ( $resourceId, 
@@ -330,9 +336,14 @@ else {
 		
 		
 		$i++;
+		
+		if ( ( $i % 4 == 0 )  or ( $i == $numFiles ) ) {
+			print '</div>'; // row
+		}
+		
 	}
 	
-	print '</div>'; // row
+	//print '</div>'; // row
 	
 	
 	if ( $this->numPages > 1 ) {
@@ -463,6 +474,7 @@ print '</div>'; // filterModal
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);

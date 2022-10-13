@@ -10,7 +10,7 @@ jQuery(document).ready(function(){
 	// jQuery("#eventLog").load(eventsUrl);
 	
 	let url = BioDiv.root + "&view=schoolspotlight&format=raw";
-	jQuery("#schoolSpotlight").load(url);
+	jQuery("#schoolSpotlight").load(url, setReloadPage);
 	
 	
 });

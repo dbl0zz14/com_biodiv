@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<a type="button" href="'.$this->translations['hub_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 	
 }
 
@@ -227,6 +227,7 @@ else {
 	
 }
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/viewbadges.js", true, true);
 

@@ -19,6 +19,7 @@ function setMessageBadge () {
 
 function activateMessageButtons () {
 	
+	setReloadPage();
 	setMessageBadge();
 	
 	jQuery(".inboxTab").click ( function () {
@@ -47,6 +48,8 @@ function activateMessageButtons () {
 }
 
 function activateMessageList () {
+	
+	setReloadPage();
 	
 	jQuery('.replyBtn').click(replyMessage);
 	

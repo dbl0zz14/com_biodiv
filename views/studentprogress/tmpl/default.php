@@ -8,8 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "StudentProgress template called" );
-
 
 if ( !$this->personId ) {
 	// Please log in button
@@ -21,14 +19,6 @@ else {
 	
 	print '<div class="row">';
 
-	// $errMsg = print_r ( $this->students, true );
-	// error_log ( "studentProgress: " . $errMsg );
-		
-	// $errMsg = print_r ( $this->badgeGroups, true );
-	// error_log ( "badgeGroups: " . $errMsg );
-	
-	// $errMsg = print_r ( $this->availablePoints, true );
-	// error_log ( "availablePoints: " . $errMsg );
 		
 	foreach ( $this->students as $studentId=>$student ) {
 		

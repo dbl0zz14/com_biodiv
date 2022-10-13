@@ -10,8 +10,13 @@
 // No direct access to this file
 defined('_JEXEC') or die('Restricted Access');
 
+printAdminMenu("USERS");
 
-print '<h2>MammalWeb admin page</h2>';
+//print '<a href="?option=com_biodiv"><button type="button">MammalWeb Admin Home</button></a>';
+
+print '<div id="j-main-container" class="span10 j-toggle-main">';
+
+print '<h2>MammalWeb batch user creation</h2>';
 
 
 print '<h3>Batch create users here</h3>';
@@ -59,8 +64,8 @@ print '<label for="project">Choose a project:</label>';
 print '<select id="project" name="project">';
 
 
-foreach ( $this->projects as $projectId=>$projectName ) {
-	print '<option value="'.$projectId.'">'.$projectName.'</option>';
+foreach ( $this->projects as $projectId=>$project ) {
+	print '<option value="'.$projectId.'">'.$project->project_prettyname.'</option>';
 }
 print '</select><br>';
 
@@ -74,17 +79,19 @@ print '<label for="school">Choose a school:</label>';
 print '<select id="school" name="school">';
 
 
-foreach ( $this->schools as $schoolId=>$schoolName ) {
-	print '<option value="'.$schoolId.'">'.$schoolName.'</option>';
+foreach ( $this->schools as $schoolId=>$school ) {
+	print '<option value="'.$schoolId.'">'.$school->name.'</option>';
 }
 print '</select><br>';
 
-print '<input type="submit" value="Create users" />';
+print '<input class="btn btn-primary" type="submit" value="Create users" />';
 
 print '</form>';
 
 print '<div id="newUsersMsg"></div>';
 print '<div id="newUsers"></div>';
+
+print '</div>';
 
 //print '<input type="hidden" name="task" value="createusers"/>';
 echo JHtml::_('form.token'); 

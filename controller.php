@@ -1541,6 +1541,91 @@ class BioDivController extends JControllerLegacy
 
   }
   
+  
+  function addProjectUsers () {
+	
+	
+	$app = JFactory::getApplication();
+	$input = $app->input;
+
+	$projectId = $input->getInt("id", 0);
+	$userEmails = $input->getString("emails", 0);
+	
+	$adminProjects = myAdminProjects();
+	
+	$messages = array();
+	
+	$translations = getTranslations("projectusers");
+	
+	if ( array_key_exists($projectId, $adminProjects ) ) {
+		
+		if ( $userEmails ) {
+			
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true);
+			$query->select("role_id from Role where role_name = " . $db->quote("User"));
+			$db->setQuery($query);			
+			$userRole = $db->loadResult();			
+			
+			$emailArray = explode(',', $userEmails);
+			
+			$helper = new BiodivHelper();
+			
+			foreach ( $emailArray as $email ) {
+				
+				// Sanitise and validate email format
+				$email = filter_var($email, FILTER_SANITIZE_EMAIL);
+				
+				if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+					$messages[] = $translations['add_fail']['translation_text'] . ' ' . $email . ' ' . $translations['not_email']['translation_text'];
+				}
+				else {
+				
+					// Check whether an existing user
+					$existingUserEmail = $helper->getUser ( $email );
+					if ( $existingUserEmail ) {
+						error_log ( "User found" );
+						
+						$newProjectUser = new stdClass;
+						$newProjectUser->person_id = $existingUserEmail->id;
+						$newProjectUser->project_id = $projectId;
+						$newProjectUser->role_id = $userRole;
+						
+						$result = false;
+						try {
+							$result = $db->insertObject("ProjectUserMap", $newProjectUser);
+						} 
+						catch ( Exception $e ) {
+							$messages[] = $email . ': ' . $e->getMessage();
+						}
+						
+						if ( $result ) {
+							$messages[] = $translations['user_added']['translation_text'] . ' ' . $email;
+						}
+						else {
+							$messages[] = $translations['existing_fail']['translation_text'] . ' ' . $email;
+						}
+					}
+					else {
+						$messages[] = $translations['add_fail']['translation_text'] . ' ' . $email . ' ' . $translations['not_user']['translation_text'];
+					}
+				}
+			}
+			
+		}
+	}
+	else {
+		$messages[] = $translations['not_admin']['translation_text'];
+	}
+	
+	$this->input->set('message', json_encode($messages) );
+	$this->input->set('view', 'projectusers');
+	
+	parent::display();
+		
+  }
+  
+  
   function check_like($photo_id = 0){
 	$app = JFactory::getApplication();
     if(!$photo_id){

@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 error_log ( "SchoolSpotlight template called" );
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 else {
 

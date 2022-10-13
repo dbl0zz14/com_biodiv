@@ -27,7 +27,7 @@ else {
 	
 	print '<div class="h3 panelHeading">'.$this->translations['accounts']['translation_text'].'</div>';
 	
-	
+	print '<div class="table-responsive">';
 	print  '<table class="table" style="white-space:nowrap">  <thead>	<tr>';
 		
 	print '<th scope="col" class="align-top">' . $this->translations['avatar']['translation_text'] . '</th>';
@@ -68,6 +68,8 @@ else {
 
 	print '</tbody>';
 	print '</table>';
+	
+	print '</div>'; // table-responsive
 	
 	
 	print '</div>'; // panel-body

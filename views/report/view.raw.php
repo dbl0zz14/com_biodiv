@@ -100,6 +100,7 @@ class BioDivViewReport extends JViewLegacy
 					$biodivReport = BiodivReport::createFromId ( $this->report_id );
 				}
 				
+				$this->reportTitle = $biodivReport->getReportTypeText();
 				$this->headings = $biodivReport->headings();
 				$this->totalRows = $biodivReport->totalRows( $this->filter );
 				$this->pageLength = $biodivReport->pageLength();

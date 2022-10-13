@@ -25,224 +25,323 @@ class BioDivController extends JControllerLegacy
 	 * @var string
 	 * @since 12.2
 	 */
-	protected $default_view = 'biodivs';
+	//protected $default_view = 'biodivs';
+	protected $default_view = 'home';
 	
 	
-	// function createusers() {
+	function createproject() {
 		
-		// $app = JFactory::getApplication();
+		$app = JFactory::getApplication();
 
-		// $input = $app->input;
+		$input = $app->input;
 				
-		// $tandCsChecked = $input->getInt('tandCsChecked', 0);
-		// $fileStem = $input->getString('fileStem', 0);
-		// $userStem = $input->getString('userStem', 0);
-		// $passwordStem = $input->getString('passwordStem', 0);
-		// $emailDomain = $input->getString('emailDomain', 0);
-		// $numUsers = $input->getInt('numUsers', 0);
-		// $userGroup = $input->getInt('userGroup', 0);
-		// $startingNum = $input->getInt('startingNum', 1);
-		// $project = $input->getInt('project', 0);
-		// $addToSchool = $input->getInt('addToSchool', 0);
-		// $schoolId = $input->getInt('school', 0);
+		$projectName = $input->getString('projectName', 0);
+		$prettyName = $input->getString('prettyName', 0);
+		$projectDescription = $input->getString('projectDescription', 0);
+		$accessLevel = $input->getInt('accessLevel', 0);
+		$parentProject = $input->getInt('parentProject', 0);
+		$imageDir = $input->getString('imageDir', 'images/projects');
+		$imageFile = $input->getString('imageFile', 0);
+		$listingLevel = $input->getInt('listingLevel', 10000);
+		$priority = $input->getInt('priority', 0);
+		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
+		$speciesLists = $input->get('speciesLists', array(), 'ARRAY');
+		$isSchoolProject = $input->getInt('isSchoolProject', 0);
+		$existingSchoolId = $input->getInt('school', 0);
+		$newSchoolName = $input->getString('newSchoolName', 0);
 		
-		// $newUsers = array();
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Create project
+		$fields = new \StdClass();
+		$fields->project_name = $projectName;
+		$fields->project_prettyname = $prettyName;
+		$fields->project_description = $projectDescription;
+		$fields->access_level = $accessLevel;
+		$fields->parent_project_id = $parentProject;
+		$fields->dirname = $imageDir;
+		$fields->image_file = $imageFile;
+		$fields->listing_level = $listingLevel;
+		
+		$success = $db->insertObject("Project", $fields, 'project_id');
+		if(!$success){
+			error_log ( "Project insert failed" );
+		}	
+		
+		$projectId = $fields->project_id;
+		
+		if ( $success ) {
+			
+			// Set classification priority
+			$priorityFields = new \StdClass();
+			$priorityFields->project_id = $projectId;
+			$priorityFields->option_id = $priority;
+			
+			$success = $db->insertObject("ProjectOptions", $priorityFields);
+			if(!$success){
+				error_log ( "ProjectOptions insert classification priority failed" );
+			}
+			
+			// Set displayOptions
+			foreach ( $displayOptions as $displayId ) {
+				$displayFields = new \StdClass();
+				$displayFields->project_id = $projectId;
+				$displayFields->option_id = $displayId;
+				
+				$success = $db->insertObject("ProjectOptions", $displayFields);
+				if(!$success){
+					error_log ( "ProjectOptions display option failed" );
+				}
+			}
+			
+			// Set displayOptions
+			foreach ( $speciesLists as $listId ) {
+				$speciesFields = new \StdClass();
+				$speciesFields->project_id = $projectId;
+				$speciesFields->option_id = $listId;
+				
+				$success = $db->insertObject("ProjectOptions", $speciesFields);
+				if(!$success){
+					error_log ( "ProjectOptions species list option failed" );
+				}
+			}
+			
+			if ( $isSchoolProject == 1 ) {
+				
+				$schoolFields = new \StdClass();
+				
+				if ( $existingSchoolId > 0 ) {
+					$schoolFields->school_id = $existingSchoolId;
+					$schoolFields->project_id = $projectId;
+				
+					$success = $db->updateObject("School", $fields, 'school_id');
+					if(!$success){
+						error_log ( "School project update failed" );
+					}
+				}
+			}
+			else if ( $isSchoolProject == 2 ) {
+				
+				$schoolFields = new \StdClass();
+				
+				if ( strlen ( $newSchoolName ) > 0 ) {
+					$schoolFields->name = $newSchoolName;
+					$schoolFields->project_id = $projectId;
+					$schoolFields->image = $imageDir . '/' . $imageFile;
+				
+					$success = $db->insertObject("School", $fields, 'school_id');
+					if(!$success){
+						error_log ( "School project insert failed" );
+					}
+				}
+			}
+		}
 
-		// if ( $tandCsChecked ) {
-			
-			// $db = \JDatabaseDriver::getInstance(dbOptions());
-			
-			// $query = $db->getQuery(true)
-				// ->select("type, value from Generate" )
-				// ->order("type");
 		
-			// $db->setQuery($query);
-			
-			// error_log("Task getAllStudentTasks select query created: " . $query->dump());
-			
-			// $allGen = $db->loadAssocList();
-			
-			// $firsts = array();
-			// $seconds = array();
-			// $thirds= array();
-			// foreach ( $allGen as $genRow ) {
-				// error_log ( "type = " . $genRow["type"] . ", value = " . $genRow["value"] );
-				// if ( $genRow["type"] == "first" ) {
-					// $firsts[] = $genRow["value"];
-				// }
-				// else if ( $genRow["type"] == "second" ) {
-					// $seconds[] = $genRow["value"];
-				// }
-				// else if ( $genRow["type"] == "third" ) {
-					// $thirds[] = $genRow["value"];
-				// }
-			// }
-		
-			// $usernames = array();
-			// foreach ( $firsts as $first ) {
-				// foreach ( $seconds as $second ) {
-					// $usernames[] = $first . $second;
-				// }
-			// }
-		
-			// shuffle ( $usernames );
-			
-			// $errMsg = print_r ( $usernames, true );
-			// error_log ( "Usernames = " . $errMsg );
-			
-			// $numThirds = count ( $thirds );
-			
-			// $helper = new BiodivHelper();
-			
-			// // $filePath = JPATH_SITE."/biodivimages/reports/school";
-			// // $tmpCsvFile = $filePath . "/tmp_" . $fileStem . '_' . $schoolId . ".csv";
-			// // $newCsvFile = $filePath . "/" . $fileStem . "_" . $schoolId . ".csv";
-			
-			// //if ( !file_exists($newCsvFile) ) {
-			
-				// // Creates a new csv file and store it in directory
-				// // Rename once finished writing to file
-				// // if (!file_exists($filePath)) {
-					// // mkdir($filePath, 0700, true);
-				// // }
-				
-				// // $tmpCsv = fopen ( $tmpCsvFile, 'w');
-				
-			
-				// for ( $i=$startingNum; $i < $startingNum + $numUsers; $i++ ) {
-					
-					// $username = $userStem . $usernames[$i] . $i;	
-					
-					// $ind = rand(0,$numThirds-1);
-					// $word = $thirds[$ind];
-					// $num = rand(1,999);
-					// $password = $passwordStem . $word . $num;	
-					// $email = $userStem . $i . '@' . $emailDomain;
-				
-					// $existingUserEmail = $helper->getUser ( $email );
-					// if ( $existingUserEmail ) {
-						// error_log ( "Email " . $email . " already in use, cannot create" );
-						// //fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
-						// $newUsers[] = array("error"=>"User num ".$i." already exists - cannot create - use starting number for additional users");
-						
-					// }
-					// else if ( JUserHelper::getUserId($username) ) {
-						// error_log ( "username " . $username . " already in use, cannot create" );
-						// //fputcsv($tmpCsv, array("User num ".$i." already exists - cannot create - use starting number for additional users"));
-						// $newUsers[] = array("error"=>"User num ".$i." already exists - cannot create - use starting number for additional users");
-					// }
-					// else {
-					
-						// error_log("Creating user " . $email);
-						
-					
-						// $profileMW = array( 
-							// 'tos'=>$tandCsChecked,
-							// 'wherehear'=>$project,	
-							// 'subscribe'=>0
-							// );
-						
-						// // Add to Registered group
-						// $groups = array("2"=>"2");
-						
-						
-						// $data = array(
-						// 'name'=>$username,
-						// 'username'=>$username,
-						// 'password'=>$password,
-						// 'email'=>$email,
-						// 'block'=>0,
-						// 'profileMW'=>$profileMW,
-						// 'groups'=>$groups,
-						// );
-						
-						// $user = new JUser;
-						
-						// $userCreated = false;
-
-						// try{
-							// if (!$user->bind($data)){
-								// error_log("User bind returned false");
-								// error_log($user->getError());
-								
-							// }
-							// if (!$user->save()) {
-								// error_log("User save returned false");
-								// error_log($user->getError());
-								
-							// }
-							// if ( !$user->getError() ) {
-								// error_log("User saved");
-								
-								// $userCreated = true;
-							// }
-							
-						// }
-						// catch(Exception $e){
-							// error_log($e->getMessage());
-							
-						// }
-						
-						// if ( $userCreated ) {
-							
-							// if ( $userGroup > 0 ) {
-								// JUserHelper::addUSerToGroup ( $user->id, $userGroup );
-							// }
-							
-							// //fputcsv($tmpCsv, array($username, $password));
-							// $newUsers[] = array("username"=>$username, "password"=>$password); 
-							
-							// // Link to school project
-							// $fields = new \StdClass();
-							// $fields->person_id = $user->id;
-							// $fields->project_id = $project;
-							// $fields->role_id = 2;
-							
-							// $success = $db->insertObject("ProjectUserMap", $fields);
-							// if(!$success){
-								// error_log ( "ProjectUserMap insert failed" );
-							// }	
-			
-							
-							// // Link to school in BES
-							// $db = \JDatabaseDriver::getInstance(dbOptions());
-			
-							// $fields = new \StdClass();
-							// $fields->person_id = $user->id;
-							// $fields->school_id = $schoolId;
-							// $fields->role_id = 5;
-							
-							// $success = $db->insertObject("SchoolUsers", $fields);
-							// if(!$success){
-								// error_log ( "SchoolUsers insert failed" );
-							// }	
-						// }
-					// }			
-				// }
-				
-				// //fclose($tmpCsv);
-				
-				// //rename ( $tmpCsvFile, $newCsvFile );
-				
-			// //}
-			
-		// }
-		// else {
-			// error_log ("Please ensure T&Cs agreement is in place");
-			// $newUsers[] = array("error"=>"Please ensure T&Cs agreement is in place"); 
-							
-		// }
-		
-		// $newUsersJson = json_encode ( $newUsers );
-
-		// $this->input->set('data', $newUsersJson );
-		// //$this->input->set('view', 'biodivs');
+		$this->input->set('id', $projectId);
+		$this->input->set('view', 'project');
 		
 		// $view = $this->getView( 'biodivs', 'html' );
 		// $view->display();
 
-		// //parent::display();
-	// }
+		parent::display();
+	}
+	
+	
+	function editproject() {
+		
+		error_log ( "Edit project called" );
+		
+		$app = JFactory::getApplication();
+
+		$input = $app->input;
+		
+		$projectId = $input->getInt('id', 0);
+		$projectName = $input->getString('projectName', 0);
+		$prettyName = $input->getString('prettyName', 0);
+		$projectDescription = $input->getString('projectDescription', 0);
+		$accessLevel = $input->getInt('accessLevel', 0);
+		$parentProject = $input->getInt('parentProject', 0);
+		$imageDir = $input->getString('imageDir', 'images/projects');
+		$imageFile = $input->getString('imageFile', 0);
+		$listingLevel = $input->getInt('listingLevel', 10000);
+		$priority = $input->getInt('priority', 0);
+		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
+		$speciesLists = $input->get('speciesLists', array(), 'ARRAY');
+		$isSchoolProject = $input->getInt('isSchoolProject', 0);
+		$existingSchoolId = $input->getInt('school', 0);
+		$newSchoolName = $input->getString('newSchoolName', 0);
+		
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Create project
+		$fields = new \StdClass();
+		$fields->project_id = $projectId;
+		$fields->project_name = $projectName;
+		$fields->project_prettyname = $prettyName;
+		$fields->project_description = $projectDescription;
+		$fields->access_level = $accessLevel;
+		$fields->parent_project_id = $parentProject;
+		$fields->dirname = $imageDir;
+		$fields->image_file = $imageFile;
+		$fields->listing_level = $listingLevel;
+		
+		$success = $db->updateObject("Project", $fields, 'project_id');
+		if(!$success){
+			error_log ( "Project update failed" );
+		}	
+		
+		if ( $success ) {
+			
+			$query = $db->getQuery(true);
+			$query->delete($db->quoteName('ProjectOptions'))
+				->where("project_id = " . $projectId );
+			
+			// Set classification priority
+			$priorityFields = new \StdClass();
+			$priorityFields->project_id = $projectId;
+			$priorityFields->option_id = $priority;
+			
+			$success = $db->insertObject("ProjectOptions", $priorityFields);
+			if(!$success){
+				error_log ( "ProjectOptions insert classification priority failed" );
+			}
+			
+			// Set displayOptions
+			foreach ( $displayOptions as $displayId ) {
+				$displayFields = new \StdClass();
+				$displayFields->project_id = $projectId;
+				$displayFields->option_id = $displayId;
+				
+				$success = $db->insertObject("ProjectOptions", $displayFields);
+				if(!$success){
+					error_log ( "ProjectOptions display option failed" );
+				}
+			}
+			
+			// Set displayOptions
+			foreach ( $speciesLists as $listId ) {
+				$speciesFields = new \StdClass();
+				$speciesFields->project_id = $projectId;
+				$speciesFields->option_id = $listId;
+				
+				$success = $db->insertObject("ProjectOptions", $speciesFields);
+				if(!$success){
+					error_log ( "ProjectOptions species list option failed" );
+				}
+			}
+			
+			if ( $isSchoolProject == 1 ) {
+				
+				$schoolFields = new \StdClass();
+				
+				if ( $existingSchoolId > 0 ) {
+					$schoolFields->school_id = $existingSchoolId;
+					$schoolFields->project_id = $projectId;
+					
+					$success = $db->updateObject("School", $schoolFields, 'school_id');
+					if(!$success){
+						error_log ( "School project update failed" );
+					}
+				}
+			}
+			else if ( $isSchoolProject == 2 ) {
+				
+				$schoolFields = new \StdClass();
+				
+				if ( strlen ( $newSchoolName ) > 0 ) {
+					$schoolFields->name = $newSchoolName;
+					$schoolFields->project_id = $projectId;
+					$schoolFields->image = $imageDir . '/' . $imageFile;
+				
+					$success = $db->insertObject("School", $schoolFields, 'school_id');
+					if(!$success){
+						error_log ( "School project insert failed" );
+					}
+				}
+			}
+			
+		}
+
+		
+		$this->input->set('id', $projectId);
+		$this->input->set('view', 'project');
+		
+		// $view = $this->getView( 'biodivs', 'html' );
+		// $view->display();
+
+		parent::display();
+	}
+	
+	
+	function createschool() {
+		
+		$app = JFactory::getApplication();
+
+		$input = $app->input;
+				
+		$schoolName = $input->getString('schoolName', 0);
+		$image = $input->getString('image', 0);
+		$projectId = $input->getInt('projectId', 0);
+		
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Create school
+		$fields = new \StdClass();
+		$fields->name = $schoolName;
+		$fields->image = $image;
+		$fields->project_id = $projectId;
+		
+		$success = $db->insertObject("School", $fields, 'school_id');
+		if(!$success){
+			error_log ( "School insert failed" );
+		}	
+		
+		$schoolId = $fields->school_id;
+		
+				
+		$this->input->set('id', $schoolId);
+		$this->input->set('view', 'school');
+		
+		parent::display();
+	}
+	
+	
+	function editschool() {
+		
+		$app = JFactory::getApplication();
+
+		$input = $app->input;
+		
+		$schoolId = $input->getInt('id', 0);
+		$schoolName = $input->getString('schoolName', 0);
+		$image = $input->getString('image', 0);
+		$projectId = $input->getInt('projectId', 0);
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Update school
+		$fields = new \StdClass();
+		$fields->school_id = $schoolId;
+		$fields->name = $schoolName;
+		$fields->image = $image;
+		$fields->project_id = $projectId;
+		
+		
+		$success = $db->updateObject("School", $fields, 'school_id');
+		if(!$success){
+			error_log ( "School update failed" );
+		}	
+		
+				
+		$this->input->set('id', $schoolId);
+		$this->input->set('view', 'school');
+		
+		parent::display();
+	}
+	
 	
 	
 	// function deletefiles() {

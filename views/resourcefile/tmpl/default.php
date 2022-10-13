@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['hub_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
 }
 else if ( $this->resourceId ) {
 	

@@ -171,7 +171,7 @@ function displayAllBadges () {
 
 function badgesLoaded () {
 	
-	console.log("badgesLoaded");
+	setReloadPage();
 	
 	jQuery(".badge_card").click( function () {
 		
@@ -194,6 +194,8 @@ function badgesLoaded () {
 
 
 function tasksLoaded () {
+	
+	setReloadPage();
 	
 	jQuery(".collectTask").click ( collectTask );
 	
@@ -260,7 +262,7 @@ function displayTaskArticle () {
 	jQuery('#task_article').empty();
 	
 	let url = BioDiv.root + "&view=task&format=raw&id=" + taskId;
-	jQuery('#task_article').load(url);
+	jQuery('#task_article').load(url, setReloadPage);
 	
 };
 
@@ -274,7 +276,7 @@ function displaySpeciesArticle () {
 	jQuery('#species_article').empty();
 	
 	let url = BioDiv.root + "&view=species&format=raw&id=" + taskId;
-	jQuery('#species_article').load(url);
+	jQuery('#species_article').load(url, setReloadPage);
 	
 };
 
@@ -288,7 +290,7 @@ function displayHelpArticle () {
 	jQuery('#helpArticle').empty();
 	
 	let url = BioDiv.root + "&view=article&format=raw&id=" + articleId;
-	jQuery('#helpArticle').load(url);
+	jQuery('#helpArticle').load(url, setReloadPage);
 	
 };
 
@@ -568,7 +570,7 @@ function loadSchoolTarget () {
 		
 	let schoolTargetUrl = BioDiv.root + "&view=schooltarget&format=raw&id=" + schoolId;
 	
-	jQuery(this).load(schoolTargetUrl);
+	jQuery(this).load(schoolTargetUrl, setReloadPage);
 }
 
 // -------------------------------------- end of school target stuff
@@ -581,7 +583,7 @@ function loadStudentTarget () {
 	
 	let studentTargetUrl = BioDiv.root + "&view=studenttarget&format=raw";
 	
-	jQuery(this).load(studentTargetUrl);
+	jQuery(this).load(studentTargetUrl, setReloadPage);
 }
 
 // -------------------------------------- end of student target
@@ -593,7 +595,7 @@ function loadStudentCelebration () {
 	
 	let url = BioDiv.root + "&view=celebration&format=raw";
 	
-	jQuery(this).load(url);
+	jQuery(this).load(url, setReloadPage);
 }
 
 // -------------------------------------- end of student celebration
@@ -627,16 +629,16 @@ function triggerForm () {
 }
 	
 
-function reloadCurrentPage () {
-	window.location.reload(true);
-}
+// function reloadCurrentPage () {
+	// window.location.reload(true);
+// }
 	
 
-function setReloadPage () {	
-	jQuery ('.reloadPage').click( function () {
-		reloadCurrentPage();
-	});
-}
+// function setReloadPage () {	
+	// jQuery ('.reloadPage').click( function () {
+		// reloadCurrentPage();
+	// });
+// }
 
 
 async function loadPdfThumb () {
@@ -722,6 +724,7 @@ jQuery(document).ready(function(){
 			
 			let url = BioDiv.root + "&view=saveavatar&format=raw&id=" + avatarId;
 			jQuery("#avatarArea").load(url, function () {
+				setReloadPage();
 				jQuery("#goToDash").show();
 			});
 		}
