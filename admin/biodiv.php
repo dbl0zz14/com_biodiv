@@ -114,6 +114,8 @@ function printProjectForm ( $projectId = null ) {
 	
 	$displayOptions = getProjectDisplayOptions();
 	
+	$projectAdmins = getAllProjectAdmins();
+	
 	$currProject = null;
 	if ( $projectId ) {
 		$currProject = getProject ( $projectId );
@@ -316,7 +318,7 @@ function printProjectForm ( $projectId = null ) {
 			else {
 				print '<input type="checkbox" id="displayOption_'.$id.'" name="displayOptions[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
 			}
-			print '<label for="'.$id.'"  style="display:inline-block;">'.$title.'</label>';
+			print '<label for="displayOption_'.$id.'"  style="display:inline-block;">'.$title.'</label>';
 			print '</div>';
 			
 		}
@@ -326,7 +328,7 @@ function printProjectForm ( $projectId = null ) {
 			
 			print '<div>';
 			print '<input type="checkbox" id="displayOption_'.$id.'" name="displayOptions[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
-			print '<label for="'.$id.'"  style="display:inline-block;">'.$title.'</label>';
+			print '<label for="displayOption_'.$id.'"  style="display:inline-block;">'.$title.'</label>';
 			print '</div>';
 			
 		}
@@ -379,12 +381,12 @@ function printProjectForm ( $projectId = null ) {
 			
 			print '<div>';
 			if ( array_key_exists($id, $currSpeciesLists) ) {
-				print '<input type="checkbox" id="displayOption_'.$id.'" name="displayOptions[]" value="'.$id.'"  style="margin-bottom:7px;" checked> ';
+				print '<input type="checkbox" id="speciesList_'.$id.'" name="speciesLists[]" value="'.$id.'"  style="margin-bottom:7px;" checked> ';
 			}
 			else {
-				print '<input type="checkbox" id="displayOption_'.$id.'" name="displayOptions[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
+				print '<input type="checkbox" id="speciesList_'.$id.'" name="speciesLists[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
 			}
-			print '<label for="'.$id.'"  style="display:inline-block;">'.$title.'</label>';
+			print '<label for="speciesList_'.$id.'"  style="display:inline-block;">'.$title.'</label>';
 			print '</div>';
 			
 		}
@@ -393,8 +395,8 @@ function printProjectForm ( $projectId = null ) {
 		foreach ( $speciesLists as $id=>$title ) {
 		
 			print '<div>';
-			print '<input type="checkbox" id="speciedList_'.$id.'" name="speciesLists[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
-			print '<label for="'.$id.'"  style="display:inline-block">'.$title.'</label>';
+			print '<input type="checkbox" id="speciesList_'.$id.'" name="speciesLists[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
+			print '<label for="speciesList_'.$id.'"  style="display:inline-block">'.$title.'</label>';
 			print '</div>';
 			
 		}
@@ -407,13 +409,62 @@ function printProjectForm ( $projectId = null ) {
 	print '<button id="back_projectForm5" type="button" class="btn js-stools-btn-clear projectNextBack" data-original-title="Back">Back</button>';
 	print '</div>';
 	print '<div class="span1">';
-	print '<button id="next_projectForm7" type="button" class="btn btn-primary js-stools-btn-clear projectNextBack showProjectSave" title="Next" data-original-title="Next">Next</button>';
+	print '<button id="next_projectForm7" type="button" class="btn btn-primary js-stools-btn-clear projectNextBack" title="Next" data-original-title="Next">Next</button>';
 	print '</div>';
 	print '</div>';
 
 	print '</div>';
 	
+	
 	print '<div id="projectForm7" class="projectForm" style="display:none">';
+	
+	print '<h3>Set project admin user(s)</h3>';
+
+	print '<p>';
+	print '<label for="projectAdmins">Choose who should be project administrators for this project (users with Project Admin permissions in Joomla)</label>';	
+	if ( $currProject ) {
+		$currProjectAdmins = $currProject->projectAdmins;
+		foreach ( $projectAdmins as $id=>$user ) {
+			
+			print '<div>';
+			if ( array_key_exists($id, $currProjectAdmins) ) {
+				print '<input type="checkbox" id="projectAdmin_'.$id.'" name="projectAdmins[]" value="'.$id.'"  style="margin-bottom:7px;" checked> ';
+			}
+			else {
+				print '<input type="checkbox" id="projectAdmin_'.$id.'" name="projectAdmins[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
+			}
+			print '<label for="projectAdmin_'.$id.'"  style="display:inline-block;">'.$user->username.' ('. $user->name . ', ' . $user->email . ')</label>';
+			print '</div>';
+			
+		}
+	}
+	else {
+		foreach ( $projectAdmins as $id=>$user ) {
+		
+			print '<div>';
+			print '<input type="checkbox" id="projectAdmin_'.$id.'" name="projectAdmins[]" value="'.$id.'"  style="margin-bottom:7px;"> ';
+			print '<label for="projectAdmin_'.$id.'"  style="display:inline-block">'.$user->username.' ('. $user->name . ', ' . $user->email . ')</label>';
+			print '</div>';
+			
+		}
+	}
+	
+	print '</p>';
+	
+	print '<div>';
+	print '<div class="span1">';
+	print '<button id="back_projectForm6" type="button" class="btn js-stools-btn-clear projectNextBack" data-original-title="Back">Back</button>';
+	print '</div>';
+	print '<div class="span1">';
+	print '<button id="next_projectForm8" type="button" class="btn btn-primary js-stools-btn-clear projectNextBack showProjectSave" title="Next" data-original-title="Next">Next</button>';
+	print '</div>';
+	print '</div>';
+
+	print '</div>';
+	
+	
+	
+	print '<div id="projectForm8" class="projectForm" style="display:none">';
 	
 	print '<h3>Is this project a BES Schools project?</h3>';
 	
@@ -513,7 +564,7 @@ function printProjectForm ( $projectId = null ) {
 	
 	print '<div>';
 	print '<div class="span1">';
-	print '<button id="back_projectForm6" type="button" class="btn js-stools-btn-clear projectNextBack hideProjectSave" data-original-title="Back">Back</button>';
+	print '<button id="back_projectForm7" type="button" class="btn js-stools-btn-clear projectNextBack hideProjectSave" data-original-title="Back">Back</button>';
 	print '</div>';
 	print '</div>';
 
@@ -547,7 +598,8 @@ function getAllProjects () {
 
 function getProject ( $projectId ) {
 	
-	$db = \JDatabaseDriver::getInstance(dbOptions());
+	$options = dbOptions();
+	$db = \JDatabaseDriver::getInstance($options);
 
 
 	$query = $db->getQuery(true)
@@ -591,8 +643,45 @@ function getProject ( $projectId ) {
 	
 	$project->speciesLists = $db->loadAssocList("option_id", "option_name");
 	
+	
+	$userDb = $options['userdb'];
+	$prefix = $options['userdbprefix'];
+	
+	$query = $db->getQuery(true)
+		->select("PUM.person_id, U.username, U.name, U.email from ProjectUserMap PUM")
+		->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
+		->where("PUM.role_id = 1")
+		->where("PUM.project_id = " . $projectId)
+		->order("U.name");
+	
+	$db->setQuery($query);
+	
+	//error_log("ProjectSetup project admin query created: " . $query->dump());
+	
+	$project->projectAdmins = $db->loadObjectList("person_id");
+	
 	return $project;
 		
+}
+
+
+function getAllProjectAdmins () {
+	
+	$joomlaDb = JFactory::getDbo();
+	                    
+    $query = $joomlaDb->getQuery(true);
+	$query->select("U.id, U.name, U.username, U.email from #__users U")
+		->innerJoin("#__usergroups UG on UG.title = " . $joomlaDb->quote("Project Admin") )
+		->innerJoin("#__user_usergroup_map UM on UM.user_id = U.id and UM.group_id = UG.id");
+		
+	$joomlaDb->setQuery($query);
+	
+	//error_log("getAllProjectAdmins select query created: " . $query->dump());
+	
+	$users = $joomlaDb->loadObjectList("id");
+    
+	return $users;
+	
 }
 
 
@@ -796,14 +885,6 @@ function getAccessLevels () {
 
 function getUserDetails ( $userId ) {
 	
-	// $joomlaDb = JFactory::getDbo();
-        // $joomlaDb->setQuery( 'SELECT id, title' .
-                        // ' FROM `#__usergroups`' .
-						// ' WHERE title like "School%"' );
-                        
-        
-        // $this->userGroups = $joomlaDb->loadAssocList ("id", "title");
-
 	$user = JFactory::getUser($userId);
 	
 	$userDetails = new StdClass();

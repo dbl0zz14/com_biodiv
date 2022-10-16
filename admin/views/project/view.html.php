@@ -37,8 +37,11 @@ class BioDivViewProject extends JViewLegacy
 		
 		$this->speciesLists = $this->project->speciesLists;
 		$this->displayOptions = $this->project->displayOptions;
+		$this->projectAdmins = $this->project->projectAdmins;
 		
 		$this->accessLevels = getAccessLevels();
+		
+		$this->allProjectAdmins = getAllProjectAdmins();
 		
 		// Display the template
 		parent::display($tpl);

@@ -46,6 +46,7 @@ class BioDivController extends JControllerLegacy
 		$priority = $input->getInt('priority', 0);
 		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
 		$speciesLists = $input->get('speciesLists', array(), 'ARRAY');
+		$projectAdmins = $input->get('projectAdmins', array(), 'ARRAY');
 		$isSchoolProject = $input->getInt('isSchoolProject', 0);
 		$existingSchoolId = $input->getInt('school', 0);
 		$newSchoolName = $input->getString('newSchoolName', 0);
@@ -58,7 +59,9 @@ class BioDivController extends JControllerLegacy
 		$fields->project_prettyname = $prettyName;
 		$fields->project_description = $projectDescription;
 		$fields->access_level = $accessLevel;
-		$fields->parent_project_id = $parentProject;
+		if ( $parentProject ) {
+			$fields->parent_project_id = $parentProject;
+		}
 		$fields->dirname = $imageDir;
 		$fields->image_file = $imageFile;
 		$fields->listing_level = $listingLevel;
@@ -106,6 +109,19 @@ class BioDivController extends JControllerLegacy
 				}
 			}
 			
+			// Set project admins
+			foreach ( $projectAdmins as $projectAdmin ) {
+				$adminFields = new \StdClass();
+				$adminFields->project_id = $projectId;
+				$adminFields->person_id = $projectAdmin;
+				$adminFields->role_id = 1;
+				
+				$success = $db->insertObject("ProjectUserMap", $adminFields);
+				if(!$success){
+					error_log ( "ProjectUserMap species list option failed" );
+				}
+			}
+			
 			if ( $isSchoolProject == 1 ) {
 				
 				$schoolFields = new \StdClass();
@@ -114,7 +130,7 @@ class BioDivController extends JControllerLegacy
 					$schoolFields->school_id = $existingSchoolId;
 					$schoolFields->project_id = $projectId;
 				
-					$success = $db->updateObject("School", $fields, 'school_id');
+					$success = $db->updateObject("School", $schoolFields, 'school_id');
 					if(!$success){
 						error_log ( "School project update failed" );
 					}
@@ -129,7 +145,7 @@ class BioDivController extends JControllerLegacy
 					$schoolFields->project_id = $projectId;
 					$schoolFields->image = $imageDir . '/' . $imageFile;
 				
-					$success = $db->insertObject("School", $fields, 'school_id');
+					$success = $db->insertObject("School", $schoolFields, 'school_id');
 					if(!$success){
 						error_log ( "School project insert failed" );
 					}
@@ -168,6 +184,7 @@ class BioDivController extends JControllerLegacy
 		$priority = $input->getInt('priority', 0);
 		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
 		$speciesLists = $input->get('speciesLists', array(), 'ARRAY');
+		$projectAdmins = $input->get('projectAdmins', array(), 'ARRAY');
 		$isSchoolProject = $input->getInt('isSchoolProject', 0);
 		$existingSchoolId = $input->getInt('school', 0);
 		$newSchoolName = $input->getString('newSchoolName', 0);
@@ -182,7 +199,9 @@ class BioDivController extends JControllerLegacy
 		$fields->project_prettyname = $prettyName;
 		$fields->project_description = $projectDescription;
 		$fields->access_level = $accessLevel;
-		$fields->parent_project_id = $parentProject;
+		if ( $parentProject ) {
+			$fields->parent_project_id = $parentProject;
+		}
 		$fields->dirname = $imageDir;
 		$fields->image_file = $imageFile;
 		$fields->listing_level = $listingLevel;
@@ -197,6 +216,9 @@ class BioDivController extends JControllerLegacy
 			$query = $db->getQuery(true);
 			$query->delete($db->quoteName('ProjectOptions'))
 				->where("project_id = " . $projectId );
+			$db->setQuery($query);
+			$result = $db->execute();
+			
 			
 			// Set classification priority
 			$priorityFields = new \StdClass();
@@ -229,6 +251,26 @@ class BioDivController extends JControllerLegacy
 				$success = $db->insertObject("ProjectOptions", $speciesFields);
 				if(!$success){
 					error_log ( "ProjectOptions species list option failed" );
+				}
+			}
+			
+			// Set project admins
+			$query = $db->getQuery(true);
+			$query->delete($db->quoteName('ProjectUserMap'))
+				->where("project_id = " . $projectId )
+				->where("role_id = 1");
+			$db->setQuery($query);
+			$result = $db->execute();
+			
+			foreach ( $projectAdmins as $projectAdmin ) {
+				$adminFields = new \StdClass();
+				$adminFields->project_id = $projectId;
+				$adminFields->person_id = $projectAdmin;
+				$adminFields->role_id = 1;
+				
+				$success = $db->insertObject("ProjectUserMap", $adminFields);
+				if(!$success){
+					error_log ( "ProjectUserMap species list option failed" );
 				}
 			}
 			
