@@ -53,6 +53,8 @@ class BioDivViewResourceSet extends JViewLegacy
 				$this->resourceFiles = $this->resourceSet->getFiles();
 				
 				$this->canEdit = Biodiv\ResourceSet::canEdit( $this->setId );
+				
+				$this->gotMessages = totalUploadMessages() > 0;
 			}
 			
 			

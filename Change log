@@ -6,6 +6,7 @@
 * BES Encounters changes - show resource set on select resource 
 * BES Encounters changes - improve spacing on search resources page
 * BES Encounters changes - add missing titles to find activities
+* BES Encounters changes - use UploadMessages table to fix msgs bug and persist messages
 
 # 8/9/22 - Version 3.6.4
 * BES Encounters changes - admin user: resource and activity reports 

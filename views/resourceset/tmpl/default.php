@@ -193,7 +193,7 @@ else {
 	print '</div>'; // addFilesModal
 
 
-	if ( totalMsgs() > 0 ) {
+	if ( $this->gotMessages > 0 ) {
 		print '<div id="errorsModal" class="modal fade" role="dialog">';
 		print '  <div class="modal-dialog"  >';
 
@@ -204,7 +204,7 @@ else {
 		print '        <h4 class="modal-title text-left">'.$this->translations['upload_errors']['translation_text'].'</h4>';
 		print '      </div>';
 		print '     <div class="modal-body">';
-		showMessages();
+		showUploadMessages();
 		print '      </div>';
 		print '	  <div class="modal-footer">';
 		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';

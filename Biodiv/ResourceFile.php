@@ -1653,7 +1653,7 @@ class ResourceFile {
 			if($resourceId = codes_insertObject($resourceFields, $struc)){
 				
 				$problem = false;
-				addMsg('success', "Uploaded $clientName");
+				addUploadMessage('success', "Uploaded $clientName");
 				$instance = new self( $resourceId, 
 							$resourceType,
 							$personId,

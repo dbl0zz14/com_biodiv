@@ -8,7 +8,10 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
+showUploadMessages();
+
 print '<div class="fullPageHeight">';
+
 
 if ( $this->avatar ) {
 	
@@ -92,5 +95,6 @@ print '</div>'; // col-md-12
 print '</div>'; // row
 
 print '</div>'; // fullHeight
+
 
 ?>

@@ -5237,6 +5237,7 @@ function sampleSequences($project_id) {
 	// Set all sequences to be unavailable, then set the required percentage to be available.
 }
 
+
 function addMsg($type, $msg){
   $app = JFactory::getApplication();
   $msgs = $app->getUserState("com_biodiv.msgs", noMsgs());
@@ -5284,6 +5285,94 @@ function showMessages(){
   }
   $app->setUserState("com_biodiv.msgs", noMsgs());
 }
+
+
+function addUploadMessage($type, $msg){
+  
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	$msgFields = (object) [
+		'person_id' => userID(),
+		'type' => $type,
+		'message' => $msg];
+		
+	$success = $db->insertObject("UploadMessages", $msgFields);
+	if(!$success){
+		error_log ( "ResourceTag insert failed" );
+	}
+
+}
+
+
+function getUploadMessages() {
+	
+	$personId = userID();
+	
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	// Get a list of distinct species for this topic so we can ensure we have a range 
+	// Check they have a primary species otherwise leave out
+	$query = $db->getQuery(true);
+	$query->select("type, message")->from("UploadMessages UM")
+		->where("read_flag = 0" )
+		->where("person_id = " . $personId );
+	$db->setQuery($query);
+	
+	$messages = $db->loadObjectList();
+	
+	return $messages;
+}
+
+
+function totalUploadMessages() {
+	
+	$messages = getUploadMessages();
+	
+	return count($messages);
+}
+
+function showUploadMessages(){
+	
+	$personId = userID();
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	
+	$messages = getUploadMessages();
+	
+	foreach ( $messages as $message ) {
+		$type = $message->type;
+		$msg = $message->message;
+		if($type == 'error'){
+			$class = "alert-danger";
+		}
+		else{
+			$class = "alert-$type";
+		}
+		print "<div class='alert-dismissable $class'><p class='$class'><b>" . ucfirst($type). "</b> $msg</p></div>\n";
+	}
+	
+	$query = $db->getQuery(true);
+	
+	$fields = array(
+		$db->quoteName('read_flag') . ' = 1'
+	);
+
+	// Conditions for which records should be updated.
+	$conditions = array(
+		$db->quoteName('person_id') . ' = ' . $personId 
+	);
+	
+	$query->update($db->quoteName('UploadMessages'))->set($fields)->where($conditions);
+
+	$db->setQuery($query);
+
+	$result = $db->execute();
+	
+	if(!$result){
+		error_log ( "UploadMessages update failed" );
+	}
+}
+
 
 // Get all generic filters (eg Common, Mammals and Birds)
 function getFilters () {

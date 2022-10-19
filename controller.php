@@ -1010,9 +1010,7 @@ class BioDivController extends JControllerLegacy
 	$set_id = $app->getUserState('com_biodiv.resource_set_id', 0);
     $isSchoolUpload = JRequest::getInt('school');
 	
-	error_log ( "Set id = " . $set_id );
-	
-    //if ( $set_id and canEdit($set_id, "resourceset") ) {
+	//if ( $set_id and canEdit($set_id, "resourceset") ) {
 	if ( $set_id and Biodiv\ResourceSet::canEdit($set_id) ) {
 	
 		$problem = false;
@@ -1037,7 +1035,7 @@ class BioDivController extends JControllerLegacy
 		
 		if(!isset($files['tmp_name'])){
 		  error_log ( "No file uploaded" );
-		  addMsg("error", "No file uploaded");
+		  addUploadMessage("error", "No file uploaded");
 		  $fail = 1;
 		}
 		$tmpNames = $files['tmp_name'];  // assuming multiple upload
@@ -1075,13 +1073,13 @@ class BioDivController extends JControllerLegacy
 				
 				if ( $isAdmin and $fileSize > BIODIV_ADMIN_MAX_FILE_SIZE ) {
 						error_log ( "Filesize too big" );
-						addMsg("error",  "File " . $clientName ." too large: admin max " . BIODIV_ADMIN_MAX_FILE_SIZE/1000000 . "MB");
+						addUploadMessage("error",  "File " . $clientName ." too large: admin max " . BIODIV_ADMIN_MAX_FILE_SIZE/1000000 . "MB");
 						$problem = true;
 						
 				}
 				else if (!$isAdmin and $fileSize > BIODIV_MAX_FILE_SIZE ){
 					error_log ( "Filesize too big" );
-					addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE/1000000 . "MB");
+					addUploadMessage("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE/1000000 . "MB");
 					$problem = true;
 					
 				}
@@ -1097,7 +1095,7 @@ class BioDivController extends JControllerLegacy
 					else {
 						$maxSize = BIODIV_MAX_FILE_SIZE/1000000;
 					}
-					addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". $maxSize . "MB) or there may be a network problem");
+					addUploadMessage("error", "$clientName could not be uploaded - file may be too large (max filesize is ". $maxSize . "MB) or there may be a network problem");
 					$problem = true;
 				}
 				else {
@@ -1109,7 +1107,7 @@ class BioDivController extends JControllerLegacy
 					$newFullName = "$dirName/$newName";
 					
 					if(JFile::exists($newFullName)){
-						addMsg("warning", "File already uploaded: $clientName");
+						addUploadMessage("warning", "File already uploaded: $clientName");
 						$problem = true;
 					}
 					else {
@@ -1124,7 +1122,7 @@ class BioDivController extends JControllerLegacy
 						$success=	JFile::upload($tmpName, $newFullName);
 						if(!$success){
 							error_log ( "New file - upload failed... "   );
-							addMsg("error","File upload unsuccessful for $clientName");
+							addUploadMessage("error","File upload unsuccessful for $clientName");
 							$problem = true;
 						}	
 						else {
@@ -1148,7 +1146,7 @@ class BioDivController extends JControllerLegacy
 					}
 				}
 				
-				if ( $problem ) addMsg("error", "Failed to upload resource " . $clientName );
+				if ( $problem ) addUploadMessage("error", "Failed to upload resource " . $clientName );
 			
 			}
 		}
