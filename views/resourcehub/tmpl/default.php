@@ -10,12 +10,11 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	//print '<a type="button" href="'.JURI::root().'/'.$this->translations['hub_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCEHUB_LOGIN").'</div>';
 }
 else if ( $this->mySchoolRole == 0 or $this->mySchoolRole == Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-	print '<h2>'.$this->translations['no_access']['translation_text'].'</h2>';
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['student_link']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['student_dash']['translation_text'].'</a>';
+	print '<h2>'.JText::_("COM_BIODIV_RESOURCEHUB_NO_ACCESS").'</h2>';
+	print '<a type="button" href="'.JURI::root().'/'.JText::_("COM_BIODIV_RESOURCEHUB_STUDENT_LINK").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_RESOURCEHUB_STUDENT_DASH").'</a>';
 }
 else {
 	
@@ -36,7 +35,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_RESOURCEHUB_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_RESOURCEHUB_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -67,7 +66,7 @@ else {
 
 	print '<div class="searchRes">';
 
-	$searchPage = JURI::root() . "/" . $this->translations['search_page']['translation_text'];
+	$searchPage = JURI::root() . "/" . JText::_("COM_BIODIV_RESOURCEHUB_SEARCH_PAGE");
 
 	print '<form class="form-inline hidden-xs" action="'.$searchPage.'" method = "GET">';
 	
@@ -109,7 +108,7 @@ else {
 	print '<div class="panel panel-default findByGroupPanel">';
 	print '<div class="panel-body">';
 	
-	//print '<button type="button" class="btn btn-primary resourceUpload" data-toggle="modal" data-target="#uploadModal" >'.$this->translations['upload']['translation_text'].'</button>';
+	//print '<button type="button" class="btn btn-primary resourceUpload" data-toggle="modal" data-target="#uploadModal" >'.JText::_("COM_BIODIV_RESOURCEHUB_UPLOAD").'</button>';
 	
 	print '<div class="findByGroupGrid">';
 	
@@ -125,7 +124,7 @@ else {
 	print '</div>'; // col-3
 	print '<div class="col-xs-9">';
 	print '<div class="h4 panelHeading">';
-	print $this->translations['upload']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_UPLOAD");
 	print '</div>';
 	print '</div>'; // col-9
 	print '</div>'; // row
@@ -133,20 +132,15 @@ else {
 	
 	print '<div class="hidden-xs">';
 	print '<div class="h5 panelHeading">';
-	print $this->translations['upload']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_UPLOAD");
 	print '</div>';
 	print '<div class="findByGroupIcon text-center hidden-xs"><i class="fa fa-files-o fa-2x"></i></div>';
 	print '</div>';
 	
 	
 	
-	// print '<div class="h5 panelHeading">'.'<i class="fa fa-files-o fa-2x hidden-sm hidden-md hidden-lg hidden-xl"></i> '.$this->translations['upload']['translation_text'].'</div>';
-	// print '<div class="findByGroupIcon text-center hidden-xs"><i class="fa fa-files-o fa-2x"></i></div>';
-	
-	
 	print '</div>'; // panel-body
 	print '</div>'; // panel
-	//print '</a>';
 	print '</div>';
 	
 	print '<div class="findBookmarked">';
@@ -161,7 +155,7 @@ else {
 	print '</div>'; // col-3
 	print '<div class="col-xs-9">';
 	print '<div class="h4 panelHeading">';
-	print $this->translations['find_bookmarked']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_BOOKMARKED");
 	print '</div>';
 	print '</div>'; // col-9
 	print '</div>'; // row
@@ -169,16 +163,11 @@ else {
 	
 	print '<div class="hidden-xs">';
 	print '<div class="h5 panelHeading">';
-	print $this->translations['find_bookmarked']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_BOOKMARKED");
 	print '</div>';
 	print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->bookmarkedImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div>';
 	print '</div>';
 	
-	// print '<div class="h5 panelHeading">';
-	// print '<div class="findByGroupIconSmall hidden-sm hidden-md hidden-lg hidden-xl"><img src="'.$this->bookmarkedImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div> ';
-	// print $this->translations['find_bookmarked']['translation_text'];
-	// print '</div>';
-	// print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->bookmarkedImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div>';
 	
 	print '</div>'; // panel-body
 	print '</div>'; // panel
@@ -197,7 +186,7 @@ else {
 	print '</div>'; // col-3
 	print '<div class="col-xs-9">';
 	print '<div class="h4 panelHeading">';
-	print $this->translations['find_my_uploads']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_MY_UPLOADS");
 	print '</div>';
 	print '</div>'; // col-9
 	print '</div>'; // row
@@ -205,14 +194,12 @@ else {
 	
 	print '<div class="hidden-xs">';
 	print '<div class="h5 panelHeading">';
-	print $this->translations['find_my_uploads']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_MY_UPLOADS");
 	print '</div>';
 	print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->myUploadsImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div>';
 	print '</div>';
 	
 	
-	// print '<div class="h5 panelHeading">'.$this->translations['find_my_uploads']['translation_text'].'</div>';
-	// print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->myUploadsImg.'"  class="img-responsive" alt="Find my uploads icon" /></div>';
 	
 	print '</div>'; // panel-body
 	print '</div>'; // panel
@@ -231,7 +218,7 @@ else {
 	print '</div>'; // col-3
 	print '<div class="col-xs-9">';
 	print '<div class="h4 panelHeading">';
-	print $this->translations['find_new']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_NEW");
 	print '</div>';
 	print '</div>'; // col-9
 	print '</div>'; // row
@@ -239,13 +226,11 @@ else {
 	
 	print '<div class="hidden-xs">';
 	print '<div class="h5 panelHeading">';
-	print $this->translations['find_new']['translation_text'];
+	print JText::_("COM_BIODIV_RESOURCEHUB_FIND_NEW");
 	print '</div>';
 	print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->newImg.'"  class="img-responsive" alt="Find bookmarked icon" /></div>';
 	print '</div>';
 	
-	// print '<div class="h5 panelHeading">'.$this->translations['find_new']['translation_text'].'</div>';
-	// print '<div class="findByGroupIcon text-center hidden-xs"><img src="'.$this->newImg.'"  class="img-responsive" alt="Find new resources icon" /></div>';
 	
 	
 	print '</div>'; // panel-body
@@ -266,8 +251,6 @@ else {
 	
 	print '<div class="panel panel-default findByTypePanel">';
 	print '<div class="panel-body">';
-	
-	//print '<div class="h4 panelHeading">'.$this->translations['find_by_type']['translation_text'].'</div>';
 	
 	print '<div class="findByTypeGrid">';
 	
@@ -299,7 +282,7 @@ else {
 	print '<div class="panel panel-default findByGroupPanel">';
 	print '<div class="panel-body">';
 	
-	print '<div class="h4 panelHeading">'.$this->translations['featured']['translation_text'].'</div>';
+	print '<div class="h4 panelHeading">'.JText::_("COM_BIODIV_RESOURCEHUB_FEATURED").'</div>';
 	
 	$maxResources = 2;
 	$featuredCount = 0;
@@ -327,7 +310,7 @@ else {
 		
 			$resourceId = $resourceData["resource_id"];
 		
-			$resourcePage = $this->translations['resource_page']['translation_text'];
+			$resourcePage = JText::_("COM_BIODIV_RESOURCEHUB_RESOURCE_PAGE");
 			print '<a href="'.$resourcePage.'?id='.$resourceId.'">';
 		
 			$resource->printCard();
@@ -340,7 +323,7 @@ else {
 	
 	print '<div class="text-center">';
 	print '<a href="'.$searchPage.'" class="btn btn-primary">';
-	print '<div class="h4 panelHeading">'.$this->translations['more']['translation_text'].'</div>';
+	print '<div class="h4 panelHeading">'.JText::_("COM_BIODIV_RESOURCEHUB_MORE").'</div>';
 	print '</a>';
 	print '</div>';
 	
@@ -373,7 +356,7 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+//print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_RESOURCEHUB_REVIEW").'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';
@@ -400,7 +383,7 @@ print '     <div class="modal-body">';
 print '	    <div id="uploadArea" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCEHUB_CANCEL").'</button>';
 print '      </div>';
 	  	  
 print '    </div>'; // modal-content

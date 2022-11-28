@@ -52,7 +52,7 @@ JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", array(), true);
 JHTML::script("bootstrap3-editable/bootstrap-editable.js", true, true);
 JHTML::script("com_biodiv/biodiv.js", true, true);
 
-// set up external database links
+
 include "codes.php";
 require_once('libraries/getid3/getid3/getid3.php');
 
@@ -1311,7 +1311,7 @@ function projectDetails ( $project_id ) {
 function getTrapperStatistics () {
 	
 	// Get all the text snippets for trapperdash view
-	$translations = getTranslations("dashtrapper");
+	//$translations = getTranslations("dashtrapper");
 
 	$personId = (int)userID();
 	
@@ -1325,7 +1325,7 @@ function getTrapperStatistics () {
 	$db->setQuery($query); 
 	$numSites = $db->loadResult();
 	
-	array_push( $statRows, array($translations['tot_sites']['translation_text'], $numSites) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_DASHTRAPPER_TOT_SITES"), $numSites) );
 	
 	$query = $db->getQuery(true);
     $query->select("count(*) ")
@@ -1334,7 +1334,7 @@ function getTrapperStatistics () {
 	$db->setQuery($query); 
 	$numSites = $db->loadResult();
 	
-	array_push( $statRows, array($translations['your_sites']['translation_text'], $numSites) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_DASHTRAPPER_YOUR_SITES"), $numSites) );
 	
 	$query = $db->getQuery(true);
     $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
@@ -1344,7 +1344,8 @@ function getTrapperStatistics () {
 	$db->setQuery($query, 0, 1); // LIMIT 1
 	$row = $db->loadAssoc();
 	
-	array_push( $statRows, array($translations['tot_seq']['translation_text'], $row['uploaded']) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_DASHTRAPPER_TOT_SEQ"), $row['uploaded']) );
+	
 	$query = $db->getQuery(true);
     
 	
@@ -1373,10 +1374,8 @@ function getTrapperStatistics () {
 	$myPrivateSeqs = $db->loadResult();
 	
 	
-	array_push( $statRows, array($translations['your_seq']['translation_text'], $mySeqs+$myPrivateSeqs) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_DASHTRAPPER_YOUR_SEQ"), $mySeqs+$myPrivateSeqs) );
 	
-	
-
 		
 	return $statRows;
 }	
@@ -1385,7 +1384,7 @@ function getTrapperStatistics () {
 function getSpotterStatistics () {
 	
 	// Get all the text snippets for status view
-	$translations = getTranslations("status");
+	//$translations = getTranslations("status");
 
 	$db = JDatabase::getInstance(dbOptions());
 	
@@ -1399,8 +1398,8 @@ function getSpotterStatistics () {
 	$db->setQuery($query, 0, 1); // LIMIT 1
 	$row = $db->loadAssoc();
 	
-	array_push( $statRows, array($translations['tot_system']['translation_text'], $row['uploaded']) );
-	array_push( $statRows, array($translations['tot_class']['translation_text'], $row['classified']) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_TOT_SYSTEM"), $row['uploaded']) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_TOT_CLASS"), $row['classified']) );
 	
 	
 	$query = $db->getQuery(true);
@@ -1422,15 +1421,51 @@ function getSpotterStatistics () {
 		$userPos = count($lTable);
 		$tSpotters += 1;
 		
-		array_push( $statRows, array($translations['num_you']['translation_text'], 0) );
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_NUM_YOU"), 0) );
 	
 	}
 	else {
-		array_push( $statRows, array($translations['num_you']['translation_text'], $leagueTable[$userPos]['num_classified']) );
+		
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_NUM_YOU"), $leagueTable[$userPos]['num_classified']) );
 	}
 	
-	array_push( $statRows, array($translations['tot_spot']['translation_text'], $tSpotters) );
-	array_push( $statRows, array($translations['you_curr']['translation_text'] . ' ' . getOrdinal($userPos + 1) . ' ' . $translations['contrib']['translation_text'], '') );
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_TOT_SPOT"), $tSpotters) );
+	
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_YOU_CURR"), getOrdinal($userPos + 1)) );
+	
+	
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	
+	$query = $db->getQuery(true);
+    $query->select("person_id, month_classified")
+		->from("LeagueTableByMonth")
+		->where("project_id = 0")
+		->where("end_date = " . $endDate)
+		->order("month_classified DESC");
+    $db->setQuery($query);
+	
+	error_log ( "getSpotterStatistics, this month query: " . $query->dump() );
+	
+    $thisMonth = $db->loadAssocList("person_id");
+	$userThisMonthPos = array_search ( $personId, array_keys($thisMonth) );
+	
+	$prevMonthEnd = date('Ymd', strtotime("last day of last month"));
+	
+	$query = $db->getQuery(true);
+    $query->select("person_id, month_classified")
+		->from("LeagueTableByMonth")
+		->where("project_id = 0")
+		->where("end_date = " . $prevMonthEnd)
+		->order("month_classified DESC");
+    $db->setQuery($query);
+	
+    error_log ( "getSpotterStatistics, prev month query: " . $query->dump() );
+	
+	$prevMonth = $db->loadAssocList("person_id");
+	$userPrevMonthPos = array_search ( $personId, array_keys($prevMonth) );
+	
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_PREV_MONTH"), getOrdinal($userPrevMonthPos + 1)) );
+	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_THIS_MONTH"), getOrdinal($userThisMonthPos + 1)) );
 		
 	return $statRows;
 }	
@@ -2097,6 +2132,11 @@ function calculateLeagueTableByMonth ( $project_id = null, $end_date = null ) {
 	}
 	$project_ids = array_keys($projects);
 	
+	if ( $project_id === null ) {
+		// 0 => all projects
+		$project_ids[] = 0;
+	}
+	
 	// Get users to count for classifications and uploads.
 	$query = $db->getQuery(true);
 	$query->select("distinct person_id from Animal order by person_id");
@@ -2143,47 +2183,86 @@ function calculateLeagueTableByMonth ( $project_id = null, $end_date = null ) {
 		
 		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
 		
-		$query = $db->getQuery(true);
-		$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
-			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-			->where("P.sequence_id > 0")
-			->where("P.person_id in (" . $personStr . ")")
-			->where("P.uploaded < " . $dateToUse )
-			->where("PSM.project_id = " . $proj_id )
-			->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
-			->group("P.person_id");
+		if ( $proj_id == 0 ) {
+			$query = $db->getQuery(true);
+			$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
+				->where("P.sequence_id > 0")
+				->where("P.person_id in (" . $personStr . ")")
+				->where("P.uploaded < " . $dateToUse )
+				->group("P.person_id");
+			
+			
+			$db->setQuery($query);
+			
+			//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+			
+			$userUploaded = $db->loadAssocList("person_id", "numUploaded");
+			
+			//$errMsg = print_r ( $userUploaded, true );
+			//error_log ( "userUploaded: ");
+			//error_log ( $errMsg );
 		
+			$query = $db->getQuery(true);
+			$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
+				->innerJoin("Photo P on A.photo_id = P.photo_id")
+				->where("P.person_id in (" . $personStr . ")")
+				->where("A.timestamp < " . $dateToUse )
+				->group("A.person_id");
+			
+			
+			$db->setQuery($query);
+			
+			//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
+			
+			$userClassified = $db->loadAssocList("person_id", "numClassified");
+			
+			//$errMsg = print_r ( $userClassified, true );
+			//error_log ( "userClassified: ");
+			//error_log ( $errMsg );
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.sequence_id > 0")
+				->where("P.person_id in (" . $personStr . ")")
+				->where("P.uploaded < " . $dateToUse )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
+				->group("P.person_id");
+			
+			
+			$db->setQuery($query);
+			
+			//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+			
+			$userUploaded = $db->loadAssocList("person_id", "numUploaded");
+			
+			//$errMsg = print_r ( $userUploaded, true );
+			//error_log ( "userUploaded: ");
+			//error_log ( $errMsg );
 		
-		$db->setQuery($query);
-		
-		//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
-		
-		$userUploaded = $db->loadAssocList("person_id", "numUploaded");
-		
-		//$errMsg = print_r ( $userUploaded, true );
-		//error_log ( "userUploaded: ");
-		//error_log ( $errMsg );
-	
-		$query = $db->getQuery(true);
-		$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
-			->innerJoin("Photo P on A.photo_id = P.photo_id")
-			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-			->where("P.person_id in (" . $personStr . ")")
-			->where("A.timestamp < " . $dateToUse )
-			->where("PSM.project_id = " . $proj_id )
-			->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
-			->group("A.person_id");
-		
-		
-		$db->setQuery($query);
-		
-		//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
-		
-		$userClassified = $db->loadAssocList("person_id", "numClassified");
-		
-		//$errMsg = print_r ( $userClassified, true );
-		//error_log ( "userClassified: ");
-		//error_log ( $errMsg );
+			$query = $db->getQuery(true);
+			$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
+				->innerJoin("Photo P on A.photo_id = P.photo_id")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.person_id in (" . $personStr . ")")
+				->where("A.timestamp < " . $dateToUse )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
+				->group("A.person_id");
+			
+			
+			$db->setQuery($query);
+			
+			//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
+			
+			$userClassified = $db->loadAssocList("person_id", "numClassified");
+			
+			//$errMsg = print_r ( $userClassified, true );
+			//error_log ( "userClassified: ");
+			//error_log ( $errMsg );
+		}
 		
 		foreach ( $contributers as $personId ) {
 			
@@ -2595,9 +2674,9 @@ function discoverSites () {
 	//error_log("discoverSites");
 	
 	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("discover");
+	//$translations = getTranslations("discover");
 	 
-	$sites = $translations["sites"]["translation_text"];
+	$sites = JText::_("COM_BIODIV_DISCOVER_SITES");
 	  
 	$db = JDatabase::getInstance(dbOptions());
 	$query = $db->getQuery(true);
@@ -2648,14 +2727,12 @@ function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months 
 	//error_log("discoverData(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
 	
 	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("discover");
+	//$translations = getTranslations("discover");
 	  
 	  
-	//$coords = "(".$lat_start.$translations["s"]["translation_text"].",".$lon_start.$translations["w"]["translation_text"]." to ";
-	//$coords .= $lat_end.$translations["n"]["translation_text"].",".$lon_end.$translations["e"]["translation_text"] . ")";
-	$coords = $translations["lat"]["translation_text"]. " " . $lat_start . " " . $translations["to"]["translation_text"] . " " . $lat_end . ", ";
-	$coords .= $translations["lon"]["translation_text"]. " " . $lon_start . " " . $translations["to"]["translation_text"] . " " . $lon_end ;
-	$title = $translations["up_class"]["translation_text"] . " " . $coords ;
+	$coords = JText::_("COM_BIODIV_DISCOVER_LAT"). " " . $lat_start . " " . JText::_("COM_BIODIV_DISCOVER_TO") . " " . $lat_end . ", ";
+	$coords .= JText::_("COM_BIODIV_DISCOVER_LON"). " " . $lon_start . " " . JText::_("COM_BIODIV_DISCOVER_TO") . " " . $lon_end ;
+	$title = JText::_("COM_BIODIV_DISCOVER_UP_CLASS") . " " . $coords ;
 	
 	//$numDisplayedMonths = 6;
 	$interval_in_months = 1;
@@ -2711,7 +2788,8 @@ function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months 
 	
 	// If all uploaded entries are 0 there are no uploads so reflect in title
 	if ( array_sum($uploadedArray) == 0 ) {
-		$title = $translations["no_up_class"]["translation_text"] . " " . $coords ;
+		
+		$title = JText::_("COM_BIODIV_DISCOVER_NO_UP_CLASS") . " " . $coords ;
 	}
 
   
@@ -2719,15 +2797,12 @@ function discoverData ( $lat_start, $lat_end, $lon_start, $lon_end, $num_months 
 		"labels" => $labelsArray,
 		"uploaded" => $uploadedArray,
 		"classified" => $classifiedArray,
-		"cla_label" => $translations["classified"]["translation_text"],
-		"upl_label" => $translations["uploaded"]["translation_text"],
+		"cla_label" => JText::_("COM_BIODIV_DISCOVER_CLASSIFIED"),
+		"upl_label" => JText::_("COM_BIODIV_DISCOVER_UPLOADED"),
 		"title" => $title
 		
 		);
   
-  
-	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
-	//print implode(",", $projectdetails);
   
 	return $discoverData;
 }
@@ -2739,14 +2814,13 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	//error_log("discoverAnimals(" . $lat_start . ", ". $lat_end . ", ". $lon_start . ", ". $lon_end . ")");
 	
 	// Get all the text snippets for this view in the current language
-	  $translations = getTranslations("discover");
+	//  $translations = getTranslations("discover");
 	  
 	  
-	  //$coords = "(".$lat_start.$translations["s"]["translation_text"].",".$lon_start.$translations["w"]["translation_text"]." to ";
-	  //$coords .= $lat_end.$translations["n"]["translation_text"].",".$lon_end.$translations["e"]["translation_text"] . ")";
-	  $coords = $translations["lat"]["translation_text"]. " " . $lat_start . " " . $translations["to"]["translation_text"] . " " . $lat_end . ", ";
-	  $coords .= $translations["lon"]["translation_text"]. " " . $lon_start . " " . $translations["to"]["translation_text"] . " " . $lon_end ;
-	  $title = $translations["sights"]["translation_text"] . " " . $coords ;
+	  $coords = JText::_("COM_BIODIV_DISCOVER_LAT"). " " . $lat_start . " " . JText::_("COM_BIODIV_DISCOVER_TO") . " " . $lat_end . ", ";
+	  $coords .= JText::_("COM_BIODIV_DISCOVER_LON"). " " . $lon_start . " " . JText::_("COM_BIODIV_DISCOVER_TO") . " " . $lon_end ;
+	  $title = JText::_("COM_BIODIV_DISCOVER_SIGHTS") . " " . $coords ;
+	
 	
 	
 	  // Note that for now we are summing over the years to get total sightings
@@ -2817,7 +2891,8 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  foreach ( $animals_to_return_en as $sp=>$num ) {
 		  //error_log( "animal row: " . $sp . ", " . $num );
 		  if ( $sp == "Other Species" ) {
-			  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+			  
+			  $animals_to_return[JText::_("COM_BIODIV_DISCOVER_OTHER_SP")] = $num;
 		  }
 		  else {
 			  $animals_to_return[codes_getName($animals_w_id[$sp]["option_id"], "speciestran")] = $num;
@@ -2827,7 +2902,8 @@ function discoverAnimals ( $lat_start, $lat_end, $lon_start, $lon_end, $num_spec
 	  // Quick fix?
 	  if ( count($animals_to_return) == 0 ) {
 		  $animals_to_return["All"] = 0;
-		  $title = $translations["no_sights"]["translation_text"] . " " . $coords ;
+		  
+		  $title = JText::_("COM_BIODIV_DISCOVER_NO_SIGHTS") . " " . $coords ;
 	
 	  }
 	  
@@ -2845,11 +2921,11 @@ function discoverSpecies ( $species_id, $year = null  ) {
 	//error_log("discoverSpecies(" . $species_id . ", ". $year . ")");
 	
 	// Get all the text snippets for this view in the current language
-	  $translations = getTranslations("discover");
+	//  $translations = getTranslations("discover");
 	  
 	  $tr_sp_name = codes_getOptionTranslation($species_id);
 	  
-	  $title = $translations["species"]["translation_text"] . " - " . $tr_sp_name;
+	  $title = JText::_("COM_BIODIV_DISCOVER_SPECIES") . " - " . $tr_sp_name;
 	
 	  $db = JDatabase::getInstance(dbOptions());
 	  $query = $db->getQuery(true);
@@ -2971,12 +3047,13 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
   }
   
   // Get all the text snippets for this view in the current language
-  $translations = getTranslations("project");
+  //$translations = getTranslations("project");
   
-  $title = $translations["seq_dflt"]["translation_text"];
-  if ( $num_months == 6 ) $title = $translations["seq_sixm"]["translation_text"];
-  else if ( $num_months == 12 ) $title = $translations["seq_oneyr"]["translation_text"];
-  else if ( $num_months == 36 ) $title = $translations["seq_thryr"]["translation_text"];
+  $title = JText::_("COM_BIODIV_PROJECT_SEQ_DFLT");
+  
+  if ( $num_months == 6 ) $title = JText::_("COM_BIODIV_PROJECT_SEQ_SIXM");
+  else if ( $num_months == 12 ) $title = JText::_("COM_BIODIV_PROJECT_SEQ_ONEYR");
+  else if ( $num_months == 36 ) $title = JText::_("COM_BIODIV_PROJECT_SEQ_THRYR");
   
   //$numDisplayedMonths = 6;
   $numDisplayedMonths = $num_months + $interval_in_months;
@@ -3034,8 +3111,8 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
 		"labels" => $labelsArray,
 		"uploaded" => $uploadedArray,
 		"classified" => $classifiedArray,
-		"cla_label" => $translations["classified"]["translation_text"],
-		"upl_label" => $translations["uploaded"]["translation_text"],
+		"cla_label" => JText::_("COM_BIODIV_PROJECT_CLASSIFIED"),
+		"upl_label" => JText::_("COM_BIODIV_PROJECT_UPLOADED"),
 		"title" => $title
 		
 		);
@@ -3053,17 +3130,15 @@ function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
 	
 	//error_log("discoverUserUploads(" . $site_id . ", ". $num_months . ")");
 	
-	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("discover");
-	  
 	// Default to All sites
-	$siteText = $translations["all_sites"]["translation_text"];
+	$siteText = JText::_("COM_BIODIV_DISCOVER_ALL_SITES");
+	
 	if ( $site_id ) {
 		
 		$siteDetails = codes_getDetails($site_id, 'site');
-		$siteText = $translations["for_site"]["translation_text"] . ' ' . $siteDetails['site_name'];
+		$siteText = JText::_("COM_BIODIV_DISCOVER_FOR_SITE") . ' ' . $siteDetails['site_name'];
 	}
-	$title = $translations["up_class"]["translation_text"] . " " . $siteText ;
+	$title = JText::_("COM_BIODIV_DISCOVER_UP_CLASS") . " " . $siteText ;
 	
 	$interval_in_months = 1;
     $numDisplayedMonths = $num_months + $interval_in_months;
@@ -3136,7 +3211,8 @@ function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
 	
 	// If all uploaded entries are 0 there are no uploads so reflect in title
 	if ( array_sum($uploadedArray) == 0 ) {
-		$title = $translations["no_up_class"]["translation_text"] . " " . $siteText ;
+		
+		$title = JText::_("COM_BIODIV_DISCOVER_NO_UP_CLASS") . " " . $siteText ;
 	}
 
   
@@ -3144,15 +3220,12 @@ function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
 		"labels" => $labelsArray,
 		"uploaded" => $uploadedArray,
 		"classified" => $classifiedArray,
-		"cla_label" => $translations["classified"]["translation_text"],
-		"upl_label" => $translations["uploaded"]["translation_text"],
+"cla_label" => JText::_("COM_BIODIV_DISCOVER_CLASSIFIED"),
+		"upl_label" => JText::_("COM_BIODIV_DISCOVER_UPLOADED"),
 		"title" => $title
 		
 		);
   
-  
-	//print "<br/>Got " . count($projectdetails) . " all project details user has access to<br/>They are:<br>";
-	//print implode(",", $projectdetails);
   
 	return $discoverData;
 }
@@ -3164,9 +3237,9 @@ function discoverUserUploads ( $site_id = null, $num_months = 12  ) {
 function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
 	
 	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("dashcharts");
+	//$translations = getTranslations("dashcharts");
 
-	$title = $translations["by_sp"]["translation_text"];
+	$title = JText::_("COM_BIODIV_DASHCHARTS_BY_SP");
 	
 	$personId = userID();
 
@@ -3325,8 +3398,9 @@ function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $i
 	foreach ( $animals_to_return_en as $sp=>$num ) {
 	  //error_log( "animal row: " . $sp . ", " . $num );
 	  if ( $sp == "Other Species" ) {
-		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
-		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+		  
+		  $animals_to_return[JText::_("COM_BIODIV_DASHCHARTS_OTHER_SP")] = $num;
+		  
 	  }
 	  else {
 		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
@@ -3351,9 +3425,9 @@ function discoverUserAnimals ( $site_id = null, $top=true, $num_species = 10, $i
 function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species = 10, $include_dontknow = false, $include_human = false, $include_nothing = false  ) {
 	
 	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("dashcharts");
+	//$translations = getTranslations("dashcharts");
 
-	$title = $translations["by_sp"]["translation_text"];
+	$title = JText::_("COM_BIODIV_DASHCHARTS_BY_SP");
 	
 	$personId = userID();
 
@@ -3468,8 +3542,9 @@ function discoverUserSequenceAnimals ( $site_id = null, $top=true, $num_species 
 	foreach ( $animals_to_return_en as $sp=>$num ) {
 	  //error_log( "animal row: " . $sp . ", " . $num );
 	  if ( $sp == "Other Species" ) {
-		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
-		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+		  
+		  $animals_to_return[JText::_("COM_BIODIV_DASHCHARTS_OTHER_SP")] = $num;
+		  
 	  }
 	  else {
 		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
@@ -3493,9 +3568,9 @@ function discoverUserNothingHuman ( $site_id = null  ) {
 	
 	//error_log ( "discoverUserNothingHuman(" . $site_id . ")" );
 	// Get all the text snippets for this view in the current language
-	$translations = getTranslations("dashcharts");
+	//$translations = getTranslations("dashcharts");
 
-	$title = $translations["noth_hum"]["translation_text"];
+	$title = JText::_("COM_BIODIV_DASHCHARTS_NOTH_HUM");
 	
 	$personId = userID();
 
@@ -3608,12 +3683,13 @@ function discoverUserNothingHuman ( $site_id = null  ) {
 		foreach ( $animals_to_return_en as $sp=>$num ) {
 		  //error_log( "animal row: " . $sp . ", " . $num );
 		  if ( $sp == 'Animals' ) {
-			  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
-			  $animals_to_return[$translations["all_sp"]["translation_text"]] = $num;
+			  
+			  $animals_to_return[JText::_("COM_BIODIV_DASHCHARTS_ALL_SP")] = $num;
+			  
 		  }
 		  else {
-			  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
-			  $animals_to_return[codes_getName($animals_w_id[$sp]["species_id"], "speciestran")] = $num;
+			 
+			 $animals_to_return[codes_getName($animals_w_id[$sp]["species_id"], "speciestran")] = $num;
 		  }
 		}
 	}
@@ -3653,9 +3729,9 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   }
   
   // Get all the text snippets for this view in the current language
-  $translations = getTranslations("project");
+  //$translations = getTranslations("project");
   
-  $title = $translations["by_sp"]["translation_text"];
+  $title = JText::_("COM_BIODIV_PROJECT_BY_SP");
   	
   $projects = getSubProjectsById( $project_id );
   $id_string = implode(",", array_keys($projects));
@@ -3737,8 +3813,9 @@ function projectAnimals ( $project_id, $num_species = null, $include_dontknow = 
   foreach ( $animals_to_return_en as $sp=>$num ) {
 	  //error_log( "animal row: " . $sp . ", " . $num );
 	  if ( $sp == "Other Species" ) {
-		  //error_log ( "key = " . $translations["other_sp"]["translation_text"] );
-		  $animals_to_return[$translations["other_sp"]["translation_text"]] = $num;
+		  
+		  $animals_to_return[JText::_("COM_BIODIV_PROJECT_OTHER_SP")] = $num;
+		  
 	  }
 	  else {
 		  //error_log ( "key = " . codes_getName($animals_w_id[$sp]["option_id"], "speciestran") );
@@ -6072,11 +6149,12 @@ function getSpecies ( $filterId, $onePage ) {
 
 function getClassifyInputs () {
 	
-	$translations = getTranslations("classify");
+	//$translations = getTranslations("classify");
 	$classifyInputs = array();
 	
 	foreach(array("gender", "age") as $struc){
-		$title_tran = $translations[codes_getTitle($struc)]['translation_text'];
+		$tranStr = "COM_BIODIV_CLASSIFY_" . strtoupper(codes_getTitle($struc));
+		$title_tran = JText::_($tranStr);
 		$input = "<label for ='classify_$struc'>" . $title_tran . "</label><br />\n";
 		//$input .= "<select id='classify_$struc' name='$struc'>\n";
 		//$input .= codes_getOptions(1, $struc);
@@ -6091,16 +6169,15 @@ function getClassifyInputs () {
 	$number .= "<input id='classify_number' type='number' min='1' max='99' value='1' name='number'/><button type='button' class='btn' id='classify_increase'><span class='fa fa-plus'/></button></div>\n";
 	$classifyInputs[] = $number;
 		
-	//$number = "<label for ='classify_number'>" . $translations['how_many']['translation_text'] . "</label>\n";
 	//$number .= "<input id='classify_number' type='number' min='1' value='1' name='number'/>\n";
 	//$classifyInputs[] = $number;
 	
-	$sure = "<label for ='classify_sure'>" . $translations['sure']['translation_text'] . "</label>\n";
+	$sure = "<label for ='classify_sure'>" . JText::_("COM_BIODIV_CLASSIFY_SURE") . "</label>\n";
 	// See what happens if we don;t specify what to check - want it to default to first option
 	$sure .= codes_getRadioButtons("sure", "suretran", null);
 	$classifyInputs[] = $sure;
 	
-	$notes = "<label for ='classify_notes'>" . $translations['notes']['translation_text'] . "</label>\n";
+	$notes = "<label for ='classify_notes'>" . JText::_("COM_BIODIV_CLASSIFY_NOTES") . "</label>\n";
 	$notes .= "<input id='classify_notes' type='text' maxlength='100' name='notes'/>\n";
 	$classifyInputs[] = $notes;
 		
@@ -6109,20 +6186,20 @@ function getClassifyInputs () {
 
 function getClassifyBirdInputs () {
 	
-	$translations = getTranslations("classify");
+	//$translations = getTranslations("classify");
 	$classifyInputs = array();
 	
 	// The song/call is actually stored in notes for now.
 	// Possibly should have a column for this and a struc or even a separate table for bird classifications
 	// but maybe do as part of project specific data..
-	$songcall = "<label for ='classify_songcall'>" . $translations['songcall']['translation_text'] . "</label>\n";
+	$songcall = "<label for ='classify_songcall'>" . JText::_("COM_BIODIV_CLASSIFY_SONGCALL") . "</label>\n";
 	
 	$songcall .= "<div class='species-radio'><input name='notes' type='radio' value='song' id='songcall_0' checked='checked'/><label for='songcall_0'>Song</label></div>";
 	$songcall .= "<div class='species-radio'><input name='notes' type='radio' value='call' id='songcall_1' /><label for='songcall_1'>Call</label></div>";
 	
 	$classifyInputs[] = $songcall;
 	
-	$sure = "<label for ='classify_sure'>" . $translations['sure']['translation_text'] . "</label>\n";
+	$sure = "<label for ='classify_sure'>" . JText::_("COM_BIODIV_CLASSIFY_SURE") . "</label>\n";
 	// See what happens if we don;t specify what to check - want it to default to first option
 	$sure .= codes_getRadioButtons("sure", "suretran", null);
 	$classifyInputs[] = $sure;

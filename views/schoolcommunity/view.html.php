@@ -30,19 +30,12 @@ class BioDivViewSchoolCommunity extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("schoolcommunity");
-	
-	// Check whether set id 
-			
 	$input = JFactory::getApplication()->input;
 	
 	if ( $this->personId ) {
 		
 		$this->helpOption = codes_getCode ( "schoolcommunity", "beshelp" );
 			
-		//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
-		
 		$schoolRoles = Biodiv\SchoolCommunity::getSchoolRoles();
 		
 		$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
@@ -62,9 +55,6 @@ class BioDivViewSchoolCommunity extends JViewLegacy
 		// Sort the schools from highest to lowest points
 		function school_sort($a,$b)
 		{
-			// if ($a->school->weightedPoints==$b->school->weightedPoints) return 0;
-			// return ($a->school->weightedPoints<$b->school->weightedPoints)?1:-1;
-			
 			if ( $a->totalPointsAvail > 0 ) $aAvg = round((100*$a->totalPoints)/$a->totalPointsAvail, 1);
 			else $aAvg = 0;
 			

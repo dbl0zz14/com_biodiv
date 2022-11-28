@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCESET_LOGIN").'</div>';
 }
 
 else {
@@ -43,8 +43,8 @@ else {
 				
 	print '<div class="col-md-2 col-sm-4 col-xs-4">';
 
-	print '<a href="'.$this->translations['hub_page']['translation_text'].'" class="btn btn-primary homeBtn" >';
-	print '<i class="fa fa-arrow-left"></i> ' . $this->translations['resources_home']['translation_text'];
+	print '<a href="'.JText::_("COM_BIODIV_RESOURCESET_HUB_PAGE").'" class="btn btn-primary homeBtn" >';
+	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_RESOURCESET_RESOURCES_HOME");
 	print '</a>';
 	
 	print '</div>'; // col-1
@@ -55,7 +55,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs hidden-sm">'.$this->translations['subheading']['translation_text'].'</small> ';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_RESOURCESET_HEADING").'</span> <small class="hidden-xs hidden-sm">'.JText::_("COM_BIODIV_RESOURCESET_SUBHEADING").'</small> ';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -78,7 +78,7 @@ else {
 	print '<div class="col-md-2">';
 	
 	if ( $this->canEdit ) {
-		print '<div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.$this->translations['add_files']['translation_text'].'</div>';
+		print '<div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.JText::_("COM_BIODIV_RESOURCESET_ADD_FILES").'</div>';
 	}
 	
 	print '</div>'; // col-2
@@ -101,7 +101,7 @@ else {
 		$resourceId = $resourceFile["resource_id"];
 		$resourcePerson = $resourceFile["person_id"];
 		
-		$resourcePage = $this->translations['resource_page']['translation_text'];
+		$resourcePage = JText::_("COM_BIODIV_RESOURCESET_RESOURCE_PAGE");
 		print '<a href="'.$resourcePage.'?id='.$resourceId.'">';
 		
 		
@@ -131,7 +131,7 @@ else {
 		
 		if ( $this->personId == $resourcePerson ) {
 			
-			print '<button id="editResource_'.$resourceId.'" class="btn btn-default edit_resource edit_resource_in_set" role="button" data-toggle="modal" data-target="#editModal">'.$this->translations['edit']['translation_text'].'</button>';
+			print '<button id="editResource_'.$resourceId.'" class="btn btn-default edit_resource edit_resource_in_set" role="button" data-toggle="modal" data-target="#editModal">'.JText::_("COM_BIODIV_RESOURCESET_EDIT").'</button>';
 		}
 		
 		print '</div>'; // resourceInSet
@@ -163,7 +163,7 @@ else {
 	print '	    <div id="editArea" ></div>';
 	print '      </div>';
 	print '	  <div class="modal-footer">';
-	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCESET_CANCEL").'</button>';
 	print '      </div>';
 			  
 	print '    </div>'; // modal-content
@@ -184,7 +184,7 @@ else {
 	print '	    <div id="addArea" ></div>';
 	print '      </div>';
 	print '	  <div class="modal-footer">';
-	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCESET_CANCEL").'</button>';
 	print '      </div>';
 			  
 	print '    </div>'; // modal-content
@@ -201,13 +201,13 @@ else {
 		print '    <div class="modal-content">';
 		print '      <div class="modal-header text-right">';
 		print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-		print '        <h4 class="modal-title text-left">'.$this->translations['upload_errors']['translation_text'].'</h4>';
+		print '        <h4 class="modal-title text-left">'.JText::_("COM_BIODIV_RESOURCESET_UPLOAD_ERRORS").'</h4>';
 		print '      </div>';
 		print '     <div class="modal-body">';
 		showUploadMessages();
 		print '      </div>';
 		print '	  <div class="modal-footer">';
-		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCESET_CANCEL").'</button>';
 		print '      </div>';
 				  
 		print '    </div>'; // modal-content
@@ -224,7 +224,6 @@ else {
 	print '    <div class="modal-content">';
 	print '      <div class="modal-header">';
 	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 	print '      </div>';
 	print '     <div class="modal-body">';
 	print '	    <div id="helpArticle" ></div>';

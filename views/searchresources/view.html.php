@@ -26,11 +26,6 @@ class BioDivViewSearchResources extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ResourceList display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("searchresources");
-		
 		$this->personId = userID();
 		
 		$this->isEcologist = false;
@@ -140,18 +135,12 @@ class BioDivViewSearchResources extends JViewLegacy
 										Biodiv\SchoolCommunity::COMMUNITY=>"fa fa-globe fa-lg",
 										Biodiv\SchoolCommunity::ECOLOGISTS=>"fa fa-leaf fa-lg");
 										
-			// $errMsg = print_r ( $this->shareStatus, true );
-			// error_log ( "Share status: " );
-			// error_log ( $errMsg );
 			
 								
-			$this->shareOptions = array(Biodiv\SchoolCommunity::PERSON=>$this->translations['share_private']['translation_text'],
-										Biodiv\SchoolCommunity::SCHOOL=>$this->translations['share_school']['translation_text'],
-										Biodiv\SchoolCommunity::COMMUNITY=>$this->translations['share_community']['translation_text']);			
+			$this->shareOptions = array(Biodiv\SchoolCommunity::PERSON=>JText::_("COM_BIODIV_SEARCHRESOURCES_SHARE_PRIVATE"),
+										Biodiv\SchoolCommunity::SCHOOL=>JText::_("COM_BIODIV_SEARCHRESOURCES_SHARE_SCHOOL"),
+										Biodiv\SchoolCommunity::COMMUNITY=>JText::_("COM_BIODIV_SEARCHRESOURCES_SHARE_COMMUNITY"));			
 			
-			//error_log ("Getting const" );
-			//$testConst = Biodiv\SchoolCommunity::PERSON;
-			//error_log ( "Test const = " . $testConst );
 			
 			if ( $this->setId ) {
 				
@@ -172,7 +161,7 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'].'?fav=1';
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?fav=1';
 				
 			}
 			else if ( $this->getLatest ) {
@@ -188,8 +177,6 @@ class BioDivViewSearchResources extends JViewLegacy
 			}
 			else if ( $this->getMine ) {
 				
-				//$this->resourceFiles = Biodiv\ResourceFile::getMyResources();
-				
 				$searchResults = Biodiv\ResourceFile::getMyResources( $this->filter, $this->page );
 				
 				$this->totalNumResources = $searchResults->total;
@@ -198,11 +185,9 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'].'?mine=1';
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?mine=1';
 			}
 			else if ( $this->getNew ) {
-				
-				//$this->resourceFiles = Biodiv\ResourceFile::getNewResources();
 				
 				$searchResults = Biodiv\ResourceFile::getNewResources( $this->filter, $this->page );
 				
@@ -212,7 +197,7 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'].'?new=1';
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?new=1';
 				
 			}
 			else if ( $this->getApprove ) {
@@ -246,7 +231,7 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'].'?type='.$this->resType;
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?type='.$this->resType;
 				
 			}
 			else if ( $this->searchStr ) {
@@ -261,7 +246,7 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'].'?search='.$this->searchStr;
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?search='.$this->searchStr;
 				
 			}
 			else {
@@ -280,9 +265,9 @@ class BioDivViewSearchResources extends JViewLegacy
 				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = $this->translations['search_page']['translation_text'];
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE");
 				
-				$this->heading = $this->translations['pinned_resources']['translation_text'];
+				$this->heading = JText::_("COM_BIODIV_SEARCHRESOURCES_PINNED_RESOURCES");
 				
 			}
 		

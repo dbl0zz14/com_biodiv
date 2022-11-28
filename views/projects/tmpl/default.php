@@ -11,19 +11,11 @@ defined('_JEXEC') or die;
 
 <?php
 
-// Check download file:
-//$filename = JURI::root()."biodivfiles/projectanimals.csv";
-//print '<a href="'.$filename.'" download="animals">Download file</a> ';
-//print "<p>".count($this->projects)."</p>";
-//print '<div class="row">';
 $project_num = 0;
 foreach ( $this->projects as $project ) {
 	if ( $project_num%4 == 0 ) print '<div class="row">';
 	print "<div class='col-md-3 project-col' >";
 	$url = projectImageURL($project->project_id);
-	//print "image url is " . $url;
-	//print '<img alt = "" src="/rhombus/images/tree.jpg" itemprop="thumbnailUrl" width="90%"/>';
-	//print '<img alt = "" src="'.$url.'" itemprop="thumbnailUrl" width="90%"/>';
 	
 	print '<form action = "';
 	print BIODIV_ROOT;
@@ -33,14 +25,9 @@ foreach ( $this->projects as $project ) {
 	print BIODIV_COMPONENT;
 	print "'/>";
 	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
-	print "<button class='image-btn project-btn' type='submit' data-tooltip='".$this->translations['tooltip']['translation_text']."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+	print "<button class='image-btn project-btn' type='submit' data-tooltip='".JText::_("COM_BIODIV_PROJECTS_TOOLTIP")."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
 	print "</form>";
 	
-	/*
-	print '<div class="crop-width">';
-	print '<img class="project-col-image cover scale2" alt = "project image" src="'.$url.'" />';
-	print '</div>';
-	*/
 	print '<div class="project-title">';
 	print '<h2 itemprop="name">';
 	print $project->project_prettyname;
@@ -70,10 +57,10 @@ foreach ( $this->projects as $project ) {
 	print 'aria-valuenow="' . $progress["numClassifications"] . '"  aria-valuemin="0" ';
 	print 'aria-valuemax="' . $progress["numSequences"] . '" style="width:' . $progress["percentComplete"] . '%">';
 	if ( $multiple_complete ) {
-		print $this->translations['keep_spot']['translation_text'] . $add_note;
+		print JText::_("COM_BIODIV_PROJECTS_KEEP_SPOT") . $add_note;
 	}
 	else {
-		print '' . $progress["percentComplete"] . $this->translations['frac_class']['translation_text'] . $add_note;
+		print '' . $progress["percentComplete"] . JText::_("COM_BIODIV_PROJECTS_FRAC_CLASS") . $add_note;
 	}
 	print '</div>';
 	print '</div>';
@@ -92,19 +79,7 @@ foreach ( $this->projects as $project ) {
 	print '<p>'.$project->project_description.'</p>';
 	print '</div>';
 	
-	/*
-	print "<table><tr>";
-	print '<td><form action = "';
-	print BIODIV_ROOT;
-	print '" method = "GET">';
-	print "<input type='hidden' name='view' value='projecthome'/>";
-	print "<input type='hidden' name='option' value='";
-	print BIODIV_COMPONENT;
-	print "'/>";
-	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
-	print "<button  class='btn btn-primary btn-projects' type='submit'>More</button>";
-	print "</form></td>";
-	print "</tr></table>";*/
+	
 	print '<p class="spacer-3em"></p>';
 	print '</div>';
 	$project_num += 1;
@@ -115,7 +90,7 @@ foreach ( $this->projects as $project ) {
 	}
 }
 print '<div class="row">';
-print "* " . $this->translations['proj_note']['translation_text'] ;
+print "* " . JText::_("COM_BIODIV_PROJECTS_PROJ_NOTE") ;
 print '</div>';
 
 
@@ -123,8 +98,6 @@ print '</div>';
 
 <?php
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-//JHTML::script("com_biodiv/bootbox.js", true, true);
-//JHTML::script("com_biodiv/classify.js", true, true);
 JHTML::script("com_biodiv/project.js", true, true);
 ?>
 

@@ -12,13 +12,13 @@ defined('_JEXEC') or die;
 <?php
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JText::_("COM_BIODIV_DASHSPOTTER_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_DASHSPOTTER_LOGIN").'</a>';
 }
 else {
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['spotter_stats']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHSPOTTER_SPOTTER_STATS").'</h3>';
 	
 	// Add the table and headings
 	print  '<div class="table-responsive">';
@@ -40,13 +40,13 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'. JText::_("COM_BIODIV_DASHSPOTTER_SPOTTER_PAGE") .'">'. JText::_("COM_BIODIV_DASHSPOTTER_CLASS_NOW") .'</a></p>';
 	
 	print '</div>'; // col-6
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['quiz_results']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHSPOTTER_QUIZ_RESULTS").'</h3>';
 	
 	$nostars = "<span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span>";
 	$onestar = "<span class='fa fa-star'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span></span><span class='fa fa-star-o'></span>";
@@ -61,8 +61,6 @@ else {
 	// Add the rows of data  
 	foreach ( $this->scores as $row ) {
 		
-		$errMsg = print_r ( $row, true );
-		error_log ( "Spotter view, row: " . $errMsg );
 		
 		// Avoid Gold Standard or other topics we don't display
 		if ( in_array($row['topic_id'], $this->topicIds ) ) {
@@ -81,7 +79,7 @@ else {
 			
 			print '<td>'.$stars.'</td>';
 			
-			print '<td><a class="btn btn-success" href="index.php/?option=com_biodiv&view=trainingtopic&topic_id='.$row['topic_id'].'">'. $this->translations['take_quiz']['translation_text'].'</a></td>';
+			print '<td><a class="btn btn-success" href="index.php/?option=com_biodiv&view=trainingtopic&topic_id='.$row['topic_id'].'">'. JText::_("COM_BIODIV_DASHSPOTTER_TAKE_QUIZ").'</a></td>';
 			
 			print '</tr>';
 		}
@@ -93,11 +91,11 @@ else {
 	
 	if ( $this->numTopicScores == 0 ) {
 		// No quiz results yet
-		print '<p>'.$this->translations['quiz_none']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHSPOTTER_QUIZ_NONE").'</p>';
 		
 	}
 	if ( $this->numMissingScores > 0 ) {
-		print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.$this->translations['quiz_page']['translation_text'].'" >'. $this->translations['choose_quiz']['translation_text'] .'</a></p>';
+		print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.JText::_("COM_BIODIV_DASHSPOTTER_QUIZ_PAGE").'" >'. JText::_("COM_BIODIV_DASHSPOTTER_CHOOSE_QUIZ") .'</a></p>';
 	}
 	
 	print '</div>'; // col-6

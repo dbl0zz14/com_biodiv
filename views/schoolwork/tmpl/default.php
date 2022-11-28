@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_SCHOOLWORK_LOGIN").'</div>';
 	
 }
 
@@ -41,7 +41,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_SCHOOLWORK_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_SCHOOLWORK_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -76,7 +76,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

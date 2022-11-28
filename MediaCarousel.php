@@ -1,7 +1,6 @@
 <?php
 
 // Also need mediacarousel.js and mediacarousel.css to use this class.
-// Use the classify translations
 
 
 // No direct access to this file
@@ -9,12 +8,8 @@ defined('_JEXEC') or die;
 
 class MediaCarousel {
 	
-	var $translations;
-	
 	function __construct()
 	{
-		$this->translations = getTranslations("classify");
-		
 		$this->lcontrols = array();
 		foreach(codes_getList("noanimaltran") as $stuff){
 			list($id, $name) = $stuff;
@@ -29,12 +24,12 @@ class MediaCarousel {
 	}
 	
 	function generateLocationButton () {
-		$showmap = $this->translations['show_map']['translation_text'] . " <span class='fa fa-map-marker'/>";
+		$showmap = JText::_("COM_BIODIV_CLASSIFY_SHOW_MAP") . " <span class='fa fa-map-marker'/>";
 		print "<button type='button' class='btn btn-primary' id='control_map'>".$showmap."</button>";
 	}
 
 	function generateNextButton () {
-		$nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
+		$nextseq = JText::_("COM_BIODIV_CLASSIFY_NEXT_SEQ") . " <span class='fa fa-arrow-circle-right'/>";
 		print "<button type='button' class='btn btn-success' id='control_nextseq'>".$nextseq."</button>";
 	}
 
@@ -59,14 +54,14 @@ class MediaCarousel {
 			$mediaUrl = $photoUrls[$photoId];
 			print '<div id="videoContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
 			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
-			print '<video id="classify-video" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+			print '<video id="classify-video" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . JText::_("COM_BIODIV_CLASSIFY_NO_VID") . '</video></div>';
 		}
 		else if ( $media === "audio" ) {
 			$photoId = array_keys($photoUrls)[0];
 			$mediaUrl = $photoUrls[$photoId];
 			print '<div id="audioContainer" data-seq-id="'.$sequenceId.'" data-photo-id="'.$photoId.'">';
 			print "<div id='mediaLocation' data-south='".$loc->getSouth()."' data-west='" . $loc->getWest() . "' data-north='" . $loc->getNorth() . "' data-east='" . $loc->getEast() . "'></div>";
-			print '<audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . $this->translations['no_vid']['translation_text'] . '</audio></div>';
+			print '<audio id="classify-audio" oncontextmenu="return false;" controls controlsList="nodownload noplaybackrate" ><source src="'.$mediaUrl.'" type="'.$media.'/'.$type.'">' . JText::_("COM_BIODIV_CLASSIFY_NO_VID") . '</audio></div>';
 		}
 		else if ( $media === "photo" ) {
 			

@@ -30,20 +30,6 @@ class BioDivViewChooseModule extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("choosemodule");
-	
-	// // Check user is a student and get school
-	// $this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
-	
-	// $this->isStudent = $this->schoolUser->role_id == Biodiv\SchoolCommunity::STUDENT_ROLE;
-	// if ( !$this->isStudent ) {
-		// $this->school = "";
-	// }
-	// else {
-		// $this->school = $this->schoolUser->school;
-	// }
-	
 	if ( $this->personId ) {
 		
 		$app = JFactory::getApplication();

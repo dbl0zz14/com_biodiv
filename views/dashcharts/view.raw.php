@@ -32,9 +32,6 @@ class BioDivViewDashCharts extends JViewLegacy
 		
 	$this->personId = (int)userID();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("dashcharts");
-	
 	
 	if ( $this->personId ) {
 		
@@ -69,7 +66,7 @@ class BioDivViewDashCharts extends JViewLegacy
 		$this->numSites = count($this->siteSelect);
 		
 		// And add the All option
-		$this->siteSelect = array($this->translations['all']['translation_text']) + $this->siteSelect;
+		$this->siteSelect = array(JText::_("COM_BIODIV_DASHCHARTS_ALL")) + $this->siteSelect;
 		
 		// Does the user have any non-like classifications?
 		$query = $db->getQuery(true);

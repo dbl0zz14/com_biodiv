@@ -1914,8 +1914,6 @@ class SchoolCommunity {
 	
 	public static function generateUserBox ( $boxName, $param = null, $selected = false ) {
 		
-		$translations = getTranslations("schoolcommunity");
-		
 		$selectedBoxClass = "";
 		$activeClass = "";
 		if ( $selected ) {
@@ -1946,7 +1944,7 @@ class SchoolCommunity {
 			
 			$htmlStr = '<div class="dashboardBox totalPointsBox ' . $selectedBoxClass . '">';
 			$htmlStr .= '<div class="totalPoints h5">';			
-			$htmlStr .=  $points . ' ' . $translations['points']['translation_text'];
+			$htmlStr .=  $points . ' ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_POINTS");
 			$htmlStr .= '</div>';
 			$htmlStr .= '<div class="userSlogan h5">';
 			$htmlStr .= $slogan;
@@ -2041,20 +2039,11 @@ class SchoolCommunity {
 			$htmlStr .= '<div class="row">';
 			$htmlStr .= '<div class="col-md-12">';
 			$htmlStr .=  '<div class="username">'.$username.'</div>';
-			$htmlStr .= '<p><small>' . $points . ' ' . $translations['points_contrib']['translation_text'] . '</small></p>';
+			$htmlStr .= '<p><small>' . $points . ' ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_POINTS_CONTRIB") . '</small></p>';
 			$htmlStr .= '</div>'; // col-12
 			$htmlStr .= '</div>'; // row
 			
 			$htmlStr .=  '</div>'; // col-7
-			
-			// $htmlStr .= '<div class="col-md-5 col-sm-2 col-xs-6 text-center">';
-			// $htmlStr .= '<a href="'.$translations['logout_link']['translation_text'].'">';
-			// $htmlStr .= '<div class="dashboardBox logoutBox ">';
-			// $htmlStr .= $translations['logout']['translation_text'];
-			// $htmlStr .= '</div>'; // logoutBox
-			// $htmlStr .= '</a>';
-			
-			// $htmlStr .= '</div>'; // col-5
 			
 			$htmlStr .= '</div>'; // row
 			
@@ -2063,10 +2052,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "schoolPageBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['school_link']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_LINK").'">';
 			$htmlStr .= '<div class="dashboardBox schoolPageBox ' . $selectedBoxClass . '">';	
 			$htmlStr .= '<div class="schoolPage h5">';
-			$htmlStr .= $translations['school_page']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_PAGE");
 			$htmlStr .= '</div>'; // schoolPage
 			$htmlStr .= '</div>'; // schoolPageBox
 			$htmlStr .= '</a>';
@@ -2074,10 +2063,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "logoutBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['logout_link']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'">';
 			$htmlStr .= '<div class="dashboardBox logoutBox ">';
 			$htmlStr .= '<div class="h5">';
-			$htmlStr .= $translations['logout']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			$htmlStr .= '</div>'; // h5
 			$htmlStr .= '</div>'; // logoutBox
 			$htmlStr .= '</a>';
@@ -2085,10 +2074,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "resourceHubBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['hub_link']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_HUB_LINK").'">';
 			$htmlStr .= '<div class="dashboardBox resourceHubBox ' . $selectedBoxClass . '">';
 			$htmlStr .= '<div class="resourceHub h5">';
-			$htmlStr .= $translations['resource_hub']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_RESOURCE_HUB");
 			$htmlStr .= '</div>'; // h5
 			$htmlStr .= '</div>'; // resourceHubBox
 			$htmlStr .= '</a>';
@@ -2096,10 +2085,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "communityBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['community_link']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY_LINK").'">';
 			$htmlStr .= '<div class="dashboardBox communityBox ' . $selectedBoxClass . '">';
 			$htmlStr .= '<div class="h5">';
-			$htmlStr .= $translations['community']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY");
 			$htmlStr .= '</div>'; // h5
 			$htmlStr .= '</div>'; // communityBox
 			$htmlStr .= '</a>';
@@ -2107,10 +2096,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "teacherDashBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['teacher_dash']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_TEACHER_DASH").'">';
 			$htmlStr .= '<div class="dashboardBox teacherDashBox ' . $selectedBoxClass . '">';
 			$htmlStr .= '<div class="h5">';
-			$htmlStr .= $translations['teacher_page']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_TEACHER_PAGE");
 			$htmlStr .= '</div>'; // h5
 			$htmlStr .= '</div>'; // teacherDashBox
 			$htmlStr .= '</a>';
@@ -2118,10 +2107,10 @@ class SchoolCommunity {
 		}
 		else if ( $boxName == "studentDashBox" ) {
 			
-			$htmlStr = '<a href="'.$translations['student_dash']['translation_text'].'">';
+			$htmlStr = '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_DASH").'">';
 			$htmlStr .= '<div class="dashboardBox studentDashBox ' . $selectedBoxClass . '">';
 			$htmlStr .= '<div class="h5">';
-			$htmlStr .= $translations['student_page']['translation_text'];
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_PAGE");
 			$htmlStr .= '</div>'; // h5
 			$htmlStr .= '</div>'; // communityBox
 			$htmlStr .= '</a>';
@@ -2165,21 +2154,6 @@ class SchoolCommunity {
 			
 			$htmlStr = '<li>';
 			
-			//$htmlStr .= '<div class="schoolName">'.$school.'</div>';
-			
-			
-			
-			//$htmlStr = '<div class="avatarBox">';
-			
-			// $htmlStr .= '<div class="row">';
-			// $htmlStr .= '<div class="col-md-12 col-xs-6 text-center">';
-			// $htmlStr .= '<div class="schoolName">'.$school.'</div>';
-			// $htmlStr .= '</div>'; // col-12
-			// $htmlStr .= '</div>'; // row
-			
-			//$htmlStr .= '<div class="row">';
-			
-			//$htmlStr .= '<div class="col-md-5 col-md-offset-col-sm-2 col-xs-6 text-center">';
 			
 			
 			$htmlStr .= '<div class="row">';
@@ -2188,59 +2162,10 @@ class SchoolCommunity {
 			$htmlStr .= '</div>'; // col-12
 			$htmlStr .= '<div class="col-md-12">';
 			$htmlStr .=  '<strong>' . $username . '</strong>';
-			$htmlStr .=  ' <small>' . $points . ' ' . $translations['points_contrib']['translation_text'] . '</small>';
+			$htmlStr .=  ' <small>' . $points . ' ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_POINTS_CONTRIB") . '</small>';
 			$htmlStr .= '</div>'; // col-12
 			$htmlStr .= '</div>'; // row
 			
-			/*
-			$htmlStr .= '<div style="display:inline">';
-			$htmlStr .= '<img src="'.$avatar.'" class="img-responsive menuAvatar" />';
-			$htmlStr .=  $username;
-			$htmlStr .=   ' <span class="badge">'.$points.'</span>';
-			$htmlStr .= '</div>';
-			*/
-			
-			
-			
-			//$htmlStr .=  '<div class="username">'.$username.'</div>';
-			//$htmlStr .= '<p><small>' . $points . ' ' . $translations['points_contrib']['translation_text'] . '</small></p>';
-			
-			//$htmlStr .=  '</div>'; // col-7
-			
-			//$htmlStr .= '</div>'; // row
-			
-			//$htmlStr .= '</div>'; // avatarBox
-			
-			// $htmlStr = '<div class="avatarBox">';
-			
-			// $htmlStr .= '<div class="row">';
-			// $htmlStr .= '<div class="col-md-12 col-xs-6 text-left">';
-			// $htmlStr .= '<div class="schoolName">'.$school.'</div>';
-			// $htmlStr .= '</div>'; // col-12
-			// $htmlStr .= '</div>'; // row
-			
-			// $htmlStr .= '<div class="row">';
-			
-			// $htmlStr .= '<div class="col-md-5 col-sm-2 col-xs-6 text-center">';
-			
-			// $htmlStr .= '<div class="row">';
-			// $htmlStr .= '<div class="col-md-8 col-md-offset-2">';
-			// $htmlStr .= '<img src="'.$avatar.'" class="img-responsive" />';
-			// $htmlStr .= '</div>'; // col-8-2
-			// $htmlStr .= '</div>'; // row
-			
-			// $htmlStr .= '<div class="row">';
-			// $htmlStr .= '<div class="col-md-12">';
-			// $htmlStr .=  '<div class="username">'.$username.'</div>';
-			// $htmlStr .= '<p><small>' . $points . ' ' . $translations['points_contrib']['translation_text'] . '</small></p>';
-			// $htmlStr .= '</div>'; // col-12
-			// $htmlStr .= '</div>'; // row
-			
-			// $htmlStr .=  '</div>'; // col-7
-			
-			// $htmlStr .= '</div>'; // row
-			
-			// $htmlStr .= '</div>'; // avatarBox
 			
 			$htmlStr .= '</li>';
 			
@@ -2292,7 +2217,7 @@ class SchoolCommunity {
 			$htmlStr .=  $username;
 			$htmlStr .= '</div>'; // col-8
 			$htmlStr .= '<div class="col-md-4">';
-			$htmlStr .= $points. ' ' . $translations['points_contrib']['translation_text'];
+			$htmlStr .= $points. ' ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_POINTS_CONTRIB");
 			$htmlStr .= '</div>'; // col-4
 			$htmlStr .= '</div>'; // row
 			
@@ -2302,8 +2227,8 @@ class SchoolCommunity {
 		else if ( $boxName == "schoolPageMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['school_link']['translation_text'].'">';
-			$htmlStr .= $translations['school_page']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_LINK").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_PAGE");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2311,8 +2236,8 @@ class SchoolCommunity {
 		else if ( $boxName == "logoutMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a href="'.$translations['logout_link']['translation_text'].'" class="h4" >';
-			$htmlStr .= $translations['logout']['translation_text'];
+			$htmlStr .= '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'" class="h4" >';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2320,8 +2245,8 @@ class SchoolCommunity {
 		else if ( $boxName == "resourceHubMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['hub_link']['translation_text'].'">';
-			$htmlStr .= $translations['resource_hub']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_HUB_LINK").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_RESOURCE_HUB");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2329,8 +2254,8 @@ class SchoolCommunity {
 		else if ( $boxName == "communityMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['community_link']['translation_text'].'">';
-			$htmlStr .= $translations['community']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY_LINK").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2338,8 +2263,8 @@ class SchoolCommunity {
 		else if ( $boxName == "teacherDashMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['teacher_dash']['translation_text'].'">';
-			$htmlStr .= $translations['teacher_page']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_TEAHER_DASH").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_TEACHER_PAGE");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2347,8 +2272,8 @@ class SchoolCommunity {
 		else if ( $boxName == "studentDashMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['student_dash']['translation_text'].'">';
-			$htmlStr .= $translations['student_page']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_DASH").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_PAGE");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
@@ -2356,15 +2281,15 @@ class SchoolCommunity {
 		else if ( $boxName == "ecologistDashMenuItem" ) {
 			
 			$htmlStr = '<li>';
-			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.$translations['ecol_dash']['translation_text'].'">';
-			$htmlStr .= $translations['ecol_page']['translation_text'];
+			$htmlStr .= '<a class="'.$activeClass.' h4" href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ECOL_DASH").'">';
+			$htmlStr .= \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ECOL_PAGE");
 			$htmlStr .= '</a>';
 			$htmlStr .= '</li>';
 			
 		}
 		else if ( $boxName == "projectLogo" ) {
 			
-			$htmlStr = '<img class="img-responsive" src="'.$translations['project_logo']['translation_text'].'" />';
+			$htmlStr = '<img class="img-responsive" src="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_PROJECT_LOGO").'" />';
 			
 		}
 		
@@ -2405,8 +2330,6 @@ class SchoolCommunity {
 	
 	
 	public static function generateStudentMasthead ( $helpOptionId = 0, $slogan = null, $totalPoints = 0, $numBadges = 0, $numStars = 0, $backButtonLink = null, $calcStatus = false ) {
-		
-		$translations = getTranslations("schoolcommunity");
 		
 		$schoolUser = self::getSchoolUser();
 		
@@ -2449,8 +2372,8 @@ class SchoolCommunity {
 				print '</div>';
 			}
 			
-			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-success" >';
-			print $translations['logout']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'" class="btn btn-success" >';
+			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			print '</a>';
 			
 			print '</div>'; // col-3
@@ -2477,27 +2400,11 @@ class SchoolCommunity {
 			print '<td class="statusBarElement statusBarBadges" ><i class="fa fa-lg fa-circle statusIcon"></i><span class="label label-primary statusBadge">' . $numBadges . '</span></td>';
 			
 			
-			//print '<td class="statusBarElement statusBarPoints">' . $totalPoints . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
-			/*
-			$numModules = count($totalPointsByModule);
-			$moduleNum = 1;
-			foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
-				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
-				$extraClass = "";
-				if ( $moduleNum == $numModules ) {
-					$extraClass .= " statusBarTeacherPointsRight";
-				}
-				
-				print '<td class="statusBarElement statusBarTeacherPoints '.$extraClass.'"><img class="img-responsive statusModuleIcon'.$modules[$moduleId]->name.'" src="'.$modules[$moduleId]->icon.'" > ' . $modulePoints->points . ' </td>';
-				
-				$moduleNum++;
-			}
-			*/
+			
 			$numModules = count($moduleIds);
 			$moduleNum = 1;
 			foreach ( $moduleIds as $moduleId ) {
-			//foreach ( $totalPointsByModule as $moduleId=>$modulePoints ) {
-				//print '<td class="statusBarElement statusBarTeacherPoints">' . $modulePoints->points . ' <span class="hidden-xs">' . $translations['points']['translation_text'] . '</span></td>';
+			
 				if ( array_key_exists( $moduleId, $totalPointsByModule ) ){
 					$modulePoints = $totalPointsByModule[$moduleId];
 				}
@@ -2529,8 +2436,8 @@ class SchoolCommunity {
 				
 				print '<div class="col-md-2 col-sm-4 col-xs-4">';
 			
-				print '<a href="'.$translations['student_dash']['translation_text'].'" class="btn btn-primary homeBtn" >';
-				print '<i class="fa fa-arrow-left"></i> ' . $translations['student_back']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_DASH").'" class="btn btn-primary homeBtn" >';
+				print '<i class="fa fa-arrow-left"></i> ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_BACK");
 				print '</a>';
 				
 				print '</div>'; // col-1
@@ -2546,8 +2453,6 @@ class SchoolCommunity {
 	
 	public static function generateBackAndLogout ( $helpOptionId = 0, $slogan = null, $totalPoints = 0 ) {
 		
-		$translations = getTranslations("schoolcommunity");
-		
 		$schoolUser = self::getSchoolUser();
 		
 		if ( $schoolUser ) {
@@ -2556,8 +2461,8 @@ class SchoolCommunity {
 			print '<div class="row studentBackRow">';
 			print '<div class="col-md-2 col-sm-4 col-xs-4">';
 			
-			print '<a href="'.$translations['student_dash']['translation_text'].'" class="btn btn-default" >';
-			print '<i class="fa fa-arrow-left"></i> ' . $translations['student_back']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_DASH").'" class="btn btn-default" >';
+			print '<i class="fa fa-arrow-left"></i> ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENT_BACK");
 			print '</a>';
 			
 			print '</div>'; // col-1
@@ -2570,8 +2475,8 @@ class SchoolCommunity {
 				print '</div>';
 			}
 			
-			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			print $translations['logout']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'" class="btn btn-default" >';
+			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			print '</a>';
 			
 			print '</div>'; //col-2
@@ -2582,8 +2487,6 @@ class SchoolCommunity {
 	
 	
 	public static function generateNav ( $activeItem = null, $helpOptionId = 0 ) {
-		
-		$translations = getTranslations("schoolcommunity");
 		
 		$schoolUser = self::getSchoolUser();
 		
@@ -2639,7 +2542,7 @@ class SchoolCommunity {
 			print '<td class="text-center statusBarElement statusBarUsername" ><span class="hidden-xs">'.$schoolUser->username.'</span></td>';
 			
 			if ( $roleId == self::ADMIN_ROLE ) {
-				print '<td class="statusBarElement statusBarTeacherPoints statusBarTeacherPointsLeft statusBarTeacherPointsRight text-center"> ' . $translations['admin_user']['translation_text'] . ' </td>';
+				print '<td class="statusBarElement statusBarTeacherPoints statusBarTeacherPointsLeft statusBarTeacherPointsRight text-center"> ' . \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ADMIN_USER") . ' </td>';
 			}
 			else {
 				$numModules = count($moduleIds);
@@ -2681,8 +2584,8 @@ class SchoolCommunity {
 				print '</div>';
 			}
 			
-			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-success hidden-xs hidden-sm" >';
-			print $translations['logout']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'" class="btn btn-success hidden-xs hidden-sm" >';
+			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			print '</a>';
 			
 			print '</div>'; // col-2
@@ -2703,8 +2606,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['ecologist_dash']['translation_text'].'">';
-				print $translations['ecologist_page']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ECOLOGIST_DASH").'">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ECOLOGIST_PAGE");
 				print '</a>';
 				print '</li>';
 			
@@ -2719,8 +2622,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['admin_dash']['translation_text'].'">';
-				print $translations['admin_page']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ADMIN_DASH").'">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_ADMIN_PAGE");
 				print '</a>';
 				print '</li>';
 			
@@ -2733,8 +2636,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['school_link']['translation_text'].'">';
-				print $translations['school_page']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_LINK").'">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SCHOOL_PAGE");
 				print '</a>';
 				print '</li>';
 			}
@@ -2746,8 +2649,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageTasks">';
-				print $translations['manage_tasks']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_TASKS_LINK").'" class="manageTasks">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_MANAGE_TASKS");
 				print '</a>';
 				print '</li>';
 				
@@ -2763,8 +2666,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['students_link']['translation_text'].'" class="students">';
-				print $translations['students']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENTS_LINK").'" class="students">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_STUDENTS");
 				if ( $numToApprove > 0 ) {
 					print ' <span id="studentsBadge" class="badge notifyBadge">'.$numToApprove.'</span>';
 				}
@@ -2780,8 +2683,8 @@ class SchoolCommunity {
 				$activeClass = "active";
 			}
 			print '<li class="besNavbarItem '.$activeClass.'">';
-			print '<a href="'.$translations['community_link']['translation_text'].'">';
-			print $translations['community']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY_LINK").'">';
+			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_COMMUNITY");
 			print '</a>';
 			print '</li>';
 			
@@ -2792,8 +2695,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['hub_link']['translation_text'].'">';
-				print $translations['resource_hub']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_HUB_LINK").'">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_RESOURCE_HUB");
 				print '</a>';
 				print '</li>';
 			
@@ -2806,8 +2709,8 @@ class SchoolCommunity {
 					$activeClass = "active";
 				}
 				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['messages_link']['translation_text'].'">';
-				print $translations['messages']['translation_text'];
+				print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_MESSAGES_LINK").'">';
+				print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_MESSAGES");
 				if ( $numNewMessages > 0 ) {
 					print ' <span id="messageBadge" class="badge notifyBadge">'.$numNewMessages.'</span>';
 				}
@@ -2817,8 +2720,8 @@ class SchoolCommunity {
 			}
 			
 			print '<li class="besNavbarItem hidden-md hidden-lg">';
-			print '<a href="'.$translations['logout_link']['translation_text'].'">';
-			print $translations['logout']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT_LINK").'">';
+			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGOUT");
 			print '</a>';
 			print '</li>';
 			
@@ -2840,280 +2743,6 @@ class SchoolCommunity {
 		}
 	}
 	
-	public static function generateNavOrig ( $activeItem = null, $helpOptionId = 0 ) {
-		
-		$translations = getTranslations("schoolcommunity");
-		
-		$schoolUser = self::getSchoolUser();
-		
-		$totalPoints = Task::getTotalUserPoints();
-		
-		if ( $schoolUser) {
-			
-			$roleId = $schoolUser->role_id;
-			
-			//print '<div class="text-center">'.$schoolUser->school.'</div>';
-			
-			print '<div class="row mobileHeader">';
-			print '<div class="col-md-2 col-sm-2 col-xs-3 text-left">';
-			//print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			//print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="50px">';
-			//print '</a>';
-			print '</div>'; // col-2
-			print '<div class="col-md-3 col-md-offset-7 col-sm-7 col-sm-offset-3 col-xs-12 ">';
-			print '<table class="table statusTable" >';
-			print '<tbody>';
-			print '<tr>';
-			print '<td width="20%"><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" alt="avatar image" /></td>';
-			print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
-			print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			print '<td style="vertical-align:middle">';
-			print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			print $translations['logout']['translation_text'];
-			print '</a>';
-			print '</td>';
-			print '</tr>';
-			print '</tbody>';
-			print '</table>';
-			print '</div>'; // col-3+5
-			// print '<div class="col-md-2 text-right">';
-			// print '<a href="'.$translations['logout_link']['translation_text'].'" class="btn btn-default" >';
-			// print $translations['logout']['translation_text'];
-			// print '</a>';
-			// print '</div>'; // col-2
-			print '</div>'; // row
-			
-			
-			print '<nav class="navbar navbar-default">';
-			print '<div class="container-fluid staffNav">';
-			
-			print '<div class="navbar-header">';
-			
-			
-			print '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#besNavbarCollapse" aria-expanded="false">';
-			print '<span class="sr-only">Toggle navigation</span>';
-			print '<i class="fa fa-3x fa-bars "></i>';
-			print '</button>';
-
-			
-			
-			// print '<div class="row " >';
-			// print '<div class="col-md-10 col-md-offset-1 col-sm-3 col-sm-offset-1 hidden-xs">';
-			
-			// print '<div class="besLogo" style="background:white; position:relative; top:-20px;padding:20px 20px 20px;">';
-			// print '<img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" class="img-responsive" />';
-			
-			// print '</div>';
-			
-			// print '</div>'; // col-10
-			// print '</div>'; // row
-			
-		    //print '<a class="navbar-brand" href="#">BES ENCOUNTERS</a>';
-			//print '<a class="navbar-brand" href="https://www.britishecologicalsociety.org"><img src="images/Projects/BES/BES_Black_Solid_Logo_Horizontal.jpg" alt="BES logo" height="42px">Encounters</a>';
-			
-			
-        
-			//print $avatarBox;
-			print '</div>'; // navbar-header
-
-			print '<div class="collapse navbar-collapse" id="besNavbarCollapse">';
-			print '<ul class="nav navbar-nav">';
-			
-			
-			
-			if ( $roleId == self::ECOLOGIST_ROLE ) {
-				
-				// ------------------------ ecologist dash
-				
-				$activeClass = "";
-				if ( $activeItem == "ecologistdashboard" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['ecologist_dash']['translation_text'].'">';
-				print $translations['ecologist_page']['translation_text'];
-				print '</a>';
-				print '</li>';
-				
-				// ------------------------------------------- browse tasks
-				
-				// $activeClass = "";
-				// if ( $activeItem == "managestudents" ) {
-					// $activeClass = "active";
-				// }
-				// print '<li class="besNavbarItem '.$activeClass.'">';
-				// print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageStudents">';
-				// print $translations['student_tasks']['translation_text'];
-				// print '</a>';
-				// print '</li>';
-			
-			}
-			
-			// ------------------------------------------ school page
-			if ( $roleId != self::ECOLOGIST_ROLE ) {
-				$activeClass = "";
-				if ( $activeItem == "schooldashboard" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['school_link']['translation_text'].'">';
-				print $translations['school_page']['translation_text'];
-				print '</a>';
-				print '</li>';
-			}
-			
-			if ( ($roleId == self::TEACHER_ROLE) or ($roleId == self::ECOLOGIST_ROLE)) {
-				
-				$activeClass = "";
-				if ( $activeItem == "managetasks" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['tasks_link']['translation_text'].'" class="manageTasks">';
-				print $translations['manage_tasks']['translation_text'];
-				print '</a>';
-				print '</li>';
-				
-			}
-			
-			
-			if ( $roleId == self::TEACHER_ROLE ) {
-				
-				$numToApprove = Task::countMyStudentsTasks ( Badge::PENDING );
-	
-				$activeClass = "";
-				if ( $activeItem == "students" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['students_link']['translation_text'].'" class="students">';
-				print $translations['students']['translation_text'];
-				if ( $numToApprove > 0 ) {
-					print ' <span id="studentsBadge" class="badge notifyBadge">'.$numToApprove.'</span>';
-				}
-				print '</a>';
-				print '</li>';
-			
-			
-			}
-			
-			// ---------------------------------------- community page
-			$activeClass = "";
-			if ( $activeItem == "schoolcommunity" ) {
-				$activeClass = "active";
-			}
-			print '<li class="besNavbarItem '.$activeClass.'">';
-			print '<a href="'.$translations['community_link']['translation_text'].'">';
-			print $translations['community']['translation_text'];
-			print '</a>';
-			print '</li>';
-			
-			// ------------------------------------------ resource hub
-			if ( $roleId != self::STUDENT_ROLE ) {
-				$activeClass = "";
-				if ( $activeItem == "resourcehub" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['hub_link']['translation_text'].'">';
-				print $translations['resource_hub']['translation_text'];
-				print '</a>';
-				print '</li>';
-			
-			
-				$messageList = new MessageList();
-				$numNewMessages = $messageList->newMessageCount();
-	
-				$activeClass = "";
-				if ( $activeItem == "messages" ) {
-					$activeClass = "active";
-				}
-				print '<li class="besNavbarItem '.$activeClass.'">';
-				print '<a href="'.$translations['messages_link']['translation_text'].'">';
-				print $translations['messages']['translation_text'];
-				if ( $numNewMessages > 0 ) {
-					print ' <span id="messageBadge" class="badge notifyBadge">'.$numNewMessages.'</span>';
-				}
-				print '</a>';
-				print '</li>';
-			
-			}
-			
-			// print '<li class="besNavbarItem">';
-			// print '<a href="'.$translations['logout_link']['translation_text'].'">';
-			// print $translations['logout']['translation_text'];
-			// print '</a>';
-			// print '</li>';
-			
-			print '</ul>';
-			
-			print '<div class="teacherStatus pull-right">';
-		
-			print '<p class="navbar-text">';
-			print '<img src="'.$schoolUser->avatar.'" class="img-responsive avatar menuAvatar" />';
-			print '</p>';
-			// print '<p class="navbar-text">';
-			// print $schoolUser->username;
-			// print '</p>';
-			print '<p class="navbar-text">';
-			print '<strong>'.$schoolUser->username.'</strong> ' . $totalPoints . ' ' . $translations['points']['translation_text'];
-			print '</p>';
-
-			// // ------------------------------------- status and logout
-			// print '<li class="besNavbarItem">';
-			// print '<table class="table table-condensed teacherStatus" style="position:relative; top:-10px;">';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// print '<td><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" style="width:60px"/></td>';
-			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			// print '</li>';
-			
-				
-			print '<button class="btn btn-default navbar-btn">';
-			print '<a href="'.$translations['logout_link']['translation_text'].'">';
-			print $translations['logout']['translation_text'];
-			print '</a>';
-			print '</button>';
-			
-			print '</div>';
-			
-			print '</div>'; // nav collapse
-			
-			print '</div>'; // container-fluid
-			print '</nav>'; // navbar
-			
-			// ------------------------------------ help
-			// if ( $helpOptionId > 0 ) {
-				// print '<div id="helpButton_'.$helpOptionId.'" class="btn btn-default helpButton menuPageHelp h3" data-toggle="modal" data-target="#helpModal">';
-				// print ' <i class="fa fa-info"></i> ';
-				// print '</div>';
-			// }
-			
-			// ----------------------------------- avatar and points
-			// print '<div class="row">';
-			// print '<div class="col-md-4 col-md-offset-8">';
-			// print '<table class="table teacherStatus" style="position:relative; top:-20px;">';
-			// print '<tbody>';
-			// print '<tr>';
-			// print '<td style="width:80px"><img src="'.$schoolUser->avatar.'" class="img-responsive avatar" /></td>';
-			// print '<td class="text-center" style="vertical-align:middle"><strong>'.$schoolUser->username.'</strong></td>';
-			// print '<td style="vertical-align:middle">' . $totalPoints . ' ' . $translations['points']['translation_text'] . '</td>';
-			// print '</tr>';
-			// print '</tbody>';
-			// print '</table>';
-			// print '</div>'; // col-4
-			// print '</div>'; // row
-			
-			print '</div>';
-			
-			
-		
-		}
-	}
 }
 
 

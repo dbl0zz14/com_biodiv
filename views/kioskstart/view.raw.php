@@ -50,9 +50,6 @@ class BioDivViewKioskStart extends JViewLegacy
 		// Make sure there are no stray animals
 		$app->setUserState('com_biodiv.all_animal_ids', 0);
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskstart");
-
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 		//error_log ( "Project image url: " . $this->projectImageUrl );

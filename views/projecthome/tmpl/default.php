@@ -10,8 +10,6 @@ defined('_JEXEC') or die;
 ?>
 
 <?php
-	//print "<p>".count($this->projects)."</p>";
-	//print '<div class="row">';
 	$project = $this->project;
 
 	print '<h2 itemprop="name">';
@@ -40,11 +38,11 @@ defined('_JEXEC') or die;
 	}
 	// Print how to join the project for restricted projects.
 	if ( $this->access_level == 1 ) {
-		print '<p>'.$this->translations['hybrid']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_PROJECTHOME_HYBRID").'</p>';
 		print '<p class="spacer-1em"></p>';
 	}
 	if ( $this->access_level > 1 ) {
-		print '<p>'.$this->translations['restric']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_PROJECTHOME_RESTRIC").'</p>';
 		print '<p class="spacer-1em"></p>';
 	}
 	
@@ -57,7 +55,7 @@ defined('_JEXEC') or die;
 	print "<input type='hidden' name='project_id' value='". $project["project_id"] ."'/>";
 	
 	print "<span class='input-group-btn'>";
-    print "  <button  class='btn btn-success btn-lg' type='submit'><i class='fa fa-search'></i> ".$this->translations['class_proj']['translation_text']."</button>";
+    print "  <button  class='btn btn-success btn-lg' type='submit'><i class='fa fa-search'></i> ".JText::_("COM_BIODIV_PROJECTHOME_CLASS_PROJ")."</button>";
 	print "</span>";
 	
 	print "</div>";
@@ -110,11 +108,10 @@ defined('_JEXEC') or die;
 		
 	
 		if ( count($this->subProjects) > 0 ) {
-		print '<p>'.$this->translations['sub_proj']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_PROJECTHOME_SUB_PROJ").'</p>';
 		print '<p class="spacer-1em"></p>';
 		}
-		//print_r ($this->subProjects);
-	
+		
 		$project_num = 0;
 		foreach ( $this->subProjects as $proj_id=>$proj_prettyname ) {
 			if ( $project_num%4 == 0 ) print '<div class="row">';
@@ -129,7 +126,7 @@ defined('_JEXEC') or die;
 			print BIODIV_COMPONENT;
 			print "'/>";
 			print "<input type='hidden' name='project_id' value='".$proj_id."'/>";
-			print "<button class='image-btn project-btn' type='submit' data-tooltip='".$this->translations['tooltip']['translation_text']."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+			print "<button class='image-btn project-btn' type='submit' data-tooltip='".JText::_("COM_BIODIV_PROJECTHOME_TOOLTIP")."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
 			print "</form>";
 			
 			print '<div class="subproject-title">';

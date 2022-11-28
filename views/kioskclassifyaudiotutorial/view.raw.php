@@ -26,16 +26,11 @@ class BioDivViewKioskClassifyAudioTutorial extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskClassifyAudioTutorial::display called" );
-		// Assign data to the view
-		//($person_id = (int)userID()) or die("No person_id");
 		$app = JFactory::getApplication();
 
 		$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-		error_log ( "Project id = " . $this->projectId );
-
 		if ( !$this->projectId ) die ("no project id given" );
 
 		$this->project = projectDetails($this->projectId);
@@ -50,9 +45,6 @@ class BioDivViewKioskClassifyAudioTutorial extends JViewLegacy
 			$this->user_key = JRequest::getString("user_key");
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskclassifyaudiotutorial");
 
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);

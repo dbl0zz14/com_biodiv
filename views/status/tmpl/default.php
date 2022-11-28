@@ -9,20 +9,17 @@
 defined('_JEXEC') or die;
 
 $document = JFactory::getDocument();
-$document->addScriptDeclaration("BioDiv.loadingMsg = '".$this->translations['loading']['translation_text']."';");
+$document->addScriptDeclaration("BioDiv.loadingMsg = '".JText::_("COM_BIODIV_STATUS_LOADING")."';");
 
 ?>
-<h1><?php print $this->translations['spot_stat']['translation_text'] ?></h1>
+<?php 
+print '<h1>'.JText::_("COM_BIODIV_STATUS_SPOT_STAT").'</h1>'; 
+?>
 <div class='row'>
 <div class='col-md-6'>
 <p>
 <table class="table">
 <?php
-/*
-foreach($this->status as $msg => $count){
-  print "<tr><td>$msg</td><td>$count</td></tr>\n";
- }
- */
  foreach ( $this->status as $row ) {
 		
 	print '<tr>';
@@ -43,7 +40,11 @@ foreach($this->status as $msg => $count){
 <form action = "<?php print BIODIV_ROOT;?>" method = 'GET'>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
-    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_all']['translation_text'] ?></button>
+    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> 
+<?php 
+	print JText::_("COM_BIODIV_STATUS_CLASS_ALL");  
+?>
+</button>
 </form>
 </p>
 <p>
@@ -51,7 +52,11 @@ foreach($this->status as $msg => $count){
 <?php print "    <input type='hidden' name='view' value='" . $classifyView . "'/>"; ?>
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_self' value='1'/>
-    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_my']['translation_text']?></button>
+    <button  class='btn btn-success btn-block classify_btn' type='submit'><i class='fa fa-search'></i> 
+<?php 
+print JText::_("COM_BIODIV_STATUS_CLASS_MY"); 
+?>
+</button>
     
 </form>
 </p>
@@ -62,7 +67,11 @@ foreach($this->status as $msg => $count){
     <input type='hidden' name='option' value='<?php print BIODIV_COMPONENT;?>'/>
     <input type='hidden' name='classify_only_project' value='1'/>
 	<select name = 'project_id' class = 'form-control'>
-	  <option value="" disabled selected hidden><?php print $this->translations['sel_proj']['translation_text']?>...</option>
+	  <option value="" disabled selected hidden>
+<?php 
+print JText::_("COM_BIODIV_STATUS_SEL_PROJ"); 
+?>
+...</option>
     
       <?php
         foreach($this->projects as $proj_id=>$proj){
@@ -71,7 +80,11 @@ foreach($this->status as $msg => $count){
       ?>
     </select>
 	<span class="input-group-btn">
-      <button  class='btn btn-success classify_btn' type='submit'><i class='fa fa-search'></i> <?php print $this->translations['class_proj']['translation_text']?></button>
+      <button  class='btn btn-success classify_btn' type='submit'><i class='fa fa-search'></i> 
+<?php 
+print JText::_("COM_BIODIV_STATUS_CLASS_PROJ"); 
+?>
+</button>
 	</span>
 	
 </div>
@@ -79,55 +92,11 @@ foreach($this->status as $msg => $count){
 </p>
 </div>
 <div class="loader invisible"></div>
-<?php
-//print "<p><b>Projects:";
-//foreach($this->projects as $project_name  ){
-//  print " <span class='badge'>$project_name</span> ";
-// }
-//print "</b></p>\n";
-?>
+
 <div class='col-md-6'>
-<!-- div id="myCarousel" class="carousel slide" data-ride="carousel"  data-wrap="false" -->
-  <!-- Indicators -->
-  
 
-  <!-- Wrapper for slides -->
-  <!-- div class="carousel-inner" -->
 <?php
-/*
 
-$first = true;
-foreach($this->mylikes as $photo_id  ){
-	
-	if ($first) {
-		print '<div class="item active">';
-		$first = false;
-	}
-	else {
-		print '<div class="item">';
-	}
-	
-	if ( isVideo($photo_id) ) {
-		print '<video  oncontextmenu="return false;" controls controlsList="nodownload" width="100%"><source src="'.photoURL($photo_id).'" type="video/mp4">Your browser does not support the video tag.</video>';
-		//print "Found video: ".photoURL($photo_id);
-	}
-	if ( isAudio($photo_id) ) {
-		print '<audio oncontextmenu="return false;" controls controlsList="nodownload" width="100%" ><source src="'.photoURL($photo_id).'" >' . $this->translations['no_aud']['translation_text'] . '</audio>';
-		//print "Found video: ".photoURL($photo_id);
-	}
-	else {
-		print JHTML::image(photoURL($photo_id), 'Photo ' . $photo_id, array('class' =>'img-responsive'));
-	}
-	print '</div>';
- }
- if ( $first == true ) {
-	// no likes so use a default image
-/print '<div class="item active">';
-	print JHTML::image(projectImageURL(1), 'Default Photo', array('class' =>'img-responsive'));
-	print '</div>';
-	 
- }
-*/
 
 $isCameraWebsite =  getSetting("camera") === "yes";
 if ( $isCameraWebsite ) {
@@ -141,7 +110,7 @@ if ( $isCameraWebsite ) {
 		}
 		else if ( isAudio($likePhoto) ) {
 			
-			print '<audio oncontextmenu="return false;" controls controlsList="nodownload"><source src="'.$photoUrl.'">' . $this->translations['no_aud']['translation_text'] . '</audio>';
+			print '<audio oncontextmenu="return false;" controls controlsList="nodownload"><source src="'.$photoUrl.'">' . JText::_("COM_BIODIV_STATUS_NO_AUD") . '</audio>';
 		}
 		else {
 			print JHTML::image($photoUrl, 'Photo ' . $likePhoto, array('class' =>'img-responsive'));
@@ -155,24 +124,7 @@ if ( $isCameraWebsite ) {
 }
 ?>
 
-  <!-- /div -->
-
-  <!-- Left and right controls -->
-  <?php
-  /*
-  if (count($this->mylikes) > 1 ) {
-  print '<a class="left carousel-control" href="#myCarousel" data-slide="prev">';
-  print '  <span class="glyphicon glyphicon-chevron-left"></span>';
-  print '  <span class="sr-only">Previous</span>';
-  print '</a>';
-  print '<a class="right carousel-control" href="#myCarousel" data-slide="next">';
-  print '  <span class="glyphicon glyphicon-chevron-right"></span>';
-  print '  <span class="sr-only">Next</span>';
-  print '</a>';
-  }
-  */
-  ?>
-<!-- /div -->
+  
 </div>
 
 </div>
@@ -205,13 +157,12 @@ if ( $this->survey != null ) {
 	print '      <div class="panel panel-warning">';
 	print '          <div class="panel-heading">';
   	print '              <div class="row">';
-    print '      	         <div class="col-md-10">'.$this->translations['parti_info']['translation_text'].'</div>';
-    print '      	         <div id="show_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.$this->translations['show_partic']['translation_text'].'"><i class="fa fa-angle-down fa-lg"></i></div>';
-    print '      	         <div id="hide_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.$this->translations['hide_partic']['translation_text'].'"><i class="fa fa-angle-up fa-lg"></i></div>';
+    print '      	         <div class="col-md-10">'.JText::_("COM_BIODIV_STATUS_PARTI_INFO").'</div>';
+    print '      	         <div id="show_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_SHOW_PARTIC").'"><i class="fa fa-angle-down fa-lg"></i></div>';
+    print '      	         <div id="hide_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_HIDE_PARTIC").'"><i class="fa fa-angle-up fa-lg"></i></div>';
 	print '              </div>';
 	print '          </div>';
 	
-	//print '          <div class="panel-body" style="display:none;">';
 	print '          <div id="partic_info" class="panel-body">';
 	print $this->participantInfo;
 	print '          </div>';
@@ -228,7 +179,7 @@ if ( $this->survey != null ) {
 		print $this->consentInstructions;
 	}
 	else {
-		print '<p>'.$this->translations['already_consented']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_STATUS_ALREADY_CONSENTED").'</p>';
 	}
 	print $this->consentText;
 	
@@ -237,10 +188,10 @@ if ( $this->survey != null ) {
 	if ( $this->requireSurveyConsent ) {
 		
 		print '          <div id="require_consent">';
-		print '          <h4 id ="consent_reminder" class="text-danger">' . $this->translations['indicate_consent']['translation_text'] . '</h4>';
+		print '          <h4 id ="consent_reminder" class="text-danger">' . JText::_("COM_BIODIV_STATUS_INDICATE_CONSENT") . '</h4>';
 			
 		print '          <div class="checkbox">';
-		print '          <label><input id="consent_checkbox" type="checkbox" name="consent" value="1">'.$this->translations['consent_text']['translation_text'] . '</label>';
+		print '          <label><input id="consent_checkbox" type="checkbox" name="consent" value="1">'.JText::_("COM_BIODIV_STATUS_CONSENT_TEXT") . '</label>';
 		print '          </div>';
 		print '          </div>';
 	}
@@ -252,20 +203,19 @@ if ( $this->survey != null ) {
 	
 	print '      </div>'; // modal body
 	print '      	<div class="modal-footer">';
-	//print '          <form id="take_survey" action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="task" value="take_survey"/>';
     print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button  class="btn btn-warning btn-block" type="submit">'.$this->translations['contribute']['translation_text'].'</button></div>';
-	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" >'.$this->translations['maybe_later']['translation_text'].'</button></div>';
-	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button id="no_survey" type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button></div>';
+	
+	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button  class="btn btn-warning btn-block" type="submit">'.JText::_("COM_BIODIV_STATUS_CONTRIBUTE").'</button></div>';
+	
+	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" >'.JText::_("COM_BIODIV_STATUS_MAYBE_LATER").'</button></div>';
+	
 	print '          </form>';
 	print '          </div>';
 
 	
-	//print '      <div class="modal-footer">';
-	//print '        <button type="button" class="btn btn-danger classify-modal-button" data-dismiss="modal">'.$this->translations['not_now']['translation_text'].'</button>';
-	//print '      </div>';
+	
 	print '    </div>';
 
 	print '  </div>';

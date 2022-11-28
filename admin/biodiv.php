@@ -14,7 +14,14 @@ defined('_JEXEC') or die('Restricted access');
 set_include_path(JPATH_COMPONENT_SITE . PATH_SEPARATOR . get_include_path());
 
 include_once "local.php";
+include_once "codes.php";
+
 include_once "BiodivHelper.php";
+include_once "BiodivReport.php";
+include_once "BiodivTransifex.php";
+
+//require_once 'libraries/vendor/guzzlehttp/guzzle/src/Client.php';
+
 
 define('BIODIV_ADMIN_ROOT', JURI::base() . '?option=' . BIODIV_COMPONENT);
 $document = JFactory::getDocument();
@@ -22,7 +29,9 @@ $document->addScriptDeclaration('
 var BioDiv = {};
 BioDiv.root = "'. BIODIV_ADMIN_ROOT . '";');
 
+
 JHtml::_('jquery.framework');
+
 
 
 function printAdminMenu($currentPage) {
@@ -89,6 +98,14 @@ function printAdminMenu($currentPage) {
 		print '<li>';
 	}
 	print '<a href="index.php?option=com_biodiv&amp;view=biodivs">Batch user creation</a>';
+	print '</li>';
+	if ( $currentPage == "TRANSLATIONS" ) {
+		print $activeLi;
+	}
+	else {
+		print '<li>';
+	}
+	print '<a href="index.php?option=com_biodiv&amp;view=translations">Translations</a>';
 	print '</li>';
 	print '</ul>';
 	print '</div>';
@@ -895,6 +912,668 @@ function getUserDetails ( $userId ) {
 	return $userDetails;
 
 }
+
+
+function createReportFile ( $type, $headings, $rows ) {
+	
+	$reportRoot = JPATH_SITE."/biodivimages/reports";
+	$filePath = $reportRoot."/admin/";
+	
+	$t=time();
+	$dateStr = date("Ymd_His",$t);
+	$filename = $type . '_' . $dateStr . ".csv";
+	
+	$tmpCsvFile = $filePath . "/tmp_" . $filename;
+	$newCsvFile = $filePath . "/" . $filename;
+	
+	// Has the report already been created?
+	if ( !file_exists($newCsvFile) ) {
+		
+		// Creates a new csv file and store it in directory
+		// Rename once finished writing to file
+		if (!file_exists($filePath)) {
+			mkdir($filePath, 0755, true);
+		}
+		
+		$tmpCsv = fopen ( $tmpCsvFile, 'w');
+		
+		// First put the headings
+		if ( $headings ) {
+			fputcsv($tmpCsv, $headings);
+		}
+		
+		// Then each row
+		foreach ( $rows as $row ) {
+			fputcsv($tmpCsv, $row);
+		}
+		
+		fclose($tmpCsv);
+		
+		rename ( $tmpCsvFile, $newCsvFile );
+
+	}
+	
+	$url = JURI::root()."/biodivimages/reports/admin/".$filename;
+	return $url;
+}
+
+function getAllArticlesForTranslation ( $page, $length ) {
+	
+	$db = JFactory::getDBO();
+	
+	$query = $db->getQuery(true)
+		->select($db->quoteName(array('C.id', 'C.title', 'C.alias', 'CA.title', 'C.modified'), array('article_id', 'title', 'alias', 'category', 'modified')))
+		->from($db->quoteName('#__content', 'C'))
+		->innerJoin($db->quoteName('#__categories', 'CA'))
+		->where("C.catid = CA.id")
+		->where("C.language = " . $db->quote('en-GB') )
+		->order("C.modified DESC");
+
+	$db->setQuery($query);
+	$db->execute();
+	
+	$totalRows = $db->getNumRows();
+		
+	$start = ($page-1)*$length;
+		
+	$db->setQuery($query, $start, $length);
+	
+	//error_log("getUsername select query created: " . $query->dump());
+	
+	$articles = $db->loadObjectList("article_id");
+		
+	return (object)array("total"=>$totalRows, "articles"=>$articles);
+	
+}
+
+
+function getArticle ( $articleId ) {
+	
+	$jarticle = JTable::getInstance("content");
+
+	$jarticle->load($articleId); 
+	
+	return $jarticle;
+	
+}
+
+
+
+function getSupportedLanguages () {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("*")
+		->from("Language")
+		->where("tag != " . $db->quote('en-GB') );
+	$db->setQuery($query);
+	$langs = $db->loadObjectList("language_id");
+	
+	return $langs;
+}
+
+
+function getSupportedLanguage ( $tag ) {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true);
+	$query->select("*")
+		->from("Language")
+		->where("tag = " . $db->quote($tag) );
+	$db->setQuery($query);
+	$lang = $db->loadObject();
+	
+	return $lang;
+}
+
+
+function getAllAssociations ( $articleId ) {
+	
+	$associations = null;
+	
+	if ($articleId)
+	{
+		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $articleId);
+		
+	}
+	
+	return $associations;
+}
+
+
+function getAssociations ( $articleId, $lang ) {
+	
+	$assoc = null;
+	
+	if ($articleId)
+	{
+		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $articleId);
+		
+		if ( $associations ) {
+			if ( array_key_exists($lang, $associations) ) {
+				$assoc = $associations[$lang];
+			}
+		}
+	}
+	
+	return $assoc;
+}
+
+
+function getAssociatedArticle ( $articleId, $lang ) {
+	
+	$assocId = null;
+
+	if ($articleId != null)
+	{
+		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $articleId);
+		
+		if ( $associations ) {
+			
+			if ( array_key_exists($lang, $associations) ) {
+				//$assocId = $associations[$lang]->id;
+				$id = explode ( ':', $associations[$lang]->id );
+				$assocId = $id[0];
+			}
+		}
+	}
+	
+	return $assocId;
+}
+
+
+function getAssociatedCategory ( $catId, $lang ) {
+	
+	$assocId = null;
+	
+	if ($catId)
+	{
+		try {
+			$associations = JLanguageAssociations::getAssociations('com_content', '#__categories', 'com_categories.item', $catId, 'id', 'alias', 'id');
+		}
+		catch ( Exception $e ) {
+			
+			error_log ( "Exception caught: " . $e->getMessage() );
+		
+		}
+		
+		
+		if ( $associations ) {
+			//$assocId = $associations[$lang]->id;
+			if ( array_key_exists($lang, $associations) ) {
+				$id = explode ( ':', $associations[$lang]->id );
+				$assocId = $id[0];
+			}
+			else {
+				error_log ("No associated category for cat " . $catId . ", language " . $lang );
+			}
+		}
+	}
+	
+	return $assocId;
+}
+
+
+function isJSON ( $string ) {
+	
+   return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE) ? true : false;
+   
+}
+
+
+function getJSONDecodedArray ( $string ) {
+	
+	$decoded = null;
+	if ( is_string ( $string ) ) {
+		$newArray = json_decode($string, true);
+		if ( is_array($newArray) && (json_last_error() == JSON_ERROR_NONE) ) {
+			$decoded = $newArray;
+		}
+	}
+	
+	return $decoded;
+   
+}
+
+
+function checkHtml ( $htmlStr ) {
+	
+	$warning = null;
+	
+	// Just a basic check
+	if ( strpos ( strtolower($htmlStr), "script") !== FALSE ) {
+		$warning = "Text may contain a script";
+	}
+	
+	return $warning;
+}
+
+
+function updateArticle ( $articleId, $lang, $title, $html ) {
+	
+	error_log ( "updateArticle called" );
+	
+	$response = null;
+	$assocId = null;
+	$assoc = null;
+	
+	$allAssociations = getAllAssociations ( $articleId );
+	
+	$assocsForKey = array();
+	foreach ( $allAssociations as $assocLang=>$assocObj ) {
+		$id = explode ( ':', $assocObj->id );
+		$assocsForKey[$assocLang] = $id[0];
+	}
+	
+	if ( $allAssociations ) {
+		if ( array_key_exists($lang, $allAssociations) ) {
+			$assoc = $allAssociations[$lang];
+		}
+	}
+	
+	$errMsg = print_r ( $allAssociations, true );
+	error_log ( "Got allAssociations: " . $errMsg);
+	
+	$errMsg = print_r ( $assocsForKey, true );
+	error_log ( "Created assocsForKey: " . $errMsg);
+	
+	if ( $assoc ) {
+		
+		$id = explode ( ':', $assoc->id );
+		$assocId = $id[0];
+	}
+	
+	if ( !$assocId ) {
+		
+		error_log ( "No associated article" );
+		
+		$table = JTable::getInstance('Content', 'JTable', array());
+
+		$article = getArticle ( $articleId );
+		
+		// $errMsg = print_r ( $article, true );
+		// error_log ( "Article: " . $errMsg );
+		
+		//$title = $article->title . " " . $lang; 
+		$alias = $article->alias . "-" . strtolower($lang); 
+	
+		$catId = getAssociatedCategory ( $article->catid, $lang );
+		
+		
+		error_log ( "Got associated category: " . $catId );
+		
+		$data = array(
+			'catid' => $catId,
+			'title' => $title,
+			//'alias' =>  $alias,
+			'language' => $lang,
+			'introtext' => $html,
+			'state' => 1,
+			'images' => $article->images,
+			'urls' => $article->urls,
+			'attribs' => $article->attribs
+		);
+
+		error_log ( "About to bind, html = " . $html );
+		
+		try {
+			// Bind data
+			if (!$table->bind($data))
+			{
+				throw new Exception("Failed to bind article data. Error: " . $table->getError());
+			}
+
+			error_log ( "About to check" );
+			
+			// Check the data.
+			if (!$table->check())
+			{
+				throw new Exception("Failed to check article data. Error: " . $table->getError());
+			}
+
+			error_log ( "About to store" );
+			
+			// Store the data.
+			if (!$table->store())
+			{
+				//error_log ( "Store unsuccessful, error = " . $table->getError() );
+				
+				throw new Exception("Failed to store article data. Error: " . $table->getError());
+			}
+			
+			$response = "Article text created successfully for new associated article " . $articleId . ", language " . $lang;
+			
+			$assocTable = JTable::getInstance('Associations', 'JTable', array());
+			$associationsContext = 'com_content.item';
+			
+			error_log ( "About to handle associations" );
+			
+			// There is no association for this language but is there for teh original article id
+			$db = JFactory::getDBO();
+			$query = $db->getQuery(true)
+				->select($db->qn('key'))
+				->from($db->qn('#__associations'))
+				->where($db->qn('context') . ' = ' . $db->quote($associationsContext))
+				->where($db->qn('id') . ' = ' . (int) $articleId);
+			$db->setQuery($query);
+			
+			error_log("Associations old_key query created: " . $query->dump());
+			
+			$old_key = $db->loadResult();
+			
+			if ( $old_key ) {
+
+				// Deleting old associations for the associated items
+				$query = $db->getQuery(true)
+					->delete($db->qn('#__associations'))
+					->where($db->qn('context') . ' = ' . $db->quote($associationsContext));
+
+				if ($assocsForKey)
+				{
+					$query->where('(' . $db->qn('id') . ' IN (' . implode(',', $assocsForKey) . ') OR '
+						. $db->qn('key') . ' = ' . $db->q($old_key) . ')');
+				}
+				else
+				{
+					$query->where($db->qn('key') . ' = ' . $db->q($old_key));
+				}
+
+				$db->setQuery($query);
+				
+				error_log("Associations delete query created: " . $query->dump());
+				
+				$db->execute();
+			}
+			
+			error_log ( "Table language = " . $table->language );
+			error_log ( "Table id = " . $table->id );
+
+			// Adding original and self to the association
+			
+			$assocsForKey['en-GB'] = (int) $articleId;
+			if ($table->language !== '*')
+			{
+				$assocsForKey[$table->language] = (int) $table->id;
+			}
+
+			if (count($assocsForKey) > 1)
+			{
+				$errMsg = print_r ( $assocsForKey, true );
+				error_log ( "Associatons: " . $errMsg );
+				
+				// Adding new association for these items
+				$key   = md5(json_encode($assocsForKey));
+				
+				error_log ( "New key = " . $key );
+				
+				$query = $db->getQuery(true)
+					->insert('#__associations');
+
+				foreach ($assocsForKey as $id)
+				{
+					$query->values(((int) $id) . ',' . $db->quote($associationsContext) . ',' . $db->quote($key));
+				}
+
+				$db->setQuery($query);
+				
+				error_log("Associations delete query created: " . $query->dump());
+				
+				$db->execute();
+			}
+			
+		} catch ( Exception $e ) {
+			
+			$response = "Article text failed to create for new associated article " . $articleId . ", language " . $lang . ". Reason: " . $e->getMessage();
+			
+		}
+		
+	}
+	else {
+		
+		$db = JFactory::getDBO();
+		
+		$articleFields = new StdClass();
+		$articleFields->id = $assocId;
+		$articleFields->title = $title;
+		$articleFields->introtext = $html;
+		$success = null;
+		
+		error_log ( "Updating existing article, html = " . $html );
+		$errMsg = print_r ( $articleFields, true );
+		error_log ("Update fields: " . $errMsg );
+		
+		try {
+			$success = $db->updateObject('#__content', $articleFields, "id");
+		}
+		catch ( Exception $e ) {
+			$response = "#__content update failed for article " . $articleId . ", language " . $lang . ", exception caught: " . $e;
+			error_log ( $response );
+			
+		}
+		if(!$success){
+			$response = "Article text update failed for article " . $articleId . ", language " . $lang;
+			error_log ( $response );
+		}
+		else {
+			$response = "Article text updated successfully for article " . $articleId . ", language " . $lang;
+		}
+		
+	}
+	return $response;
+}
+
+
+// function newOrUpdateArticle ( $data ) {
+	
+	// $response = null;
+	
+	// // Mimic the code in AdminModel
+	// $dispatcher = \JEventDispatcher::getInstance();
+	// //$table      = $this->getTable();
+	// $table      = JTable::getInstance('Content', 'JTable', array());
+	// //$context    = $this->option . '.' . $this->name;
+	// $context    = 'com_content.item';
+	// $app        = \JFactory::getApplication();
+
+	// if (!empty($data['tags']) && $data['tags'][0] != '')
+	// {
+		// $table->newTags = $data['tags'];
+	// }
+
+	// $key = $table->getKeyName();
+	// $pk = (!empty($data[$key])) ? $data[$key] : (int) $this->getState($this->getName() . '.id');
+	// $isNew = true;
+
+	// // Include the plugins for the save events.
+	// //\JPluginHelper::importPlugin($this->events_map['save']);
+
+	// // Allow an exception to be thrown.
+	// try
+	// {
+		// // Load the row if saving an existing record.
+		// if ($pk > 0)
+		// {
+			// $table->load($pk);
+			// $isNew = false;
+		// }
+
+		// // Bind the data.
+		// if (!$table->bind($data))
+		// {
+			// //$this->setError($table->getError());
+			
+			// //return false;
+			
+			// throw new Exception("Failed to bind article data. Error: " . $table->getError());
+
+		// }
+
+		// // Prepare the row for saving
+		// //$this->prepareTable($table);
+
+		// // Check the data.
+		// if (!$table->check())
+		// {
+			// // $this->setError($table->getError());
+
+			// // return false;
+			
+			// throw new Exception("Failed to check article data. Error: " . $table->getError());
+		// }
+
+		// // Trigger the before save event.
+		// //$result = $dispatcher->trigger($this->event_before_save, array($context, $table, $isNew, $data));
+
+		// // if (in_array(false, $result, true))
+		// // {
+			// // $this->setError($table->getError());
+
+			// // return false;
+			
+		// // }
+
+		// // Store the data.
+		// if (!$table->store())
+		// {
+			// // $this->setError($table->getError());
+
+			// // return false;
+			
+			// throw new Exception("Failed to store article data. Error: " . $table->getError());
+		// }
+
+		// // Clean the cache.
+		// //$this->cleanCache();
+
+		// // Trigger the after save event.
+		// //$dispatcher->trigger($this->event_after_save, array($context, $table, $isNew, $data));
+	// }
+	// catch (\Exception $e)
+	// {
+		// // $this->setError($e->getMessage());
+
+		// // return false;
+		
+		// $response = "Article text failed to create for new associated article " . $articleId . ", language " . $lang . ". Reason: " . $e->getMessage();
+	// }
+
+	// if (isset($table->$key))
+	// {
+		// $this->setState($this->getName() . '.id', $table->$key);
+	// }
+
+	// $this->setState($this->getName() . '.new', $isNew);
+
+	// if ($this->associationsContext && \JLanguageAssociations::isEnabled() && !empty($data['associations']))
+	// {
+		// $associations = $data['associations'];
+
+		// // Unset any invalid associations
+		// $associations = ArrayHelper::toInteger($associations);
+
+		// // Unset any invalid associations
+		// foreach ($associations as $tag => $id)
+		// {
+			// if (!$id)
+			// {
+				// unset($associations[$tag]);
+			// }
+		// }
+
+		// // Show a warning if the item isn't assigned to a language but we have associations.
+		// if ($associations && $table->language === '*')
+		// {
+			// $app->enqueueMessage(
+				// \JText::_(strtoupper($this->option) . '_ERROR_ALL_LANGUAGE_ASSOCIATED'),
+				// 'warning'
+			// );
+		// }
+
+		// // Get associationskey for edited item
+		// $db    = $this->getDbo();
+		// $query = $db->getQuery(true)
+			// ->select($db->qn('key'))
+			// ->from($db->qn('#__associations'))
+			// ->where($db->qn('context') . ' = ' . $db->quote($this->associationsContext))
+			// ->where($db->qn('id') . ' = ' . (int) $table->$key);
+		// $db->setQuery($query);
+		// $old_key = $db->loadResult();
+
+		// // Deleting old associations for the associated items
+		// $query = $db->getQuery(true)
+			// ->delete($db->qn('#__associations'))
+			// ->where($db->qn('context') . ' = ' . $db->quote($this->associationsContext));
+
+		// if ($associations)
+		// {
+			// $query->where('(' . $db->qn('id') . ' IN (' . implode(',', $associations) . ') OR '
+				// . $db->qn('key') . ' = ' . $db->q($old_key) . ')');
+		// }
+		// else
+		// {
+			// $query->where($db->qn('key') . ' = ' . $db->q($old_key));
+		// }
+
+		// $db->setQuery($query);
+		// $db->execute();
+
+		// // Adding self to the association
+		// if ($table->language !== '*')
+		// {
+			// $associations[$table->language] = (int) $table->$key;
+		// }
+
+		// if (count($associations) > 1)
+		// {
+			// $errMsg = print_r ( $associations, true );
+			// error_log ( "Associatons: " . $errMsg );
+			
+			// // Adding new association for these items
+			// $key   = md5(json_encode($associations));
+			// $query = $db->getQuery(true)
+				// ->insert('#__associations');
+
+			// foreach ($associations as $id)
+			// {
+				// $query->values(((int) $id) . ',' . $db->quote($this->associationsContext) . ',' . $db->quote($key));
+			// }
+
+			// $db->setQuery($query);
+			// $db->execute();
+		// }
+	// }
+// }
+
+
+//function updateArticleTitle ( $articleId, $lang, $title ) {
+	
+	// Check html and flag as error if not
+	// if ( str) {
+	// }
+	
+	// $db = JFactory::getDBO();
+	
+	// $query = $db->getQuery(true)
+		// ->select($db->quoteName(array('C.id', 'C.title', 'C.alias', 'CA.title', 'C.modified'), array('article_id', 'title', 'alias', 'category', 'modified')))
+		// ->from($db->quoteName('#__content', 'C'))
+		// ->innerJoin($db->quoteName('#__categories', 'CA'))
+		// ->where("C.catid = CA.id")
+		// ->where("C.language = " . $db->quote('en-GB') )
+		// ->order("C.modified DESC");
+
+	// $db->setQuery($query);
+	
+	// //error_log("getUsername select query created: " . $query->dump());
+	
+	// $articles = $db->loadObjectList("article_id");
+		
+	
+	// return $articles;
+//}
+
+
 
 
 

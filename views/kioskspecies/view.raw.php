@@ -38,9 +38,6 @@ class BioDivViewKioskSpecies extends JViewLegacy
 
 		$this->introtext = $article->introtext;
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskspecies");
-		
 		$maxArticleLength = 300;
 
 		//error_log ( "Getting dom document" );
@@ -69,14 +66,14 @@ class BioDivViewKioskSpecies extends JViewLegacy
 			
 			//error_log ("Next para: " . $text);
 			
-			$sciName = $this->translations['sci_name']['translation_text'];
+			$sciName = JText::_("COM_BIODIV_KIOSKSPECIES_SCI_NAME");
 			
 			if ( stripos ( $text, $sciName ) !== false ) {
 				//error_log ("Found scientific name");
 				$this->scientificName = substr( $text, strlen($sciName) );
 			}
 			
-			$appearText = $this->translations['appearance']['translation_text'];
+			$appearText = JText::_("COM_BIODIV_KIOSKSPECIES_APPEARANCE");
 			
 			if ( stripos ( $text, $appearText ) !== false ) {
 				//error_log ("Found appearance");
@@ -96,7 +93,7 @@ class BioDivViewKioskSpecies extends JViewLegacy
 			// NB we just get the first image and the first attribution
 			if ( !$this->photoAttribution ) {
 				
-				$attribText = $this->translations['attrib']['translation_text'];
+				$attribText = JText::_("COM_BIODIV_KIOSKSPECIES_ATTRIB");
 				
 				//error_log ("attrib text = " . $attribText );
 				
@@ -106,7 +103,7 @@ class BioDivViewKioskSpecies extends JViewLegacy
 				}
 				else {
 					// Try sentence starting with Image
-					$attribText = $this->translations['image']['translation_text'];
+					$attribText = JText::_("COM_BIODIV_KIOSKSPECIES_IMAGE");
 				
 					if ( stripos ( $text, $attribText ) !== false ) {
 						//error_log ("Found attribution");
@@ -117,12 +114,6 @@ class BioDivViewKioskSpecies extends JViewLegacy
 		}
 
 		
-		//error_log ("Number of images = " . $imageNodes->length );
-		
-		//error_log ("Image src = " . $this->imageSrc );
-
-
-
 		
 
 		parent::display($tpl);

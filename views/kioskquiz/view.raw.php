@@ -47,9 +47,6 @@ class BioDivViewKioskQuiz extends JViewLegacy
 
 		$this->isCamera = getSetting("camera") == "yes";
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskquiz");
-
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 

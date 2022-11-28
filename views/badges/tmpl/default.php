@@ -19,14 +19,14 @@ error_log ( $errMsg );
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_BADGES_LOGIN").'</div>';
 	
 }
 
 else {
 	
 	if ( $this->suggest ) {
-		print '<h4>'.$this->translations['could_try']['translation_text'].'</h4>';
+		print '<h4>'.JText::_("COM_BIODIV_BADGES_COULD_TRY").'</h4>';
 	}
 	
 	
@@ -34,14 +34,14 @@ else {
 		
 		if ( $this->numToCollect == 0 ) {
 			print '<div class="row"><div class="col-md-6 h3" style="margin-top:20px;margin-bottom:20px">'.
-				$this->translations['all_collected']['translation_text'].'</div><div class="col-md-6 text-right">'.
-				'<a href="'.$this->translations['wild_space_link']['translation_text'].'" class="btn btn-primary" >'.$this->translations['wild_space']['translation_text'].'</button>'.'</a>'.'</div></div>';
+				JText::_("COM_BIODIV_BADGES_ALL_COLLECTED").'</div><div class="col-md-6 text-right">'.
+				'<a href="'.JText::_("COM_BIODIV_BADGES_WILD_SPACE_LINK").'" class="btn btn-primary" >'.JText::_("COM_BIODIV_BADGES_WILD_SPACE").'</button>'.'</a>'.'</div></div>';
 		}
 		else {
 			print '<button class="btn btn-primary collectBadges" style="margin-top:20px;margin-bottom:20px">'.
-				$this->translations['collect_badges']['translation_text'].'</button> '.'<a href="'.$this->translations['wild_space_link']['translation_text'].
+				JText::_("COM_BIODIV_COLLECT_BADGES").'</button> '.'<a href="'.JText::_("COM_BIODIV_BADGES_WILD_SPACE_LINK").
 				'" class="btn btn-primary" >'.
-				$this->translations['wild_space']['translation_text'].'</button>'.'</a>';
+				JText::_("COM_BIODIV_BADGES_WILD_SPACE").'</button>'.'</a>';
 		}
 		
 		
@@ -96,8 +96,8 @@ else {
 		
 		if ( $this->collect ) {
 			
-			print '<button class="btn btn-primary collectedBadges" style="margin-top:20px;margin-bottom:20px">'.$this->translations['show_collected']['translation_text'].'</button>';
-			print '<h3>'.$this->translations['tap_collect']['translation_text'].'</h3>';
+			print '<button class="btn btn-primary collectedBadges" style="margin-top:20px;margin-bottom:20px">'.JText::_("COM_BIODIV_BADGES_SHOW_COLLECTED").'</button>';
+			print '<h3>'.JText::_("COM_BIODIV_BADGES_TAP_COLLECT").'</h3>';
 			
 		}
 	
@@ -121,7 +121,7 @@ else {
 			
 			
 			if ( $this->singleBadgeGroup and $totalNumBadges == 0  ) {
-				print $this->translations['no_activities']['translation_text'];
+				print JText::_("COM_BIODIV_BADGES_NO_ACTIVITIES");
 			}
 			
 			
@@ -185,22 +185,11 @@ else {
 						
 						print '<div class="row small-gutter">';
 						
-						// print '<div class="col-md-4 col-sm-4 col-xs-4 text-left">';
-						// //print '<span class="'.$colorClass.'_text"><i class= "fa '.$icon.'" aria-hidden= "true" ></i></span>';
-						// print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
-						// print '</div>';
-						// print '<div class="col-md-8 col-sm-8 col-xs-8 text-right" style="color:#aaaaaa;"><strong>';
-						// print $task->points . ' ' . $this->translations['points']['translation_text'];
-						// print '</strong></div>'; // col-12
-						// print '<div class="col-md-12 col-sm-10 col-xs-10 h5 text-center taskText"><strong>';
-						// print $badge->badge_name;
-						// print '</strong></div>'; // col-12
-						
 						print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
 						print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
 						print '</div>';
 						print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
-						print $task->points . ' ' . $this->translations['points']['translation_text'];
+						print $task->points . ' ' . JText::_("COM_BIODIV_BADGES_POINTS");
 						print '</strong></div>'; // col-6
 						print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
 						print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
@@ -250,10 +239,10 @@ else {
 							$isLinkedTask = true;
 						}
 						if ( $isLinkedTask ) {
-							print '<div class="taskDescription h5 text-center taskText">'.$this->translations['teacher_task']['translation_text'].'</div>';
+							print '<div class="taskDescription h5 text-center taskText">'.JText::_("COM_BIODIV_BADGES_TEACHER_TASK").'</div>';
 						}
 						else if ( $task->status == Biodiv\Badge::PENDING ) {
-							print '<div class="taskDescription h5 text-center taskText">'.$this->translations['pending']['translation_text'].'</div>';
+							print '<div class="taskDescription h5 text-center taskText">'.JText::_("COM_BIODIV_BADGES_PENDING").'</div>';
 						}
 						else {
 							print '<div class="taskDescription h5 text-center taskText">'.$task->description.'</div>';
@@ -263,23 +252,18 @@ else {
 						print '<div class="text-center taskButtons">';
 								
 						if ( $task->status == Biodiv\Badge::COMPLETE ) {
-							print '<div class="collectMessage">'.$this->translations['collect']['translation_text'].'</div>';
+							print '<div class="collectMessage">'.JText::_("COM_BIODIV_BADGES_COLLECT").'</div>';
 						}
 						else {
 							print '<div id="task_more_'.$task->task_id.'" class="btn btn-primary btn-sm task_btn" data-toggle="modal" data-target="#task_modal">'.
-										$this->translations['more']['translation_text'].'</div>';
+										JText::_("COM_BIODIV_BADGES_MORE").'</div>';
 										
 							if ( !$this->viewOnly and !$isLinkedTask and $task->counted_by == "USER" and $task->status == Biodiv\Badge::UNLOCKED ) {
-								print '<div id="task_done_'.$task->task_id.'" class="btn btn-default btn-sm task_btn upload_task">'.$this->translations['done']['translation_text'].'</div>';
+								print '<div id="task_done_'.$task->task_id.'" class="btn btn-default btn-sm task_btn upload_task">'.JText::_("COM_BIODIV_BADGES_DONE").'</div>';
 							}
 						}
 						
 						print '</div>'; // text-center
-						
-						// print '<div class="text-center taskLockInd">';
-						// print '<h5 class="text-center text-warning"><i class="fa '.$this->statusIcons[$task->status].' fa-lg"></i></h5>';
-						// print '</div>';
-						
 										
 						print '</div>'; // panel-body
 						
@@ -298,18 +282,11 @@ else {
 					
 					print '<div class="row small-gutter">';
 						
-					// print '<div class="col-md-4 col-sm-4 col-xs-4 h4 text-left">';
-					// print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
-					// print '</div>';
-					// print '<div class="col-md-8 col-sm-8 col-xs-8 text-right"><strong>';
-					// print $task->points . ' ' . $this->translations['points']['translation_text'];
-					// print '</strong></div>'; // col-8
-					
 					print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
 					print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
 					print '</div>';
 					print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
-					print $task->points . ' ' . $this->translations['points']['translation_text'];
+					print $task->points . ' ' . JText::_("COM_BIODIV_BADGES_POINTS");
 					print '</strong></div>'; // col-6
 					print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
 					print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
@@ -339,17 +316,13 @@ else {
 					
 					print '<div class="text-center taskButtons">';
 					if ( $task->species_unlocked ) {
-						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal">'.$this->translations['view_species']['translation_text'].'</div>';
+						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal">'.JText::_("COM_BIODIV_BADGES_VIEW_SPECIES").'</div>';
 					}
 					else {
-						print '<div id="unlock_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn unlock_species"  data-toggle="modal" data-target="#species_modal">'.$this->translations['unlock_species']['translation_text'].'</div>';
-						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal" style="display:none">'.$this->translations['view_species']['translation_text'].'</div>';
+						print '<div id="unlock_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn unlock_species"  data-toggle="modal" data-target="#species_modal">'.JText::_("COM_BIODIV_BADGES_UNLOCK_SPECIES").'</div>';
+						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal" style="display:none">'.JText::_("COM_BIODIV_BADGES_VIEW_SPECIES").'</div>';
 					}
 					print '</div>';
-					
-					// print '<div class="text-center taskLockInd">';
-					// print '<h5 class="text-center text-warning"><i class="fa '.$this->statusIcons[$task->status].' fa-lg"></i></h5>';
-					// print '</div>';
 					
 					print '</div>'; // panel-body
 					
@@ -377,13 +350,13 @@ else {
 		}
 		
 		if ( $this->completeOnly and $taskCount == 0  ) {
-			print $this->translations['no_complete_mod']['translation_text'];
+			print JText::_("COM_BIODIV_BADGES_NO_COMPLETE_MOD");
 		}
 		else if ( $this->unlockedOnly and $taskCount == 0  ) {
-			print $this->translations['no_unlocked']['translation_text'];
+			print JText::_("COM_BIODIV_BADGES_NO_UNLOCKED");
 		}
 		else if ( $this->suggest and $taskCount == 0  ) {
-			print $this->translations['no_suggest']['translation_text'];
+			print JText::_("COM_BIODIV_BADGES_NO_SUGGEST");
 		}
 	
 		if ( $this->onOneLine ) {

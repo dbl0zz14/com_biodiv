@@ -27,9 +27,6 @@ class BioDivViewUploadTop extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("trapper");
-
 		$isCamera = getSetting("camera") == "yes";
 		$this->siteHelper = new SiteHelper($isCamera);
 	  

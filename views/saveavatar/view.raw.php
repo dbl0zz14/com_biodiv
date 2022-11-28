@@ -27,11 +27,6 @@ class BioDivViewSaveAvatar extends JViewLegacy
 
 	public function display($tpl = null) 
 	{
-		error_log ( "SaveAvatar: display called ");
-			
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("saveavatar");
-		
 		$this->personId = (int)userID();
 		
 		if ( $this->personId ) {

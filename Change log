@@ -1,3 +1,9 @@
+# 28/11/22 - Version 3.6.6
+* Admin updates to generate and send files to Transifex, and to download and update translated articles
+* Updates to use languages ini files
+* Add project filter to User dashboard reports
+* Add Spotter position last month and ths month to date on status page 
+
 # 13/10/22 - Version 3.6.5
 * BES Encounters changes for Module 3 - birds
 * BES Encounters changes - admin pages to create and edit projects 

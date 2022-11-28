@@ -29,8 +29,6 @@ class BioDivViewProjectUsers extends JViewLegacy
 		//Assign data to the view
 		$this->personId = (int)userID();
 		
-		$this->translations = getTranslations("projectusers");
-		
 		if ( $this->personId ) {
 		
 			// CHECK admin user for this project

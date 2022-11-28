@@ -50,15 +50,8 @@ class BioDivViewKioskLearnBirds extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		//error_log("KioskLearnBirds View: user_key = " . $this->user_key);
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kiosklearn");
-
 		$this->kioskSpecies = new KioskSpecies($this->projectId);
 		
-		//error_log("KioskLearnBirds View: KioskSpecies object created");
-
 		$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();
 		
 		$this->commonBirds = array_column($this->kioskSpecies->getCommonBirds(), NULL, "id");

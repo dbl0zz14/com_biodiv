@@ -28,9 +28,7 @@ class BioDivViewMediaCarousel extends JViewLegacy
   public function display($tpl = null) 
   {
 	  
-	//error_log ("Media Carousel View called" );
-	
-    $person_id = (int)userID();
+	$person_id = (int)userID();
     
 	$person_id or die("No person_id");
 
@@ -41,9 +39,6 @@ class BioDivViewMediaCarousel extends JViewLegacy
 	
 	$this->sequence_id = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.sequence_id', 'sequence_id', 0);
-	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("training");
 	
 	// Create the classes used to generate the carousel html code
 	$this->mediaCarousel = new MediaCarousel();

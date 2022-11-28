@@ -48,12 +48,7 @@ class BioDivViewKioskClassify extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
-		
 		$this->isCamera = getSetting("camera") == "yes";
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskclassify");
 
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);

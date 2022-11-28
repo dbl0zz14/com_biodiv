@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_SCHOOLTARGET_LOGIN").'</div>';
 }
 else {
 
@@ -27,11 +27,11 @@ else {
 		print '<div class="panel-body">';
 		
 		$imgSrc = $this->modules[$targetModule]->white_icon;
-		print '<div class="h3 panelHeading"><img class="img-responsive targetModuleIcon" src="'.$imgSrc.'"> '.$this->schoolPoints[$targetModule].' '.$this->translations['points']['translation_text'].'</div>';
+		print '<div class="h3 panelHeading"><img class="img-responsive targetModuleIcon" src="'.$imgSrc.'"> '.$this->schoolPoints[$targetModule].' '.JText::_("COM_BIODIV_SCHOOLTARGET_POINTS").'</div>';
 		
-		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->targetAward->awardName. ' '.$this->translations['school_needs']['translation_text'];
+		print '<p>'.JText::_("COM_BIODIV_SCHOOLTARGET_TO_REACH").' '.$this->targetAward->awardName. ' '.JText::_("COM_BIODIV_SCHOOLTARGET_SCHOOL_NEEDS");
 		
-		print ' <strong>'.$this->targetAward->pointsNeeded.' '.$this->translations['points']['translation_text'].'</strong>';
+		print ' <strong>'.$this->targetAward->pointsNeeded.' '.JText::_("COM_BIODIV_SCHOOLTARGET_POINTS").'</strong>';
 		
 		print '</p>';
 		
@@ -42,41 +42,14 @@ else {
 		print '</div>'; // row
 		
 		
-		
-		// print '<p>'.$this->translations['school_has']['translation_text'].'</p>';
-			
-		// print '<div class="bigText spaced">'.$this->target->totalUserPoints.' '.$this->translations['points']['translation_text'].'</div>';
-		
-		// print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->target->awardName. ' '.$this->translations['school_needs']['translation_text'].'</p>';
-		
-		// print '<div class="bigText spaced">'.$this->target->pointsNeeded.' '.$this->translations['points']['translation_text'].'</div>';
-		
-		
-		// print '<div class="col-md-12 h4 text-center">';
-		// print $this->translations['school_has']['translation_text'];
-		// print '</div>';
-		
-		// print '<div class="col-md-12 text-center bigText">';
-		// print $this->target->totalUserPoints . ' ' . $this->translations['points']['translation_text'];
-		// print '</div>';
-		
-		// print '<div class="col-md-12 h4 text-center">';
-		// print $this->translations['to_reach']['translation_text'] . ' ' . $this->target->awardName . ' ' . $this->translations['school_needs']['translation_text'];
-		// print '</div>';
-		
-		// print '<div class="col-md-12 text-center bigText">';
-		// print $this->target->pointsNeeded . ' ' . $this->translations['points']['translation_text'];
-		// print '</div>';
-		
-		
 	}
 	else if ( $this->isLatest ) {
 		print '<div class="col-md-12 text-center">';
-		print $this->translations['school_reached']['translation_text'] . ' ' . $this->targetAward->awardName;
+		print JText::_("COM_BIODIV_SCHOOLTARGET_SCHOOL_REACHED") . ' ' . $this->targetAward->awardName;
 		print '</div>';
 		
 		print '<div class="col-md-12 text-center">';
-		print $this->translations['all_awards']['translation_text'];
+		print JText::_("COM_BIODIV_SCHOOLTARGET_ALL_AWARDS");
 		print '</div>';	
 	}
 	

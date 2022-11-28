@@ -30,17 +30,11 @@ class BioDivViewUserDashboard extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("userdashboard");
-	
 	// Get all the projects that this user is a spotter for
 	$this->spotterProjects = mySpottingProjects();
 	
 	// Get all the projects that this user is a spotter for
 	$this->trapperProjects = myTrappingProjects();
-	
-	// get all the users sites
-	//$this->sites = mySites();
 	
 	// Remove any previous report for this user - page has been reloaded and we don't keep them around
 	BiodivReport::removeExistingReports( $this->personId );
@@ -60,9 +54,9 @@ class BioDivViewUserDashboard extends JViewLegacy
 		}
 	}
 	
-	$this->waitText = $this->translations['wait_text']['translation_text'];
-	$this->doneText = $this->translations['done_text']['translation_text'];
-	$this->genText = $this->translations['gen_text']['translation_text'];
+	$this->waitText = JText::_("COM_BIODIV_USERDASHBOARD_WAIT_TEXT");
+	$this->doneText = JText::_("COM_BIODIV_USERDASHBOARD_DONE_TEXT");
+	$this->genText = JText::_("COM_BIODIV_USERDASHBOARD_GEN_TEXT");
 
     // Display the view
     parent::display($tpl);

@@ -36,9 +36,6 @@ class BioDivViewTraining extends JViewLegacy
 	// New training session so allow write to db
 	$app->setUserState('com_biodiv.written', '0');
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("training");
-	
 	// Get training topics
 	$features = array();
 	$features['restriction'] = "seq > 0";

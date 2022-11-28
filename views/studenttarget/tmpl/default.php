@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 error_log ( "SchoolSpotlight template called" );
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_STUDENTTARGET_LOGIN").'</div>';
 }
 else {
 
@@ -20,7 +20,7 @@ else {
 	print '<div id="studentTargetRow" class="row">';
 	
 	print '<div class="col-md-12 text-center">';
-	print $this->translations['to_reach']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTTARGET_TO_REACH");
 	print '</div>'; // col-12
 	
 	print '<div class="col-md-12 text-center bigText">';
@@ -42,8 +42,8 @@ else {
 	print '</div>'; // col-12
 	
 	print '<div class="col-md-12 text-center">';
-	print $this->translations['you_need']['translation_text'] . ' ' . '<span class="hugeText">' . $this->target->pointsNeeded . 
-			'</span>' . ' ' . $this->translations['more_points']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTTARGET_YOU_NEED") . ' ' . '<span class="hugeText">' . $this->target->pointsNeeded . 
+			'</span>' . ' ' . JText::_("COM_BIODIV_STUDENTTARGET_MORE_POINTS");
 	print '</div>'; // col-12
 	
 	print '</div>'; // row

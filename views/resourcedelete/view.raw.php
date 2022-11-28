@@ -27,11 +27,6 @@ class BioDivViewResourceDelete extends JViewLegacy
     public function display($tpl = null) 
     {
 		
-		//error_log ( "ResourceDelete display called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("resourcedelete");
-	
 		$this->personId = (int)userID();
 		
 		if ( $this->personId ) {

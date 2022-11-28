@@ -26,9 +26,6 @@ class BioDivViewCollection extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("collection");
-	
 		$this->personId = (int)userID();
 		
 		$this->badgeGroupId = 0;

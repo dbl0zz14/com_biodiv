@@ -26,9 +26,6 @@ class BioDivViewMessageList extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("messagelist");
-		
 		$this->personId = userID();
 		
 		if ( $this->personId ) {

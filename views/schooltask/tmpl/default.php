@@ -14,41 +14,18 @@ error_log ( "SchoolTasks template called" );
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_SCHOOLTASK_LOGIN").'</div>';
 	
 }
 else if ( !$this->isTeacher ) {
 	
 	// Must be teacher message
-	print $this->translations['must_be_teacher']['translation_text'];
+	print JText::_("COM_BIODIV_SCHOOLTASK_MUST_BE_TEACHER");
 	
 }
 
 else {
 	
-	//print_r ( $this->allTasks );
-	/*
-	print '<div id="controlsArea" class="row">';
-
-	print '<div class="col-md-3 btn studentProgressTab squareButton">';
-	print $this->translations['student_progress']['translation_text'];
-	print '</div>';
-	
-	print '<div class="col-md-3 btn manageStudentsTab squareButton">';
-	print $this->translations['approve_tasks']['translation_text'];
-	print '</div>';
-	
-	print '<div class="col-md-3 btn schoolTaskTab squareButton active">';
-	print $this->translations['school_task']['translation_text'];
-	print '</div>';
-	
-	print '</div>'; // row
-	
-	
-	print '<div id="contentArea" class="row schoolTasksRow">';
-	*/
-	
-	//print '<div id="displayArea">';
 	print '<div class="row">';
 	print '<form id="schoolTaskForm">';
 	
@@ -59,14 +36,10 @@ else {
 	
 	print "<input type='hidden' name='school' value='" . $schoolId . "'/>";
 	print "<input type='hidden' name='resourceType' value='" . $resourceTypeId . "'/>";
-	//print "<input type='hidden' name='task' value='" . $this->taskId . "'/>";
-	//print "<input type='hidden' name='uploadName' value='" . $this->uploadName . "'/>";
-	//print "<input type='hidden' name='source' value='role'/>";
-		
-
+	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['select_task']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_SCHOOLTASK_SELECT_TASK").'</h3>';
 	
 	print '  <div class="input-group">';
 	print '    <span class="input-group-addon" style="background-color:#FFFFFF; border-bottom-left-radius:25px; border-top-left-radius:25px;"><span class="glyphicon glyphicon-search"></span></span>';
@@ -96,7 +69,7 @@ else {
 		print '</div>'; // row
 		print '</div>'; // col-3
 		print '<div class="col-md-9 col-sm-9 col-xs-9 text-left">';
-		print '<h5> '.$task->module_name. ' ' . $task->badge_group. ' ' . $this->translations['badge']['translation_text'] . '. ' .$task->badge_name. ' - ' . $task->name . 
+		print '<h5> '.$task->module_name. ' ' . $task->badge_group. ' ' . JText::_("COM_BIODIV_SCHOOLTASK_BADGE") . '. ' .$task->badge_name. ' - ' . $task->name . 
 					'</h5><p><small>'.$task->description.'</small></p>';
 		print '</div>'; // col-9
 		print '</div>'; // row	
@@ -113,15 +86,13 @@ else {
 	
 	print '<div id="chooseStudents" >';
 	
-	print '<h3>'.$this->translations['select_students']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_SCHOOLTASK_SELECT_STUDENTS").'</h3>';
 	
 	print '<div class="input-group">';
 	print '<div class="checkbox">';
-	print '<label><input id="selectAllStudents" type="checkbox" value="" aria-label="checkbox to select all students">'. $this->translations['select_all']['translation_text'] .'</label>';
+	print '<label><input id="selectAllStudents" type="checkbox" value="" aria-label="checkbox to select all students">'. JText::_("COM_BIODIV_SCHOOLTASK_SELECT_ALL") .'</label>';
 	print '</div>';
 	print '</div>';
-	
-	//print '<div class="btn selectAllStudents"><i class="fa fa-check"></i>'.$this->translations['select_all']['translation_text'].'</div>';
 	
 	print '<div id="studentSelect" name="studentSelect">';
 	
@@ -130,7 +101,6 @@ else {
 		print '<label><input type="checkbox" class="studentCheckbox" name="studentCheckBox[]" value="'.$student->person_id.
 					'" aria-label="checkbox to select '.$student->username.'">'. $student->username .'</label>';
 		print '</div>';
-		//print '<div class="h5">'. $student->username . '</div>';
 	}
 	
 	print '</div>'; // studentSelect
@@ -144,7 +114,7 @@ else {
 	
 	print '<div id="uploadButton"">';
 	
-	print '<button type="submit" id="uploadSchoolTask" class="btn btn-primary btn-lg dash_btn ">'.$this->translations['upload']['translation_text'].'</button>';
+	print '<button type="submit" id="uploadSchoolTask" class="btn btn-primary btn-lg dash_btn ">'.JText::_("COM_BIODIV_SCHOOLTASK_UPLOAD").'</button>';
 		
 	print '</div>'; // uploadButton
 	

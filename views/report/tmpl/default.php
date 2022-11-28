@@ -9,12 +9,10 @@
 defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JText::_("COM_BIODIV_REPORT_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_REPORT_LOGIN").'</a>';
 }
 else {
 
-	//error_log("report tmpl printing data");
-	
 	print '<div class="col-xs-12 col-sm-12 col-md-12 h3">'.$this->reportTitle.'</div>';
 
 	print '<div class="col-xs-12 col-sm-12 col-md-12">';
@@ -23,7 +21,7 @@ else {
 	if ( $this->totalRows < BiodivReport::REPORT_FILE_THRESHOLD ) {
 		print '<button id="reportdownload" type="button" class="list-group-item btn btn-block" data-report-id="'.$this->report_id.'" >';
 			
-		print '<h4 class="list-group-item-heading">'.$this->translations['download']['translation_text'].'</h4>';
+		print '<h4 class="list-group-item-heading">'.JText::_("COM_BIODIV_REPORT_DOWNLOAD").'</h4>';
 
 		print '</button>';
 	}
@@ -31,7 +29,7 @@ else {
 	
 		print '<button id="rptfiledownload" type="button" class="list-group-item btn btn-block" data-report-id="'.$this->report_id.'" >';
 			
-		print '<h4 class="list-group-item-heading">'.$this->translations['download']['translation_text'].'</h4>';
+		print '<h4 class="list-group-item-heading">'.JText::_("COM_BIODIV_REPORT_DOWNLOAD").'</h4>';
 
 		print '</button>';
 	}
@@ -161,8 +159,7 @@ else {
 				$setId = 0;
 				if ( strlen($rowField) > 7 ) $setId = substr($rowField,7);
 				if ( $setId > 0 ) {
-					//print '<td><button class="resource-set-btn" data-set_id="'. $setId . '"><i class="fa fa-files-o"></i></button></td>';
-					print '<td><a href="'.$this->translations['set_page']['translation_text'].'?set_id='.$setId.'" class="resource-set-btn" role="button" ><i class="fa fa-files-o"></i></a></td>';
+					print '<td><a href="'.JText::_("COM_BIODIV_REPORT_SET_PAGE").'?set_id='.$setId.'" class="resource-set-btn" role="button" ><i class="fa fa-files-o"></i></a></td>';
 				}
 				else {
 					print '<td></td>';

@@ -8,7 +8,7 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-// DO WE WANT A TITLE HERE _ IF SO TAKE FROM SRVEY TABLE....  print "<h1>" . $this->translations['heading']['translation_text'] . "</h1>";
+// DO WE WANT A TITLE HERE _ IF SO TAKE FROM SRVEY TABLE....  print "<h1>" . JText::_("COM_BIODIV_SURVEY_HEADING") . "</h1>";
 
 
 // Survey initial modal - only include if required
@@ -104,10 +104,10 @@ if ( $this->haveConsent ) {
 				print '<p></p>';
 				print '        <label class="btn btn-default col-1 na_btn">';
 				print '            <input type="radio" name="sq['.$question['sq_id'].']" value="11" autocomplete="off" required> ';
-				print '        </label> '.$this->translations['not_applic']['translation_text'];;
+				print '        </label> '.JText::_("COM_BIODIV_SURVEY_NOT_APPLIC");
 				print '        <label class="btn btn-default col-1 na_btn">';
 				print '            <input type="radio" name="sq['.$question['sq_id'].']" value="12" autocomplete="off" required> ';
-				print '        </label> '.$this->translations['prefer_not']['translation_text'];
+				print '        </label> '.JText::_("COM_BIODIV_SURVEY_PREFER_NOT");
 				print '    </div>';
 				print '     </div>'; // question
 			}
@@ -124,18 +124,16 @@ if ( $this->haveConsent ) {
 	
 	
 	print '      </div>'; // panel-group
-	//print '       <button  class="btn btn-outline-primary btn-block btn-lg" > '.$this->translations['parti_info']['translation_text'].' <i class="fa fa-angle-down fa-lg" aria-hidden="true"></i></button>';
 	
-	//print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="task" value="add_response"/>';
     print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="take_survey"  class="btn btn-warning btn-block" type="submit">'.$this->translations['contribute']['translation_text'].'</button></div>';
+    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="take_survey"  class="btn btn-warning btn-block" type="submit">'.JText::_("COM_BIODIV_SURVEY_CONTRIBUTE").'</button></div>';
 	print '          </form>';
 	print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="view" value="status"/>';
-    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="no_survey" class="btn btn-warning btn-block" type="submit"  data-survey-id="'.$this->surveyId.'">'.$this->translations['no_survey']['translation_text'].'</button></div>';
+    print '              <div class="col-md-3 col-sm-4 col-xs-6"><button id="no_survey" class="btn btn-warning btn-block" type="submit"  data-survey-id="'.$this->surveyId.'">'.JText::_("COM_BIODIV_SURVEY_NO_SURVEY").'</button></div>';
 	print '          </form>';
 	
 	
@@ -147,7 +145,7 @@ else {
 	print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
 	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 	print '              <input type="hidden" name="view" value="status"/>';
-    print '              <button class="btn btn-warning" type="submit">'.$this->translations['identify']['translation_text'].'</button>';
+    print '              <button class="btn btn-warning" type="submit">'.JText::_("COM_BIODIV_SURVEY_IDENTIFY").'</button>';
 	print '          </form>';
 	
 }

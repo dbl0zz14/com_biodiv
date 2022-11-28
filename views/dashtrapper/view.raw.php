@@ -28,20 +28,12 @@ class BioDivViewDashTrapper extends JViewLegacy
    */
   public function display($tpl = null) 
   {
-    error_log ( "DashTrapper view display called" );
-		
-	$this->personId = (int)userID();
-	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("dashtrapper");
-	
+    $this->personId = (int)userID();
 	
 	if ( $this->personId ) {
 		
 		
 		$app = JFactory::getApplication();	
-		
-		error_log ( "DashTrapper calling getTrapperStatistics" );
 		
 		$this->statRows = getTrapperStatistics();
 		

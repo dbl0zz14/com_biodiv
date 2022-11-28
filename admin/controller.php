@@ -42,6 +42,7 @@ class BioDivController extends JControllerLegacy
 		$parentProject = $input->getInt('parentProject', 0);
 		$imageDir = $input->getString('imageDir', 'images/projects');
 		$imageFile = $input->getString('imageFile', 0);
+		$articleId = $input->getInt('articleId', 0);
 		$listingLevel = $input->getInt('listingLevel', 10000);
 		$priority = $input->getInt('priority', 0);
 		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
@@ -64,6 +65,7 @@ class BioDivController extends JControllerLegacy
 		}
 		$fields->dirname = $imageDir;
 		$fields->image_file = $imageFile;
+		$fields->article_id = $articleId;
 		$fields->listing_level = $listingLevel;
 		
 		$success = $db->insertObject("Project", $fields, 'project_id');
@@ -157,16 +159,11 @@ class BioDivController extends JControllerLegacy
 		$this->input->set('id', $projectId);
 		$this->input->set('view', 'project');
 		
-		// $view = $this->getView( 'biodivs', 'html' );
-		// $view->display();
-
 		parent::display();
 	}
 	
 	
 	function editproject() {
-		
-		error_log ( "Edit project called" );
 		
 		$app = JFactory::getApplication();
 
@@ -180,6 +177,7 @@ class BioDivController extends JControllerLegacy
 		$parentProject = $input->getInt('parentProject', 0);
 		$imageDir = $input->getString('imageDir', 'images/projects');
 		$imageFile = $input->getString('imageFile', 0);
+		$articleId = $input->getInt('articleId', 0);
 		$listingLevel = $input->getInt('listingLevel', 10000);
 		$priority = $input->getInt('priority', 0);
 		$displayOptions = $input->get('displayOptions', array(), 'ARRAY');
@@ -204,6 +202,7 @@ class BioDivController extends JControllerLegacy
 		}
 		$fields->dirname = $imageDir;
 		$fields->image_file = $imageFile;
+		$fields->article_id = $articleId;
 		$fields->listing_level = $listingLevel;
 		
 		$success = $db->updateObject("Project", $fields, 'project_id');

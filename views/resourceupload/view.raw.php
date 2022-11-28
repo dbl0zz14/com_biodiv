@@ -26,11 +26,6 @@ class BioDivViewResourceUpload extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ResourceUpload display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("resourceupload");
-	
 		$this->resourceTypes = null;
 		
 		$this->personId = (int)userID();

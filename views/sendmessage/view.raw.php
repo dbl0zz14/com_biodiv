@@ -26,16 +26,11 @@ class BioDivViewSendMessage extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "SendMessage display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("sendmessage");
-	
 		$this->person_id = (int)userID();
 
 		if ( !$this->person_id ) {
 			
-			$resp = ['error' => $this->translations['login']['translation_text'] ];
+			$resp = ['error' => JText::_("COM_BIODIV_SENDMESSAGE_LOGIN") ];
 			$this->messageResponse = (object) $resp;
 			error_log("SendMessage view: no person id" );
 			
@@ -69,11 +64,11 @@ class BioDivViewSendMessage extends JViewLegacy
 					try {
 						$messageManager->reportMessage ( $sender, $reportedMsgId, $reportText );
 						
-						$resp = ['message' => $this->translations['report_sent']['translation_text'] ];
+						$resp = ['message' => JText::_("COM_BIODIV_SENDMESSAGE_REPORT_SENT") ];
 						$this->messageResponse = (object) $resp;
 					}
 					catch ( Throwable $th ) {
-						$resp = ['error' => $this->translations['report_failed']['translation_text'] ];
+						$resp = ['error' => JText::_("COM_BIODIV_SENDMESSAGE_REPORT_FAILED") ];
 						$this->messageResponse = (object) $resp;
 					}
 					
@@ -102,7 +97,7 @@ class BioDivViewSendMessage extends JViewLegacy
 					error_log ( "SendMessage - about to set up response" );
 					
 					//$resp = ['message' => 'Message sent' ];
-					$resp = ['message' => $this->translations['success']['translation_text'], 'replyTo' => $replyToId, 'replyIcon' => '<i class="fa fa-reply"></i>' ];
+					$resp = ['message' => JText::_("COM_BIODIV_SENDMESSAGE_SUCCESS"), 'replyTo' => $replyToId, 'replyIcon' => '<i class="fa fa-reply"></i>' ];
 					$this->messageResponse = (object) $resp;
 				}
 			}

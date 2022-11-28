@@ -26,9 +26,6 @@ class BioDivViewAwards extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("awards");
-	
 		$this->personId = (int)userID();
 		
 		$this->newAwards = array();

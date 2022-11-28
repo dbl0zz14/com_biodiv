@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCEFILE_LOGIN").'</div>';
 }
 else if ( $this->resourceId ) {
 	
@@ -18,10 +18,9 @@ else if ( $this->resourceId ) {
 	
 }
 else {
-	print ('<div class="col-md-12" >'.$this->translations['no_file']['translation_text'].'</div>');
+	print ('<div class="col-md-12" >'.JText::_("COM_BIODIV_RESOURCEFILE_NO_FILE").'</div>');
 }
 
-//print ('Resource File here');
 
 
 ?>

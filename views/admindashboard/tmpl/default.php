@@ -15,20 +15,20 @@ $document->addScriptDeclaration("BioDiv.doneText = '".$this->doneText."';");
 $document->addScriptDeclaration("BioDiv.genText = '".$this->genText."';");
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_ADMINDASHBOARD_LOGIN").'</div>';
 }
 else if ( $this->firstLoad ) {
 	
 	print '<div class="row">';
 	print '<div class="col-md-12">';
 
-	print '<h1 class="text-center">'.$this->translations['welcome']['translation_text'].'</h1>';
+	print '<h1 class="text-center">'.JText::_("COM_BIODIV_ADMINDASHBOARD_WELCOME").'</h1>';
 	
-	print '<h2 class="text-center bigSpaced">'.$this->translations['you_are']['translation_text'].'</h2>';
+	print '<h2 class="text-center bigSpaced">'.JText::_("COM_BIODIV_ADMINDASHBOARD_YOU_ARE").'</h2>';
 
 	print '<div id="avatarArea">';
 	
-	print '<h3 class="text-center bigSpaced">'.$this->translations['choose_avatar']['translation_text'].'</h3>';
+	print '<h3 class="text-center bigSpaced">'.JText::_("COM_BIODIV_ADMINDASHBOARD_CHOOSE_AVATAR").'</h3>';
 	
 	$isFirst = true;
 	$avatarCount = 0;
@@ -59,13 +59,13 @@ else if ( $this->firstLoad ) {
 		print '</div>'; // row
 	}
 	
-	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.$this->translations['save_avatar']['translation_text'].'</button>';
+	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.JText::_("COM_BIODIV_ADMINDASHBOARD_SAVE_AVATAR").'</button>';
 	
 	print '</div>'; // row
 	print '</div>'; // avatarArea
 	
 	if ( $this->isAdmin ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['admin_dash']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_ADMINDASHBOARD_ADMIN_DASH").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_ADMINDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 
 
@@ -92,7 +92,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print $this->translations['heading']['translation_text'].' <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print JText::_("COM_BIODIV_ADMINDASHBOARD_HEADING").' <small class="hidden-xs">'.JText::_("COM_BIODIV_ADMINDASHBOARD_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -149,7 +149,7 @@ else {
 		
 		print '<div class="summaryItemName h3 panelHeading text-center">';
 		
-		print $this->translations['resources']['translation_text'];
+		print JText::_("COM_BIODIV_ADMINDASHBOARD_RESOURCES");
 		
 		print '</div>'; // summaryName
 		
@@ -161,13 +161,13 @@ else {
 		
 		print '<div class="summaryItemText h4 text-center">';
 		
-		print $this->translations['uploaded']['translation_text'];
+		print JText::_("COM_BIODIV_ADMINDASHBOARD_UPLOADED");
 		
 		print '</div>'; // summaryText
 		
 		print '<div class="summaryItemBtn text-center">';
 			
-		print '<div class="btn btn-lg btn-primary report-btn" role="button" data-report-type="'.$this->resourceReportId.'">'.$this->translations['view']['translation_text'].'</div>';
+		print '<div class="btn btn-lg btn-primary report-btn" role="button" data-report-type="'.$this->resourceReportId.'">'.JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW").'</div>';
 		
 		print '</div>'; // summaryBtn
 		
@@ -196,7 +196,7 @@ else {
 		
 		print '<div class="summaryItemName h3 panelHeading text-center">';
 		
-		print $this->translations['user_admin']['translation_text'];
+		print JText::_("COM_BIODIV_ADMINDASHBOARD_USER_ADMIN");
 		
 		print '</div>'; // summaryName
 		
@@ -208,13 +208,13 @@ else {
 		
 		print '<div class="summaryItemText h4 text-center">';
 		
-		print $this->translations['active_users']['translation_text'];
+		print JText::_("COM_BIODIV_ADMINDASHBOARD_ACTIVE_USERS");
 		
 		print '</div>'; // summaryText
 		
 		print '<div class="summaryItemBtn text-center">';
 			
-		print '<a href="'.$this->translations['user_admin_page']['translation_text'].'"><div class="btn btn-lg btn-default" role="button">'.$this->translations['view_admin']['translation_text'].'</div></a>';
+		print '<a href="'.JText::_("COM_BIODIV_ADMINDASHBOARD_USER_ADMIN_PAGE").'"><div class="btn btn-lg btn-default" role="button">'.JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW_ADMIN").'</div></a>';
 		
 		print '</div>'; // summaryBtn
 		
@@ -272,15 +272,13 @@ else {
 			
 			print '<div class="summaryItemText h4 text-center">';
 			
-			//print $module->name . ' ' . $this->translations['activities']['translation_text'];
-			print $this->translations['activities']['translation_text'];
+			print JText::_("COM_BIODIV_ADMINDASHBOARD_ACTIVITIES");
 			
 			print '</div>'; // summaryText
 			
 			print '<div class="summaryItemBtn text-center">';
 			
-			//print '<div class="btn btn-lg btn-primary report-btn" role="button" data-report-type="'.$module->report_id.'" data-filter="{'.'"'.'module":\''.$module->name.'\'}">'.$this->translations['view']['translation_text'].'</div>';
-			print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$module->report_id."' data-filter='{\"module\":\"".$module->module_id."\"}'>".$this->translations['view']['translation_text']."</div>";
+			print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$module->report_id."' data-filter='{\"module\":\"".$module->module_id."\"}'>".JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW")."</div>";
 			
 			print '</div>'; // summaryBtn
 			
@@ -337,7 +335,7 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+//print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_ADMINDASHBOARD_REVIEW").'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

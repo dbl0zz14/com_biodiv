@@ -22,8 +22,6 @@ class Task {
 	{
 		if ( $taskId ) {
 			
-			$this->translations = getTranslations("Task");
-			
 			$this->taskId = $taskId;
 			
 			if ( $personId ) {
@@ -271,8 +269,8 @@ class Task {
 			
 			if ( $result ) {
 				
-				SchoolCommunity::addNotification ( $this->translations['you_unlocked']['translation_text'] . ' ' . 
-								$this->translations['learn_more']['translation_text'], $this->personId );
+				SchoolCommunity::addNotification ( \JText::_("COM_BIODIV_TASK_YOU_UNLOCKED") . ' ' . 
+								\JText::_("COM_BIODIV_TASK_LEARN_MORE"), $this->personId );
 			}
 			
 		}
@@ -374,8 +372,8 @@ class Task {
 					$db->setQuery($query);
 					$result = $db->execute();
 					
-					SchoolCommunity::addNotification ( $this->translations['well_done']['translation_text'] . ' ' . $this->taskDetail->name . "  " . 
-								$this->translations['activity_approved']['translation_text'], $this->personId );
+					SchoolCommunity::addNotification ( \JText::_("COM_BIODIV_TASK_WELL_DONE") . ' ' . $this->taskDetail->name . "  " . 
+								\JText::_("COM_BIODIV_TASK_ACTIVITY_APPROVED"), $this->personId );
 					
 				
 				}
@@ -419,8 +417,8 @@ class Task {
 					$db->setQuery($query);
 					$result = $db->execute();
 					
-					SchoolCommunity::addNotification ( $this->translations['problem']['translation_text'] . ' ' . $this->taskDetail->name . "  " . 
-								$this->translations['ask_teacher']['translation_text'], $this->personId, false );
+					SchoolCommunity::addNotification ( \JText::_("COM_BIODIV_TASK_PROBLEM") . ' ' . $this->taskDetail->name . "  " . 
+								\JText::_("COM_BIODIV_TASK_YOU_ASK_TEACHER"), $this->personId, false );
 					
 				
 				}
@@ -562,8 +560,6 @@ class Task {
 	public static function checkSystemTasks () {
 		
 		
-		$translations = getTranslations("Task");
-		
 		$personId = userID();
 		
 		$userTaskTable = "StudentTasks";
@@ -609,7 +605,7 @@ class Task {
 				$db->setQuery($query);
 				$result = $db->execute();
 				
-				SchoolCommunity::addNotification($systemTask->getTaskName() . " " . $translations['completed']['translation_text']);
+				SchoolCommunity::addNotification($systemTask->getTaskName() . " " . \JText::_("COM_BIODIV_TASK_COMPLETED"));
 				SchoolCommunity::logEvent ( false, SchoolCommunity::SCHOOL,  'completed the ' . $systemTask->getBadgeName() . ' ' . 'badge'  );
 			}
 		}

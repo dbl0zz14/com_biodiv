@@ -29,7 +29,6 @@ class BioDivViewStatus extends JViewLegacy
     $person_id = (int)userID();
     $person_id or die("No person_id");
 
-    $this->root = 
     $this->status = getSpotterStatistics();
 	
 	// Set the photo to zero on load and the classify option back to default 0
@@ -42,57 +41,9 @@ class BioDivViewStatus extends JViewLegacy
 	$app->setUserState('com_biodiv.animal_ids', 0);
     
 
-    $db = JDatabase::getInstance(dbOptions());
-
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("status");
-/*
-	$query = $db->getQuery(true);
-    $query->select("end_date, num_uploaded as uploaded, num_classified as classified ")
-		->from("Statistics")
-		->where("project_id = 0")
-		->order("end_date DESC");
-	$db->setQuery($query, 0, 1); // LIMIT 1
-	$row = $db->loadAssoc();
-	$this->status[$this->translations['tot_system']['translation_text']] = $row['uploaded'];
-	$this->status[$this->translations['tot_class']['translation_text']] = $row['classified'];
-	
-	// Default to zero.
-	$this->status[$this->translations['num_you']['translation_text']] = 0;
-	
-	$query = $db->getQuery(true);
-    $query->select("person_id, num_classified")
-		->from("LeagueTable")
-		->order("num_classified desc");
-    $db->setQuery($query);
-	
-    $leagueTable = $db->loadAssocList();
-	
-	
-	
-	$this->leagueTable = array_column($leagueTable, 'person_id');
-	$this->totalSpotters = count($this->leagueTable);
-	
-	//print_r($this->leagueTable);
-	
-	$userPos = array_search($person_id, $this->leagueTable);
-	if ( $userPos === False  ) {
-		//print ( "Not in league table" );
-		$userPos = count($this->leagueTable);
-		$this->totalSpotters += 1;
-	}
-	else {
-		$this->status[$this->translations['num_you']['translation_text']] = $leagueTable[$userPos]['num_classified'];
-	}
-	
-	$this->status[$this->translations['tot_spot']['translation_text']] = $this->totalSpotters;
-	$this->status[$this->translations['you_curr']['translation_text'] . ' ' . getOrdinal($userPos + 1) . ' ' . $this->translations['contrib']['translation_text'] ] ='';
-*/
-
 	// call new biodiv.php function instead of myProjects()
 	// Changed back argument to check redirect issue  
 	$this->projects = mySpottingProjects( true );
-	//$this->projects = mySpottingProjects();
 	$this->mylikes = getLikes(1);
 	
 	// Do we want to pop up surveys?

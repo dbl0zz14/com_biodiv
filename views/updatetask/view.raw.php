@@ -26,16 +26,11 @@ class BioDivViewUpdateTask extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "UpdateTask display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("updatetask");
-		
 		$this->personId = userID();
 		
 		$this->resourceId = null;
 		
-		$this->message = $this->translations['default_msg']['translation_text'];
+		$this->message = JText::_("COM_BIODIV_UPDATETASK_DEFAULT_MSG");
 		
 		if ( $this->personId ) {
 	
@@ -71,14 +66,14 @@ class BioDivViewUpdateTask extends JViewLegacy
 				
 				$task = new Biodiv\Task ( $taskId );
 				$task->unlock();
-				$this->message =  $this->translations['unlock_msg']['translation_text'] . ': ' . $task->getSpecies();
+				$this->message =  JText::_("COM_BIODIV_UPDATETASK_UNLOCK_MSG") . ': ' . $task->getSpecies();
 		
 			}
 			else if ( $collect ) {
 				
 				$task = new Biodiv\Task ( $taskId );
 				$task->collect();
-				$this->message =  $this->translations['collect_msg']['translation_text'] . ': ' . $task->getTaskName();
+				$this->message =  JText::_("COM_BIODIV_UPDATETASK_COLLECT_MSG") . ': ' . $task->getTaskName();
 		
 			}
 			else if ( $done ) {
@@ -89,13 +84,13 @@ class BioDivViewUpdateTask extends JViewLegacy
 				// Get my avatar
 				$this->avatar = Biodiv\SchoolCommunity::getAvatar();
 				
-				$this->feedback = $this->translations['well_done']['translation_text'];
+				$this->feedback = JText::_("COM_BIODIV_UPDATETASK_WELL_DONE");
 				
-				$this->message = $this->translations['done_msg']['translation_text'] . ' ' . $task->getTaskName() . ' ' . 
-						$this->translations['activity']['translation_text'];
+				$this->message = JText::_("COM_BIODIV_UPDATETASK_DONE_MSG") . ' ' . $task->getTaskName() . ' ' . 
+						JText::_("COM_BIODIV_UPDATETASK_ACTIVITY");
 				
 				if ( Biodiv\SchoolCommunity::isStudent() ) {
-					$this->nextStep = $this->translations['once_approved']['translation_text'];
+					$this->nextStep = JText::_("COM_BIODIV_UPDATETASK_ONCE_APPROVED");
 				}	
 				
 				$this->reloadButton = true;
@@ -108,8 +103,8 @@ class BioDivViewUpdateTask extends JViewLegacy
 				$studentId = $task->getTaskPerson();
 				error_log ( "Task person id = " . $studentId );
 				$schoolUser = Biodiv\SchoolCommunity::getSchoolUser( $studentId );
-				$this->message = $this->translations['approve_msg']['translation_text'] . ': ' . $task->getTaskName() . ' ' .
-						$this->translations['for']['translation_text'] . ' ' . $schoolUser->username;
+				$this->message = JText::_("COM_BIODIV_UPDATETASK_APPROVE_MSG") . ': ' . $task->getTaskName() . ' ' .
+						JText::_("COM_BIODIV_UPDATETASK_FOR") . ' ' . $schoolUser->username;
 			
 			}
 			else if ( $reject ) {
@@ -118,8 +113,8 @@ class BioDivViewUpdateTask extends JViewLegacy
 				$task->reject();
 				$studentId = $task->getTaskPerson();
 				$schoolUser = Biodiv\SchoolCommunity::getSchoolUser( $studentId );
-				$this->message = $this->translations['reject_msg']['translation_text'] . ': ' . $task->getTaskName() . ' ' .
-						$this->translations['for']['translation_text'] . ' ' . $schoolUser->username;
+				$this->message = JText::_("COM_BIODIV_UPDATETASK_REJECT_MSG") . ': ' . $task->getTaskName() . ' ' .
+						JText::_("COM_BIODIV_UPDATETASK_FOR") . ' ' . $schoolUser->username;
 			
 			}
 			else if ( $taskSetId ) {
@@ -129,13 +124,13 @@ class BioDivViewUpdateTask extends JViewLegacy
 				// Get my avatar
 				$this->avatar = Biodiv\SchoolCommunity::getAvatar();
 				
-				$this->feedback = $this->translations['well_done']['translation_text'];
+				$this->feedback = JText::_("COM_BIODIV_UPDATETASK_WELL_DONE");
 				
-				$this->message = $this->translations['done_msg']['translation_text'] . ' ' . $task->getTaskName() . ' ' . 
-						$this->translations['activity']['translation_text'];
+				$this->message = JText::_("COM_BIODIV_UPDATETASK_DONE_MSG") . ' ' . $task->getTaskName() . ' ' . 
+						JText::_("COM_BIODIV_UPDATETASK_ACTIVITY");
 				
 				if ( Biodiv\SchoolCommunity::isStudent() ) {
-					$this->nextStep = $this->translations['once_approved']['translation_text'];
+					$this->nextStep = JText::_("COM_BIODIV_UPDATETASK_ONCE_APPROVED");
 				}	
 				
 				$this->reloadButton = true;
@@ -152,15 +147,15 @@ class BioDivViewUpdateTask extends JViewLegacy
 					// Get my avatar
 					$this->avatar = Biodiv\SchoolCommunity::getAvatar();
 					
-					$this->feedback = $this->translations['thank_you']['translation_text'];
+					$this->feedback = JText::_("COM_BIODIV_UPDATETASK_THANK_YOU");
 					
-					$this->message = $this->translations['done_msg']['translation_text'] . ' ' . $task->getTaskName() . ' ' . 
-						$this->translations['activity']['translation_text'];
+					$this->message = JText::_("COM_BIODIV_UPDATETASK_DONE_MSG") . ' ' . $task->getTaskName() . ' ' . 
+						JText::_("COM_BIODIV_UPDATETASK_ACTIVITY");
 					
 					$this->reloadButton = true;
 				}
 				else {
-					$this->message = $this->translations['problem']['translation_text'];
+					$this->message = JText::_("COM_BIODIV_UPDATETASK_PROBLEM");
 				}
 				
 			}	

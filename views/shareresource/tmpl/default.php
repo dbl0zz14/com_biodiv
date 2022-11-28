@@ -8,9 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "FavouriteResource template called" );
-
-
 
 
 ?>

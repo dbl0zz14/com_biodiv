@@ -30,9 +30,6 @@ class BioDivViewResourceHub extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("resourcehub");
-	
 	$schoolSettings = getSetting ( "school_icons" );
 	$settingsObj = json_decode ( $schoolSettings );
 	$this->bookmarkedImg = "";
@@ -56,8 +53,6 @@ class BioDivViewResourceHub extends JViewLegacy
 	// Get the resource types
 	$allResourceTypes = Biodiv\ResourceFile::getResourceTypes();
 	$this->resourceTypes = array_slice($allResourceTypes, 0, 7);
-	
-	//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 	
 	$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 		

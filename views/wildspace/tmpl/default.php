@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_WILDSPACE_LOGIN").'</div>';
 	
 }
 
@@ -45,7 +45,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_WILDSPACE_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_WILDSPACE_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -57,13 +57,11 @@ else {
 	print '</div>'; // row
 	print '</h2>'; 
 	
-	print '<a href="'.$this->translations['badges_link']['translation_text'].'" class="btn btn-primary" >'.$this->translations['badges_page']['translation_text'].'</button>'.'</a>';
+	print '<a href="'.JText::_("COM_BIODIV_WILDSPACE_BADGES_LINK").'" class="btn btn-primary" >'.JText::_("COM_BIODIV_WILDSPACE_BADGES_PAGE").'</button>'.'</a>';
 
 
 	// // ----------------------------------------- Species buttons  ------------------------------
 	
-	// // Scroll up
-	// print '<div class="row"><button id="scroll_up_species" class="btn btn-lg btn-block scroll_btn" disabled><span class="fa fa-2x fa-chevron-up"></span></button></div>';
 	
 	print '<div class="row speciesRow">';
 	
@@ -106,7 +104,7 @@ print '	 <div class="modal-body">';
 print '    <div id="species_article"></div>';
 print '  </div>'; // modal body
 print '  <div class="modal-footer">';
-print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button></div>';
+print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-primary" data-dismiss="modal">'.JText::_("COM_BIODIV_WILDSPACE_CLOSE").'</button></div>';
 print '  </div>'; // modal footer
 print ' </div>'; // modal content
 print ' </div>'; // modal dialog
@@ -120,7 +118,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

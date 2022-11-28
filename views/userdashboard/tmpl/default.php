@@ -16,15 +16,9 @@ $document->addScriptDeclaration("BioDiv.genText = '".$this->genText."';");
 
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.JURI::root().'/'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JURI::root().'/'.JText::_("COM_BIODIV_USERDASHBOARD_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_USERDASHBOARD_LOGIN").'</a>';
 }
 else {
-	
-	//print "<div class='col-md-12'>";
-
-	//print '<h1>'.$this->translations['dash_heading']['translation_text'].'</h1>';
-
-	//print "</div>";
 	
 	print "<div class='col-md-3'>";
 	
@@ -39,9 +33,9 @@ else {
 		
 	print '<div class="panel-heading">';
   	print '<div class="row">';
-    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.$this->translations['status']['translation_text'].'</h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.$this->translations['show']['translation_text'].'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.$this->translations['hide']['translation_text'].'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.JText::_("COM_BIODIV_USERDASHBOARD_STATUS").'</h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_SHOW").'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_HIDE").'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 	print '</div>';
 	print '</div>'; // panel-heading
 	
@@ -50,11 +44,11 @@ else {
 	print '<div class="list-group btn-group-vertical btn-block" role="group" aria-label="Status Buttons">';
 	
 	print '<button id="spotter_status" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	print '<h5>'.$this->translations['spotter']['translation_text'].'</h5>';
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_SPOTTER").'</h5>';
 	print '</button>';
 		
 	print '<button id="trapper_status" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	print '<h5>'.$this->translations['trapper']['translation_text'].'</h5>';
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_TRAPPER").'</h5>';
 	print '</button>';
 
 	print '</div>'; // list-group
@@ -68,9 +62,9 @@ else {
 		
 	print '<div class="panel-heading">';
   	print '<div class="row">';
-    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.$this->translations['charts']['translation_text'].'</h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 show_options" data-toggle="tooltip" title="'.$this->translations['show']['translation_text'].'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 hide_options" data-toggle="tooltip" title="'.$this->translations['hide']['translation_text'].'"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.JText::_("COM_BIODIV_USERDASHBOARD_CHARTS").'</h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 show_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_SHOW").'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 hide_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_HIDE").'"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 	print '</div>';
 	print '</div>'; // panel-heading
 	
@@ -79,13 +73,10 @@ else {
 	print '<div class="list-group btn-group-vertical btn-block" role="group" aria-label="Chart Buttons">';
 	
 	print '<button id="site_charts" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	print '<h5>'.$this->translations['site_charts']['translation_text'].'</h5>';
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_SITE_CHARTS").'</h5>';
 	print '</button>';
 		
-	//print '<button id="project_charts" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	//print '<h5>'.$this->translations['project_charts']['translation_text'].'</h5>';
-	//print '</button>';
-
+	
 	print '</div>'; // list-group
 	
 	print '</div>'; // panel-body
@@ -97,9 +88,9 @@ else {
 		
 	print '<div class="panel-heading">';
   	print '<div class="row">';
-    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.$this->translations['likes']['translation_text'].'</h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.$this->translations['show']['translation_text'].'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.$this->translations['hide']['translation_text'].'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.JText::_("COM_BIODIV_USERDASHBOARD_LIKES").'</h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_SHOW").'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_HIDE").'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 	print '</div>';
 	print '</div>'; // panel-heading
 	
@@ -108,11 +99,11 @@ else {
 	print '<div class="list-group btn-group-vertical btn-block" role="group" aria-label="Likes Buttons">';
 	
 	print '<button id="my_likes" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	print '<h5>'.$this->translations['my_likes']['translation_text'].'</h5>';
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_MY_LIKES").'</h5>';
 	print '</button>';
 		
 	print '<button id="others_likes" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
-	print '<h5>'.$this->translations['others_likes']['translation_text'].'</h5>';
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_OTHERS_LIKES").'</h5>';
 	print '</button>';
 
 	print '</div>'; // list-group
@@ -127,9 +118,9 @@ else {
 		
 	print '<div class="panel-heading">';
   	print '<div class="row">';
-    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.$this->translations['reports']['translation_text'].'</h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.$this->translations['show']['translation_text'].'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
-    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.$this->translations['hide']['translation_text'].'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+    print '<div class="col-xs-9 col-sm-9 col-md-9"><h4>'.JText::_("COM_BIODIV_USERDASHBOARD_REPORTS").'</h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right show_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_SHOW").'"><h4><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+    print '<div role="button" class="col-xs-3 col-sm-3 col-md-3 text-right hide_options" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_USERDASHBOARD_HIDE").'"><h4><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 	print '</div>';
 	print '</div>'; // panel-heading
 	
@@ -151,11 +142,8 @@ else {
 		}
 		print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'" style="white-space: normal;">';
 		
-		//print '<h4 class="list-group-item-heading">'.$reportName.'</h4>';
-		//print '<div class="list-group-item-text">'.$this->reportArticles[$reportId]->introtext.'</div>';
-		
 		print '<h5>'.$reportName.'</h5>';
-		//print '<div>' . $this->reportArticles[$reportType]->introtext . '</div>';
+		
 		print '</button>';
 	}
 
@@ -180,7 +168,7 @@ else {
 
 	print "<div id='data_warning' hidden>";
 	
-	print "<p style='margin-top: 10px'>".$this->translations['data_warn']['translation_text']."</p>";
+	print "<p style='margin-top: 10px'>".JText::_("COM_BIODIV_USERDASHBOARD_DATA_WARN")."</p>";
 
 	print "</div>";
 
@@ -197,13 +185,13 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
+print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_USERDASHBOARD_REVIEW").'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="media_carousel" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.JText::_("COM_BIODIV_USERDASHBOARD_CLOSE").'</button>';
 print '      </div>';
 	  	  
 print '    </div>';

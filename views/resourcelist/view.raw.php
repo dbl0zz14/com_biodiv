@@ -26,10 +26,6 @@ class BioDivViewResourceList extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ResourceList display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("resourcelist");
 		
 		$this->personId = userID();
 		
@@ -84,19 +80,10 @@ class BioDivViewResourceList extends JViewLegacy
 			error_log ( $errMsg );
 			
 								
-			$this->shareOptions = array(Biodiv\SchoolCommunity::PERSON=>$this->translations['share_private']['translation_text'],
-										Biodiv\SchoolCommunity::SCHOOL=>$this->translations['share_school']['translation_text'],
-										Biodiv\SchoolCommunity::COMMUNITY=>$this->translations['share_community']['translation_text']);
-						/*	
-			if ( Biodiv\SchoolCommunity::isEcologist() ) {	
-				error_log ("ResourceList view - isEcologist = true" );
-				$this->shareOptions[Biodiv\SchoolCommunity::ECOLOGISTS] = $this->translations['share_ecologists']['translation_text'];
-			}
-						*/			
-			
-			//error_log ("Getting const" );
-			//$testConst = Biodiv\SchoolCommunity::PERSON;
-			//error_log ( "Test const = " . $testConst );
+			$this->shareOptions = array(Biodiv\SchoolCommunity::PERSON=>JText::_("COM_BIODIV_RESOURCELIST_SHARE_PRIVATE"),
+										Biodiv\SchoolCommunity::SCHOOL=>JText::_("COM_BIODIV_RESOURCELIST_SHARE_SCHOOL"),
+										Biodiv\SchoolCommunity::COMMUNITY=>JText::_("COM_BIODIV_RESOURCELIST_SHARE_COMMUNITY"));
+						
 			
 			if ( $this->setId ) {
 				
@@ -164,7 +151,7 @@ class BioDivViewResourceList extends JViewLegacy
 				//$this->setId = Biodiv\ResourceSet::getLastSetId();
 				$this->resourceFiles = Biodiv\ResourceFile::getPinnedResources();
 				
-				$this->heading = $this->translations['pinned_resources']['translation_text'];
+				$this->heading = JText::_("COM_BIODIV_RESOURCELIST_PINNED_RESOURCES");
 				
 			}
 		

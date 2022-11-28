@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 <?php
 	print "<div class='col-md-12' >";
-	print "<h1>".$this->translations['choose_topic']['translation_text']."</h1>";
+	print "<h1>".JText::_("COM_BIODIV_TRAINING_CHOOSE_TOPIC")."</h1>";
 	print "</div>";
 		
 	
@@ -55,9 +55,7 @@ defined('_JEXEC') or die;
 				
 		$url = imageURL($topic_id);
 		
-		print "<button class='image-btn topic-btn' type='button' data-topic='".$topic_id."' data-tooltip='".$this->translations['topic_tip']['translation_text'].
-		//	"'><div class='crop-width-col4'><img class='project-col-image cover scale2' alt = 'topic image' src='".$url."' /></div></button>";
-		//	"'><div class='crop-width-col4'><img class='cover img-responsive' alt = 'topic image' src='".$url."' /></div></button>";
+		print "<button class='image-btn topic-btn' type='button' data-topic='".$topic_id."' data-tooltip='".JText::_("COM_BIODIV_TRAINING_TOPIC_TIP").
 			"'><div class='crop-width-col4'><img class='cover img-responsive' style='min-height:100%' alt = 'topic image' src='".$url."' /></div></button>";
 		
 		print '</div>'; // col-md-4
@@ -71,11 +69,9 @@ defined('_JEXEC') or die;
 		print "    <div class='modal-content'>";
 		print "      <div class='modal-header'>";
 		print "        <button type='button' class='close' data-dismiss='modal'></button>";
-		//print "        <h4 class='modal-title'>".$this->translations['intro_h']['translation_text']."</h4>";
 		print "      </div>";
 		print "      <div class='modal-body'>";
 		print"       <div id='topic_helplet_" . $topic_id . "'></div>";
-		//print "        <p>Link to an article with instructions...</p>";
 		print "      </div>";
 		print "		<div class='modal-footer'>";
 		
@@ -87,9 +83,9 @@ defined('_JEXEC') or die;
 		// This field causes age, gender and number to be included in the classification test/training.
 		//print "		<input type='hidden' name='detail' value='1'/>";
 		
-		print "		<button class='btn btn-success btn-lg classify-modal-button' type='submit' data-tooltip='".$this->translations["spot_tip"]["translation_text"]."'>".
-					$this->translations["start_spot"]["translation_text"]."</button>";
-		print "		<button type='button' class='btn btn-success btn-lg classify-modal-button' data-dismiss='modal'>".$this->translations['cancel']['translation_text']."</button>";
+		print "		<button class='btn btn-success btn-lg classify-modal-button' type='submit' data-tooltip='".JText::_("COM_BIODIV_TRAINING_SPOT_TIP")."'>".
+					JText::_("COM_BIODIV_TRAINING_START_SPOT")."</button>";
+		print "		<button type='button' class='btn btn-success btn-lg classify-modal-button' data-dismiss='modal'>".JText::_("COM_BIODIV_TRAINING_CANCEL")."</button>";
 		print "		</form>";
 		
 		print "      </div>"; // modal footer

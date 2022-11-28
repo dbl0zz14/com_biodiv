@@ -26,11 +26,6 @@ class BioDivViewSchoolTarget extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "SchoolTarget display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("schooltarget");
-	
 		$this->personId = (int)userID();
 		
 		$this->schoolData = array();

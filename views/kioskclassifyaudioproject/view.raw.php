@@ -26,7 +26,6 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskClassifyBirdProject::display called" );
 		// Assign data to the view
 		//($person_id = (int)userID()) or die("No person_id");
 		$app = JFactory::getApplication();
@@ -34,8 +33,6 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 		$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-		error_log ( "Project id = " . $this->projectId );
-
 		if ( !$this->projectId ) die ("no project id given" );
 
 		$this->project = projectDetails($this->projectId);
@@ -45,8 +42,6 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 
 		$classifySecond = 
 		$app->getUserStateFromRequest('com_biodiv.classify_second_project', 'classify_second_project', 0);
-
-		error_log ( "classify second = " . $classifySecond );
 
 		$this->secondProject = null;
 		if ( $classifySecond == 1 ) {
@@ -77,9 +72,6 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 		// Ensure there are no classification held as we are starting a new kioskclassify
 		$app->setUserState('com_biodiv.all_animal_ids', 0);
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskclassifyaudioproject");
-		
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 
@@ -89,9 +81,6 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 		// Note if second project null the user request project id is used ir primary project.
 		$sequenceDetails = nextSequence( $this->secondProject );
 		
-		$errStr = print_r ( $sequenceDetails, true );
-		error_log ( "KioskClassifyProject first sequence details: " . $errStr );
-		
 		$this->sequenceId = null;
 		$this->sequence = null;
 		
@@ -100,15 +89,11 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 			$this->sequence = new Sequence ( $this->sequenceId );
 		}
 		
-		error_log ( "BioDivViewKioskClassifyProject::display about to create speciesLists" );
-		
 		$this->kioskSpecies = new KioskSpecies($this->projectId);
 		
 		$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();
 		
 		// Truncate the common species list if required.
-		//$this->commonMammals = array_slice($this->kioskSpecies->getCommonMammals(), 0, $this->maxSpeciesDisplayed);
-		//$this->allMammals = $this->kioskSpecies->getAllMammals();
 		$this->commonBirds = array_slice($this->kioskSpecies->getCommonBirds(), 0, $this->maxSpeciesDisplayed);
 		$this->allBirds = $this->kioskSpecies->getAllBirds();
 		

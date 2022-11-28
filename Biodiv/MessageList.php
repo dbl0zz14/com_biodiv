@@ -268,8 +268,7 @@ class MessageList {
 			
 			$result = $db->execute();
 			
-			$translations = getTranslations("MessageList");
-			$mailTo = $translations['report_email']['translation_text'];
+			$mailTo = \JText::_("COM_BIODIV_MESSAGELIST_REPORT_EMAIL");
 			
 			$mailer = \JFactory::getMailer();
 			$config = \JFactory::getConfig();

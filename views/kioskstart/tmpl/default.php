@@ -23,7 +23,7 @@ print '<div class="row">';
 
 print '<div class="col-md-4">';
 
-print '	<button id="kiosk_start" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['start_here']['translation_text'].'</button>';
+print '	<button id="kiosk_start" class="btn btn-lg btn-block btn-success h2" type="submit">'.JText::_("COM_BIODIV_KIOSKSTART_START_HERE").'</button>';
 
 print '</div>';
 
@@ -32,10 +32,10 @@ print '</div>';
 print '<div class="col-md-4">';
 
 if ( $this->birdsOnly ) {
-	print '	<button id="kiosk_birds" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['learn_birds']['translation_text'].'</button>';
+	print '	<button id="kiosk_birds" class="btn btn-lg btn-block btn-success h2" type="submit">'.JText::_("COM_BIODIV_KIOSKSTART_LEARN_BIRDS").'</button>';
 }
 else {
-	print '	<button id="kiosk_animals" class="btn btn-lg btn-block btn-success h2" type="submit">'.$this->translations['learn_animals']['translation_text'].'</button>';
+	print '	<button id="kiosk_animals" class="btn btn-lg btn-block btn-success h2" type="submit">'.JText::_("COM_BIODIV_KIOSKSTART_LEARN_ANIMALS").'</button>';
 }
 
 print '</div>';
@@ -44,22 +44,14 @@ print '</div>';
 
 print '<div class="col-md-4">';
 
-print '	<button id="kiosk_classify" class="btn btn-lg btn-block btn-success h2" >'.$this->translations['classify']['translation_text'].'</button>';
+print '	<button id="kiosk_classify" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_CLASSIFY").'</button>';
 
 print '</div>';
 
 
 print '<div class="col-md-4">';
 
-print '	<button id="kiosk_quiz" class="btn btn-lg btn-block btn-success h2" >'.$this->translations['take_quiz']['translation_text'].'</button>';
-
-print '</div>';
-
-
-
-print '<div class="col-md-4">';
-
-print '	<button id="kiosk_map" class="btn btn-lg btn-block btn-success h2" >'.$this->translations['map']['translation_text'].'</button>';
+print '	<button id="kiosk_quiz" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_TAKE_QUIZ").'</button>';
 
 print '</div>';
 
@@ -67,7 +59,15 @@ print '</div>';
 
 print '<div class="col-md-4">';
 
-print '	<button id="kiosk_project" class="btn btn-lg btn-block btn-success h2" >'.$this->translations['learn_project']['translation_text'].'</button>';
+print '	<button id="kiosk_map" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_MAP").'</button>';
+
+print '</div>';
+
+
+
+print '<div class="col-md-4">';
+
+print '	<button id="kiosk_project" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_LEARN_PROJECT").'</button>';
 
 print '</div>';
 

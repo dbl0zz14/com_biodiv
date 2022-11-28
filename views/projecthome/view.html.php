@@ -35,9 +35,6 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	$app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("project");
-	
 	// Determine whether audio site
 	$isCamera = getSetting("camera") == "yes";
 	$this->classifyView = $isCamera ? "classify" : "classifybirds";
@@ -51,8 +48,6 @@ class BioDivViewProjecthome extends JViewLegacy
 	$this->project_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-	//$this->project = projectDetails($this->project_id);
-	
 	$displayOptionArray = getSingleProjectOptions($this->project_id, 'projectdisplay');
 	
 	// Just get the option names.
@@ -67,15 +62,11 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	
 	$article = JTable::getInstance("content");
-	//$project_id = JRequest::getInt("project_id");
 	
 	$this->project = codes_getDetails($this->project_id, "project");
 	
 	// Get the associated article, if there is one, in the urrent language if possible
 	$article_id = getAssociatedArticleId($this->project['article_id']);
-	
-	//error_log("article_id = " . $article_id);
-	//error_log("article = " . $article);
 	
 	
 	$article->load($article_id); 

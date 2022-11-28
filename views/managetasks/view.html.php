@@ -26,11 +26,6 @@ class BioDivViewManageTasks extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ManageStudents display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("managetasks");
-		
 		$this->personId = userID();
 		
 		if ( $this->personId ) {
@@ -43,16 +38,6 @@ class BioDivViewManageTasks extends JViewLegacy
 			$this->isTeacher = $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE;
 			$this->isEcologist = $this->schoolUser->role_id == Biodiv\SchoolCommunity::ECOLOGIST_ROLE;
 			
-	
-			//if ( $this->isTeacher ) {
-				
-				//$this->students = Biodiv\SchoolCommunity::getMyStudents();
-				
-				//$this->tasks = Biodiv\Task::getAllDoneTasks ();
-				
-			//}
-			
-		
 		}
 
 		// Display the view

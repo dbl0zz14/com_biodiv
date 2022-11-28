@@ -26,13 +26,6 @@ class BioDivViewKioskMap extends JViewLegacy
   public function display($tpl = null) 
   {
 	  
-	error_log("KioskMap view called");
-	  
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("kioskmap");
-	
-	error_log("KioskMap view got translations");
-	
 	$app = JFactory::getApplication();
 	$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
@@ -52,9 +45,7 @@ class BioDivViewKioskMap extends JViewLegacy
 	
 	$this->projectMapSettings = $db->loadAssocList('data_type', 'value');
 	
-	//$errStr = print_r ( $this->projectMapSettings, true );
-	//error_log ( "KioskMap settings: " . $errStr );
-		
+	
 	// All kiosks are UK based so for now set initial area to UK
 	$this->initialMapSettings = array (
 		"mapcentre" => "[55,-5]",
@@ -68,9 +59,7 @@ class BioDivViewKioskMap extends JViewLegacy
 	// Get the species to include in dropdown.
 	$this->speciesList = getFeatureSpecies();
 	
-	error_log("KioskMap view got species list");
 	
-
     // Display the view
     parent::display($tpl);
   }

@@ -1553,7 +1553,7 @@ class BioDivController extends JControllerLegacy
 	
 	$messages = array();
 	
-	$translations = getTranslations("projectusers");
+	//$translations = getTranslations("projectusers");
 	
 	if ( array_key_exists($projectId, $adminProjects ) ) {
 		
@@ -1575,7 +1575,7 @@ class BioDivController extends JControllerLegacy
 				$email = filter_var($email, FILTER_SANITIZE_EMAIL);
 				
 				if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-					$messages[] = $translations['add_fail']['translation_text'] . ' ' . $email . ' ' . $translations['not_email']['translation_text'];
+					$messages[] = JText::_("COM_BIODIV_PROJECTUSERS_ADD_FAIL") . ' ' . $email . ' ' . JText::_("COM_BIODIV_PROJECTUSERS_NOT_EMAIL");
 				}
 				else {
 				
@@ -1598,14 +1598,14 @@ class BioDivController extends JControllerLegacy
 						}
 						
 						if ( $result ) {
-							$messages[] = $translations['user_added']['translation_text'] . ' ' . $email;
+							$messages[] = JText::_("COM_BIODIV_PROJECTUSERS_USER_ADDED") . ' ' . $email;
 						}
 						else {
-							$messages[] = $translations['existing_fail']['translation_text'] . ' ' . $email;
+							$messages[] = JText::_("COM_BIODIV_PROJECTUSERS_EXISTING_FAIL") . ' ' . $email;
 						}
 					}
 					else {
-						$messages[] = $translations['add_fail']['translation_text'] . ' ' . $email . ' ' . $translations['not_user']['translation_text'];
+						$messages[] = JText::_("COM_BIODIV_PROJECTUSERS_ADD_FAIL") . ' ' . $email . ' ' . JText::_("COM_BIODIV_PROJECTUSERS_NOT_USER");
 					}
 				}
 			}
@@ -1613,7 +1613,7 @@ class BioDivController extends JControllerLegacy
 		}
 	}
 	else {
-		$messages[] = $translations['not_admin']['translation_text'];
+		$messages[] = JText::_("COM_BIODIV_PROJECTUSERS_NOT_ADMIN");
 	}
 	
 	$this->input->set('message', json_encode($messages) );

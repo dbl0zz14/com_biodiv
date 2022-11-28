@@ -26,9 +26,6 @@ class BioDivViewSchoolWork extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("schoolwork");
-	
 		$this->personId = (int)userID();
 		
 		$this->badgeGroupId = 0;

@@ -26,11 +26,6 @@ class BioDivViewShareResource extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ShareResource display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("shareresource");
-		
 		$this->personId = userID();
 		
 		$this->resourceId = null;
@@ -44,16 +39,9 @@ class BioDivViewShareResource extends JViewLegacy
 			
 			$this->shareLevel = $input->getInt('share', 0);
 			
-			error_log ( "ShareResource resource id = " . $this->resourceId );
-			error_log ( "ShareResource share = " . $this->shareLevel );
-			
 			if ( $this->resourceId ) {
 				
-				error_log ( "Got a resource id" );
-				
 				$db = JDatabaseDriver::getInstance(dbOptions());
-				
-				error_log ( "Got db" );
 				
 				$query = $db->getQuery(true)
 						->select("R.resource_id, R.access_level from Resource R")
@@ -68,11 +56,7 @@ class BioDivViewShareResource extends JViewLegacy
 					
 					$currentLevel = $existingResource['access_level'];
 					
-					error_log ( "Got existing resource for this resource and person with access level " . $currentLevel );
-				
 					if ( $this->shareLevel != $currentLevel ) {
-						
-						error_log ( "Updating with new access level " . $share );
 						
 						$resource = new stdClass();
 						$resource->person_id = $this->personId;

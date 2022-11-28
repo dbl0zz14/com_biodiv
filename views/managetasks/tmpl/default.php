@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_MANAGETASKS_LOGIN").'</div>';
 }
 
 else {
@@ -33,7 +33,6 @@ else {
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
 		Biodiv\SchoolCommunity::generateBackAndLogout();
-		//Biodiv\SchoolCommunity::generateStudentMasthead();
 	}
 
 	
@@ -45,19 +44,17 @@ else {
   
 
 	print '<div id="viewMyTasks" class="btn btn-info chooseModule manageTasksBtn">';
-	print $this->translations['my_tasks']['translation_text'];
+	print JText::_("COM_BIODIV_MANAGETASKS_MY_TASKS");
 	print '</div>';
 	
 	if ( $this->isEcologist ) { 
-		//print '<div id="viewTeacherTasks_'.$this->moduleId.'" class="btn btn-info manageTasksBtn allTeacherTasks">';
 		print '<div id="viewTeacherTasks" class="btn btn-info manageTasksBtn chooseTeacherModule">';
-		print $this->translations['all_teacher_tasks']['translation_text'];
+		print JText::_("COM_BIODIV_MANAGETASKS_ALL_TEACHER_TASKS");
 		print '</div>';
 	}
 	
-	//print '<div id="viewStudentTasks" class="btn btn-info manageTasksBtn allStudentBadges">';
 	print '<div id="viewStudentTasks" class="btn btn-info manageTasksBtn chooseStudentModule">';
-	print $this->translations['all_student_tasks']['translation_text'];
+	print JText::_("COM_BIODIV_MANAGETASKS_ALL_STUDENT_TASKS");
 	print '</div>';
 	
 	print '</div>'; // btn-group

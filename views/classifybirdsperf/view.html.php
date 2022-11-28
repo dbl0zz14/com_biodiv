@@ -62,16 +62,13 @@ class BioDivViewClassifyBirdsPerf extends JViewLegacy
 	  $app->setUserState('com_biodiv.all_animal_ids', 0);
 	  
 	  
-	  // Get all the text snippets for this view in the current language
-	  $this->translations = getTranslations("classify");
-	
 	  $time_elapsed_secs = microtime(true) - $this->start;
 	  print "<p>Time to end of translations = " . $time_elapsed_secs . '</p>';
 	
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  if ( !userID() ) {
 		$app = JFactory::getApplication();
-		$message = $this->translations['log_class']['translation_text'];  //"Please log in before classifying.";
+		$message = JText::_("COM_BIODIV_CLASSIFY_LOG_CLASS");  //"Please log in before classifying.";
 		$url = "".BIODIV_ROOT."&view=classifybirds";
 		if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
 		if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
@@ -88,7 +85,7 @@ class BioDivViewClassifyBirdsPerf extends JViewLegacy
 		  $fields->project_id = $this->project_id;
 		  if ( !canClassify("project", $fields) ) {
 			$app = JFactory::getApplication();
-			$message = $this->translations['no_access']['translation_text'];  //"Sorry you do not have access to classify on this project.";
+			$message = JText::_("COM_BIODIV_CLASSIFY_NO_ACCESS");  //"Sorry you do not have access to classify on this project.";
 			$url = "".BIODIV_ROOT."&view=projecthome";
 			$url .= "&project_id=" . $this->project_id;
 			$app->redirect($url, $message);
@@ -215,8 +212,8 @@ class BioDivViewClassifyBirdsPerf extends JViewLegacy
 		print "<p>Time to end of sequence progress = " . $time_elapsed_secs . '</p>';
 	
 	  
-		$this->showmap = $this->translations['show_map']['translation_text'] . " <span class='fa fa-map-marker'/>";
-		$this->nextseq = $this->translations['next_seq']['translation_text'] . " <span class='fa fa-arrow-circle-right'/>";
+		$this->showmap = JText::_("COM_BIODIV_CLASSIFY_SHOW_MAP") . " <span class='fa fa-map-marker'/>";
+		$this->nextseq = JText::_("COM_BIODIV_CLASSIFY_NEXT_SEQ") . " <span class='fa fa-arrow-circle-right'/>";
 
 		$this->classifyInputs = getClassifyBirdInputs();
 		

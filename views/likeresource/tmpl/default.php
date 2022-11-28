@@ -9,11 +9,11 @@
 defined('_JEXEC') or die;
 
 if ( $this->totalLikes == 1 ) {
-	print '' . $this->totalLikes . ' ' . $this->translations['single_like']['translation_text'];
+	print '' . $this->totalLikes . ' ' . JText::_("COM_BIODIV_LIKERESOURCE_SINGLE_LIKE");
 }
 else {
 	
-	print '' . $this->totalLikes . ' ' . $this->translations['many_likes']['translation_text'];
+	print '' . $this->totalLikes . ' ' . JText::_("COM_BIODIV_LIKERESOURCE_MANY_LIKES");
 }
 
 

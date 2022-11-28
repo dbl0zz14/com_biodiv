@@ -27,9 +27,6 @@ class BioDivViewNewResourceSet extends JViewLegacy
     public function display($tpl = null) 
     {
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("newresourceset");
-	
 		$this->person_id = (int)userID();
 
 		if ( !$this->person_id ) {

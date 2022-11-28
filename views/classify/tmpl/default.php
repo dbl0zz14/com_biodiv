@@ -21,27 +21,17 @@ if ( $this->photo_id ) {
 }
 
 if(!$this->photo_id){
-  print "<h2>" . $this->translations['no_pho']['translation_text'] . "</h2>\n";
-  print "<h3>" . $this->translations['avail']['translation_text'] . "</h3>\n";
-  print "<h3>" . $this->translations['check']['translation_text'] . "</h3>\n";
+	
+  print "<h2>" . JText::_("COM_BIODIV_CLASSIFY_NO_PHO") . "</h2>\n";
+  print "<h3>" . JText::_("COM_BIODIV_CLASSIFY_AVAIL") . "</h3>\n";
+  print "<h3>" . JText::_("COM_BIODIV_CLASSIFY_CHECK") . "</h3>\n";
+  
   return;
  }
  
  $document->addScriptDeclaration("BioDiv.maxclass = ".$this->maxClassifications.";");
 	
 
-/*
-if ( $this->isVideo === true ) {
-	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
-}
-else if ( $this->isAudio === true ) {
-	print "<h2>" . $this->translations['what_hear']['translation_text'] . "</h2>";
-}
-else {
-	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
-    //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
-}
-*/
 ?>
 
 
@@ -55,13 +45,13 @@ else {
 	
 <?php
 	if ( $this->isVideo === true ) {
-	print "<h2>" . $this->translations['what_vid']['translation_text'] . "</h2>";
+	print "<h2>" . JText::_("COM_BIODIV_CLASSIFY_WHAT_VID") . "</h2>";
 }
 else if ( $this->isAudio === true ) {
-	print "<h2>" . $this->translations['what_hear']['translation_text'] . "</h2>";
+	print "<h2>" . JText::_("COM_BIODIV_CLASSIFY_WHAT_HEAR") . "</h2>";
 }
 else {
-	print "<h2>" . $this->translations['what_see']['translation_text'] . "</h2>";
+	print "<h2>" . JText::_("COM_BIODIV_CLASSIFY_WHAT_SEE") . "</h2>";
     //print '<h5 class="bg-warning clashing add-padding-all">Look through the whole sequence before providing your classification of all animals that appear in it. Remember: you do not need to classify images individually.</h5>';
 }
 ?>
@@ -69,8 +59,7 @@ else {
  
 <?php
 	if($this->photoDetails['person_id'] == userID()){
-		//print "<div class='col-xs-12 col-sm-6 col-md-6'><div id='you-uploaded'>" . $this->translations['you_up']['translation_text'] . "</div></div>";
-		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info'>" . $this->translations['you_up']['translation_text'] . "</div>";
+		print "<div class='col-xs-12 col-sm-6 col-md-6 text-info'>" . JText::_("COM_BIODIV_CLASSIFY_YOU_UP") . "</div>";
 	}
 	else {
 		print "<div class='col-xs-12 col-sm-6 col-md-6'></div>";
@@ -115,13 +104,11 @@ if ( $this->isVideo === true ) {
 	$ext = strtolower(JFile::getExt($photoUrl));
 	error_log("Classify View: ext = " . $ext );
 	
-	//print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" type="video/mp4">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
-	
-	print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$photoUrl.'" type="video/'.$ext.'">' . $this->translations['no_vid']['translation_text'] . '</video></div>';
+print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$photoUrl.'" type="video/'.$ext.'">' . JText::_("COM_BIODIV_CLASSIFY_NO_VID") . '</video></div>';
 	
 }
 else if ( $this->isAudio === true ) {
-	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . $this->translations['no_aud']['translation_text'] . '</video></div>';
+	print '<div id="audioContainer" data-photo-id="'.$this->photo_id.'"><audio id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.photoURL($this->photoDetails["photo_id"]).'" >' . JText::_("COM_BIODIV_CLASSIFY_NO_AUD") . '</video></div>';
 }
 else {
 	
@@ -296,10 +283,10 @@ print "</div>";
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print $this->translations['map_modal']['translation_text']; ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_CLASSIFY_MAP_MODAL"); ?> </h4>
       </div>
       <div class="modal-body">
-	    <div id="no_map"><h5> <?php print $this->translations['no_map']['translation_text']; ?> </h5></div>
+	    <div id="no_map"><h5> <?php print JText::_("COM_BIODIV_CLASSIFY_NO_MAP"); ?> </h5></div>
         <div id="map_canvas" style="width:100%;height:500px;"></div>
       </div>
       <div class="modal-footer">
@@ -317,7 +304,7 @@ print "</div>";
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print $this->translations['max_class']['translation_text']; ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_CLASSIFY_MAX_CLASS"); ?> </h4>
       </div>
       <div class="modal-body">
         <p></p>
@@ -337,13 +324,13 @@ print "</div>";
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"><?php print $this->translations['class_exp']['translation_text']; ?> </h4>
+        <h4 class="modal-title"><?php print JText::_("COM_BIODIV_CLASSIFY_CLASS_EXP"); ?> </h4>
       </div>
       <div class="modal-body">
         <p></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary classify-modal-button" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
+        <button type="button" class="btn btn-primary classify-modal-button" data-dismiss="modal"><?php print JText::_("COM_BIODIV_CLASSIFY_CLOSE"); ?></button>
       </div>
     </div>
 
@@ -354,8 +341,8 @@ print "</div>";
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only"><?php print $this->translations['close']['translation_text']; ?></span></button>
-    <h4 class="modal-title" id="myModalLabel"><?php print $this->translations['class_ani']['translation_text']; ?> </h4>
+    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only"><?php print JText::_("COM_BIODIV_CLASSIFY_CLOSE"); ?></span></button>
+    <h4 class="modal-title" id="myModalLabel"><?php print JText::_("COM_BIODIV_CLASSIFY_CLASS_ANI"); ?> </h4>
       </div>
       <div class="modal-body">
         <form id='classify-form' role='form'>
@@ -405,8 +392,8 @@ foreach($this->classifyInputs as $formInput){
 
 ?>
 <hr/>
-<button type="button" class="btn btn-default" data-dismiss="modal"><?php print $this->translations['close']['translation_text']; ?></button>
-        <button type="button" class="btn btn-success" id='classify-save'><?php print $this->translations['save']['translation_text']; ?></button>
+<button type="button" class="btn btn-default" data-dismiss="modal"><?php print JText::_("COM_BIODIV_CLASSIFY_CLOSE"); ?></button>
+        <button type="button" class="btn btn-success" id='classify-save'><?php print JText::_("COM_BIODIV_CLASSIFY_SAVE"); ?></button>
 
 </div> <!--col3 -->
 

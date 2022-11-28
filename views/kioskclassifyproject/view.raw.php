@@ -26,16 +26,12 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskClassifyProject::display called" );
-		// Assign data to the view
 		//($person_id = (int)userID()) or die("No person_id");
 		$app = JFactory::getApplication();
 
 		$this->projectId =
 		(int)$app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
-		error_log ( "Project id = " . $this->projectId );
-
 		if ( !$this->projectId ) die ("no project id given" );
 
 		$this->project = projectDetails($this->projectId);
@@ -45,8 +41,6 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 
 		$classifySecond = 
 		$app->getUserStateFromRequest('com_biodiv.classify_second_project', 'classify_second_project', 0);
-
-		error_log ( "classify second = " . $classifySecond );
 
 		$this->secondProject = null;
 		if ( $classifySecond == 1 ) {
@@ -78,9 +72,6 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 		// Ensure there are no classification held as we are starting a new kioskclassify
 		$app->setUserState('com_biodiv.all_animal_ids', 0);
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskclassifyproject");
-		
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 
@@ -90,8 +81,6 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 		// Note if second project null the user request project id is used ir primary project.
 		$sequenceDetails = nextSequence( $this->secondProject );
 		
-		$errStr = print_r ( $sequenceDetails, true );
-		error_log ( "KioskClassifyProject first sequence details: " . $errStr );
 		
 		$this->sequenceId = null;
 		$this->sequence = null;
@@ -100,8 +89,6 @@ class BioDivViewKioskClassifyProject extends JViewLegacy
 			$this->sequenceId = $sequenceDetails[0]['sequence_id'];
 			$this->sequence = new Sequence ( $this->sequenceId );
 		}
-		
-		error_log ( "BioDivViewKioskClassifyProject::display about to create speciesLists" );
 		
 		$this->kioskSpecies = new KioskSpecies($this->projectId);
 		

@@ -35,17 +35,17 @@ else {
 
 <?php
 print "<div class='form-inline col-md-12 col-sm-12 col-xs-12' >";
-print "<div class='btn-group' data-toggle='tooltip' title='".$this->translations['areas_tooltip']['translation_text']."' style='margin-bottom:4px;'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".$this->translations['show_areas']['translation_text']."</button></div>";
+print "<div class='btn-group' data-toggle='tooltip' title='".JText::_("COM_BIODIV_DISCOVER_AREAS_TOOLTIP")."' style='margin-bottom:4px;'><button type='button' class='btn btn-warning' id='discover_areas' disabled>".JText::_("COM_BIODIV_DISCOVER_SHOW_AREAS")."</button></div>";
 
-print ' <div class="btn-group" data-toggle="tooltip" title="'.$this->translations['sites_tooltip']['translation_text'].'"  style="margin-bottom:4px;"> ';
-print '  <button class="btn btn-warning" id="discover_sites" >'.$this->translations['toggle_sites']['translation_text'].'</button> ';
-print '  <button class="btn btn-warning hidden" id="hide_sites" >'.$this->translations['toggle_sites_off']['translation_text'].'</button> ';
+print ' <div class="btn-group" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_DISCOVER_SITES_TOOLTIP").'"  style="margin-bottom:4px;"> ';
+print '  <button class="btn btn-warning" id="discover_sites" >'.JText::_("COM_BIODIV_DISCOVER_TOGGLE_SITES").'</button> ';
+print '  <button class="btn btn-warning hidden" id="hide_sites" >'.JText::_("COM_BIODIV_DISCOVER_TOGGLE_SITES_OFF").'</button> ';
 print '</div>';
 
 
-print " <div class='input-group' data-toggle='tooltip' title='".$this->translations['species_tooltip']['translation_text']."'  style='margin-bottom:4px;'>";
+print " <div class='input-group' data-toggle='tooltip' title='".JText::_("COM_BIODIV_DISCOVER_SPECIES_TOOLTIP")."'  style='margin-bottom:4px;'>";
 print "<select class='form-control form-control-sm' name = 'species_id' id='species_select'>";
-print "  <option value='' disabled selected hidden>" . $this->translations['sel_sp']['translation_text'] . "...</option>";
+print "  <option value='' disabled selected hidden>" . JText::_("COM_BIODIV_DISCOVER_SEL_SP") . "...</option>";
 
 
 	foreach($this->speciesList as $id=>$species){
@@ -55,7 +55,7 @@ print "  <option value='' disabled selected hidden>" . $this->translations['sel_
 
 print "</select>";
 print "<span class='input-group-btn'>";
-print "<button  class='btn btn-warning' id='discover_species'>" . $this->translations['show_sp']['translation_text'] . "</button>";
+print "<button  class='btn btn-warning' id='discover_species'>" . JText::_("COM_BIODIV_DISCOVER_SHOW_SP") . "</button>";
 print "</span>";
 print "</div>"; // input-group
 
@@ -68,10 +68,10 @@ print "</div>"; // col-12
 <div class="row">
 <div class='col-xs-12 col-sm-12 col-md-8'>
 <div id="discovermap" style="width:100%; height:500px;"></div>
-<?php print "<h5 class='bg-warning highlighted add-padding-all'>".$this->translations['data_warn']['translation_text']."</h5>";?>
+<?php print "<h5 class='bg-warning highlighted add-padding-all'>".JText::_("COM_BIODIV_DISCOVER_DATA_WARN")."</h5>";?>
 </div>
 <div class='col-xs-12 col-sm-12 col-md-4'>
-<?php print '<div id="howto_message"><h5 class="bg-warning highlighted add-padding-all">'.$this->translations['areas_tooltip']['translation_text'].'<h5></div>'; ?>
+<?php print '<div id="howto_message"><h5 class="bg-warning highlighted add-padding-all">'.JText::_("COM_BIODIV_DISCOVER_AREAS_TOOLTIP").'<h5></div>'; ?>
 <div id="sightingschart_message"></div>
 <div id="uploadschart_message"></div>
 <div class="table-responsive discover-chart" style="padding: 0; height:340px; width:310px; overflow:hidden;">

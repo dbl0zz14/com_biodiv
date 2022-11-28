@@ -30,9 +30,6 @@ class BioDivViewSchoolDashboard extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("schooldashboard");
-	
 	// Check whether set id 
 			
 	$input = JFactory::getApplication()->input;
@@ -43,8 +40,6 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 		
 		$this->helpOption = codes_getCode ( "schooldashboard", "beshelp" );
 			
-		//$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
-		
 		$this->moduleAwardIcons = array( 'NONE'=>'',
 									'SCHOOL_BRONZE'=>'<span class="bronze"><i class="fa fa-lg fa-trophy"></i></span>',
 									'SCHOOL_SILVER'=>'<span class="bronze"><i class="fa fa-lg fa-trophy"></i></span><span class="silver"><i class="fa fa-lg fa-trophy"></i></span>',
@@ -71,7 +66,7 @@ class BioDivViewSchoolDashboard extends JViewLegacy
 		$this->notifications = null;
 		if ( $this->firstLoad ) {
 			Biodiv\SchoolCommunity::setNewUser(0);
-			Biodiv\SchoolCommunity::addNotification($this->translations['welcome_note']['translation_text']);
+			Biodiv\SchoolCommunity::addNotification(JText::_("COM_BIODIV_SCHOOLDASHBOARD_WELCOME_NOTE"));
 			// Do the first unlock to get the badges through
 			
 			if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {

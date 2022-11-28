@@ -45,11 +45,6 @@ class BioDivViewKioskAbout extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskabout");
-
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 		
@@ -64,8 +59,6 @@ class BioDivViewKioskAbout extends JViewLegacy
 		$db->setQuery($query); 
 		
 		$this->categoryId = $db->loadResult();
-		
-		error_log ( "KioskAbout got category id = " . $this->categoryId );
 		
 		
 		$dbo = JFactory::getDbo();

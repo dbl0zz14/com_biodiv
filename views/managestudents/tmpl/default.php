@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_MANAGESTUDENTS_LOGIN").'</div>';
 	
 }
 
@@ -26,10 +26,10 @@ else {
 	print '<thead>';
 	print '<tr>';
 		
-	print '<th class="text-center">'.$this->translations['approval']['translation_text'].'</th>';
-	print '<th class="text-center">'.$this->translations['username']['translation_text'].'</th>';
-	print '<th>'.$this->translations['activity']['translation_text'].'</th>';
-	print '<th>'.$this->translations['file']['translation_text'].'</th>';
+	print '<th class="text-center">'.JText::_("COM_BIODIV_MANAGESTUDENTS_APPROVAL").'</th>';
+	print '<th class="text-center">'.JText::_("COM_BIODIV_MANAGESTUDENTS_USERNAME").'</th>';
+	print '<th>'.JText::_("COM_BIODIV_MANAGESTUDENTS_ACTIVITY").'</th>';
+	print '<th>'.JText::_("COM_BIODIV_MANAGESTUDENTS_FILE").'</th>';
 	
 	print '</tr>';
 	print '</thead>';
@@ -58,11 +58,11 @@ else {
 		if ( $task->status == Biodiv\Badge::PENDING ) {
 			print '<div class="col-md-12 text-center">';
 			print '<div id="approveTask_'.$task->st_id.'" class="btn btn-sm btn-primary btn-block approveTask">' .
-				$this->translations['approve']['translation_text'].'</div>';
+				JText::_("COM_BIODIV_MANAGESTUDENTS_APPROVE").'</div>';
 			print '</div>'; // col-12
 			print '<div class="col-md-12 text-center">';
 			print '<div id="rejectTask_'.$task->st_id.'" class="btn btn-sm btn-default btn-block rejectTask">' .
-				$this->translations['reject']['translation_text'].'</div>';
+				JText::_("COM_BIODIV_MANAGESTUDENTS_REJECT").'</div>';
 			print '</div>'; // col-12
 			print '<div  id="taskApproved_'.$task->st_id.'"class="col-md-12 text-center" style="display:none">';
 			print '<i class="fa fa-check"></i>';
@@ -95,7 +95,7 @@ else {
 		if ( count($files) == 0 ) {
 			print '<div class="row">';
 			print '<div class="col-md-12">';
-			print $this->translations['no_files']['translation_text'];
+			print JText::_("COM_BIODIV_MANAGESTUDENTS_NO_FILES");
 			print '</div>'; // col-12
 			print '</div>'; // row
 		}

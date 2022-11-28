@@ -118,13 +118,9 @@ class BioDivViewTrainingResults extends JViewLegacy
 	$this->detail = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.detail', 'detail', 0);
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("training");
-	
 	// Get a set of sequences and correct answers for this topic.
 	$seq_json = $app->getUserStateFromRequest('com_biodiv.sequences', 'sequences', 0);
 	
-	//error_log("seq_json = " . $seq_json );
 	
 	$sequence_ids = json_decode($seq_json);
 	
@@ -134,8 +130,6 @@ class BioDivViewTrainingResults extends JViewLegacy
 	}
 		
 	$ani_json = $app->getUserStateFromRequest('com_biodiv.animals', 'animals', 0);
-	
-	//error_log("ani_json = " . $ani_json);
 	
 	$this->classifications = json_decode($ani_json);
 	

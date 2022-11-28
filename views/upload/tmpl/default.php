@@ -15,38 +15,34 @@ JHTML::stylesheet("bootstrap-datepicker-master/datepicker3.css", array(), true);
 showMessages();
 
 
-print "<h1>" . $this->translations['upload_im']['translation_text'] . " " . $this->site_name . " " . $this->translations['id']['translation_text'] . " " . $this->site_id . "</h1>";
+print "<h1>" . JText::_("COM_BIODIV_UPLOAD_UPLOAD_IM") . " " . $this->site_name . " " . JText::_("COM_BIODIV_UPLOAD_ID") . " " . $this->site_id . "</h1>";
 
 
 print "<div class='col-md-6'>";
 
 
-print "<h2>". $this->translations['start_new']['translation_text']."</h2>";
+print "<h2>". JText::_("COM_BIODIV_UPLOAD_START_NEW")."</h2>";
 
 
 print "<form role='form' action='".$this->root . "&task=add_upload&site_id=".$this->site_id."'";
 print " method='post' class='form-inline'>";
 
 
-//print "<div class='container'>";
-
 // Deployment date and times only relevant for camera deployments, as opposed to recordings on phones etc.
 // However timezone is relevant for all media types
-//	print "<div class='row' style='margin-top:10px;'>";
-//	print "  <div class='col-sm-6 col-md-8'>";
 	print "    <div class='form-group'>";
 		 
-		  $timezone_text = $this->translations['timezone']['translation_text'];
-		  $dst_text = $this->translations['dst']['translation_text'];
-		  $dst_yes = $this->translations['dst_yes']['translation_text'];
-		  $dst_no = $this->translations['dst_no']['translation_text'];
+		  $timezone_text = JText::_("COM_BIODIV_UPLOAD_TIMEZONE");
+		  $dst_text = JText::_("COM_BIODIV_UPLOAD_DST");
+		  $dst_yes = JText::_("COM_BIODIV_UPLOAD_DST_YES");
+		  $dst_no = JText::_("COM_BIODIV_UPLOAD_DST_NO");
 		  $timezone_abbreviations = DateTimeZone::listAbbreviations();
 		  $timezone_ids = DateTimeZone::listIdentifiers();
 		  
 		  print  "<label for='timezone' style='display:block; margin-top: 20px;'>$timezone_text</label>";
 		  
 		  print  "<select id='timezone' name ='timezone' class='form-control'/>\n";
-		  print  "<option value='' disabled selected hidden>".$this->translations['pls_select']['translation_text']."</option>";
+		  print  "<option value='' disabled selected hidden>".JText::_("COM_BIODIV_UPLOAD_PLS_SELECT")."</option>";
 		  
 		  // Make UTC the first option:
 		  $utc = array_pop($timezone_ids);
@@ -111,11 +107,11 @@ if ( $this->isCamera ) {
 	foreach(array("Deployment", "Collection") as $field){
 		$lfield = strtolower($field);
 		  
-		$date_text = $this->translations['dep_date']['translation_text'];
-		$time_text = $this->translations['dep_time']['translation_text'];
+		$date_text = JText::_("COM_BIODIV_UPLOAD_DEP_DATE");
+		$time_text = JText::_("COM_BIODIV_UPLOAD_DEP_TIME");
 		if ( $field == "Collection" ) {
-			$date_text = $this->translations['coll_date']['translation_text'];
-			$time_text = $this->translations['coll_time']['translation_text'];
+			$date_text = JText::_("COM_BIODIV_UPLOAD_COLL_DATE");
+			$time_text = JText::_("COM_BIODIV_UPLOAD_COLL_TIME");
 		}
 
 		//	print "<div class='row' style='margin-top:10px;'>";
@@ -175,17 +171,15 @@ print "</div> <!-- .row -->";
 
 
 print " <div style='display: block; margin-top: 20px;'>";
-print "	<button type='submit' id='add_upload' class='btn btn-success btn-lg'>".biodiv_label_icons('upload', $this->translations['upload']['translation_text'])."</button>";
-print " <button type='button' class='btn btn-danger btn-lg mw_help' data-dismiss='modal'>".biodiv_label_icons('help', $this->translations['help']['translation_text'])."</button>";
+print "	<button type='submit' id='add_upload' class='btn btn-success btn-lg'>".biodiv_label_icons('upload', JText::_("COM_BIODIV_UPLOAD_UPLOAD"))."</button>";
+print " <button type='button' class='btn btn-danger btn-lg mw_help' data-dismiss='modal'>".biodiv_label_icons('help', JText::_("COM_BIODIV_UPLOAD_HELP"))."</button>";
 	
 print "  </div>";
 
     
 
-//print "</div> <!-- /.container -->  ";
 print "</form>";
 
-//error_log ("Upload end of form");
 
 
 print "</div>"; // class='col-md-6'
@@ -195,27 +189,21 @@ print "<div class='col-md-6'>";
 
 
 if ($this->previous_upload_id){
-  print "<h2>" . $this->translations['last_up']['translation_text'] . "</h2>\n";
-  print "<strong><p  style='margin-top:30px;'>" . $this->translations['last_at']['translation_text'] . " ". $this->previous_upload_date . "</p>";
+  print "<h2>" . JText::_("COM_BIODIV_UPLOAD_LAST_UP") . "</h2>\n";
+  print "<strong><p  style='margin-top:30px;'>" . JText::_("COM_BIODIV_UPLOAD_LAST_AT") . " ". $this->previous_upload_date . "</p>";
   if($this->isCamera && $this->previous_collection_date){
-    print "<p>" . $this->translations['with_depl']['translation_text'] . " ". $this->previous_deployment_date . "</p>";
-	print "<p>" . $this->translations['with_coll']['translation_text'] . " ". $this->previous_collection_date . "</p>";
-	
-	//print ".</p> <p  style='margin-top:20px;'><a class='btn btn-primary' role='button' href='$action&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', $this->translations['up_more']['translation_text']) . "</a>";
+    print "<p>" . JText::_("COM_BIODIV_UPLOAD_WITH_DEPL") . " ". $this->previous_deployment_date . "</p>";
+	print "<p>" . JText::_("COM_BIODIV_UPLOAD_WITH_COLL") . " ". $this->previous_collection_date . "</p>";
 	
 	$action_more = $this->root . "&task=upload_more";
-	print "<p  style='margin-top:20px;'><a class='btn btn-success btn-lg' role='button' href='$action_more&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', $this->translations['up_more']['translation_text']) . "</a></p>";
+	print "<p  style='margin-top:20px;'><a class='btn btn-success btn-lg' role='button' href='$action_more&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', JText::_("COM_BIODIV_UPLOAD_UP_MORE")) . "</a></p>";
   }
   print "</strong>";
  }
 
 
-error_log ("Upload end of prev upload");
-
-
-//print "  <div class='lead'><a href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".$this->translations['list_up']['translation_text']."</a></p>";
 print "  <div style='margin-top:20px;'>";
-print "  <a class='btn btn-primary btn-lg' role='button' href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".biodiv_label_icons('list', $this->translations['list_up']['translation_text'])."</a>";
+print "  <a class='btn btn-primary btn-lg' role='button' href='" . BIODIV_ROOT."&view=uploaded&site_id=". $this->site_id."'>".biodiv_label_icons('list', JText::_("COM_BIODIV_UPLOAD_LIST_UP"))."</a>";
 print "  </div>";
 
 
@@ -229,7 +217,7 @@ print "    <!-- Modal content-->";
 print "    <div class='modal-content'>";
 print "      <div class='modal-header'>";
 print "        <button type='button' class='close' data-dismiss='modal'>&times;</button>";
-print "        <h4 class='modal-title'>".$this->translations['help_title']['translation_text']." </h4>";
+print "        <h4 class='modal-title'>".JText::_("COM_BIODIV_UPLOAD_HELP_TITLE")." </h4>";
 print "      </div>";
 print "      <div class='modal-body'>";
 		if($this->title ){
@@ -241,7 +229,7 @@ print "      <div class='modal-body'>";
 		}
 print "      </div>";
 print "      <div class='modal-footer'>";
-print "        <button type='button' class='btn btn-danger classify-modal-button' data-dismiss='modal'>".$this->translations['close']['translation_text']."</button>";
+print "        <button type='button' class='btn btn-danger classify-modal-button' data-dismiss='modal'>".JText::_("COM_BIODIV_UPLOAD_CLOSE")."</button>";
 print "      </div>";
 print "    </div>";
 

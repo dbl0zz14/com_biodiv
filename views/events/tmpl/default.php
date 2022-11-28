@@ -8,9 +8,6 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-//print '<h3 class="text-center bes_page_heading">'.$this->translations['events_heading']['translation_text'].'</h3>';
-
-//print_r ( $this->today );
 print '<div class="row">';
 
 print '<div class="col-md-12">';
@@ -18,7 +15,7 @@ print '<div class="col-md-12">';
 $currEventNum = 0;
 
 if ( $this->today ) {
-	print '<h5>' . $this->translations['today']['translation_text'] . '</h5>';
+	print '<h5>' . JText::_("COM_BIODIV_EVENTS_TODAY") . '</h5>';
 	print '<table class="table table-condensed">';
 	foreach ( $this->today as $ev ) {
 		
@@ -47,7 +44,7 @@ if ( $this->today ) {
 }
 
 if ( $currEventNum < $this->displayNum and $this->yesterday ) {
-	print '<h5>' . $this->translations['yesterday']['translation_text'] . '</h5>';
+	print '<h5>' . JText::_("COM_BIODIV_EVENTS_YESTERDAY") . '</h5>';
 	print '<table class="table table-condensed">';
 	foreach ( $this->yesterday as $ev ) {
 		
@@ -75,7 +72,7 @@ if ( $currEventNum < $this->displayNum and $this->yesterday ) {
 }
 
 if ( $currEventNum < $this->displayNum and $this->thisWeek ) {
-	print '<h5>' . $this->translations['this_week']['translation_text'] . '</h5>';
+	print '<h5>' . JText::_("COM_BIODIV_EVENTS_THIS_WEEK") . '</h5>';
 	print '<table class="table table-condensed">';
 	foreach ( $this->thisWeek as $ev ) {
 		
@@ -105,7 +102,7 @@ if ( $currEventNum < $this->displayNum and $this->thisWeek ) {
 
 
 if ( $currEventNum < $this->displayNum and $this->earlier ) {
-	print '<h5>' . $this->translations['earlier']['translation_text'] . '</h5>';
+	print '<h5>' . JText::_("COM_BIODIV_EVENTS_EARLIER") . '</h5>';
 	print '<table class="table table-condensed">';
 	foreach ( $this->earlier as $ev ) {
 		

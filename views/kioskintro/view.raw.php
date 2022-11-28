@@ -45,11 +45,6 @@ class BioDivViewKioskIntro extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskclassify");
-
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 		
@@ -65,7 +60,6 @@ class BioDivViewKioskIntro extends JViewLegacy
 		
 		$this->categoryId = $db->loadResult();
 		
-		error_log ( "KioskIntro got category id = " . $this->categoryId );
 		
 		
 		$dbo = JFactory::getDbo();
@@ -76,13 +70,11 @@ class BioDivViewKioskIntro extends JViewLegacy
 			->where('state = 1')
 			->order('ordering');
 		
-		error_log("content query1 created: " . $query1->dump() );
 		
 		$dbo->setQuery($query1);
 		
 		$res = $dbo->loadObjectList();
 		
-		error_log ( "KioskIntro got content, num rows = " . count($res)  );
 		
 		$isFirst = true;
 		print '<div class="col-md-12 spaced_row">';
@@ -109,8 +101,6 @@ class BioDivViewKioskIntro extends JViewLegacy
 		
 		print '</div>'; // col-12
 		
-		
-		error_log ( "KioskIntro got content, about to display" );
 		
 		// Display the view
 		parent::display($tpl);

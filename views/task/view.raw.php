@@ -28,9 +28,6 @@ class BioDivViewTask extends JViewLegacy
 	public function display($tpl = null) 
 	{
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("task");
-		
 		$this->personId = (int)userID();
 		
 		error_log ( "Task: person id = " . $this->personId );

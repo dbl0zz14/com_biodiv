@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_STUDENTACCOUNTS_LOGIN").'</div>';
 	
 }
 
@@ -25,15 +25,15 @@ else {
 	print '<div class="panel">';
 	print '<div class="panel-body">';
 	
-	print '<div class="h3 panelHeading">'.$this->translations['accounts']['translation_text'].'</div>';
+	print '<div class="h3 panelHeading">'.JText::_("COM_BIODIV_STUDENTACCOUNTS_ACCOUNTS").'</div>';
 	
 	print '<div class="table-responsive">';
 	print  '<table class="table" style="white-space:nowrap">  <thead>	<tr>';
 		
-	print '<th scope="col" class="align-top">' . $this->translations['avatar']['translation_text'] . '</th>';
-	print '<th scope="col" class="align-top">' . $this->translations['name']['translation_text'] . '</th>';
-	print '<th scope="col" class="align-top">' . $this->translations['username']['translation_text'] . '</th>';
-	print '<th scope="col" class="align-top">' . $this->translations['include_points']['translation_text'] . '</th>';
+	print '<th scope="col" class="align-top">' . JText::_("COM_BIODIV_STUDENTACCOUNTS_AVATAR") . '</th>';
+	print '<th scope="col" class="align-top">' . JText::_("COM_BIODIV_STUDENTACCOUNTS_NAME") . '</th>';
+	print '<th scope="col" class="align-top">' . JText::_("COM_BIODIV_STUDENTACCOUNTS_USERNAME") . '</th>';
+	print '<th scope="col" class="align-top">' . JText::_("COM_BIODIV_STUDENTACCOUNTS_INCLUDE_POINTS") . '</th>';
 	print '<th scope="col" class="align-top"></th>';
 
 	print '</tr>  </thead>  <tbody>';
@@ -60,7 +60,7 @@ else {
 		
 		
 		print '<td class="align-middle">';
-		print '<div id="editAccount_'.$studentId.'" class="btn btn-info editStudent" role="button" data-toggle="modal" data-target="#editStudentModal">'.$this->translations['edit']['translation_text'].'</div>';
+		print '<div id="editAccount_'.$studentId.'" class="btn btn-info editStudent" role="button" data-toggle="modal" data-target="#editStudentModal">'.JText::_("COM_BIODIV_STUDENTACCOUNTS_EDIT").'</div>';
 		print '</td>';
 		
 		print '</tr>';
@@ -92,28 +92,27 @@ print '    <form id="editStudentForm" action="'. BIODIV_ROOT . '&task=edit_stude
 
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.$this->translations['edit_student']['translation_text'].' <span id="studentUsername"></span></h4>';
+print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_STUDENTACCOUNTS_EDIT_STUDENT").' <span id="studentUsername"></span></h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 
 print '<input id="studentId" type="hidden" name="studentId" value="0"/>';
 
 print '<div>';
-print '<label for="studentName"> '.$this->translations['name']['translation_text'].'</label>';
+print '<label for="studentName"> '.JText::_("COM_BIODIV_STUDENTACCOUNTS_NAME").'</label>';
 print '<input type="text" id="studentName"  name="studentName">';
 print '</div>';
 
 print '<div class="vSpaced">';
-print '<div><label for="studentActive"> '.$this->translations['include_points']['translation_text'].'</label></div>';
+print '<div><label for="studentActive"> '.JText::_("COM_BIODIV_STUDENTACCOUNTS_INCLUDE_POINTS").'</label></div>';
 print '<input type="checkbox" id="studentActive" name="studentActive" value="1">';
 print '</div>';
 
 
 print '      </div>';
 print '	  <div class="modal-footer">';
-//print '        <button type="submit" class="btn btn-primary" data-dismiss="modal">'.$this->translations['save']['translation_text'].'</button>';
-print '        <button type="submit" class="btn btn-primary">'.$this->translations['save']['translation_text'].'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_STUDENTACCOUNTS_SAVE").'</button>';
+print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_STUDENTACCOUNTS_CANCEL").'</button>';
 print '      </div>';
 
 print '</form>';

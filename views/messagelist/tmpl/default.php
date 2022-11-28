@@ -9,13 +9,11 @@
 defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_MESSAGELIST_LOGIN").'</div>';
 }
 else {
 	
 	if ( $this->sent ) {
-		
-		//print '<h4>' . $this->translations['sent_messages']['translation_text'] . '</h4>';
 		
 		print '<div class="panel">';
 		print '<div class="panel-body">';
@@ -23,7 +21,7 @@ else {
 		print '<div class="table-responsive">';
 		print '<table class="table">';
 		print '<thead>';
-		print '<th width="15%" class="text-center">'.$this->translations['to']['translation_text'].'</th><th>Message</th><th>Date sent</th>';
+		print '<th width="15%" class="text-center">'.JText::_("COM_BIODIV_MESSAGELIST_TO").'</th><th>Message</th><th>Date sent</th>';
 		print '</thead>';
 		print '<tbody>';
 		
@@ -69,27 +67,15 @@ else {
 	}
 	else {
 		
-		//print '<h4>' . $this->translations['messages']['translation_text'] . '</h4>';
-		
 		print '<div class="panel">';
 		print '<div class="panel-body">';
 		
 		print '<div class="table-responsive">';
 		print '<table class="table">';
 		print '<thead>';
-		print '<th width="15%" class="text-center">'.$this->translations['from']['translation_text'].'</th><th>Message</th><th>Date sent</th><th></th><th></th><th></th>';
+		print '<th width="15%" class="text-center">'.JText::_("COM_BIODIV_MESSAGELIST_FROM").'</th><th>Message</th><th>Date sent</th><th></th><th></th><th></th>';
 		print '</thead>';
 		print '<tbody>';
-		//print '<div id="displaySelectedCharts_'. $groupId .'" class="displaySelectedCharts"></div>';
-		//print '<tr></tr>';
-	
-		// print '<div class="row">';
-			
-		// print '<div class="col-md-2 col-sm-2 col-xs-2 text-center"><p>'.$this->translations['from']['translation_text'].'</p></div>';
-		
-		// print '</div>'; // row
-		
-		//print '<div class="list-group list-group-flush" role="group" aria-label="New message list group">';
 		
 		foreach ( $this->messages as $message ) {
 				
@@ -123,7 +109,7 @@ else {
 				print '</strong>';
 			}
 			
-			print '<td ><button id="reply_'.$message->message_id.'" class="btn replyBtn" data-sender="'.$message->from_person.'">'.$this->translations['reply']['translation_text'].'</button></td>';
+			print '<td ><button id="reply_'.$message->message_id.'" class="btn replyBtn" data-sender="'.$message->from_person.'">'.JText::_("COM_BIODIV_MESSAGELIST_REPLY").'</button></td>';
 			
 			print '<td id="replyFlag_'.$message->message_id.'" >';
 			
@@ -136,7 +122,7 @@ else {
 			
 			print '</td>';
 			
-			print '<td ><button id="report_'.$message->message_id.'" class="btn reportBtn" data-sender="'.$message->from_person.'">'.$this->translations['report']['translation_text'].'</button></td>';
+			print '<td ><button id="report_'.$message->message_id.'" class="btn reportBtn" data-sender="'.$message->from_person.'">'.JText::_("COM_BIODIV_MESSAGELIST_REPORT").'</button></td>';
 			
 			print '</tr>'; // row
 		}

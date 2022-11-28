@@ -10,26 +10,26 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_LOGIN").'</div>';
 }
 else if ( $this->firstLoad ) {
 	
 	print '<div class="row">';
 	print '<div class="col-md-12">';
 
-	print '<h1 class="text-center">'.$this->translations['welcome']['translation_text'].'</h1>';
+	print '<h1 class="text-center">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_WELCOME").'</h1>';
 	
-	print '<h2 class="text-center bigSpaced">'.$this->translations['you_are']['translation_text'].'</h2>';
+	print '<h2 class="text-center bigSpaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_YOU_ARE").'</h2>';
 
-	print '<p>'.$this->translations['policies_text']['translation_text'].'</p>';
+	print '<p>'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_POLICIES_TEXT").'</p>';
 		
-	print '<a href="'.$this->translations['policies_link']['translation_text'].'" target="_blank" rel="noopener noreferrer" class="btn btnInSpace">'.
-		$this->translations['policies_btn']['translation_text'].'</a>';
+	print '<a href="'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_POLICIES_LINK").'" target="_blank" rel="noopener noreferrer" class="btn btnInSpace">'.
+		JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_POLICIES_BTN").'</a>';
 	
 	
 	print '<div id="avatarArea">';
 	
-	print '<h3 class="text-center bigSpaced">'.$this->translations['choose_avatar']['translation_text'].'</h3>';
+	print '<h3 class="text-center bigSpaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_CHOOSE_AVATAR").'</h3>';
 	
 	$isFirst = true;
 	$avatarCount = 0;
@@ -60,19 +60,19 @@ else if ( $this->firstLoad ) {
 		print '</div>'; // row
 	}
 	
-	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.$this->translations['save_avatar']['translation_text'].'</button>';
+	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_SAVE_AVATAR").'</button>';
 	
 	print '</div>'; // row
 	print '</div>'; // avatarArea
 	
 	if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['dash_page']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_DASH_PAGE").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 	else if ( $this->mySchoolRole == Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['student_dash']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_STUDENT_DASH").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 	else if ( $this->mySchoolRole == Biodiv\SchoolCommunity::ECOLOGIST_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['ecol_dash']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_ECOL_DASH").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 
 		
@@ -98,7 +98,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print $this->translations['heading']['translation_text'].' <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_HEADING").' <small class="hidden-xs">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -181,11 +181,9 @@ else {
 	
 	print '<div class="row">';
 	
-	print '<div class="col-md-12 h3">'.$this->translations['events_heading']['translation_text'].'</div>';
+	print '<div class="col-md-12 h3">'.JText::_("COM_BIODIV_ECOLOGISTDASHBOARD_EVENTS_HEADING").'</div>';
 	
 	print '</div>';
-	
-	//print '<h3 class="text-center bes_page_heading">'.$this->translations['events_heading']['translation_text'].'</h3>';
 	
 	print '<div id="eventLog"></div>';
 	
@@ -219,7 +217,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCELIST_LOGIN").'</div>';
 }
 
 else {
@@ -27,7 +27,7 @@ else {
 		print '<div>'.$task->username.'</div>';
 		print '</div>'; // col-2
 		print '<div class="col-md-8 col-sm-6 col-xs-12">';
-		print '<div>'.$task->badge_group . ' ' . $this->translations['badge']['translation_text'] . '. ' . $task->badge_name . ' - ' . $task->name.'</div>';
+		print '<div>'.$task->badge_group . ' ' . JText::_("COM_BIODIV_RESOURCELIST_BADGE") . '. ' . $task->badge_name . ' - ' . $task->name.'</div>';
 		print '</div>'; // col-8
 		print '<div class="col-md-2 col-sm-4 col-xs-12 text-right">';
 		if ( $this->getApprove ) {
@@ -40,7 +40,7 @@ else {
 	
 	if ( count($this->resourceFiles) == 0 ) {
 		if ( $this->student ) {
-			print '<div class="h3">'.$this->translations['no_student_files']['translation_text'].'</div>';
+			print '<div class="h3">'.JText::_("COM_BIODIV_RESOURCELIST_NO_STUDENT_FILES").'</div>';
 		}
 	}
 	

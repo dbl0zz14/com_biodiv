@@ -19,15 +19,8 @@ if ( !$this->person_id ) {
 	print '<div class="col-md-6" style="padding-left:0">';
 	
 	if ( $this->song ) {
-		print '<strong>'.$this->translations['song']['translation_text'].'</strong> '.$this->song;
+		print '<strong>'.JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_SONG").'</strong> '.$this->song;
 	}
-	
-	/*
-	if ( $this->whenHeard ) {
-		//print '<div style="padding-left:0; padding-right:0; margin-top:15px;">' . $this->whenHeard . '</div>';
-		print $this->whenHeard;
-	}
-	*/
 	
 	print '</div>'; // col-6
 	
@@ -65,7 +58,7 @@ if ( !$this->person_id ) {
 	
 	$attributionStr = "";
 	if ( $this->photoAttribution ) {
-		$attributionStr =  $this->translations['species_image']['translation_text'] . ' ' . $this->photoAttribution;
+		$attributionStr =  JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_SPECIES_IMAGE") . ' ' . $this->photoAttribution;
 	}
 	if ( $this->audioAttribution ) {
 		$attributionStr .=  ' ' . $this->audioAttribution;

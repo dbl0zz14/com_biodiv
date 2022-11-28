@@ -44,6 +44,7 @@
 	<filename>BiodivSurvey.php</filename>
 	<filename>BiodivReport.php</filename>
 	<filename>KioskSpecies.php</filename>
+	<filename>BiodivTransifex.php</filename>
 	<folder>views</folder>
 	<folder>Biodiv</folder>
 	<folder>libraries</folder>
@@ -53,6 +54,15 @@
 -->
 
   </files>
+  
+  <languages folder="language">
+	<language tag="en-GB">en-GB/en-GB.com_biodiv.ini</language>
+	<language tag="de-DE">de-DE/de-DE.com_biodiv.ini</language>
+	<language tag="es-ES">es-ES/es-ES.com_biodiv.ini</language>
+	<language tag="hr-HR">hr-HR/hr-HR.com_biodiv.ini</language>
+	<language tag="hu-HU">hu-HU/hu-HU.com_biodiv.ini</language>
+	<language tag="pl-PL">pl-PL/pl-PL.com_biodiv.ini</language>
+  </languages>
 
   <media destination="com_biodiv" folder="media">
     <folder>css</folder>

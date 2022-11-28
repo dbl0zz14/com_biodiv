@@ -23,7 +23,7 @@ defined('_JEXEC') or die;
 	
 	$num_sequences = count($this->sequences);
 	if ( $num_sequences == 0 ) {
-		print "<h1>".$this->translations["no_seqs"]["translation_text"]."</h1>";
+		print "<h1>".JText::_("COM_BIODIV_TRAININGTOPIC_NO_SEQS")."</h1>";
 	}
 	else {
 		$loc = $this->currentSequence->getLocation();
@@ -37,7 +37,7 @@ defined('_JEXEC') or die;
 		print "<div class='row' >";
 		print "<div class='col-md-8' >";
 		
-		print "<h1>".$this->translations["what_see"]["translation_text"]."</h1>";
+		print "<h1>".JText::_("COM_BIODIV_TRAININGTOPIC_WHAT_SEE")."</h1>";
 		print "</div>";
 		print "<div class='col-md-4' >";
 		print "<h4>".$this->topicName."</h4>";
@@ -74,7 +74,7 @@ defined('_JEXEC') or die;
 		print "		  <input type='hidden' name='sequences' value='".$seq_json."'/>";
 		print "		  <input id='user_animals' type='hidden' name='animals' value=''/>";
 		print "		  <button class='btn btn-danger' type='submit' >".
-						  $this->translations["results"]["translation_text"]." <span class='fa fa-arrow-circle-right'/></button>";
+						  JText::_("COM_BIODIV_TRAININGTOPIC_RESULTS")." <span class='fa fa-arrow-circle-right'/></button>";
 		print "		  </form>";
 			
 		print "</div>"; // btn group
@@ -111,14 +111,14 @@ defined('_JEXEC') or die;
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print $this->translations['map_modal']['translation_text']; ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAININGTOPIC_MAP_MODAL"); ?> </h4>
       </div>
       <div class="modal-body">
-	    <div id="no_map"><h5> <?php print $this->translations['no_map']['translation_text']; ?> </h5></div>
+	    <div id="no_map"><h5> <?php print JText::_("COM_BIODIV_TRAININGTOPIC_NO_MAP"); ?> </h5></div>
         <div id="map_canvas" style="width:100%;height:500px;"></div>
       </div>
 	  <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal"><?php print JText::_("COM_BIODIV_TRAININGTOPIC_CLOSE"); ?></button>
       </div>
 	  	  
     </div>

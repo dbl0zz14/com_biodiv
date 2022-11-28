@@ -7,7 +7,6 @@ defined('_JEXEC') or die;
 class SiteHelper {
 	
 	// An array of the children of this project.
-	private $translations;
 	private $userprojects;
 	private $projectsitedata;
 	private $fields;
@@ -18,8 +17,6 @@ class SiteHelper {
 	
 	function __construct( $isCamera = true )
 	{
-		$this->translations = getTranslations("trapper");
-		
 		$this->isCamera = $isCamera;
 		$this->justRecorded = false;
 		$this->userprojects = myTrappingProjects();
@@ -62,20 +59,21 @@ class SiteHelper {
 	public function setHelpArray( $isCamera = true ) {
 		
 		
-		$this->help = array("site_name" => $this->translations['site_help']['translation_text'],
-				"grid_ref" => $this->translations['loc_help']['translation_text']);
+		$this->help = array("site_name" => JText::_("COM_BIODIV_TRAPPER_SITE_HELP"),
+				"grid_ref" => JText::_("COM_BIODIV_TRAPPER_LOC_HELP"));
 
-		$this->help['habitat_id'] = $this->translations['hab_help']['translation_text'];
-		
-		if ( $isCamera ) $this->help['purpose_id'] = $this->translations['pur_help']['translation_text'];
-		
-		$this->help['camera_id'] = str_replace("'", "&apos;", $this->translations['cam_help']['translation_text']);
 
-		$this->help['water_id'] = $this->translations['water_help']['translation_text'];
+		$this->help['habitat_id'] = JText::_("COM_BIODIV_TRAPPER_HAB_HELP");
 		
-		if ( $isCamera ) $this->help["camera_height"] = $this->translations['height_help']['translation_text'];
+		if ( $isCamera ) $this->help['purpose_id'] = JText::_("COM_BIODIV_TRAPPER_PUR_HELP");
 		
-		$this->help["notes"] = "Notes: Please note any other information pertinent to this location, such as \"there is a bird feeder nearby\".";
+		$this->help['camera_id'] = str_replace("'", "&apos;", JText::_("COM_BIODIV_TRAPPER_CAM_HELP"));
+
+		$this->help['water_id'] = JText::_("COM_BIODIV_TRAPPER_WATER_HELP");
+		
+		if ( $isCamera ) $this->help["camera_height"] = JText::_("COM_BIODIV_TRAPPER_HEIGHT_HELP");
+		
+		$this->help["notes"] = JText::_("COM_BIODIV_TRAPPER_HEIGHT_HELP");
 
 	}
 	
@@ -86,21 +84,20 @@ class SiteHelper {
 	
 	public function setFieldsArray( $isCamera = true ) {
 		
-		$this->fields = array("site_name" => $this->translations['site_name']['translation_text'],
-				"grid_ref" => $this->translations['lat_lon']['translation_text']);
+		$this->fields = array("site_name" => JText::_("COM_BIODIV_TRAPPER_SITE_NAME"),
+				"grid_ref" => JText::_("COM_BIODIV_TRAPPER_LAT_LON"));
 		
-		$this->fields['habitat_id'] = $this->translations['habitat']['translation_text'];
+		$this->fields['habitat_id'] = JText::_("COM_BIODIV_TRAPPER_HABITAT");
 		
-		if ( $isCamera ) $this->fields['purpose_id'] = $this->translations['purpose']['translation_text'];
+		if ( $isCamera ) $this->fields['purpose_id'] = JText::_("COM_BIODIV_TRAPPER_PURPOSE");
 		
-		$this->fields['camera_id'] = $this->translations['camera']['translation_text'];
+		$this->fields['camera_id'] = JText::_("COM_BIODIV_TRAPPER_CAMERA");
 		
+		$this->fields['water_id'] = JText::_("COM_BIODIV_TRAPPER_SEE_WATER");
 		
-		$this->fields['water_id'] = $this->translations['see_water']['translation_text'];
+		if ( $isCamera ) $this->fields["camera_height"] = JText::_("COM_BIODIV_TRAPPER_CAM_HEIGHT");
 		
-		if ( $isCamera ) $this->fields["camera_height"] = $this->translations['cam_height']['translation_text'];
-		
-		$this->fields["notes"] = $this->translations['notes']['translation_text'];
+		$this->fields["notes"] = JText::_("COM_BIODIV_TRAPPER_NOTES");
 		
 	}
 	
@@ -202,36 +199,35 @@ class SiteHelper {
 		}
 		print JHtml::_('form.token');
 
-		print '        <div class="tab"><h2>'.$this->translations['enter_site']['translation_text'].'</h2>';
-		print '          <p><input name="site_name" id="sitename" class="required" placeholder="'.$this->translations['site_name']['translation_text'].'..." oninput="this.className = \'\'"></p>';
+		print '        <div class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_ENTER_SITE").'</h2>';
+		print '          <p><input name="site_name" id="sitename" class="required" placeholder="'.JText::_("COM_BIODIV_TRAPPER_SITE_NAME").'..." oninput="this.className = \'\'"></p>';
 		print '        </div>';
 
-		print '        <div class="tab"><h2>'.$this->translations['site_loc']['translation_text'].'</h2>';
-		print '        <h5>'.$this->translations['marker']['translation_text'].'<h5>';
+		print '        <div class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_SITE_LOC").'</h2>';
+		print '        <h5>'.JText::_("COM_BIODIV_TRAPPER_MARKER").'<h5>';
 		print '         <p>';
 
 
 		print '			<div id="map_canvas" style="width:100%;height:400px"></div>';
 		print '			<div class="input-group" style="width:100%">';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.$this->translations['lat']['translation_text'].'</span>';
+		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.JText::_("COM_BIODIV_TRAPPER_LAT").'</span>';
 		print '			    <input type="text" class="form-control required" id="latitude" name="latitude"/>';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.$this->translations['lon']['translation_text'].'</span>';
+		print '			    <span class="input-group-addon" id="basic-addon2" style="width:20%">'.JText::_("COM_BIODIV_TRAPPER_LON").'</span>';
 		print '			    <input type="text" class="form-control required" id="longitude" name="longitude"/>';
 		print '			</div>';
 		print '			<div class="input-group" style="width:100%"> ';
-		print '			    <span class="input-group-addon" id="basic-addon1" style="width:25%">'.$this->translations['grid']['translation_text'].'</span>';
+		print '			    <span class="input-group-addon" id="basic-addon1" style="width:25%">'.JText::_("COM_BIODIV_TRAPPER_GRID").'</span>';
 		print '			    <input type="text" class="form-control" id="grid_ref" name="grid_ref"/>';
 		print '			</div>';
 		
 
-
-		print '         <div id="latlonhelp" data-help="'.$this->translations['lat_lon_help']['translation_text'].'"></div>';
+		print '         <div id="latlonhelp" data-help="'.JText::_("COM_BIODIV_TRAPPER_LAT_LON_HELP").'"></div>';
 		
 		print '         </p>';
 
 		print '        </div>'; // tab
 
-		print '        <div class="tab"><h2>'.$this->translations['extra_det']['translation_text'].'</h2>';
+		print '        <div class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_EXTRA_DET").'</h2>';
 		print '          <p>';
 		
 		if ( $this->isCamera ) $strucArray = array("habitat", "water", "purpose");
@@ -240,7 +236,7 @@ class SiteHelper {
 		  $struc_key = $struc.'_id';
 		  print '          <h5>'.$help[$struc_key].'</h5>';
 		  print '          <select name = "'.$struc_key.'" class = "form-control required" >';
-		  print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
+		  print '            <option value="" disabled selected hidden>'.JText::_("COM_BIODIV_TRAPPER_PLS_SELECT").'</option>';
 		  foreach ( codes_getList($struc."tran") as $thing ) {
 			  list($code, $name) = $thing;
 			  print "<option value='$code'>$name</option>";
@@ -250,14 +246,14 @@ class SiteHelper {
 		print '          </p>';
 		print '        </div>';
 
-		print '        <div class="tab"><h2>'.$this->translations['which_cam']['translation_text'].'</h2>';
+		print '        <div class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_WHICH_CAM").'</h2>';
 
 		$struc = "camera";
 		$struc_key = $struc.'_id';
 		print '          <h5>'.$help[$struc_key].'</h5>';
 		print '          <select name = "'.$struc_key.'" class = "form-control required" >';
-		 print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-		 foreach ( codes_getList($struc."tran") as $thing ) {
+		print '            <option value="" disabled selected hidden>'.JText::_("COM_BIODIV_TRAPPER_PLS_SELECT").'</option>';
+		foreach ( codes_getList($struc."tran") as $thing ) {
 			list($code, $name) = $thing;
 			print "<option value='$code'>$name</option>";
 		}
@@ -265,15 +261,14 @@ class SiteHelper {
 		
 		if ( $this->isCamera ) {
 			print '          <h5>'.$help["camera_height"].'</h5>';
-			//print '          <p><input name="camera_height" id="camera_height" class="checkint" placeholder="Height in cm..." oninput="this.className = \'\'"></p>';
-			print '          <input name="camera_height" id="camera_height" class="checkint" placeholder="'.$this->translations['ht_cm']['translation_text'].'" oninput="this.className = \'\'">';
+			print '          <input name="camera_height" id="camera_height" class="checkint" placeholder="'.JText::_("COM_BIODIV_TRAPPER_HT_CM").'" oninput="this.className = \'\'">';
 		}
 		
 		print '        </div>';
 
 		// --------------------------------------------- Projects ------------------------------------------------------
-		print '        <div id="projecttab" class="tab"><h2>'.$this->translations['which_prj']['translation_text'].'<h2>';
-		print '        <h5>'.$this->translations['ctrl_cmd']['translation_text'].'<h5>';
+		print '        <div id="projecttab" class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_WHICH_PRJ").'<h2>';
+		print '        <h5>'.JText::_("COM_BIODIV_TRAPPER_CTRL_CMD").'<h5>';
 		print '          <select id="projectselect" name = "project_ids[]" class = "form-control" size="15" multiple>';
 		
 		$default_project = getSetting('default_project');
@@ -294,16 +289,15 @@ class SiteHelper {
 
 		// ----------------------------- Project specific data -----------------------------------
 		if ( count($this->projectsitedata) > 0 ) {
-			print '        <div id="projectdatatab" class="tab"><h2>'.$this->translations['pls_enter']['translation_text'].'</h2>';
+			print '        <div id="projectdatatab" class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_PLS_ENTER").'</h2>';
 			print '        <p>';
 			$unique_strucs = array_unique(array_column($this->projectsitedata, 'struc'));
 			foreach ( $unique_strucs as $struc ) {
 				print '<div id="'.$struc.'_section" class="struc_section">';
-				//$meta = codes_getMeta($struc);
-				//print '          <h5>'.$meta["helptext"].'</h5>';
-				print '          <h5>'.$this->translations[$struc.'_help']['translation_text'].'</h5>';
+				$tranStr = "COM_BIODIV_TRAPPER_" . strtoupper($struc) . "_HELP";
+				print '          <h5>'.JText::_($tranStr).'</h5>';
 				print '          <select name = "'.$struc.'_id" class = "form-control sitedata required" >';
-				print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
+				print '            <option value="" disabled selected hidden>'.JText::_("COM_BIODIV_TRAPPER_PLS_SELECT").'</option>';
 				foreach ( codes_getList($struc."tran") as $thing ) {
 					list($code, $name) = $thing;
 					if ( $code == $defaultProjectId ) {
@@ -317,20 +311,20 @@ class SiteHelper {
 				print '</div>';
 				
 			}
-			print '        <div id="noprojectdata">'.$this->translations['no_addit']['translation_text'].'</div>';
+			print '        <div id="noprojectdata">'.JText::_("COM_BIODIV_TRAPPER_NO_ADDIT").'</div>';
 			print '        </p>';
 			print '        </div>';
 		}
 
 		// ----------------------------- Notes -----------------------------------
-		print '        <div class="tab"><h2>'.$this->translations['add_any']['translation_text'].'</h2>';
-		print '          <p><input name="notes" placeholder="'.$this->translations['notes']['translation_text'].'..." oninput="this.className = \'\'"></p>';
+		print '        <div class="tab"><h2>'.JText::_("COM_BIODIV_TRAPPER_ADD_ANY").'</h2>';
+		print '          <p><input name="notes" placeholder="'.JText::_("COM_BIODIV_TRAPPER_NOTES").'..." oninput="this.className = \'\'"></p>';
 		print '        </div>';
 
 		print '        <div style="overflow:auto;">';
 		print '          <div style="float:right;">';
-		print '            <button type="button" id="prevBtn" class="btn btn-success btn-lg" onclick="nextPrev(-1)">'.$this->translations['prev']['translation_text'].'</button>';
-		print '            <button type="button" id="nextBtn" class="btn btn-success btn-lg" onclick="nextPrev(1)" data-next="'.$this->translations['next']['translation_text'].'" data-submit="'.$this->translations['submit']['translation_text'].'">'.$this->translations['next']['translation_text'].'</button>';
+		print '            <button type="button" id="prevBtn" class="btn btn-success btn-lg" onclick="nextPrev(-1)">'.JText::_("COM_BIODIV_TRAPPER_PREV").'</button>';
+		print '            <button type="button" id="nextBtn" class="btn btn-success btn-lg" onclick="nextPrev(1)" data-next="'.JText::_("COM_BIODIV_TRAPPER_NEXT").'" data-submit="'.JText::_("COM_BIODIV_TRAPPER_SUBMIT").'">'.JText::_("COM_BIODIV_TRAPPER_NEXT").'</button>';
 		print '          </div>';
 		print '        </div>';
 
@@ -348,7 +342,7 @@ class SiteHelper {
 
 		print '      </div>';
 		print '      <div class="modal-footer">';
-		print '        <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '        <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.JText::_("COM_BIODIV_TRAPPER_CANCEL").'</button>';
 		print '      </div>';
 		print '    </div>';
 
@@ -377,19 +371,19 @@ class SiteHelper {
 		print '      <div class="modal-body">';
 		print JHtml::_('form.token');
 		
-		print '        <div><h2>'.$this->translations['select_site']['translation_text'].'</h2>';
+		print '        <div><h2>'.JText::_("COM_BIODIV_TRAPPER_SELECT_SITE").'</h2>';
 		print '        </div>';
 		
 		print '          <select name = "site_id" class = "form-control required" >';
-		  print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-		  foreach ( $sites as $site ) {
+		print '            <option value="" disabled selected hidden>'.JText::_("COM_BIODIV_TRAPPER_PLS_SELECT").'</option>';
+		foreach ( $sites as $site ) {
 		  print "<option value='".$site['site_id']."'>".$site['site_name']."</option>";
 		}
 		print '          </select>';
 
 		print '      </div>';
 		print '      <div class="modal-footer">';
-		print '        <button type="submit" class="btn btn-success btn-lg" >'.$this->translations['upload']['translation_text'].'</button>'.'<button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+		print '        <button type="submit" class="btn btn-success btn-lg" >'.JText::_("COM_BIODIV_TRAPPER_UPLOAD").'</button>'.'<button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">'.JText::_("COM_BIODIV_TRAPPER_CANCEL").'</button>';
 		print '      </div>';
 		print '        </form>';
 		
@@ -399,220 +393,7 @@ class SiteHelper {
 		print '</div>';
 	}
 	
-	public function generateSiteCreationModalOrig( $withUpload = false , $defaultProjectId = 1 ) {
-		
-		
-		// Set up the meta data needed for the modal
-		$help = $this->getHelpArray( $this->isCamera );
-
-		$projectsitedataJSON = $this->getProjectSiteDataJSON();
-		
-		$task = 'add_site';
-		if ( $withUpload ) $task = 'add_site_and_upload';
-		
-		print '<div id="add_site_modal" class="modal fade" role="dialog" aria-hidden="true" >';
-		print '  <div class="modal-dialog modal-sm">';
-
-		print '    <!-- Modal content-->';
-		print '    <div class="modal-content">';
-		print '      <div class="modal-header">';
-		print '      </div>';
-		print '      <div class="modal-body">';
-		print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . '" method="post">';
-		print JHtml::_('form.token');
-
-		print '        <div class="tab"><h2>'.$this->translations['enter_site']['translation_text'].'</h2>';
-		print '          <p><input name="site_name" id="sitename" class="required" placeholder="'.$this->translations['site_name']['translation_text'].'..." oninput="this.className = \'\'"></p>';
-		print '        </div>';
-
-		print '        <div class="tab"><h2>'.$this->translations['site_loc']['translation_text'].'</h2>';
-		print '        <h5>'.$this->translations['marker']['translation_text'].'<h5>';
-		print '         <p>';
-
-
-		print '			<div id="map_canvas" style="width:400px;height:400px;"></div>';
-		print '			<div class="input-group" style="width:400px">';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">'.$this->translations['lat']['translation_text'].'</span>';
-		print '			    <input type="text" class="form-control required" id="latitude" name="latitude"/>';
-		print '			    <span class="input-group-addon" id="basic-addon2" style="width:80px">'.$this->translations['lon']['translation_text'].'</span>';
-		print '			    <input type="text" class="form-control required" id="longitude" name="longitude"/>';
-		print '			</div>';
-		print '			<div class="input-group" style="width:400px"> ';
-		print '			    <span class="input-group-addon" id="basic-addon1" style="width:100px">'.$this->translations['grid']['translation_text'].'</span>';
-		print '			    <input type="text" class="form-control" id="grid_ref" name="grid_ref"/>';
-		print '			</div>';
-
-
-		print '         <div id="latlonhelp" data-help="'.$this->translations['lat_lon_help']['translation_text'].'"></div>';
-		print '         </p>';
-
-		print '        </div>';
-
-		print '        <div class="tab"><h2>'.$this->translations['extra_det']['translation_text'].'</h2>';
-		print '          <p>';
-		
-		if ( $this->isCamera ) $strucArray = array("habitat", "water", "purpose");
-		else $strucArray = array("habitat", "water");
-		foreach($strucArray as $struc){
-		  $struc_key = $struc.'_id';
-		  print '          <h5>'.$help[$struc_key].'</h5>';
-		  print '          <select name = "'.$struc_key.'" class = "form-control required" >';
-		  print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-		  foreach ( codes_getList($struc."tran") as $thing ) {
-			  list($code, $name) = $thing;
-			  print "<option value='$code'>$name</option>";
-		  }
-		  print '          </select>';
-		}
-		print '          </p>';
-		print '        </div>';
-
-		print '        <div class="tab"><h2>'.$this->translations['which_cam']['translation_text'].'</h2>';
-
-		$struc = "camera";
-		$struc_key = $struc.'_id';
-		print '          <h5>'.$help[$struc_key].'</h5>';
-		print '          <select name = "'.$struc_key.'" class = "form-control required" >';
-		 print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-		 foreach ( codes_getList($struc."tran") as $thing ) {
-			list($code, $name) = $thing;
-			print "<option value='$code'>$name</option>";
-		}
-		print '          </select>';
-		
-		if ( $this->isCamera ) {
-			print '          <h5>'.$help["camera_height"].'</h5>';
-			//print '          <p><input name="camera_height" id="camera_height" class="checkint" placeholder="Height in cm..." oninput="this.className = \'\'"></p>';
-			print '          <input name="camera_height" id="camera_height" class="checkint" placeholder="'.$this->translations['ht_cm']['translation_text'].'" oninput="this.className = \'\'">';
-		}
-		
-		print '        </div>';
-
-		// --------------------------------------------- Projects ------------------------------------------------------
-		print '        <div id="projecttab" class="tab"><h2>'.$this->translations['which_prj']['translation_text'].'<h2>';
-		print '        <h5>'.$this->translations['ctrl_cmd']['translation_text'].'<h5>';
-		print '          <select id="projectselect" name = "project_ids[]" class = "form-control" size="15" multiple>';
-			
-		foreach($this->userprojects as $proj_id=>$proj_name){
-		  $strucs_attribute = "";
-		  if ( array_key_exists($proj_id, $projectsitedataJSON)) $strucs_attribute = $projectsitedataJSON[$proj_id];
-		  if ( $proj_name == "MammalWeb UK" ) {
-			  print "<option id='select_proj_$proj_id' value='$proj_id' data-strucs='". $strucs_attribute ."'selected>$proj_name</option>";
-		  }
-		  else {
-			  print "<option id='select_proj_$proj_id' value='$proj_id' data-strucs='". $strucs_attribute ."'>$proj_name</option>";
-		  }
-		}
-				
-		print '          </select>';
-		print '        </div>';
-
-		// ----------------------------- Project specific data -----------------------------------
-		if ( count($this->projectsitedata) > 0 ) {
-			print '        <div id="projectdatatab" class="tab"><h2>'.$this->translations['pls_enter']['translation_text'].'</h2>';
-			print '        <p>';
-			$unique_strucs = array_unique(array_column($this->projectsitedata, 'struc'));
-			foreach ( $unique_strucs as $struc ) {
-				print '<div id="'.$struc.'_section" class="struc_section">';
-				//$meta = codes_getMeta($struc);
-				//print '          <h5>'.$meta["helptext"].'</h5>';
-				print '          <h5>'.$this->translations[$struc.'_help']['translation_text'].'</h5>';
-				print '          <select name = "'.$struc.'_id" class = "form-control sitedata required" >';
-				print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-				foreach ( codes_getList($struc."tran") as $thing ) {
-					list($code, $name) = $thing;
-					if ( $code == $defaultProjectId ) {
-						print "<option value='$code' selected>$name</option>";
-					}
-					else {
-						print "<option value='$code'>$name</option>";
-					}
-				}
-				print '          </select>';
-				print '</div>';
-				
-			}
-			print '        <div id="noprojectdata">'.$this->translations['no_addit']['translation_text'].'</div>';
-			print '        </p>';
-			print '        </div>';
-		}
-
-		// ----------------------------- Notes -----------------------------------
-		print '        <div class="tab"><h2>'.$this->translations['add_any']['translation_text'].'</h2>';
-		print '          <p><input name="notes" placeholder="'.$this->translations['notes']['translation_text'].'..." oninput="this.className = \'\'"></p>';
-		print '        </div>';
-
-		print '        <div style="overflow:auto;">';
-		print '          <div style="float:right;">';
-		print '            <button type="button" id="prevBtn" onclick="nextPrev(-1)">'.$this->translations['prev']['translation_text'].'</button>';
-		print '            <button type="button" id="nextBtn" onclick="nextPrev(1)" data-next="'.$this->translations['next']['translation_text'].'" data-submit="'.$this->translations['submit']['translation_text'].'">'.$this->translations['next']['translation_text'].'</button>';
-		print '          </div>';
-		print '        </div>';
-
-		print '        <div style="text-align:center;margin-top:40px;">';
-		print '          <span class="step"></span>';
-		print '          <span class="step"></span>';
-		print '          <span class="step"></span>';
-		print '          <span class="step"></span>';
-		print '          <span class="step"></span>';
-		print '          <span id="projectdatastep" class="step"></span>';
-		print '          <span class="step"></span>';
-		print '        </div>';
-
-		print '        </form>';
-
-		print '      </div>';
-		print '      <div class="modal-footer">';
-		print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
-		print '      </div>';
-		print '    </div>';
-
-		print '  </div>';
-		print '</div>';
-	}
-
-
-	public function generateSiteSelectionModalOrig( $defaultProjectId = 1 ) {
-		
-		
-		// Set up the meta data needed for the modal
-		
-		$sites = $this->getSites();
-
-		print '<div id="select_site_modal" class="modal fade" role="dialog" aria-hidden="true" >';
-		print '  <div class="modal-dialog modal-sm">';
-
-		print '    <!-- Modal content-->';
-		print '    <div class="modal-content">';
-		
-		print '        <form id="uploadForm" action="'. BIODIV_ROOT . '&task=add_upload" method="POST">';
-		
-		print '      <div class="modal-header">';
-		print '      </div>';
-		print '      <div class="modal-body">';
-		print JHtml::_('form.token');
-		
-		print '        <div><h2>'.$this->translations['select_site']['translation_text'].'</h2>';
-		print '        </div>';
-		
-		print '          <select name = "site_id" class = "form-control required" >';
-		  print '            <option value="" disabled selected hidden>'.$this->translations['pls_select']['translation_text'].'</option>';
-		  foreach ( $sites as $site ) {
-		  print "<option value='".$site['site_id']."'>".$site['site_name']."</option>";
-		}
-		print '          </select>';
-
-		print '      </div>';
-		print '      <div class="modal-footer">';
-		print '        <button type="submit" class="btn btn-primary" >'.$this->translations['upload']['translation_text'].'</button>'.'<button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
-		print '      </div>';
-		print '        </form>';
-		
-		print '    </div>'; // modal-content
-
-		print '  </div>';
-		print '</div>';
-	}
+	
 }
 
 

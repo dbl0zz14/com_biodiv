@@ -11,13 +11,13 @@ $action = $this->root . "&view=uploadm";
 
 ?>
 
-<h1><?php print $this->translations['up_from']['translation_text'] . ' ' . $this->site_name;?></h1>
+<h1><?php print JText::_("COM_BIODIV_UPLOADED_UP_FROM") . ' ' . $this->site_name;?></h1>
 
 <table class='table'>
 <thead>
 <tr>
-<th><?php print $this->translations['file_name']['translation_text'];?></th>
-<th><?php print $this->translations['date']['translation_text'];?></th>
+<th><?php print JText::_("COM_BIODIV_UPLOADED_FILE_NAME");?></th>
+<th><?php print JText::_("COM_BIODIV_UPLOADED_DATE");?></th>
 </tr> 
 </thead>
 <tbody>
@@ -37,12 +37,12 @@ $action = $this->root . "&view=uploadm";
 
 <?php
 if ( count($this->tosplit) > 0 ) {
-print "<h3>" . $this->translations['before_proc']['translation_text'] . "</h3>";
+print "<h3>" . JText::_("COM_BIODIV_UPLOADED_BEFORE_PROC") . "</h3>";
 print "<table class='table'>";
 print "<thead>";
 print "<tr>";
-print "<th>".$this->translations['file_name']['translation_text']."</th>";
-print "<th>".$this->translations['date']['translation_text']."</th>";
+print "<th>".JText::_("COM_BIODIV_UPLOADED_FILE_NAME")."</th>";
+print "<th>".JText::_("COM_BIODIV_UPLOADED_DATE")."</th>";
 print "</tr> ";
 print "</thead>";
 print "<tbody>";
@@ -63,6 +63,6 @@ print "</table>";
 }
 
 
-print "  <a class='btn btn-success btn-lg' role='button' href='".BIODIV_ROOT."&view=upload&site_id=". $this->site_id."'>".biodiv_label_icons('upload', $this->translations['more_ph']['translation_text'])."</a>";
+print "  <a class='btn btn-success btn-lg' role='button' href='".BIODIV_ROOT."&view=upload&site_id=". $this->site_id."'>".biodiv_label_icons('upload', JText::_("COM_BIODIV_UPLOADED_MORE_PH"))."</a>";
 
 ?>

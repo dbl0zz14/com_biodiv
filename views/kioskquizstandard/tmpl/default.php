@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	error_log ("No personId in KioskQuizStandard");
 	
-	print '  <h2 class="text-center classify_heading">'.$this->translations['no_user']['translation_text'].'</h2>';
+	print '  <h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NO_USER").'</h2>';
 }
 else {
 	
@@ -26,15 +26,15 @@ else {
 		
 
 	if ( count($this->sequences) == 0 ) {
-		print '  <h2 class="text-center classify_heading">'.$this->translations['no_sequences']['translation_text'].'</h2>';
+		print '  <h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NO_SEQUENCES").'</h2>';
 	}
 	else {
 
-		print '  <h1 id="quiz_whatsee" class="text-center classify_heading">'.$this->translations['what_see']['translation_text'].'</h1>';  
+		print '  <h1 id="quiz_whatsee" class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_WHAT_SEE").'</h1>';  
 
-		print '  <h1 id="quiz_select" class="text-center classify_heading" style="display:none">'.$this->translations['select']['translation_text'].'</h1>';  
+		print '  <h1 id="quiz_select" class="text-center classify_heading" style="display:none">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_SELECT").'</h1>';  
 
-		print '  <h1 id="quiz_happy" class="text-center classify_heading" style="display:none">'.$this->translations['happy']['translation_text'].'</h1>';  
+		print '  <h1 id="quiz_happy" class="text-center classify_heading" style="display:none">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_HAPPY").'</h1>';  
 
 		
 		
@@ -90,27 +90,27 @@ else {
 		print '<div id="filter_buttons" class="species_group">';
 
 		print '<div class="col-md-6">';
-		print '	<button id="classify_mammal" class="btn btn-lg btn-block btn-success h3 control_btn">'.$this->translations['mammal']['translation_text'].'</button>';
+		print '	<button id="classify_mammal" class="btn btn-lg btn-block btn-success h3 control_btn">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_MAMMAL").'</button>';
 		print '</div>';
 
 
 		print '<div class="col-md-6">';
-		print '	<button id="classify_bird" class="btn btn-lg btn-block btn-success h3 control_btn">'.$this->translations['bird']['translation_text'].'</button>';
+		print '	<button id="classify_bird" class="btn btn-lg btn-block btn-success h3 control_btn">'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_BIRD").'</button>';
 		print '</div>';
 
 
 		print '<div class="col-md-6">';
-		print '	<button id="species_select_'.$this->nothingId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.$this->translations['nothing']['translation_text'].'</button>';
+		print '	<button id="species_select_'.$this->nothingId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NOTHING").'</button>';
 		print '</div>';
 
 
 		print '<div class="col-md-6">';
-		print '	<button id="species_select_'.$this->humanId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.$this->translations['human']['translation_text'].'</button>';
+		print '	<button id="species_select_'.$this->humanId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_HUMAN").'</button>';
 		print '</div>';
 
 
 		print '<div class="col-md-6 col-md-offset-3">';
-		print '	<button id="species_select_'.$this->dkId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.$this->translations['dk']['translation_text'].'</button>';
+		print '	<button id="species_select_'.$this->dkId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_DK").'</button>';
 		print '</div>';
 
 		print '</div>'; // filter_buttons
@@ -157,11 +157,11 @@ else {
 		
 
 		print '<div class="col-md-6">';
-		print '	<button id="not_on_mammal_list" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['notonlist']['translation_text'].'</button>';
+		print '	<button id="not_on_mammal_list" class="btn btn-lg btn-block btn-success h3 control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NOTONLIST").'</button>';
 		print '</div>';
 
 		print '<div class="col-md-6">';
-		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.$this->translations['back']['translation_text'].'</button>';
+		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_BACK").'</button>';
 		print '</div>';
 
 		print '</div>'; // mammal_buttons
@@ -216,11 +216,11 @@ else {
 		print '<div class="col-md-12 anchor_bottom">';
 		
 		print '<div class="col-md-6">';
-		print '	<button id="species_select_'.$this->otherId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.$this->translations['other']['translation_text'].'</button>';
+		print '	<button id="species_select_'.$this->otherId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_OTHER").'</button>';
 		print '</div>';
 
 		print '<div class="col-md-6">';
-		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.$this->translations['back']['translation_text'].'</button>';
+		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_BACK").'</button>';
 		print '</div>';
 
 		print '</div>'; // anchor_bottom
@@ -265,11 +265,11 @@ else {
 		}
 
 		print '<div class="col-md-6">';
-		print '	<button id="not_on_bird_list" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['notonlist']['translation_text'].'</button>';
+		print '	<button id="not_on_bird_list" class="btn btn-lg btn-block btn-success h3 control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NOTONLIST").'</button>';
 		print '</div>';
 
 		print '<div class="col-md-6">';
-		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.$this->translations['back']['translation_text'].'</button>';
+		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_BACK").'</button>';
 		print '</div>';
 
 
@@ -327,11 +327,11 @@ else {
 		print '<div class="col-md-12 anchor_bottom">';
 
 		print '<div class="col-md-6">';
-		print '	<button id="species_select_'.$this->otherId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.$this->translations['other']['translation_text'].'</button>';
+		print '	<button id="species_select_'.$this->otherId.'" class="btn btn-lg btn-block btn-success h3 control_btn species_select" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_OTHER").'</button>';
 		print '</div>';
 
 		print '<div class="col-md-6">';
-		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.$this->translations['back']['translation_text'].'</button>';
+		print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_filter" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_BACK").'</button>';
 		print '</div>';
 
 		print '</div>'; // anchor_bottom
@@ -346,11 +346,11 @@ else {
 		print "<div class='well'><div id='species_helplet'></div></div>";
 
 		print '<div class="col-md-6">';
-		print '	<button id="classify_save" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['yes_save']['translation_text'].'</button>';
+		print '	<button id="classify_save" class="btn btn-lg btn-block btn-success h3 control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_YES_SAVE").'</button>';
 		print '</div>';
 
 		print '<div class="col-md-6">';
-		print '	<button class="btn btn-lg btn-block btn-success h3 back_to_filter control_btn" >'.$this->translations['no_back']['translation_text'].'</button>';
+		print '	<button class="btn btn-lg btn-block btn-success h3 back_to_filter control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_NO_BACK").'</button>';
 		print '</div>';
 
 
@@ -366,20 +366,20 @@ else {
 		if ( $seq->getMedia() == "photo" ) {
 			
 			print '<div id="whatsee_info" class="mwinfo col-md-7">';
-			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro']['translation_text'].'</div>';
+			print '<div class="h3"><span class="fa fa-info-circle"></span> '.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_LOOK_THRO").'</div>';
 			print '</div>';
 			
 			print '<div id="whatsee_vid_info" class="mwinfo col-md-7" style="display:none">';
-			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro_vid']['translation_text'].'</div>';
+			print '<div class="h3"><span class="fa fa-info-circle"></span> '.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_LOOK_THRO_VID").'</div>';
 			print '</div>';
 		}
 		else {
 			print '<div id="whatsee_info" class="mwinfo col-md-7" style="display:none">';
-			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro']['translation_text'].'</div>';
+			print '<div class="h3"><span class="fa fa-info-circle"></span> '.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_LOOK_THRO").'</div>';
 			print '</div>';
 			
 			print '<div id="whatsee_vid_info" class="mwinfo col-md-7">';
-			print '<div class="h3"><span class="fa fa-info-circle"></span> '.$this->translations['look_thro_vid']['translation_text'].'</div>';
+			print '<div class="h3"><span class="fa fa-info-circle"></span> '.JText::_("COM_BIODIV_KIOSKQUIZSTANDARD_LOOK_THRO_VID").'</div>';
 			print '</div>';
 		}
 		

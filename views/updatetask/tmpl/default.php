@@ -68,20 +68,20 @@ print '<div class="col-md-12 h3">';
 	
 if ( $this->findActivityButton ) {
 	
-	print '<button class="btn btn-primary btnInSpace browseTasksButton">'.$this->translations['find_another']['translation_text'].'</button>';
+	print '<button class="btn btn-primary btnInSpace browseTasksButton">'.JText::_("COM_BIODIV_UPDATETASK_FIND_ANOTHER").'</button>';
 	
 }
 
 if ( $this->reloadButton ) {
 	
-	print '<button class="btn btn-primary btnInSpace reloadBtn">'.$this->translations['find_another']['translation_text'].'</button>';
+	print '<button class="btn btn-primary btnInSpace reloadBtn">'.JText::_("COM_BIODIV_UPDATETASK_FIND_ANOTHER").'</button>';
 	
 }
 
 if ( $this->reviewWorkButton ) {
 	
-	print '<a href="'.$this->translations['schoolwork_link']['translation_text'].'" class="btn btn-primary btnInSpace">';
-	print $this->translations['review_work']['translation_text'];
+	print '<a href="'.JText::_("COM_BIODIV_UPDATETASK_SCHOOLWORK_LINK").'" class="btn btn-primary btnInSpace">';
+	print JText::_("COM_BIODIV_UPDATETASK_REVIEW_WORK");
 	print '</a>';
 	
 }

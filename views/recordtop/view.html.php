@@ -29,9 +29,6 @@ class BioDivViewRecordTop extends JViewLegacy
     {
 		$this->personId = (int)userID();
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("recordtop");
-
 		if ( $this->personId ) {
 		
 			$isCamera = getSetting("camera") == "yes";

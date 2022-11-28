@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 if ( $this->sequence == null ) {
-	print '  <h2 class="text-center classify_heading">'.$this->translations['no_sequences']['translation_text'].'</h2>';
+	print '  <h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKMEDIACAROUSEL_NO_SEQUENCES").'</h2>';
 }
 
 else {

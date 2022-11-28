@@ -28,9 +28,6 @@ class BioDivViewArticle extends JViewLegacy
 	public function display($tpl = null) 
 	{
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("species");
-		
 		$this->personId = (int)userID();
 		
 		if ( $this->personId ) {

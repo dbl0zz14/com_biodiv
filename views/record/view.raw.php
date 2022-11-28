@@ -28,17 +28,12 @@ class BioDivViewRecord extends JViewLegacy
     {
 		($person_id = (int)userID()) or die("Please log in");
 		
-		$this->translations = getTranslations("record");
-
-		
 		// Check whether site id is in form
 		$input = JFactory::getApplication()->input;
 		
 		$this->loaded = false;
 		
 		$this->siteId = $input->getInt('site_id', 0);
-		
-		//error_log("BioDivViewRecord site id = " . $this->siteId);
 		
 		if ( $this->siteId == 0 ) {
 			

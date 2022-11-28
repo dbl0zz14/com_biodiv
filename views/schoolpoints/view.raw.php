@@ -26,11 +26,6 @@ class BioDivViewSchoolPoints extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "SchoolPoints display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("schoolpoints");
-	
 		$this->personId = (int)userID();
 		
 		$this->data = array();

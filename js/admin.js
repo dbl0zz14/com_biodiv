@@ -281,9 +281,53 @@ function addSchoolUser ( e ) {
 }
 
 
+
 function printUserMessage ( data ) {
 	
 	jQuery('#addSchoolUserMsg').append(data);
+}
+
+
+
+function updateArticle ( e ) {
+	
+	console.log ( "updateArticle called" );
+
+	e.preventDefault();
+	
+	let formId = jQuery(this).attr('id');
+	
+	let fd = new FormData(this);
+	
+	let url = BioDiv.root + "&view=updatetranslation&format=raw";
+	
+	//jQuery('#userMessage').load(url, fd, BioDiv.removeClick);
+	
+	
+	jQuery.ajax({
+		type: 'POST',
+		url: url,
+		data: fd,
+		processData: false,
+		contentType: false
+	}).done(printUpdateArticleMessage);
+	
+	
+}
+
+
+
+
+function printUpdateArticleMessage ( data ) {
+	
+	console.log ( "printUpdateArticleMessage called" );
+	
+	let updateResult = JSON.parse ( data );
+	
+	let elStr = '#updateArticle_' + updateResult.language + '_' + updateResult.articleId;
+
+	jQuery(elStr).text(updateResult.message);
+	
 }
 
 
@@ -295,6 +339,7 @@ jQuery(document).ready(function(){
 	jQuery('#createProject').submit(validateProject);
 	jQuery('#editProject').submit(validateProject);
 	jQuery('.addSchoolUser').submit(addSchoolUser);
+	jQuery('.updateArticle').submit(updateArticle);
 	
 	setProjectFormButtons ();
 	

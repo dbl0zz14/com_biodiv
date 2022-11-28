@@ -29,11 +29,7 @@ class BioDivViewProjects extends JViewLegacy
     $person_id = (int)userID();
     //$person_id or die("No person_id");
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("project");
-
-
-    $this->root = 
+	$this->root = 
     $this->status = array();
 
     $db = JDatabase::getInstance(dbOptions());
@@ -49,9 +45,7 @@ class BioDivViewProjects extends JViewLegacy
 	// (Actually all except private ones.)
 	$this->projects = listedProjects();
 	
-	//print "<br/>Got " . count($this->projects) . " non-private projects <br/>They are:<br>";
-	//print_r ( $this->projects );
-        
+	    
 
     // Display the view
     parent::display($tpl);

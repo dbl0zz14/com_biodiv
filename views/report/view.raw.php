@@ -28,9 +28,6 @@ class BioDivViewReport extends JViewLegacy
     {
 		$this->personId = (int)userID();
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("report");
-		
 		
 		if ( $this->personId ) {
 		

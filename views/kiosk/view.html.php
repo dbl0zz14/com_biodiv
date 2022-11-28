@@ -40,8 +40,7 @@ class BioDivViewKiosk extends JViewLegacy
 		// Take the first kiosk option for the project 
 		$kioskRows = getSingleProjectOptions ( $this->projectId, 'kiosk'  );
 		$this->kiosk = $kioskRows[0]['option_name'];
-		error_log ("StartKiosk kiosk project option = " . $this->kiosk );
-
+		
 		$this->user_key = 
 			$app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
 
@@ -50,11 +49,6 @@ class BioDivViewKiosk extends JViewLegacy
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
 
-		error_log("Kiosk View: user_key = " . $this->user_key);
-
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kiosk");
-		
 		$this->isSchoolUser = Biodiv\SchoolCommunity::isSchoolUser();
 		$this->logoPath = null;
 		if ( $this->isSchoolUser ) {

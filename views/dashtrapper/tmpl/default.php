@@ -12,13 +12,13 @@ defined('_JEXEC') or die;
 <?php
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JText::_("COM_BIODIV_DASHTRAPPER_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_DASHTRAPPER_LOGIN").'</a>';
 }
 else {
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['trapper_stats']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHTRAPPER_TRAPPER_STATS").'</h3>';
 	
 	// Add the table and headings
 	print  '<div class="table-responsive">';
@@ -40,19 +40,19 @@ else {
 	
 	print '</div>'; // table responsive
 	
-	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.$this->translations['trapper_page']['translation_text'].'" >'. $this->translations['man_sites']['translation_text'] .'</a></p>';
+	print '<p class="text-center"><a class="btn btn-success btn-lg" href="'.JText::_("COM_BIODIV_DASHTRAPPER_TRAPPER_PAGE").'" >'. JText::_("COM_BIODIV_DASHTRAPPER_MAN_SITES") .'</a></p>';
 	
 	print '</div>'; // col-6
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['upl_class']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHTRAPPER_UPL_CLASS").'</h3>';
 	
 	if ( $this->numSites > 0 ) {
 		print "<canvas id='userProgressChart' ></canvas>";
 	}
 	else {
-		print '<p>'.$this->translations['sites_none']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHTRAPPER_SITES_NONE").'</p>';
 	}
 		
 	

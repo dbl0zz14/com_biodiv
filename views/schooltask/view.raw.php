@@ -26,11 +26,6 @@ class BioDivViewSchoolTask extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "SchoolTask display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("schooltask");
-	
 		$this->personId = (int)userID();
 		
 		$this->allTasks = array();

@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_STUDENTS_LOGIN").'</div>';
 	
 }
 
@@ -37,11 +37,10 @@ else {
 		//Biodiv\SchoolCommunity::generateStudentMasthead();
 	}
 
-	//print '<h2>'.$this->translations['heading']['translation_text'].' <small>'.$this->translations['subheading']['translation_text'].'</small></h2>';
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_STUDENTS_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_STUDENTS_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -61,19 +60,19 @@ else {
   
 
 	print '<div class="btn btn-info manageStudentsTab manageTasksBtn active ">';
-	print $this->translations['approve_tasks']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTS_APPROVE_TASKS");
 	print '</div>';
 	
 	print '<div class="btn btn-info schoolTaskTab  manageTasksBtn ">';
-	print $this->translations['school_task']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTS_SCHOOL_TASK");
 	print '</div>';
 	
 	print '<div class="btn btn-info studentProgressTab  manageTasksBtn ">';
-	print $this->translations['student_progress']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTS_STUDENT_PROGRESS");
 	print '</div>';
 	
 	print '<div class="btn btn-info studentAccountsTab  manageTasksBtn ">';
-	print $this->translations['student_users']['translation_text'];
+	print JText::_("COM_BIODIV_STUDENTS_STUDENT_USERS");
 	print '</div>';
 	
 	print '</div>'; // btn-group

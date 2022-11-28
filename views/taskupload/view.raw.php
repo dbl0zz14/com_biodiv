@@ -26,11 +26,6 @@ class BioDivViewTaskUpload extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		//error_log ( "TaskUpload display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("taskupload");
-	
 		$this->personId = (int)userID();
 
 		if ( !$this->personId ) {

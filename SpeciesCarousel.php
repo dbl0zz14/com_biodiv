@@ -5,25 +5,19 @@ defined('_JEXEC') or die;
 
 class SpeciesCarousel {
 	
-	private $translations;
 	private $filters;
 	private $allSpecies;
 	private $classifyInputs;
 	
 	function __construct()
 	{
-		$this->translations = getTranslations("classify");
 		$this->filters = array();
 		
 		$this->allSpecies = allSpecies();
 		
-		$err_msg = print_r ( $this->allSpecies, true );
-		error_log ( "allSpecies in constructor: " . $err_msg );
 		
 		$this->allSpeciesTran = codes_getList ( "speciestran" );
 		
-		$err_msg = print_r ( $this->allSpeciesTran, true );
-		error_log ( "allSpeciesTran in constructor: " . $err_msg );
 		
 		$this->classifyInputs = getClassifyInputs();
 	}
@@ -121,8 +115,8 @@ class SpeciesCarousel {
 		print "	<div class='modal-dialog modal-xl'>";
 		print "    <div class='modal-content'>";
 		print "      <div class='modal-header'>";
- 		print "   <button type='button' class='close' data-dismiss='modal'><span aria-hidden='true'>&times;</span><span class='sr-only'>".$this->translations['close']['translation_text']."</span></button>";
-		print "    <h4 class='modal-title' id='myModalLabel'>".$this->translations['class_ani']['translation_text']." </h4>";
+ 		print "   <button type='button' class='close' data-dismiss='modal'><span aria-hidden='true'>&times;</span><span class='sr-only'>".JText::_("COM_BIODIV_CLASSIFY_CLOSE")."</span></button>";
+		print "    <h4 class='modal-title' id='myModalLabel'>".JText::_("COM_BIODIV_CLASSIFY_CLASS_ANI")." </h4>";
 		print "      </div>";
 		print "      <div class='modal-body'>";
 		print "        <form id='classify-form' role='form'>";
@@ -165,8 +159,8 @@ class SpeciesCarousel {
 		}
 
 		print "<hr/>";
-		print "<button type='button' class='btn btn-default' data-dismiss='modal'>".$this->translations['close']['translation_text']."</button>";
-		print "<button type='button' class='btn btn-success' id='classify-save' data-dismiss='modal'>".$this->translations['save']['translation_text']."</button>";
+		print "<button type='button' class='btn btn-default' data-dismiss='modal'>".JText::_("COM_BIODIV_CLASSIFY_CLOSE")."</button>";
+		print "<button type='button' class='btn btn-success' id='classify-save' data-dismiss='modal'>".JText::_("COM_BIODIV_CLASSIFY_SAVE")."</button>";
 
 		print "</div> <!--col3 -->";
 

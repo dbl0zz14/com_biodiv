@@ -28,9 +28,6 @@ class BioDivViewBrowseTasks extends JViewLegacy
     {
 		error_log ( "BadgeProgress display function called" );
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("browsetasks");
-	
 		$this->personId = (int)userID();
 		
 		$this->badgeGroupId = 0;

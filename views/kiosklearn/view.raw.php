@@ -47,9 +47,6 @@ class BioDivViewKioskLearn extends JViewLegacy
 
 		//error_log("Kiosk View: user_key = " . $this->user_key);
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kiosklearn");
-
 		$this->kioskSpecies = new KioskSpecies($this->projectId);
 		
 		$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();

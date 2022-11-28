@@ -30,9 +30,6 @@ class BioDivViewSchoolUsers extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("schoolusers");
-	
 	// Check user is an ecologist and get schools
 	$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	$this->isAdmin = Biodiv\SchoolCommunity::isAdmin();

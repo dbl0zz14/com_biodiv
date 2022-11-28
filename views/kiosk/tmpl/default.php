@@ -16,7 +16,7 @@ print '	<button id="home_button" class="btn btn-success h2" data-dismiss="modal"
 
 if ( $this->isSchoolUser and $this->logoPath ) {
 	
-	print '<div id="besButton"><a href="'.$this->translations['bes_link']['translation_text'].'" class="noLineLink"><button class="btn btn-default h3" ><img src="'.$this->logoPath.'" class="img-responsive besButtonImg" /></button></a></div>';
+	print '<div id="besButton"><a href="'.JText::_("COM_BIODIV_KIOSK_BES_LINK").'" class="noLineLink"><button class="btn btn-default h3" ><img src="'.$this->logoPath.'" class="img-responsive besButtonImg" /></button></a></div>';
 
 }
 

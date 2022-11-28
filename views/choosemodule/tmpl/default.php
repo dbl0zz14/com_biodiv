@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_CHOOSEMODULE_LOGIN").'</div>';
 }
 else {
 	
@@ -48,7 +48,8 @@ else {
 			print '<a href="'.$badgeUrl.'">';
 			print '<div class="panel panel-default actionPanel '.$module->class_stem.'Color">';
 			print '<div class="panel-body">';
-			print '<div class="h3 panelHeading">'.$this->translations[$textStem.$moduleNameLc]['translation_text'].'</div>';
+			$trStr = strtoupper ( $textStem.$moduleNameLc );
+			print '<div class="h3 panelHeading">'.JText::_("COM_BIODIV_CHOOSEMODULE_".$trStr).'</div>';
 			print '<div class="text-center"><img src="'.$module->image.'"  class="'.$module->class_stem.'Img img-responsive" alt="Find '.$moduleNameLc.' icon" /></div>';
 			print '</div>'; // panel-body
 			print '</div>'; // panel
@@ -59,7 +60,8 @@ else {
 			print '<div id="chooseModule_'.$module->module_id.'" class="find'.$moduleName.'Activity">';
 			print '<div class="panel panel-default actionPanel '.$module->class_stem.'Color">';
 			print '<div class="panel-body">';
-			print '<div class="h3 panelHeading">'.$this->translations['soon']['translation_text'].": ".$this->translations[$textStem.$moduleNameLc.'']['translation_text'].'</div>';
+			$trStr = strtoupper ( $textStem.$moduleNameLc );
+			print '<div class="h3 panelHeading">'.JText::_("COM_BIODIV_CHOOSEMODULE_SOON").": ".JText::_("COM_BIODIV_CHOOSEMODULE_".$trStr).'</div>';
 			print '<div class="text-center"><img src="'.$module->image.'"  class="'.$module->class_stem.'Img img-responsive" alt="Find '.$moduleNameLc.' icon" /></div>';
 			print '</div>'; // panel-body
 			print '</div>'; // panel

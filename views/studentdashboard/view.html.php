@@ -30,9 +30,6 @@ class BioDivViewStudentDashboard extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("studentdashboard");
-	
 	// Check user is a student and get school
 	$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	
@@ -61,7 +58,7 @@ class BioDivViewStudentDashboard extends JViewLegacy
 	$this->notifications = null;
 	if ( $this->firstLoad ) {
 		Biodiv\SchoolCommunity::setNewUser(0);
-		Biodiv\SchoolCommunity::addNotification($this->translations['welcome_note']['translation_text']);
+		Biodiv\SchoolCommunity::addNotification(JText::_("COM_BIODIV_STUDENTDASHBOARD_WELCOME_NOTE"));
 		// Do the first unlock to get the badges through
 		$this->completedBadgeGroups = Biodiv\Badge::unlockBadges();
 		$this->avatars = Biodiv\SchoolCommunity::getAvatars();
@@ -118,10 +115,10 @@ class BioDivViewStudentDashboard extends JViewLegacy
 				$errMsg = print_r ( $target, true );
 				error_log ( "StudentDashboard got target: " . $errMsg );
 				if ( $target ) {
-					$this->encourage = '<i class="fa fa-info-circle"></i> ' . $this->translations['to_reach']['translation_text'] . ' ' . $target->module . ' ' .
+					$this->encourage = '<i class="fa fa-info-circle"></i> ' . JText::_("COM_BIODIV_STUDENTDASHBOARD_TO_REACH") . ' ' . $target->module . ' ' .
 						$target->seq . ' <i class="fa fa-star"></i> ' . ' ' . $target->badgeGroup . ' ' . 
-						$this->translations['you_need']['translation_text'] . ' ' . $target->pointsNeeded . ' ' . 
-						$this->translations['more_points']['translation_text'];
+						JText::_("COM_BIODIV_STUDENTDASHBOARD_YOU_NEED") . ' ' . $target->pointsNeeded . ' ' . 
+						JText::_("COM_BIODIV_STUDENTDASHBOARD_MORE_POINTS");
 				}
 			}
 		}
@@ -131,66 +128,6 @@ class BioDivViewStudentDashboard extends JViewLegacy
 		}
 		
 	}
-	
-	
-	
-	
-	
-	/*
-	// Get the current status for each badge group.
-	$this->badgeGroupSummary = array();
-	$this->badgeColorClasses = array();
-	$this->badgeIcons = array();
-	
-	
-	$bestBadgePoints = 0;
-	$bestBadgeGroup = 0;
-	foreach ( $this->badgeGroups as $badgeGroup ) {
-		$groupId = $badgeGroup[0];
-		
-		// --------------------------- Colors
-		$colorClassArray = getOptionData ( $groupId, "colorclass" ); 
-
-		$colorClass = "";
-	
-		if ( count($colorClassArray) > 0 ) {
-			$colorClass = $colorClassArray[0];
-		}
-		
-		$this->badgeColorClasses[$groupId] = $colorClass;
-				
-		// ----------------------------- Icons
-		$iconArray = getOptionData ( $groupId, "icon" ); 
-
-		$icon = "";
-	
-		if ( count($iconArray) > 0 ) {
-			$icon = $iconArray[0];
-		}
-		
-		$this->badgeIcons[$groupId] = $icon;
-		
-		// ----------------------------- Results
-		$badgeResults = new Biodiv\BadgeGroup ( $groupId );
-		
-		$this->badgeGroupSummary[$groupId] = $badgeResults->getSummary();
-		
-		if ( $this->badgeGroupSummary[$groupId]["numPoints"] > $bestBadgePoints ) {
-			$bestBadgePoints = $this->badgeGroupSummary[$groupId]["numPoints"];
-			$bestBadgeGroup = $groupId;
-		}
-	}
-	
-	$slogans = getOptionData ( $bestBadgeGroup, "slogan" );
-	
-	if ( count($slogans) > 0 ) {
-		$this->slogan = $slogans[0];
-	}
-	else {
-		
-		$this->slogan = $this->translations['default_slogan']['translation_text'];
-	}
-	*/
 	
 	// Display the view
     parent::display($tpl);

@@ -13,7 +13,7 @@ defined('_JEXEC') or die;
 
 print '<div class="col-md-12 spaced_row">';
 
-print '<h1 class="text-center">'.$this->translations['heading']['translation_text'].'</h1>';
+print '<h1 class="text-center">'.JText::_("COM_BIODIV_KIOSKABOUT_HEADING").'</h1>';
 
 $maxArticles = 6;
 $articleColClass = "col-md-4";

@@ -16,18 +16,15 @@ error_log ( "seq_json = " . $seq_json );
 
 print "<div id='seq_ids' data-seq-ids='".$seq_json."'></div>";
 
-// $document->addScriptDeclaration("function setBiodivSequenceIds() {BioDiv.sequenceIds = '".$seq_json."';}");
-
-//print '<script type="text/javascript"> function setBiodivSequenceIds() {BioDiv.sequenceIds = "'.$seq_json.'";} </script>';
 	
 
 if ( count($this->sequences) == 0 ) {
-	print '  <h2 class="text-center classify_heading">'.$this->translations['no_sequences']['translation_text'].'</h2>';
+	print '  <h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_NO_SEQUENCES").'</h2>';
 }
 
 else {
 
-	print '  <h1 id="quiz_whatsee" class="text-center classify_heading">'.$this->translations['what_see']['translation_text'].'</h1>';  
+	print '  <h1 id="quiz_whatsee" class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_WHAT_SEE").'</h1>';  
 
 	
 	
@@ -55,13 +52,13 @@ else {
 	
 		// Look through photos or play video message
 		if ( $seq->getMedia() == "video" ) {
-			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.$this->translations['play_video']['translation_text'].'</h2>';
+			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_PLAY_VIDEO").'</h2>';
 		}
 		else if ( $seq->getMedia() == "audio" ) {
-			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.$this->translations['play_audio']['translation_text'].'</h2>';
+			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_PLAY_AUDIO").'</h2>';
 		}
 		else {
-			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.$this->translations['look_thro']['translation_text'].'</h2>';
+			print '  <h2 id="look_thro_'.$i.'" class="text-center look_thro quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_LOOK_THRO").'</h2>';
 		}
 	
 	}
@@ -103,9 +100,7 @@ else {
 	print '<div class="classify_panel_right">';
 	
 	
-	print '  <h2 id="try_again" class="text-center quiz_h2"  style="display:none">'.$this->translations['try_again']['translation_text'].'</h2>';
-	
-	//print '  <h2 id="correct_species" class="text-center"  style="display:none">'.$this->translations['correct_species']['translation_text'].'</h2>';
+	print '  <h2 id="try_again" class="text-center quiz_h2"  style="display:none">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_TRY_AGAIN").'</h2>';
 	
 	
 
@@ -127,13 +122,13 @@ else {
 	
 		// Look through photos or play video message
 		if ( $seq->getMedia() == "video" ) {
-			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.$this->translations['match_video']['translation_text'].'</h2>';
+			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_MATCH_VIDEO").'</h2>';
 		}
 		else if ( $seq->getMedia() == "audio" ) {
-			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.$this->translations['match_audio']['translation_text'].'</h2>';
+			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_MATCH_AUDIO").'</h2>';
 		}
 		else {
-			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.$this->translations['match_photos']['translation_text'].'</h2>';
+			print '  <h2 id="match_with_'.$i.'" class="text-center match_with quiz_h2" '.$styleText.'>'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_MATCH_PHOTOS").'</h2>';
 		}
 		
 		
@@ -196,7 +191,7 @@ else {
 
 		print '<div id="correct_species_'. $i . '" class="species_group" style="display:none">';
 		
-		print '<h2 class="text-center quiz_h2"">'.$this->translations['species_is']['translation_text'].' ' .$correctName.'</h2>';
+		print '<h2 class="text-center quiz_h2"">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_SPECIES_IS").' ' .$correctName.'</h2>';
 		
 		
 		print '<img class="img-responsive center-block" style="max-height:48vh;" src="' . $correctImageURL . '" />';
@@ -204,13 +199,13 @@ else {
 		if ( $i  < $numSeqs - 1 ) {
 			
 			print '<div class="col-md-6 col-md-offset-3">';
-			print '	<button class="btn btn-lg btn-block btn-success h3 control_btn beginner_next" >'.$this->translations['next']['translation_text'].'</button>';
+			print '	<button class="btn btn-lg btn-block btn-success h3 control_btn beginner_next" >'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_NEXT").'</button>';
 			print '</div>';
 		}
 		else {
 
 			print '<div class="col-md-6 col-md-offset-3">';
-			print '	<button id="beginner_results" class="btn btn-lg btn-block btn-success h3 control_btn " >'.$this->translations['show_results']['translation_text'].'</button>';
+			print '	<button id="beginner_results" class="btn btn-lg btn-block btn-success h3 control_btn " >'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_SHOW_RESULTS").'</button>';
 			print '</div>';
 		
 		}
@@ -247,9 +242,9 @@ else {
 	print '<div id="beginner_quiz_results" class="col-md-12"  style="display:none">';
 	print '<div class="col-md-12">';
 	
-	print '<h1 class="text-center lower_heading">'.$this->translations['finished']['translation_text'] . '</h1>';
+	print '<h1 class="text-center lower_heading">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_FINISHED") . '</h1>';
 	
-	print '<h1 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h1>';
+	print '<h1 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_YOU_SPOTTED") . '</h1>';
 	
 	print '<div class="row spaced_row">';
 	
@@ -311,11 +306,11 @@ else {
 	print '<div class="row spaced_row">';
 	
 	print '<div class="col-md-4 col-md-offset-2">';
-	print '	<button id="play_again" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['play_again']['translation_text'].'</button>';
+	print '	<button id="play_again" class="btn btn-lg btn-block btn-success h3 control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_PLAY_AGAIN").'</button>';
 	print '</div>';
 
 	print '<div class="col-md-4">';
-	print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_home" >'.$this->translations['back_home']['translation_text'].'</button>';
+	print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_home" >'.JText::_("COM_BIODIV_KIOSKQUIZBEGINNER_BACK_HOME").'</button>';
 	print '</div>';
 	
 	print '</div>'; // row
@@ -323,44 +318,6 @@ else {
 	print '</div>'; // col-12
 	print '</div>'; // col-12
 	
-	
-	// -------------------------------- Info panel ------------------------
-	/*
-	print '<div class="col-md-12">';
-	print '<div class="col-md-12">';
-	print '<div id="whatsee_info_panel" class="panel panel-default kiosk_info_panel">';
-	print '<div class="panel-heading">';
-	
-	for ($i = 0; $i < $numSeqs; $i++) {
-		
-		$seq = $this->sequences[$i];
-	
-		// Match species to photo or video
-		$styleText="";	
-		if ( $i > 0 ) {
-			$styleText = 'style="display:none"';
-		}
-	
-		// Look through photos or play video message
-		if ( $seq->getMedia() == "video" ) {
-			print '  <h3 id="whatsee_info_'.$i.'" class="whatsee_info" '.$styleText.'><span class="fa fa-info-circle"></span> '.$this->translations['video_help']['translation_text'].'</h3>';
-		}
-		else if ( $seq->getMedia() == "audio" ) {
-			print '  <h3 id="whatsee_info_'.$i.'" class="whatsee_info" '.$styleText.'><span class="fa fa-info-circle"></span> '.$this->translations['audio_help']['translation_text'].'</h3>';
-		}
-		else {
-			print '  <h3 id="whatsee_info_'.$i.'" class="whatsee_info" '.$styleText.'><span class="fa fa-info-circle"></span> '.$this->translations['photo_help']['translation_text'].'</h3>';
-		}
-	}
-		
-	
-	
-	print '</div>'; // panel body
-	print '</div>'; // panel 
-	print '</div>'; // col-12
-	print '</div>'; // col-12
-	
-	*/
 
 	
 }

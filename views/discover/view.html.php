@@ -27,13 +27,6 @@ class BioDivViewDiscover extends JViewLegacy
   public function display($tpl = null) 
   {
 	  
-	error_log("Discover view called");
-	  
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("discover");
-	
-	error_log("Discover view got translations");
-	
 	// Get the area covered setting, currently UK or Europe, default to Europe
 	$area = getSetting("area_covered");
 	

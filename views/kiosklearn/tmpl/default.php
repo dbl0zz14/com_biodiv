@@ -8,32 +8,25 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-// Display the first article at the top then others as col-md-4s.
-// First version expects one intro article plus 3 cards to guide the user.
-//print '<div class="col-md-12">';
-//print '<div class="col-md-12">';
-//print '<iframe src="http://localhost/rhombus/en/kiosk-animal-guide" width="100%" height="1000px" style="border:none;">';
-//print '</div>';
-//print '</div>';
 
 	print '<div class="col-md-12">';
 	print '<div class="col-md-12">';
 
 	// ----------------------------------------- Headings ----------------------------------------
 	
-	print '  <div class="h2 text-center slight_lower"><strong>'.$this->translations['learn']['translation_text'].'</strong></div>';  
-	print '  <div class=" h3 text-center slight_lower">'.$this->translations['choose_animal']['translation_text'].'</div>';  
+	print '  <div class="h2 text-center slight_lower"><strong>'.JText::_("COM_BIODIV_KIOSKLEARN_LEARN").'</strong></div>';  
+	print '  <div class=" h3 text-center slight_lower">'.JText::_("COM_BIODIV_KIOSKLEARN_CHOOSE_ANIMAL").'</div>';  
 	
 	
 	// ----------------------------------------- Filter buttons -------------------------------------
 	
 	print '<div class="text-center">';
 	
-	print '	<button id="common_mammals" class="btn btn-lg btn-success filter_btn" type="submit">'.$this->translations['common_mammals']['translation_text'].'</button>';
-	print '	<button id="all_mammals" class="btn btn-lg btn-success filter_btn">'.$this->translations['all_mammals']['translation_text'].'</button>';
-	print '	<button id="common_birds" class="btn btn-lg btn-success filter_btn" >'.$this->translations['common_birds']['translation_text'].'</button>';
-	print '	<button id="all_birds" class="btn btn-lg btn-success filter_btn" >'.$this->translations['all_birds']['translation_text'].'</button>';
-	print '	<button id="all_species" class="btn btn-lg btn-success filter_btn" >'.$this->translations['all_species']['translation_text'].'</button>';
+	print '	<button id="common_mammals" class="btn btn-lg btn-success filter_btn" type="submit">'.JText::_("COM_BIODIV_KIOSKLEARN_COMMON_MAMMALS").'</button>';
+	print '	<button id="all_mammals" class="btn btn-lg btn-success filter_btn">'.JText::_("COM_BIODIV_KIOSKLEARN_ALL_MAMMALS").'</button>';
+	print '	<button id="common_birds" class="btn btn-lg btn-success filter_btn" >'.JText::_("COM_BIODIV_KIOSKLEARN_COMMON_BIRDS").'</button>';
+	print '	<button id="all_birds" class="btn btn-lg btn-success filter_btn" >'.JText::_("COM_BIODIV_KIOSKLEARN_ALL_BIRDS").'</button>';
+	print '	<button id="all_species" class="btn btn-lg btn-success filter_btn" >'.JText::_("COM_BIODIV_KIOSKLEARN_ALL_SPECIES").'</button>';
 	
 	print '</div>';
 	
@@ -105,7 +98,7 @@ defined('_JEXEC') or die;
 	print '    <div id="learn_species_helplet"></div>';
 	print '  </div>'; // modal body
 	print '  <div class="modal-footer">';
-	print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-lg btn-block btn-success filter_btn" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button></div>';
+	print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-lg btn-block btn-success filter_btn" data-dismiss="modal">'.JText::_("COM_BIODIV_KIOSKLEARN_CLOSE").'</button></div>';
     print '  </div>'; // modal footer
 	print ' </div>'; // modal content
 	print ' </div>'; // modal dialog

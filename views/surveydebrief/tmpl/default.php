@@ -18,7 +18,7 @@ print $this->debriefArticle;
 print '          <form action = "' . BIODIV_ROOT . '" method = "GET">';
 print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
 print '              <input type="hidden" name="view" value="status"/>';
-print '              <button class="btn btn-warning" type="submit">'.$this->translations['identify']['translation_text'].'</button>';
+print '              <button class="btn btn-warning" type="submit">'.JText::_("COM_BIODIV_SURVEYDEBRIEF_IDENTIFY").'</button>';
 print '          </form>';
 
 print '          </div>';

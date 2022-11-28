@@ -10,10 +10,10 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_LOGIN").'</div>';
 }
 else if ( !$this->mySchoolId ) {
-	print '<h2>'.$this->translations['no_school']['translation_text'].'</h2>';
+	print '<h2>'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_NO_SCHOOL").'</h2>';
 }
 else {
 	
@@ -33,8 +33,6 @@ else {
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
 		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
-		//Biodiv\SchoolCommunity::generateBackAndLogout();
-		//Biodiv\SchoolCommunity::generateStudentMasthead();
 	}
 	
 	// --------------------- Main content
@@ -44,7 +42,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -67,7 +65,7 @@ else {
 	print '  <div class="input-group">';
 	print '    <span class="input-group-addon" style="background-color:#FFFFFF; border-bottom-left-radius:25px; border-top-left-radius:25px;"><span class="glyphicon glyphicon-search"></span></span>';
 	print '    <input type="search" class="form-control" id="searchSchools" placeholder="'.
-			$this->translations['search_schools']['translation_text'].
+			JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SEARCH_SCHOOLS").
 			'" style="border-left: 0px;border-bottom-right-radius:25px; border-top-right-radius:25px;">';
 	print '  </div>';
 	print '</div>	';
@@ -110,20 +108,16 @@ else {
 		print '<div class="col-md-12 col-sm-12 col-xs-12">';
 		print '<div class="communityGroupName">';
 		print '<span class="gold"><i class="fa fa-trophy"></i></span> ';
-		print $this->translations['awards']['translation_text'];
+		print JText::_("COM_BIODIV_SCHOOLCOMMUNITY_AWARDS");
 		print '</div>';
 		print '</div>';
 
-		//print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left"><strong>'.$groupName.'</strong></div>';
-		
 		print '</div>'; // row
 		
 		
-		//print '<div class="schoolsChartBox">';
 		print '<div class="schoolCharts">';
 		print '<table class="table table-condensed">';
 		print '<thead>';
-		//print '<th></th><th>School</th><th>% done</th>';
 		print '<th>School</th>';
 		
 		foreach ( $this->modules as $module ) {
@@ -190,9 +184,6 @@ else {
 		
 		print '<div class="row">';
 		
-		// print '<div class="col-md-2 col-sm-2 col-xs-2 communityTableImg '.$colorClass.'_text"><img src="'.$icon.'" class="img-responsive communityTableIcon" alt="'.$groupName. ' icon" /></div>';
-
-		// print '<div class="col-md-10 col-sm-10 col-xs-10 h3 text-left"><strong>'.$groupName.'</strong></div>';
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12 '.$colorClass.'_text">';
 		print '<div class="communityGroupName">';
@@ -218,13 +209,8 @@ else {
 		}
 		print '</thead>';
 		print '<tbody>';
-		//print '<div id="displaySelectedCharts_'. $groupId .'" class="displaySelectedCharts"></div>';
 		print '<tr id="displaySelectedCharts_'. $groupId .'" class="displaySelectedCharts"></tr>';
 		$position = 1;
-		//$maxPoints = $this->data[$groupId]["maxPoints"];
-		
-		// $errMsg = print_r ( $this->data[$groupId]["schools"], true );
-		// error_log ( "SchoolCommunity: " . $errMsg );
 		
 		
 		foreach ( $this->data[$groupId]["schools"] as $groupSchoolPoints ) {
@@ -270,29 +256,9 @@ else {
 			
 			print '</tr>';
 			
-			// print '<td class="text-center">'.$groupSchoolPoints->totalPoints.'</td>';
-			// print '<td class="text-center">'.$groupSchoolPoints->totalPointsAvail.'</td>';
 			
-			/*
-			print '<div class="row schoolProgress_'.$schoolId.'">';
-			print '<div class="col-md-2 text-right schoolPosition_'.$schoolId.'">'.$position.'</div>';
-			print '<div class="col-md-7 text-left">'.$schoolName.'</div>';
-			print '<div class="col-md-3 text-right schoolProgressAmount_'.$schoolId.'">'.$truePercentPoints.'%</div>';
-			print '</div>';
-			*/
 			$position += 1;
-			/*
-			print '<div class="progress schoolProgress_'.$schoolId.'" style="background-color:'.$badgeLightColor.'">';
-			print '<div class="progress-bar" role="progressbar" aria-valuenow="'.$widthPercent.'" aria-valuemin="0" aria-valuemax="100" '.
-    			' style="width:'.$widthPercent.'%; background-color:'.$badgeColor.'">'.$schoolName.
-				' '. $truePercentPoints.'%</div>';
-			// print '<div class="progress-bar" role="progressbar" aria-valuenow="'.$weightedPoints.'" aria-valuemin="100" aria-valuemax="'.
-				// $maxPoints . '"  style="width:'.$widthPercent.'%; background-color:'.$badgeColor.'">'.$schoolName.
-				// ' '.
-				// $weightedPoints.'</div>';
-				
-			print '</div>'; // progress
-			*/
+			
 		}
 		
 		print '</tbody>';
@@ -331,7 +297,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

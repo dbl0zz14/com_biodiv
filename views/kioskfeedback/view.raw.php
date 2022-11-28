@@ -26,8 +26,6 @@ class BioDivViewKioskFeedback extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "Feedback display function called" );
-		// Assign data to the view
 		$this->person_id = (int)userID();
 
 		if ( !$this->person_id ) {
@@ -47,9 +45,6 @@ class BioDivViewKioskFeedback extends JViewLegacy
 
 		$this->project = projectDetails($this->projectId);
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskfeedback");
-		
 		
 		// Set the user state so doesn't pick up secomdary project unless asked to
 		$app->setUserState('com_biodiv.classify_second_project', 0);
@@ -65,8 +60,6 @@ class BioDivViewKioskFeedback extends JViewLegacy
 
 		$this->all_animal_ids =
 		$app->getUserStateFromRequest('com_biodiv.all_animal_ids', 'all_animal_ids', 0);
-
-		error_log("Feedback view, all_animal_ids = " .   $this->all_animal_ids );
 
 		$this->all_animals = 0;
 
@@ -88,9 +81,6 @@ class BioDivViewKioskFeedback extends JViewLegacy
 		$this->all_animals = $db->loadObjectList();
 		}
 		
-		$errStr = print_r ( $this->all_animals, true );
-		error_log ( " All animals = " . $errStr );
-
 		// get the url for the project image
 		$this->projectImageUrl = projectImageURL($this->projectId);
 

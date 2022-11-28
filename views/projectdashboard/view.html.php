@@ -30,9 +30,6 @@ class BioDivViewProjectDashboard extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("projectdashboard");
-	
 	// Get all the projects that this user is admin for
 	$this->projects = myAdminProjects();
 	
@@ -40,9 +37,6 @@ class BioDivViewProjectDashboard extends JViewLegacy
 	BiodivReport::removeExistingReports( $this->personId );
 	
 	$this->reports = BiodivReport::listReports();
-	
-	//$err_msg = print_r ( $this->reports , true );
-	//error_log ( "reports: " . $err_msg );
 	
 	$this->reportText = array();
 	foreach ( $this->reports as $report ) {
@@ -63,13 +57,10 @@ class BioDivViewProjectDashboard extends JViewLegacy
 		}
 	}
 	
-	//$errMsg = print_r ( $this->optInReports, true );
-	//error_log ( "ProjectDashboard Opt in reports array: " );
-	//error_log ( $errMsg );
 	
-	$this->waitText = $this->translations['wait_text']['translation_text'];
-	$this->doneText = $this->translations['done_text']['translation_text'];
-	$this->genText = $this->translations['gen_text']['translation_text'];
+	$this->waitText = JText::_("COM_BIODIV_PROJECTDASHBOARD_WAIT_TEXT");
+	$this->doneText = JText::_("COM_BIODIV_PROJECTDASHBOARD_DONE_TEXT");
+	$this->genText = JText::_("COM_BIODIV_PROJECTDASHBOARD_GEN_TEXT");
 
     // Display the view
     parent::display($tpl);

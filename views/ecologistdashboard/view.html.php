@@ -30,9 +30,6 @@ class BioDivViewEcologistDashboard extends JViewLegacy
     
     $app = JFactory::getApplication();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("ecologistdashboard");
-	
 	// Check user is an ecologist and get schools
 	$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 	
@@ -59,7 +56,7 @@ class BioDivViewEcologistDashboard extends JViewLegacy
 	
 	if ( $this->firstLoad ) {
 		Biodiv\SchoolCommunity::setNewUser(0);
-		Biodiv\SchoolCommunity::addNotification($this->translations['welcome_note']['translation_text']);
+		Biodiv\SchoolCommunity::addNotification(JText::_("COM_BIODIV_DASHSPOTTER_WELCOME_NOTE"));
 		
 		$this->avatars = Biodiv\SchoolCommunity::getAvatars();
 		// Do the first unlock to get the badges through
@@ -83,27 +80,7 @@ class BioDivViewEcologistDashboard extends JViewLegacy
 	
 	$this->myTotalPoints = Biodiv\Task::getTotalUserPoints();
 	
-	// Get the pillars: Quizzer etc
-	//$this->badgeGroups = codes_getList ( "badgegroup" );
 	
-	//$this->resourceTypeId = codes_getCode ( "Task", "resource" );
-		
-	
-	// Get the current status for each badge group.
-	/*
-	$this->badgeGroupSummary = array();
-	foreach ( $this->badgeGroups as $badgeGroup ) {
-		$groupId = $badgeGroup[0];
-		
-		$badgeGroup = new Biodiv\BadgeGroup ( $groupId );
-		
-		$this->badgeGroupSummary[$groupId] = $badgeGroup->getSummary();
-	}
-	*/
-	
-	// Any new messages?
-	//$messageList = new Biodiv\MessageList();
-	//$this->numNewMessages = $messageList->newMessageCount();
 
     // Display the view
     parent::display($tpl);

@@ -15,22 +15,19 @@ defined('_JEXEC') or die;
 //ini_set('memory_limit', '256M');
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JText::_("COM_BIODIV_DASHCHARTS_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_DASHCHARTS_LOGIN").'</a>';
 }
 else {
 	
 	if ( $this->numSites > 0 ) {
 		print '<div class="row">';
 		
-		//print '<h3>'.$this->translations['chart_page']['translation_text'].'</h3>';
-		
-		
 		// ---------------------- Filter by
 		print '<div class="col-xs-12 col-sm-12 col-md-3">';
 		
 		// Create 3 dropdowns of filter options: site, species and year
 		
-		print "<label for='site_filter'>".$this->translations['site_filter']['translation_text']."</label>";
+		print "<label for='site_filter'>".JText::_("COM_BIODIV_DASHCHARTS_SITE_FILTER")."</label>";
 			
 		print "<select id = 'site_select' name = 'site_filter' class = 'form-control charts_select'>";
 		
@@ -56,11 +53,11 @@ else {
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['upl_class']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHCHARTS_UPL_CLASS").'</h3>';
 		
 	if ( $this->numSites > 0 ) {
 		
-		print '<p>'.$this->translations['upl_class_help']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_UPL_CLASS_HELP").'</p>';
 		
 		print '<div class="user_chart">';
 		print '<canvas id="userProgressChart" ></canvas>';
@@ -68,19 +65,19 @@ else {
 	}
 	else {
 		
-		print '<p>'.$this->translations['upl_class_none']['translation_text'].'</p>';
-		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.$this->translations['trapper_page']['translation_text'].'" >'. $this->translations['man_sites']['translation_text'] .'</a></p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_UPL_CLASS_NONE").'</p>';
+		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'.JText::_("COM_BIODIV_DASHCHARTS_TRAPPER_PAGE").'" >'. JText::_("COM_BIODIV_DASHCHARTS_MAN_SITES") .'</a></p>';
 	}
 	
 	print '</div>'; // col-6
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['top_species']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHCHARTS_TOP_SPECIES").'</h3>';
 	
 	if ( $this->numAnimals > 0 ) {
 		
-		print '<p>'.$this->translations['top_species_help']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_TOP_SPECIES_HELP").'</p>';
 		
 		print '<div class="user_chart">';
 		print '<canvas id="topSpeciesChart" ></canvas>';
@@ -88,9 +85,9 @@ else {
 	}
 	else {
 		
-		print '<p>'.$this->translations['top_species_none']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_TOP_SPECIES_NONE").'</p>';
 		
-		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'. $this->translations['spotter_page']['translation_text'] .'">'. $this->translations['class_now']['translation_text'] .'</a></p>';
+		print '<p class="text-center"><a class="btn btn-danger btn-lg" href="'. JText::_("COM_BIODIV_DASHCHARTS_SPOTTER_PAGE") .'">'. JText::_("COM_BIODIV_DASHCHARTS_CLASS_NOW") .'</a></p>';
 	}
 		
 	print '</div>'; // col-6
@@ -102,11 +99,11 @@ else {
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['rare_species']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHCHARTS_RARE_SPECIES").'</h3>';
 	
 	if ( $this->numAnimals > 0 ) {
 		
-		print '<p>'.$this->translations['rare_species_help']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_RARE_SPECIES_HELP").'</p>';
 	
 		print '<div class="user_chart">';
 		print '<canvas id="rareSpeciesChart" ></canvas>';
@@ -114,7 +111,7 @@ else {
 	}
 	else {
 		
-		print '<p>'.$this->translations['rare_species_none']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_RARE_SPECIES_NONE").'</p>';
 		
 		
 	}
@@ -123,11 +120,11 @@ else {
 	
 	print '<div class="col-md-6">';
 	
-	print '<h3>'.$this->translations['seq_species']['translation_text'].'</h3>';
+	print '<h3>'.JText::_("COM_BIODIV_DASHCHARTS_SEQ_SPECIES").'</h3>';
 	
 	if ( $this->numAnimals > 0 ) {
 		
-		print '<p>'.$this->translations['seq_species_help']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_SEQ_SPECIES_HELP").'</p>';
 	
 		print '<div class="user_chart center-block">';
 		print '<canvas id="topSeqSpeciesChart" ></canvas>';
@@ -135,7 +132,7 @@ else {
 	}
 	else {
 		
-		print '<p>'.$this->translations['seq_species_none']['translation_text'].'</p>';
+		print '<p>'.JText::_("COM_BIODIV_DASHCHARTS_SEQ_SPECIES_NONE").'</p>';
 	}
 		
 	

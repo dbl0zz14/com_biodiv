@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_BROWSETASKS_LOGIN").'</div>';
 	
 }
 
@@ -33,11 +33,8 @@ else {
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 		
-		//Biodiv\SchoolCommunity::generateBackAndLogout();
 		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
 	}
-	
-	//print '<h2>'.$this->translations['heading']['translation_text'].' <small>'.$this->translations['subheading']['translation_text'].'</small></h2>';
 	
 	print '<div id="displayArea" class="fullPageHeight">';
 	
@@ -55,7 +52,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

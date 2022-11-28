@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_CELEBRATION_LOGIN").'</div>';
 }
 else {
 
@@ -21,15 +21,15 @@ else {
 	if ( $this->celebration->type == "badge" ) {
 		
 		print '<div class="col-md-12 text-center">';
-		print $this->translations['you_achieved']['translation_text'];
+		print JText::_("COM_BIODIV_CELEBRATION_YOU_ACHIEVED");
 		print '</div>'; // col-12
 		
 		print '<div class="col-md-12 text-center bigText">';
-		print $this->celebration->badge_name . ' ' . $this->translations['badge']['translation_text'];
+		print $this->celebration->badge_name . ' ' . JText::_("COM_BIODIV_CELEBRATION_BADGE");
 		print '</div>'; // col-12
 		
 		print '<div class="col-md-12 text-center">';
-		print $this->translations['contributed']['translation_text'].'<span class="hugeText">'.$this->celebration->points . '</span> ' . $this->translations['points']['translation_text'];;
+		print JText::_("COM_BIODIV_CELEBRATION_CONTRIBUTED").'<span class="hugeText">'.$this->celebration->points . '</span> ' . JText::_("COM_BIODIV_CELEBRATION_POINTS");
 		print '</div>'; // col-12
 		
 	}

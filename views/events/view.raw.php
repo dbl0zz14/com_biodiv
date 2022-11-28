@@ -28,9 +28,6 @@ class BioDivViewEvents extends JViewLegacy
     {
 		error_log ( "Events display function called" );
 		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("events");
-		
 		// Default to max
 		$this->displayNum = 200;
 		$this->totalNumEvents = 0;

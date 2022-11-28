@@ -28,13 +28,7 @@ class BioDivViewDashLikes extends JViewLegacy
    */
   public function display($tpl = null) 
   {
-    error_log ( "Likes view display called" );
-		
-	$this->personId = (int)userID();
-	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("dashlikes");
-	
+    $this->personId = (int)userID();
 	
 	if ( $this->personId ) {
 		
@@ -44,26 +38,19 @@ class BioDivViewDashLikes extends JViewLegacy
 		$input = $app->input;
 		
 		$this->siteId = $input->get('site', 0, 'INT');
-		error_log ( "Likes view.  Site id = " . $this->siteId );
-
+		
 		$this->speciesId = $input->get('species', 0, 'INT');
-		error_log ( "Likes view.  Species id = " . $this->speciesId );
 		
 		$this->year = $input->get('year', 0, 'INT');
-		error_log ( "Likes view.  Year = " . $this->year );
 		
 		$this->likedByOthers = $input->get('other', 0, 'INT');
-		error_log ( "Likes view.  Liked by others = " . $this->likedByOthers );
 		
 		$this->sortBy = $input->get('sort', 'liked', 'string');
-		error_log ( "Likes view.  Sort = " . $this->sortBy );
 		
 		$this->page = $input->get('page', 0, 'INT');
-		error_log ( "Likes view.  Page = " . $this->page );
 		
 		$this->numPerPageStr = $input->get('number', 3, 'string');
-		error_log ( "Likes view.  Num per page = " . $this->numPerPageStr );	
-
+		
 		if ( $this->numPerPageStr == "all" ) {
 			$start = 0;
 		}
@@ -73,9 +60,6 @@ class BioDivViewDashLikes extends JViewLegacy
 		}			
 				
 		$this->userTimezone = userTimezone();
-		
-		$errMsg = print_r ( $this->userTimezone, true );
-		error_log ( "tz detail: " . $errMsg );
 		
 		//Makes sure the timezone is available
 		get_object_vars($this->userTimezone);
@@ -103,19 +87,13 @@ class BioDivViewDashLikes extends JViewLegacy
 		// Set up the select arrays in value=>displayedValue form
 		
 		// Number per page
-		$this->numberSelect = array("3"=>"3", "6"=>"6", "all"=>$this->translations['all']['translation_text']);
-		
-		$errMsg = print_r ( $this->numberSelect, true );
-		error_log ( "numberSelect: " . $errMsg );
+		$this->numberSelect = array("3"=>"3", "6"=>"6", "all"=>JText::_("COM_BIODIV_DASHLIKES_ALL"));
 		
 		// Sort by
-		$this->sortSelect = array("site"=>$this->translations['sort_site']['translation_text'],
-								"liked"=>$this->translations['sort_liked']['translation_text'],
-								"taken"=>$this->translations['sort_taken']['translation_text']
+		$this->sortSelect = array("site"=>JText::_("COM_BIODIV_DASHLIKES_SORT_SITE"),
+								"liked"=>JText::_("COM_BIODIV_DASHLIKES_SORT_LIKED"),
+								"taken"=>JText::_("COM_BIODIV_DASHLIKES_SORT_TAKEN")
 								);
-		
-		$errMsg = print_r ( $this->sortSelect, true );
-		error_log ( "sortSelect: " . $errMsg );
 		
 		// Filter by site
 		$query = $db->getQuery(true);
@@ -128,14 +106,9 @@ class BioDivViewDashLikes extends JViewLegacy
 			
 		$db->setQuery($query);
 		
-		error_log("Site select query created: " . $query->dump());
-				
 		$this->siteSelect = $db->loadAssocList("site_id", "site_name");
-		$this->siteSelect = array($this->translations['all']['translation_text']) + $this->siteSelect;
+		$this->siteSelect = array(JText::_("COM_BIODIV_DASHLIKES_ALL")) + $this->siteSelect;
 		
-		$errMsg = print_r ( $this->siteSelect, true );
-		error_log ( "siteSelect: " . $errMsg );
-			
 		
 		// Filter by year taken
 		$query = $db->getQuery(true);
@@ -147,14 +120,9 @@ class BioDivViewDashLikes extends JViewLegacy
 			
 		$db->setQuery($query);
 		
-		error_log("Year select query created: " . $query->dump());
-		
 		$this->yearSelect = $db->loadAssocList("year_taken", "year_taken");
-		$this->yearSelect = array($this->translations['all']['translation_text']) + $this->yearSelect;
+		$this->yearSelect = array(JText::_("COM_BIODIV_DASHLIKES_ALL")) + $this->yearSelect;
 		
-		$errMsg = print_r ( $this->yearSelect, true );
-		error_log ( "yearSelect: " . $errMsg );
-				
 		
 		// Filter by species
 		$query = $db->getQuery(true);
@@ -185,10 +153,7 @@ class BioDivViewDashLikes extends JViewLegacy
 		}
 		
 		$this->speciesSelect = $db->loadAssocList("species_id", "species_name");
-		$this->speciesSelect = array($this->translations['all']['translation_text']) + $this->speciesSelect;
-		
-		$errMsg = print_r ( $this->speciesSelect, true );
-		error_log ( "speciesSelect: " . $errMsg );
+		$this->speciesSelect = array(JText::_("COM_BIODIV_DASHLIKES_ALL")) + $this->speciesSelect;
 		
 		
 		// Set up the query
@@ -215,8 +180,6 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		$this->likesArray = array();
 		
-		error_log ("Timezone string = " . $this->userTimezone->timezone );
-	
 		if ( $this->languageTag == 'en-GB' ) {
 			
 			$query = $db->getQuery(true);
@@ -251,8 +214,6 @@ class BioDivViewDashLikes extends JViewLegacy
 			else {
 				$db->setQuery($query, $start, $this->numPerPage);
 			}
-			
-			error_log("Likes query created: " . $query->dump());
 			
 			$this->likesArray = $db->loadAssocList();
 		}
@@ -289,15 +250,10 @@ class BioDivViewDashLikes extends JViewLegacy
 			else {
 				$db->setQuery($query, $start, $this->numPerPage);
 			}
-			error_log("Likes query created: " . $query->dump());
-			
 			$this->likesArray = $db->loadAssocList();
 			
 		}
 		
-		
-		$errMsg = print_r ( $this->likesArray, true );
-		error_log ( "Likes array: " . $errMsg );
 		
 		$this->numLikes = count($this->likesArray);	
 		
@@ -328,8 +284,6 @@ class BioDivViewDashLikes extends JViewLegacy
 		}		
 		
 		$db->setQuery($query);
-		
-		error_log("Total likes query created: " . $query->dump());
 		
 		$this->totalLikes = $db->loadResult();
 	

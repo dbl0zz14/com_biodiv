@@ -26,9 +26,6 @@ class BioDivViewLikeResource extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("likeresource");
-		
 		$this->personId = userID();
 		
 		$this->resourceId = null;

@@ -14,16 +14,16 @@ defined('_JEXEC') or die;
 
 	// ----------------------------------------- Headings ----------------------------------------
 	
-	print '  <div class="h2 text-center slight_lower"><strong>'.$this->translations['learn']['translation_text'].'</strong></div>';  
-	print '  <div class=" h3 text-center slight_lower">'.$this->translations['choose_animal']['translation_text'].'</div>';  
+	print '  <div class="h2 text-center slight_lower"><strong>'.JText::_("COM_BIODIV_KIOSKLEARNBIRDS_LEARN").'</strong></div>';  
+	print '  <div class=" h3 text-center slight_lower">'.JText::_("COM_BIODIV_KIOSKLEARNBIRDS_CHOOSE_ANIMAL").'</div>';  
 	
 	
 	// ----------------------------------------- Filter buttons -------------------------------------
 	
 	print '<div class="text-center">';
 	
-	print '	<button id="common_birds" class="btn btn-lg btn-success filter_btn" >'.$this->translations['common_birds']['translation_text'].'</button>';
-	print '	<button id="all_birds" class="btn btn-lg btn-success filter_btn" >'.$this->translations['all_birds']['translation_text'].'</button>';
+	print '	<button id="common_birds" class="btn btn-lg btn-success filter_btn" >'.JText::_("COM_BIODIV_KIOSKLEARNBIRDS_COMMON_BIRDS").'</button>';
+	print '	<button id="all_birds" class="btn btn-lg btn-success filter_btn" >'.JText::_("COM_BIODIV_KIOSKLEARNBIRDS_ALL_BIRDS").'</button>';
 	
 	print '</div>';
 	
@@ -93,7 +93,7 @@ defined('_JEXEC') or die;
 	print '    <div id="learn_species_helplet"></div>';
 	print '  </div>'; // modal body
 	print '  <div class="modal-footer">';
-	print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-lg btn-block btn-success filter_btn" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button></div>';
+	print '    <div class="col-md-4 col-md-offset-8"> <button type="button" class="btn btn-lg btn-block btn-success filter_btn" data-dismiss="modal">'.JText::_("COM_BIODIV_KIOSKLEARNBIRDS_CLOSE").'</button></div>';
     print '  </div>'; // modal footer
 	print ' </div>'; // modal content
 	print ' </div>'; // modal dialog

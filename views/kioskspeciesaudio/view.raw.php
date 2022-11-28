@@ -38,9 +38,6 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 
 		$this->introtext = $article->introtext;
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskspeciesaudio");
-		
 		// Check whether we have a locally stored sonogram
 		$this->sonogram = null;
 		$this->audioAttribution = null;
@@ -51,10 +48,6 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 			
 		if ( count($sonoJSON) > 0 ) {
 			$sonoObj = json_decode ( $sonoJSON[0] );
-			
-			$errStr = print_r ( $sonoObj, true );
-			//error_log ( "Sonogram Object: " . $errStr ); 
-		
 			
 			$this->sonogram = $sonoObj->video;
 			$this->audioAttribution = $sonoObj->attribution;
@@ -109,14 +102,14 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 			
 			//error_log ("Next para: " . $text);
 			
-			$sciName = $this->translations['sci_name']['translation_text'];
+			$sciName = JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_SCI_NAME");
 			
 			if ( stripos ( $text, $sciName ) !== false ) {
 				//error_log ("Found scientific name");
 				$this->scientificName = substr( $text, strlen($sciName) );
 			}
 			
-			$songText = $this->translations['song']['translation_text'];
+			$songText = JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_SONG");
 			
 			if ( stripos ( $text, $songText ) !== false ) {
 				//error_log ("Found song");
@@ -133,7 +126,7 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 				}
 			}
 			
-			$whenHeardText = $this->translations['when_heard']['translation_text'];
+			$whenHeardText = JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_WHEN_HEARD");
 			
 			if ( stripos ( $text, $whenHeardText ) !== false ) {
 				//error_log ("Found whenHeard");
@@ -150,19 +143,10 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 				}
 			}
 			
-			/*
-			$iframeText = $this->translations['iframe']['translation_text'];
-			
-			if ( stripos ( $text, $iframeText ) !== false ) {
-				error_log ("Found iframe");
-				$this->iframe = $text;
-			}
-			*/
-			
 			// NB we just get the first image and the first attribution
 			if ( !$this->photoAttribution ) {
 				
-				$attribText = $this->translations['attrib']['translation_text'];
+				$attribText = JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_ATTRIB");
 				
 				//error_log ("attrib text = " . $attribText );
 				
@@ -172,7 +156,7 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 				}
 				else {
 					// Try sentence starting with Image
-					$attribText = $this->translations['image']['translation_text'];
+					$attribText = JText::_("COM_BIODIV_KIOSKSPECIESAUDIO_IMAGE");
 				
 					if ( stripos ( $text, $attribText ) !== false ) {
 						//error_log ("Found attribution");
@@ -183,14 +167,7 @@ class BioDivViewKioskSpeciesAudio extends JViewLegacy
 		}
 
 		
-		//error_log ("Number of images = " . $imageNodes->length );
 		
-		//error_log ("Image src = " . $this->imageSrc );
-
-
-
-		
-
 		parent::display($tpl);
     }
 }

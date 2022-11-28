@@ -26,15 +26,9 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskQuizStandard::display called" );
-		
 		// Assign data to the view
 		$this->personId = (int)userID();
 		
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskquizstandardaudio");
-
-
 		if ( $this->personId ) {
 			$app = JFactory::getApplication();
 			$input = $app->input;
@@ -48,9 +42,6 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 
 			$this->project = projectDetails($this->projectId);
 			
-			// Set the user state so classifies just for this project
-			//$app->setUserState('com_biodiv.classify_only_project', 1);
-
 			$this->user_key = 
 			$app->getUserStateFromRequest('com_biodiv.user_key', 'user_key', 0);
 
@@ -62,8 +53,6 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 			$this->quizLevel =
 			$app->getUserStateFromRequest('com_biodiv.level', 'level', 0);
 			
-			//error_log ( "Quiz level = " . $this->quizLevel );
-
 			if ( !$this->quizLevel ) $this->quizLevel = 'improver';
 
 

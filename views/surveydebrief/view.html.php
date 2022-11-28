@@ -27,10 +27,6 @@ class BioDivViewSurveyDebrief extends JViewLegacy
   public function display($tpl = null) 
   {
     
-
-    // Get all the survey text snippets
-	$this->translations = getTranslations("survey");
-	
 	$app = JFactory::getApplication();
     
 	$this->surveyId = 

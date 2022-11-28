@@ -26,11 +26,6 @@ class BioDivViewResource extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "ResourceFile display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("resource");
-		
 		$this->personId = userID();
 		
 		$this->resourceId = null;

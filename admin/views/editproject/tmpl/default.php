@@ -12,8 +12,6 @@ defined('_JEXEC') or die('Restricted Access');
 
 printAdminMenu("PROJECT");
 
-//print '<a href="?option=com_biodiv"><button type="button">MammalWeb Admin Home</button></a>';
-
 print '<div id="j-main-container" class="span10 j-toggle-main">';
 
 print '<h2>Edit project: '.$this->project->project_prettyname.' ( id = '.$this->projectId.' )</h2>';
@@ -30,11 +28,9 @@ print '</p>';
 print '</form>';
 
 print '<div id="editProjectMsg"></div>';
-// print '<div id="newUsers"></div>';
 
 print '</div>';
 
-//print '<input type="hidden" name="task" value="createusers"/>';
 echo JHtml::_('form.token'); 
 
 

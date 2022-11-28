@@ -26,15 +26,8 @@ class BioDivViewCelebration extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		//error_log ( "Celebration display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("celebration");
-	
 		$this->personId = (int)userID();
 		
-		//$this->schoolData = array();
-
 		if ( !$this->personId ) {
 			
 			error_log("Celebration view: no person id" );

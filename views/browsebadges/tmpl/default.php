@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 if ( !$this->personId ) {
 	
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_BROWSEBADGES_LOGIN").'</div>';
 }
 
 else {
@@ -78,11 +78,11 @@ else {
 	
 	$module = $this->allModules[$this->moduleId];
 	
-	//print '<h2>'.$this->translations['heading']['translation_text'].' <small>'.$this->translations['subheading']['translation_text'].'</small></h2>';
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading_'.$module->class_stem]['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	$classStem = strtoupper($module->class_stem);
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_HEADING_" . $classStem).'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_BROWSEBADGES_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -101,8 +101,6 @@ else {
 	print '<div class="col-md-12">';
 	
 	print '<div class="btn-group browseBtnGroup" role="group" aria-label="Badge group buttons">';
-	
-	//print '<div class="browseBtnGroupHeading">'.$this->translations['by_type']['translation_text'].'</div>';
 	
 	$moduleId = $this->moduleId;
 	foreach ( $this->badgeGroups as $badgeGroup ) {
@@ -195,7 +193,7 @@ else {
 	
 	// ------------------------------------- button name 
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['complete']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_COMPLETE").'</div>';
 	print '</div>'; // row
 	
 	// -------------------------------------- done icon
@@ -205,15 +203,8 @@ else {
 	print '</div>'; // row
 	
 	
-	// print '<div class="row badgeStats">';
-	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['done']['translation_text'].'</div>';
-	
-	// // print '<div class="col-md-7 col-sm-7 col-xs-7 text-right ">'.$this->badgeGroupSummary[$groupId]["numPoints"].' '.
-			// // $this->translations['points']['translation_text'].'</div>';
-	// print '</div>'; // row
-	
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['done']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_DONE").'</div>';
 	print '</div>'; // row
 		
 	print '</div>'; // panel-body
@@ -228,25 +219,19 @@ else {
 	
 	// ------------------------------------- button name 
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['unlocked']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_UNLOCKED").'</div>';
 	print '</div>'; // row
 	
 	// -------------------------------------- unlocked icon
 	print '<div class="row">';
 	
-	//print '<div class="col-md-12 browseBadgeImg " style="padding:12px;"><i class= "fa fa-2x fa-unlock" aria-hidden= "true" ></i></div>';
 	print '<div class="col-md-12 browseBadgeImg " ><img src="'.$unlockedIcon.'" class="img-responsive" alt="Unlocked activities icon" /></div>';
 
 	print '</div>'; // row
 	
 	
-	// print '<div class="row badgeStats">';
-	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['to_do']['translation_text'].'</div>';
-	
-	// print '</div>'; // row
-		
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['to_do']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_TO_DO").'</div>';
 	print '</div>'; // row
 		
 		
@@ -263,7 +248,7 @@ else {
 	
 	// ------------------------------------- button name 
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['not_sure']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_NOT_SURE").'</div>';
 	print '</div>'; // row
 	
 	// -------------------------------------- suggest icon
@@ -274,13 +259,8 @@ else {
 	print '</div>'; // row
 	
 	
-	// print '<div class="row badgeStats">';
-	// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center ">'.$this->translations['suggest']['translation_text'].'</div>';
-	
-	// print '</div>'; // row
-	
 	print '<div class="row">';
-	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.$this->translations['suggest']['translation_text'].'</div>';
+	print '<div class="col-md-12 col-sm-12 col-xs-12 text-center browseGroupHeading">'.JText::_("COM_BIODIV_BROWSEBADGES_SUGGEST").'</div>';
 	print '</div>'; // row
 	
 	print '</div>'; // panel-body
@@ -424,7 +404,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

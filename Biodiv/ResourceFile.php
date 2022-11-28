@@ -31,7 +31,6 @@ class ResourceFile {
 	private $isLike;
 	private $numLikes;
 	private $url;
-	private $translations;
 	private $tags;
 	private $numInSet;
 	private $extension;
@@ -271,16 +270,14 @@ class ResourceFile {
 		$tagStr = "";
 		if ( $idTag ) $tagStr = $idTag.'_';
 		
-		$translations = getTranslations("ResourceFile");
-		
 		$shareStatus = array(SchoolCommunity::PERSON=>"fa fa-lock fa-lg",
 								SchoolCommunity::SCHOOL=>"fa fa-building-o fa-lg",
 								SchoolCommunity::COMMUNITY=>"fa fa-globe fa-lg",
 								SchoolCommunity::ECOLOGISTS=>"fa fa-leaf fa-lg");
 		
-		$shareOptions = array(SchoolCommunity::PERSON=>$translations['share_private']['translation_text'],
-								SchoolCommunity::SCHOOL=>$translations['share_school']['translation_text'],
-								SchoolCommunity::COMMUNITY=>$translations['share_community']['translation_text']);
+		$shareOptions = array(SchoolCommunity::PERSON=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_PRIVATE"),
+								SchoolCommunity::SCHOOL=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_SCHOOL"),
+								SchoolCommunity::COMMUNITY=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_COMMUNITY"));
 					
 		
 		print '<div class="panel">';
@@ -307,17 +304,6 @@ class ResourceFile {
 			print '<ul class="dropdown-menu" aria-labelledby="share_resource_'.$tagStr.$resourceId.'">';
 			
 			$isStudent = SchoolCommunity::isStudent();
-			//$studentCanShare = false;
-			// if ( $isStudent ) {
-				// // Student resources can only be shared if the task was approved
-				// $linkedTask = Task::getLinkedTask ( $resourceId );
-				// if ( $linkedTask and $linkedTask->getStatus() >= Badge::COMPLETE ) {
-					// $studentCanShare = true;
-				// }
-			// }
-			// if ( $isStudent and ($studentCanShare == false) ) {
-				// print $translations['get_approved']['translation_text'] ;
-			// }
 			if ( !$isStudent )  {
 				foreach ($shareOptions as $shareId=>$shareOpt ) {
 					print '<li><div id="share_resource_'.$tagStr.$shareId.'_'.$resourceId.'" class="share_resource share_resource_'.$shareId.'_'.$resourceId.
@@ -333,15 +319,15 @@ class ResourceFile {
 			
 				if ( $isPinned ) {
 					print '<li style="display:none;"><div id="pin_resource_'.$tagStr.$resourceId.'" class="pin_resource pin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['pin']['translation_text'] . '</div></li>';
+						\JText::_("COM_BIODIV_RESOURCEFILE_PIN") . '</div></li>';
 					print '<li><div id="unpin_resource_'.$tagStr.$resourceId.'" class="unpin_resource unpin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['unpin']['translation_text'] . '</div></li>';
+						\JText::_("COM_BIODIV_RESOURCEFILE_UNPIN") . '</div></li>';
 				}
 				else {
 					print '<li><div id="pin_resource_'.$tagStr.$resourceId.'" class="pin_resource pin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['pin']['translation_text'] . '</div></li>';
+						\JText::_("COM_BIODIV_RESOURCEFILE_PIN") . '</div></li>';
 					print '<li style="display:none;"><div id="unpin_resource_'.$tagStr.$resourceId.'" class="unpin_resource unpin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['unpin']['translation_text'] . '</div></li>';
+						\JText::_("COM_BIODIV_RESOURCEFILE_UNPIN") . '</div></li>';
 				}
 			}
 			
@@ -362,13 +348,13 @@ class ResourceFile {
 		print '</div>';
 		
 		print '<div id="show_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-2 col-sm-2 col-md-1 show_resource" data-toggle="tooltip" title="'.
-			$translations['show']['translation_text'].'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+			\JText::_("COM_BIODIV_RESOURCEFILE_SHOW").'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
 		
 		print '<div id="hide_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-2 col-sm-2 col-md-1 hide_resource" data-toggle="tooltip" title="'.
-			$translations['hide']['translation_text'].'" style="display:none;"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+			\JText::_("COM_BIODIV_RESOURCEFILE_HIDE").'" style="display:none;"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 		
 		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="col-xs-2 col-sm-2 col-md-1 download_resource" role="button" data-toggle="tooltip" title="'.
-			$translations['download']['translation_text'].'" ><a href="'.$this->url.
+			\JText::_("COM_BIODIV_RESOURCEFILE_DOWNLOAD").'" ><a href="'.$this->url.
 			'" download="'.$this->filename.'"><h4 class="text-right"><i class="fa fa-download fa-lg"></i></h4></a></div>';
 		
 		
@@ -381,45 +367,45 @@ class ResourceFile {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="col-xs-6 col-sm-6 col-md-6 favourite_resource favourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="col-xs-6 col-sm-6 col-md-6 unfavourite_resource unfavourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
 		}
 		else {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="col-xs-6 col-sm-6 col-md-6 favourite_resource favourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="col-xs-6 col-sm-6 col-md-6 unfavourite_resource unfavourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"  style="display:none;"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
 		}
 		
 		if ( $this->isLike ) {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
 		}
 		else {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
 		}
 		
 		print '<div id="num_likes_'.$tagStr.$resourceId.'" class="col-xs-12 col-sm-12 col-md-12 text-right h5 num_likes_'.$resourceId.'">';
 		
 		$numLikes = $this->numLikes;
 		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $translations['single_like']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
 		}
 		else {
 			
-			print '' . $numLikes . ' ' . $translations['many_likes']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
 		}
 		print '</div>'; // num_likes, col-12
 		
@@ -448,8 +434,6 @@ class ResourceFile {
 		$tagStr = "";
 		if ( $idTag ) $tagStr = $idTag.'_';
 		
-		$translations = getTranslations("ResourceFile");
-		
 		print '<div class="panel">';
 			
 		print '<div class="panel-heading">';
@@ -467,40 +451,40 @@ class ResourceFile {
 		print '<div class="row">';
 		
 		print '<div id="show_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-4 col-sm-4 col-md-4 show_resource" data-toggle="tooltip" title="'.
-			$translations['show']['translation_text'].'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
+			\JText::_("COM_BIODIV_RESOURCEFILE_SHOW").'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
 		
 		print '<div id="hide_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-4 col-sm-4 col-md-4 hide_resource" data-toggle="tooltip" title="'.
-			$translations['hide']['translation_text'].'" style="display:none;"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
+			\JText::_("COM_BIODIV_RESOURCEFILE_HIDE").'" style="display:none;"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
 		
 		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="col-xs-4 col-sm-4 col-md-4 download_resource" role="button" data-toggle="tooltip" title="'.
-			$translations['download']['translation_text'].'" ><a href="'.$this->url.
+			\JText::_("COM_BIODIV_RESOURCEFILE_DOWNLOAD").'" ><a href="'.$this->url.
 			'" download="'.$this->filename.'"><h4 class="text-right"><i class="fa fa-download fa-lg"></i></h4></a></div>';
 		
 		
 		if ( $this->isLike ) {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-4 col-sm-4 col-md-4 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-4 col-sm-4 col-md-4 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
 		}
 		else {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-4 col-sm-4 col-md-4 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-4 col-sm-4 col-md-4 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
 		}
 		
 		print '<div id="num_likes_'.$tagStr.$resourceId.'" class="col-xs-12 col-sm-12 col-md-12 text-right h5 num_likes_'.$resourceId.'">';
 		
 		$numLikes = $this->numLikes;
 		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $translations['single_like']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
 		}
 		else {
 			
-			print '' . $numLikes . ' ' . $translations['many_likes']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
 		}
 		print '</div>'; // num_likes, col-12
 		
@@ -538,25 +522,21 @@ class ResourceFile {
 			print '<audio src="'.$this->url.'" type="'.$this->ftype.'" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload noplaybackrate" class="'.$displayClass.'"  ></audio>';
 		}
 		else {
-			if ( $this->translations == null ) {
-				$this->translations = getTranslations("ResourceFile");
-			}
-		
+			
 			if ( strpos($this->ftype, "word") !== false ) {
-				print '<h4 class="text-center">'.$this->translations['word_download']['translation_text'].'</h4>';
-				//print '<iframe src="'.$this->url.'#toolbar=0&scrollbar=0" type="'.$this->ftype.'" class="'.$displayClass.'"  hidden ></iframe>';
+				print '<h4 class="text-center">'.\JText::_("COM_BIODIV_RESOURCEFILE_WORD_DOWNLOAD").'</h4>';
 			}
 			else if ( strpos($this->ftype, "pdf") !== false ) {
 				print '<iframe src="'.$this->url.'#toolbar=0" type="'.$this->ftype.'" class="'.$displayClass.'" ></iframe>';
 			}
 			else if ( strpos($this->extension, "ppt") !== false ) {
-				print '<h4 class="text-center">'.$this->translations['ppt_download']['translation_text'].'</h4>';
+				print '<h4 class="text-center">'.\JText::_("COM_BIODIV_RESOURCEFILE_PPT_DOWNLOAD").'</h4>';
 			}
 			else if ( strpos($this->extension, "odp") !== false ) {
-				print '<h4 class="text-center">'.$this->translations['odp_download']['translation_text'].'</h4>';
+				print '<h4 class="text-center">'.\JText::_("COM_BIODIV_RESOURCEFILE_ODP_DOWNLOAD").'</h4>';
 			}
 			else {
-				print '<h4 class="text-center">'.$this->translations['unknown_ftype']['translation_text'].'</h4>';
+				print '<h4 class="text-center">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNKNOWN_FTYPE").'</h4>';
 			}
 		}
 	}
@@ -584,10 +564,6 @@ class ResourceFile {
 		}
 		else {
 			
-			if ( $this->translations == null ) {
-				$this->translations = getTranslations("ResourceFile");
-			}
-		
 			print '<div class="defaultThumbnail text-center">';
 			
 			print $this->printFileTypeIcon();
@@ -595,22 +571,19 @@ class ResourceFile {
 			print '</div>';
 			
 			if ( $mainType == "audio" ) {
-				print '<div class="text-center h5">'.$this->translations['audio_doc']['translation_text'].'</div>';
+				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_AUDIO_DOC").'</div>';
 			}
 			else if ( strpos($this->ftype, "word") !== false ) {
-				print '<div class="text-center h5">'.$this->translations['word_doc']['translation_text'].'</div>';
+				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_WORD_DOC").'</div>';
 			}
-			// else if ( strpos($this->ftype, "pdf") !== false ) {
-				// print '<div class="text-center h5">'.$this->translations['pdf_doc']['translation_text'].'</div>';
-			// }
 			else if ( strpos($this->extension, "ppt") !== false ) {
-				print '<div class="text-center h5">'.$this->translations['ppt_doc']['translation_text'].'</div>';
+				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_PPT_DOC").'</div>';
 			}
 			else if ( strpos($this->extension, "odp") !== false ) {
-				print '<div class="text-center h5">'.$this->translations['odp_doc']['translation_text'].'</div>';
+				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_ODP_DOC").'</div>';
 			}
 			else {
-				print '<div class="text-center h5">'.$this->translations['other_doc']['translation_text'].'</div>';
+				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_OTHER_DOC").'</div>';
 			}
 		}
 	}
@@ -680,23 +653,14 @@ class ResourceFile {
 		$tagStr = "";
 		if ( $idTag ) $tagStr = $idTag.'_';
 		
-		if ( $this->translations == null ) {
-			$this->translations = getTranslations("ResourceFile");
-		}
-		
 		$shareStatus = array(SchoolCommunity::PERSON=>"fa fa-lock",
 								SchoolCommunity::SCHOOL=>"fa fa-building-o",
 								SchoolCommunity::COMMUNITY=>"fa fa-globe",
 								SchoolCommunity::ECOLOGISTS=>"fa fa-leaf");
-		/*
-		$shareStatus = array(SchoolCommunity::PERSON=>"fa fa-lock fa-lg",
-								SchoolCommunity::SCHOOL=>"fa fa-building-o fa-lg",
-								SchoolCommunity::COMMUNITY=>"fa fa-globe fa-lg",
-								SchoolCommunity::ECOLOGISTS=>"fa fa-leaf fa-lg");
-		*/
-		$shareOptions = array(SchoolCommunity::PERSON=>$this->translations['share_private']['translation_text'],
-								SchoolCommunity::SCHOOL=>$this->translations['share_school']['translation_text'],
-								SchoolCommunity::COMMUNITY=>$this->translations['share_community']['translation_text']);
+		
+		$shareOptions = array(SchoolCommunity::PERSON=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_PRIVATE"),
+								SchoolCommunity::SCHOOL=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_SCHOOL"),
+								SchoolCommunity::COMMUNITY=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_COMMUNITY"));
 					
 		
 		print '<div id="resource_'.$tagStr.$resourceId.'" class="panel resource_panel ">';
@@ -751,17 +715,17 @@ class ResourceFile {
 		print '</div>';
 		
 		print '<div class="resourceCardSource">';
-		print '<p>'.$this->translations['source']['translation_text'].' '.$this->getSourceText().'</p>';
+		print '<p>'.\JText::_("COM_BIODIV_RESOURCEFILE_SOURCE").' '.$this->getSourceText().'</p>';
 		print '</div>';
 		
 		print '<div class="resourceCardLikes text-right">';
 		$numLikes = $this->numLikes;
 		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $this->translations['single_like']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
 		}
 		else {
 			
-			print '' . $numLikes . ' ' . $this->translations['many_likes']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
 		}
 		print '</div>';
 		
@@ -771,88 +735,6 @@ class ResourceFile {
 		
 		print '</div>'; // resourceCardGrid
 		
-		
-		/*
-		print '<div class="thumbnailContainer">';
-		
-		// Image, video, etc.
-		$this->printThumbnail( "cardResource" );
-		
-		print '</div>';
-		
-		print '<div class="resourceMeta">';
-		
-		$colorClass = self::getClassStem ( $this->resourceType );
-		
-		$colorClass .= "Color";
-		//print '<div class="row">';
-		
-		$accessLevel = $this->accessLevel;
-		$shareIconClass = $shareStatus[$accessLevel];
-		
-		print '<div class="resourceCardHeaderGrid '.$colorClass.'">';
-		print '<div class="col-xs-3 col-sm-3 col-md-3 text-right h4">';
-		$this->printFiletypeIcon();
-		print '</div>'; // col-3
-		
-		print '<div class="col-xs-6 col-sm-6 col-md-6 ">';
-		print '<div class="resourceType '.$colorClass.' text-center">';
-		print self::getTypeName ( $this->resourceType );
-		print '</div>'; // color
-		print '</div>'; // col-6
-		
-		print '<div class="col-xs-3 col-sm-3 col-md-3 text-left h4">';
-		print '<i class="'.$shareIconClass.'"></i>';
-		print '</div>'; // col-3
-		
-		print '</div>'; // resourceCardHeader
-		
-		//print '</div>'; // row
-		
-		print '<div class="row">';
-		
-		print '<div class="col-xs-12 col-sm-12 col-md-12 resource_file">';
-		print '<h5>'.$this->filename.'</h5>';
-		print '<p>'.$this->description.'</p>';
-		
-		print '</div>'; // col-12
-		
-		print '</div>'; // row
-		
-		
-		
-		// Need space for likes here
-		
-		print '<div class="row">';
-		
-		print '<div id="num_likes_'.$tagStr.$resourceId.'" class="col-xs-12 col-sm-12 col-md-12 text-right h5 num_likes_'.$resourceId.'">';
-		
-		$numLikes = $this->numLikes;
-		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $this->translations['single_like']['translation_text'];
-		}
-		else {
-			
-			print '' . $numLikes . ' ' . $this->translations['many_likes']['translation_text'];
-		}
-		print '</div>'; // num_likes, col-12
-		
-		print '</div>'; // row
-		
-	
-		print '<div class="row">';
-		
-		print '<div class="col-xs-12 col-sm-12 col-md-12">';
-		
-		$this->printTags();
-		
-		print '</div>';
-		
-		print '</div>'; // row
-		
-		print '</div>'; // resourceMeta
-		*/
-
 		
 		print '</div>'; // panel-body
 		print '</div>'; //panel
@@ -870,16 +752,14 @@ class ResourceFile {
 		$tagStr = "";
 		if ( $idTag ) $tagStr = $idTag.'_';
 		
-		$translations = getTranslations("ResourceFile");
-		
 		$shareStatus = array(SchoolCommunity::PERSON=>"fa fa-lock fa-lg",
 								SchoolCommunity::SCHOOL=>"fa fa-building-o fa-lg",
 								SchoolCommunity::COMMUNITY=>"fa fa-globe fa-lg",
 								SchoolCommunity::ECOLOGISTS=>"fa fa-leaf fa-lg");
 		
-		$shareOptions = array(SchoolCommunity::PERSON=>$translations['share_private']['translation_text'],
-								SchoolCommunity::SCHOOL=>$translations['share_school']['translation_text'],
-								SchoolCommunity::COMMUNITY=>$translations['share_community']['translation_text']);
+		$shareOptions = array(SchoolCommunity::PERSON=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_PRIVATE"),
+								SchoolCommunity::SCHOOL=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_SCHOOL"),
+								SchoolCommunity::COMMUNITY=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_COMMUNITY"));
 					
 		$accessLevel = $this->accessLevel;
 		$shareIconClass = $shareStatus[$accessLevel];
@@ -913,7 +793,7 @@ class ResourceFile {
 		print '<div class="fullResourceShare">';
 		if ( $resourcePerson == $userId ) {
 			print '<div id="share_resource_'.$tagStr.$resourceId.'" class="share_resource share_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					$translations['share']['translation_text'].'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4><div class="hidden-xs">'.$translations['share']['translation_text'].'</div></div>';
+					\JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'</div></div>';
 					
 			print '<div id="shareMenu" class="miniMenu" style="display:none;">';
 				
@@ -926,7 +806,7 @@ class ResourceFile {
 				}
 			}
 			
-			print '        <button id="hide_shareMenu" type="button" class="btn btn-default hideMiniMenu" >'.$translations['cancel']['translation_text'].'</button>';
+			print '        <button id="hide_shareMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
 		
 			print '</div>'; //shareMenu
 				
@@ -937,23 +817,23 @@ class ResourceFile {
 		if ( $this->isLike ) {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['like']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"><h4 ><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.$translations['unlike']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"><h4 ><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
 		}
 		else {
 			
 			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['like']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
 			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.$translations['unlike']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
 		}
 		print '</div>';
 		
 		print '<div class="fullResourceDownload">';
 		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="download_resource text-center" role="button" data-toggle="tooltip" title="'.
-			$translations['download']['translation_text'].'" ><a href="'.$this->url.
-			'" download="'.$this->filename.'"><h4><i class="fa fa-download fa-lg"></i></h4></a><div class="hidden-xs">'.$translations['download']['translation_text'].'</div></div>';
+			\JText::_("COM_BIODIV_RESOURCEFILE_DOWNLOAD").'" ><a href="'.$this->url.
+			'" download="'.$this->filename.'"><h4><i class="fa fa-download fa-lg"></i></h4></a><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_DOWNLOAD").'</div></div>';
 		print '</div>';
 		
 		print '<div class="fullResourceBookmark">';
@@ -961,19 +841,19 @@ class ResourceFile {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['favourite']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['unfavourite']['translation_text'].'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.$translations['unfavourite']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
 		}
 		else {
 			
 			print '<div id="favourite_resource_'.$tagStr.$resourceId.
 				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.$translations['favourite']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
 			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
 				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.$translations['unfavourite']['translation_text'].'</div></div>';
+				\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
 		}
 		print '</div>';
 		
@@ -983,26 +863,26 @@ class ResourceFile {
 			print '<div class="fullResourceMoreOptions">';
 		
 			print '<div id="more_resource_'.$tagStr.$resourceId.'" class="more_resource more_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					$translations['more_options']['translation_text'].'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4><div class="hidden-xs">'.$translations['more_options']['translation_text'].'</div></div>';
+					\JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'</div></div>';
 			
 			print '<div id="moreMenu" class="miniMenu" style="display:none;">';
 			
 			print '<div id="resourceEdit_'.$resourceId.'" class="edit_resource miniMenuBtn h4" role="button" data-toggle="modal" data-target="#editModal">';
 			print '<div class="menuIcon"><i class="fa fa-pencil-square-o fa-lg"></i></div>';
-			print '<div class="menuText">'.$translations['edit']['translation_text'].'</div>';
+			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_EDIT").'</div>';
 			print '</div>';
 			
 			print '<div id="deleteResource_'.$resourceId.'" class="deleteResource miniMenuBtn h4" role="button" >';
 			print '<div class="menuIcon"><i class="fa fa-trash-o fa-lg"></i></div>';
-			print '<div class="menuText">'.$translations['delete']['translation_text'].'</div>';
+			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_DELETE").'</div>';
 			print '</div>';
 			
 			print '<div id="viewSet_'.$this->setId.'" class="viewSet miniMenuBtn h4">';
-			print '<a href="'.$translations['resource_set_page']['translation_text'].'?set_id='.$this->setId.'" ><div class="menuIcon"><i class="fa fa-files-o fa-lg"></i></div>';
-			print '<div class="menuText">'.$translations['view_set']['translation_text'].'</div></a>';
+			print '<a href="'.\JText::_("COM_BIODIV_RESOURCEFILE_RESOURCE_SET_PAGE").'?set_id='.$this->setId.'" ><div class="menuIcon"><i class="fa fa-files-o fa-lg"></i></div>';
+			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_VIEW_SET").'</div></a>';
 			print '</div>';
 			
-			print '        <button id="hide_moreMenu" type="button" class="btn btn-default hideMiniMenu" >'.$translations['cancel']['translation_text'].'</button>';
+			print '        <button id="hide_moreMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
 		
 			print '</div>'; //moreMenu
 			
@@ -1012,7 +892,7 @@ class ResourceFile {
 		else {
 			print '<div class="fullResourceMoreOptions">';
 			print '<div id="viewSet_'.$this->setId.'" class="viewSet text-center">';
-			print '<a href="'.$translations['resource_set_page']['translation_text'].'?set_id='.$this->setId.'" ><h4><i class="fa fa-files-o fa-lg"></i></h4></a><div class="hidden-xs">'.$translations['view_set']['translation_text'];
+			print '<a href="'.\JText::_("COM_BIODIV_RESOURCEFILE_RESOURCE_SET_PAGE").'?set_id='.$this->setId.'" ><h4><i class="fa fa-files-o fa-lg"></i></h4></a><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_VIEW_SET");
 			print '</div></div>';
 			print '</div>'; // moreOptions
 		}
@@ -1027,7 +907,7 @@ class ResourceFile {
 		print '</div>';
 		
 		print '<div class="fullResourceSource">';
-		print '<p>'.$translations['source']['translation_text'].' '.$this->getSourceText().'</p>';
+		print '<p>'.\JText::_("COM_BIODIV_RESOURCEFILE_SOURCE").' '.$this->getSourceText().'</p>';
 		print '</div>';
 		
 		print '<div class="fullResourceTags">';
@@ -1039,11 +919,11 @@ class ResourceFile {
 		
 		$numLikes = $this->numLikes;
 		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $translations['single_like']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
 		}
 		else {
 			
-			print '' . $numLikes . ' ' . $translations['many_likes']['translation_text'];
+			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
 		}
 		print '</div>'; // num_likes
 		print '</div>';
@@ -1069,7 +949,7 @@ class ResourceFile {
 		print '	    <div id="editArea" ></div>';
 		print '      </div>';
 		print '	  <div class="modal-footer">';
-		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$translations['cancel']['translation_text'].'</button>';
+		print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
 		print '      </div>';
 				  
 		print '    </div>'; // modal-content
@@ -1077,156 +957,6 @@ class ResourceFile {
 		print '  </div>'; // modal dialog
 		print '</div>'; // uploadModal
 		
-		
-		//print '<div class="row">';
-		/*
-		$accessLevel = $this->accessLevel;
-		$shareIconClass = $shareStatus[$accessLevel];
-		
-		print '<div class="col-xs-1 col-sm-1 col-md-1">';
-		
-		$resourcePerson = $this->personId;
-		
-		$userId = userID();
-		
-		if ( $resourcePerson == $userId ) {
-			print '<div class="dropdown">';
-			
-			print '<div id="dropdown-toggle_'.$tagStr.$resourceId.'" class="dropdown-toggle dropdown-toggle_'.$resourceId.' btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
-			print '<h4><i class="'.$shareIconClass.'"></i></h4>'; 
-			print '</div>';
-			print '<ul class="dropdown-menu" aria-labelledby="share_resource_'.$tagStr.$resourceId.'">';
-			
-			$isStudent = SchoolCommunity::isStudent();
-			//$studentCanShare = false;
-			// if ( $isStudent ) {
-				// // Student resources can only be shared if the task was approved
-				// $linkedTask = Task::getLinkedTask ( $resourceId );
-				// if ( $linkedTask and $linkedTask->getStatus() >= Badge::COMPLETE ) {
-					// $studentCanShare = true;
-				// }
-			// }
-			// if ( $isStudent and ($studentCanShare == false) ) {
-				// print $translations['get_approved']['translation_text'] ;
-			// }
-			if ( !$isStudent )  {
-				foreach ($shareOptions as $shareId=>$shareOpt ) {
-					print '<li><div id="share_resource_'.$tagStr.$shareId.'_'.$resourceId.'" class="share_resource share_resource_'.$shareId.'_'.$resourceId.
-						' h4 btn" > <i class="' . 
-						$shareStatus[$shareId] . '"></i> ' . $shareOpt . '</div></li>';
-				}
-			}
-			
-			// Add pin options here for ecologists only
-			if ( SchoolCommunity::isEcologist() ) {
-			
-				$isPinned = $this->isPin == 1;
-			
-				if ( $isPinned ) {
-					print '<li style="display:none;"><div id="pin_resource_'.$tagStr.$resourceId.'" class="pin_resource pin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['pin']['translation_text'] . '</div></li>';
-					print '<li><div id="unpin_resource_'.$tagStr.$resourceId.'" class="unpin_resource unpin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['unpin']['translation_text'] . '</div></li>';
-				}
-				else {
-					print '<li><div id="pin_resource_'.$tagStr.$resourceId.'" class="pin_resource pin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['pin']['translation_text'] . '</div></li>';
-					print '<li style="display:none;"><div id="unpin_resource_'.$tagStr.$resourceId.'" class="unpin_resource unpin_resource_'.$resourceId.' h5"> <i class="fa fa-thumb-tack fa-lg"></i> ' . 
-						$translations['unpin']['translation_text'] . '</div></li>';
-				}
-			}
-			
-			print '</ul>';
-			
-			print '</div>'; // dropdown
-		}
-		else {
-			print '<h4><i class="'.$shareIconClass.'"></i></h4>';
-		}
-		
-		print '</div>'; // col-1
-		
-		print '<div class="col-xs-10 col-sm-10 col-md-7 resource_file">';
-		print '<h5>'.$this->filename.'</h5>';
-		print '<p>'.$this->description.'</p>';
-		
-		print '</div>';
-		
-		print '<div id="show_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-2 col-sm-2 col-md-1 show_resource" data-toggle="tooltip" title="'.
-			$translations['show']['translation_text'].'"><h4 class="text-right"><i class="fa fa-angle-down fa-lg"></i></h4></div>';
-		
-		print '<div id="hide_resource_'.$tagStr.$resourceId.'" role="button" class="col-xs-2 col-sm-2 col-md-1 hide_resource" data-toggle="tooltip" title="'.
-			$translations['hide']['translation_text'].'" style="display:none;"><h4 class="text-right"><i class="fa fa-angle-up fa-lg"></i></h4></div>';
-		
-		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="col-xs-2 col-sm-2 col-md-1 download_resource" role="button" data-toggle="tooltip" title="'.
-			$translations['download']['translation_text'].'" ><a href="'.$this->url.
-			'" download="'.$this->filename.'"><h4 class="text-right"><i class="fa fa-download fa-lg"></i></h4></a></div>';
-		
-		
-		// Need space for likes here
-		
-		print '<div class="col-xs-4 col-sm-4 col-md-2">';
-		print '<div class="row">';
-		
-		if ( $this->isFavourite ) {
-			
-			print '<div id="favourite_resource_'.$tagStr.$resourceId.
-				'" class="col-xs-6 col-sm-6 col-md-6 favourite_resource favourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
-			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
-				'" class="col-xs-6 col-sm-6 col-md-6 unfavourite_resource unfavourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
-		}
-		else {
-			
-			print '<div id="favourite_resource_'.$tagStr.$resourceId.
-				'" class="col-xs-6 col-sm-6 col-md-6 favourite_resource favourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'" ><h4 class="text-right"><i class="fa fa-bookmark-o fa-lg"></i></h4></div>';
-			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
-				'" class="col-xs-6 col-sm-6 col-md-6 unfavourite_resource unfavourite_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['favourite']['translation_text'].'"  style="display:none;"><h4 class="text-right"><i class="fa fa-bookmark fa-lg"></i></h4></div>';
-		}
-		
-		if ( $this->isLike ) {
-			
-			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
-			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
-		}
-		else {
-			
-			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 like_resource like_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'" ><h4 class="text-right"><i class="fa fa-heart-o fa-lg"></i></h4></div>';
-			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="col-xs-6 col-sm-6 col-md-6 unlike_resource unlike_resource_'.$resourceId.'" role="button" data-toggle="tooltip" title="'.
-				$translations['like']['translation_text'].'"  style="display:none;"><h4 class="text-right"><i class="fa fa-heart fa-lg"></i></h4></div>';
-		}
-		
-		print '<div id="num_likes_'.$tagStr.$resourceId.'" class="col-xs-12 col-sm-12 col-md-12 text-right h5 num_likes_'.$resourceId.'">';
-		
-		$numLikes = $this->numLikes;
-		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . $translations['single_like']['translation_text'];
-		}
-		else {
-			
-			print '' . $numLikes . ' ' . $translations['many_likes']['translation_text'];
-		}
-		print '</div>'; // num_likes, col-12
-		
-		print '</div>'; // row
-		
-		print '</div>'; //col-2
-		
-		print '</div>'; // row
-		
-		print '</div>'; // panel-heading
-		
-		print '<div class="panel-body resource_panel" style="display:none;">';
-		
-		print '<div id="resource_'.$tagStr.$resourceId.'" ></div>';
-		
-		*/		
 		
 		print '</div>'; // panel-body
 		print '</div>'; //panel
@@ -1248,8 +978,6 @@ class ResourceFile {
 		$schoolRoles = SchoolCommunity::getSchoolRoles();
 		$isEcologist = SchoolCommunity::isEcologist();
 		
-		$translations = getTranslations("ResourceFile");
-		
 		$pageNum = 1;
 	
 		// -------------------------School, title and description
@@ -1263,7 +991,7 @@ class ResourceFile {
 			if ( $resource ) {
 				$currSchoolId = $resource->getSchoolId();
 			}
-			print '<label for="school"><h4>'.$translations['choose_school']['translation_text'].'</h4></label>';
+			print '<label for="school"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_CHOOSE_SCHOOL").'</h4></label>';
 			print "<select id = 'school' name = 'school'>"; // class = 'form-control'>";
 
 			$isFirst = true;
@@ -1302,7 +1030,7 @@ class ResourceFile {
 		if ( $resource ) {
 			$title = $resource->getTitle();
 		}
-		print '<label for="uploadName"><h4>'.$translations['name_upload']['translation_text'].'</h4></label>';
+		print '<label for="uploadName"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_NAME_UPLOAD").'</h4></label>';
 		print '<input type="text" id="uploadName" name="uploadName" value = "'.$title.'">';
 		print '<div id="uploadNameCount" class="text-right" data-maxchars="'.self::$maxTitleChars.'">0/'.self::$maxTitleChars.'</div>';
 		
@@ -1313,12 +1041,12 @@ class ResourceFile {
 			$desc = $resource->getDescription();
 		}
 
-		print '<label for="uploadDescription"><h4>'.$translations['upload_desc']['translation_text'].'</h4></label>';
+		print '<label for="uploadDescription"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_UPLOAD_DESC").'</h4></label>';
 		print '<textarea id="uploadDescription" name="uploadDescription" rows="2" cols="100" >'.$desc.'</textarea>';
 		print '<div id="uploadDescriptionCount" class="text-right" data-maxchars="'.self::$maxDescChars.'">0/'.self::$maxDescChars.'</div>';
 		
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
-		print $translations['next']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 		print '</div>'; // uploadNext
 		
 		print '</div>'; // newUpload
@@ -1333,7 +1061,7 @@ class ResourceFile {
 
 		print '<div id="resourceMeta_'.$pageNum.'"  class="metaPage" style="display:none">';
 		
-		print '<label for="resourceType"><h4>'.$translations['choose_type']['translation_text'].'</h4></label>';
+		print '<label for="resourceType"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_CHOOSE_TYPE").'</h4></label>';
 		
 		print '<div class="row">';
 		foreach($resourceTypes as $resType){
@@ -1352,11 +1080,11 @@ class ResourceFile {
 		print '</div>'; // row
 		
 		print '<div id="resourceBack_'.$pageNum.'" class="btn btn-default btn-lg resourceBackBtn"  >';
-		print $translations['back']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_BACK");
 		print '</div>'; // resourceBack
 		
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
-		print $translations['next']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 		print '</div>'; // resourceNext
 		
 		print '</div>'; // resourceMeta
@@ -1374,7 +1102,7 @@ class ResourceFile {
 			
 			print '<h4>'.$tagGroup->upload_text.'</h4>';
 			
-			print '<h4>'.$translations['as_many']['translation_text'].'</h4>';
+			print '<h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_AS_MANY").'</h4>';
 		
 			foreach($tagGroup->tags as $tag){
 				
@@ -1390,11 +1118,11 @@ class ResourceFile {
 			}
 			
 			print '<div id="resourceBack_'.$pageNum.'" class="btn btn-default btn-lg resourceBackBtn"  >';
-			print $translations['back']['translation_text'];
+			print \JText::_("COM_BIODIV_RESOURCEFILE_BACK");
 			print '</div>'; // resourceBack
 			
 			print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
-			print $translations['next']['translation_text'];
+			print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 			print '</div>'; // resourceNext
 			
 			print '</div>'; // resourceMeta
@@ -1412,7 +1140,7 @@ class ResourceFile {
 		
 		print '<div id="resourceMeta_'.$pageNum.'"  class="metaPage" style="display:none">';
 		
-		print '<h4>'.$translations['set_source']['translation_text'].'</h4>';
+		print '<h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_SET_SOURCE").'</h4>';
 		
 		$checked = "checked";
 		if ( $existingSource && $existingSource != "user" ) {
@@ -1420,7 +1148,7 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow">';
 		print '<input type="radio" id="displayUsername" name="source" value="user" '.$checked.'>';
-		print '<label for="displayUsername" class="uploadLabel">'.$translations['my_username']['translation_text'].'</label>';
+		print '<label for="displayUsername" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_MY_USERNAME").'</label>';
 		print '</div>'; // uploadRow
 		
 		
@@ -1430,11 +1158,11 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow">';
 		print '<input type="radio" id="displayRole" name="source" value="role" '.$checked.'>';
-		print '<label for="displayRole" class="uploadLabel" >'.$translations['not_username']['translation_text'].'</label>';
+		print '<label for="displayRole" class="uploadLabel" >'.\JText::_("COM_BIODIV_RESOURCEFILE_NOT_USERNAME").'</label>';
 		print '</div>'; // uploadRow
 		
 		$checked = "";
-		$externalText = $translations['external_text']['translation_text'];
+		$externalText = \JText::_("COM_BIODIV_RESOURCEFILE_EXTERNAL_TEXT");
 		$displayExternalStyle = 'style="display:none"';
 		if ( $existingSource && $existingSource == "external" ) {
 			$checked = "checked";
@@ -1443,27 +1171,27 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow ">';
 		print '<input type="radio" id="displayExternal" name="source" value="external" '.$checked.'>';
-		print '<label for="displayExternal" class="uploadLabel">'.$translations['external_source']['translation_text'].'</label>';
+		print '<label for="displayExternal" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_EXTERNAL_SOURCE").'</label>';
 		print '</div>'; // uploadRow
 		
 		
 		print '<div class="uploadRow externalExtras" '.$displayExternalStyle.'>';
 		print '<input type="checkbox" id="externalPermission" name="externalPermission" value="1" '.$checked.'>';
-		print '<label for="externalPermission" class="uploadLabel">'.$translations['external_permission']['translation_text'].'</label>';
+		print '<label for="externalPermission" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_EXTERNAL_PERMISSION").'</label>';
 		print '</div>'; // uploadRow
 		
 		print '<div class="uploadRow externalExtras" '.$displayExternalStyle.'>';
-		print '<label for="externalText">'.$translations['external_text']['translation_text'].'</label>';
+		print '<label for="externalText">'.\JText::_("COM_BIODIV_RESOURCEFILE_EXTERNAL_TEXT").'</label>';
 		print '<input type="text" id="externalText" name="externalText" value="'.$externalText.'">';
 		print '</div>'; // uploadRow
 				
 			
 		print '<div id="resourceBack_'.$pageNum.'" class="btn btn-default btn-lg resourceBackBtn"  >';
-		print $translations['back']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_BACK");
 		print '</div>'; // resourceBack
 		
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
-		print $translations['next']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 		print '</div>'; // resourceNext
 		
 		print '</div>'; // resourceMeta
@@ -1478,7 +1206,7 @@ class ResourceFile {
 		}
 		print '<div id="resourceMeta_'.$pageNum.'"  class="metaPage" style="display:none">';
 		
-		print '<h4>'.$translations['set_share']['translation_text'].'</h4>';
+		print '<h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_SET_SHARE").'</h4>';
 		
 		$checked = "checked";
 		if ( $existingShareLevel && $existingShareLevel != SchoolCommunity::PERSON ) {
@@ -1486,7 +1214,7 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow">';
 		print '<input type="radio" id="sharePrivate" name="shareLevel" value="'.SchoolCommunity::PERSON.'" '.$checked.'>';
-		print '<label for="sharePrivate" class="uploadLabel">'.$translations['keep_private']['translation_text'].'</label>';
+		print '<label for="sharePrivate" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_KEEP_PRIVATE").'</label>';
 		print '</div>'; // uploadRow
 		
 		$checked = "";
@@ -1495,7 +1223,7 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow">';
 		print '<input type="radio" id="shareSchool" name="shareLevel" value="'.SchoolCommunity::SCHOOL.'" '.$checked.'>';
-		print '<label for="shareSchool" class="uploadLabel" >'.$translations['share_school']['translation_text'].'</label>';
+		print '<label for="shareSchool" class="uploadLabel" >'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_SCHOOL").'</label>';
 		print '</div>'; // uploadRow
 		
 		$checked = "";
@@ -1504,7 +1232,7 @@ class ResourceFile {
 		}
 		print '<div class="uploadRow">';
 		print '<input type="radio" id="shareCommunity" name="shareLevel" value="'.SchoolCommunity::COMMUNITY.'" '.$checked.'>';
-		print '<label for="shareCommunity" class="uploadLabel">'.$translations['share_community']['translation_text'].'</label>';
+		print '<label for="shareCommunity" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_COMMUNITY").'</label>';
 		print '</div>'; // uploadRow
 		
 		$checked = "";
@@ -1514,16 +1242,16 @@ class ResourceFile {
 		if ( $isEcologist ) {
 			print '<div class="uploadRow">';
 		print '<input type="radio" id="shareEcologists" name="shareLevel" value="'.SchoolCommunity::ECOLOGISTS.'" '.$checked.'>';
-			print '<label for="shareEcologists" class="uploadLabel">'.$translations['share_ecologists']['translation_text'].'</label>';
+			print '<label for="shareEcologists" class="uploadLabel">'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_ECOLOGISTS").'</label>';
 			print '</div>'; // uploadRow
 		}	
 		
 		print '<div id="resourceBack_'.$pageNum.'" class="btn btn-default btn-lg resourceBackBtn"  >';
-		print $translations['back']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_BACK");
 		print '</div>'; // resourceBack
 		
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
-		print $translations['next']['translation_text'];
+		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 		print '</div>'; // resourceNext
 		
 		print '</div>'; // resourceMeta
@@ -1533,9 +1261,6 @@ class ResourceFile {
 	}
 	
 	public static function createResourceFile ( $setId, $resourceType, $clientName, $newName, $dirName, $fileSize, $fileType, $title = null, $description = null, $accessLevel = null, $source = null, $externalText = null ) {
-		
-		// Get all the text snippets for this class in the current language
-		$translations = getTranslations("ResourceFile");
 		
 		$personId = userID();
 		
@@ -1565,8 +1290,6 @@ class ResourceFile {
 			$otherDetails = $db->loadAssoc();
 			
 			$schoolId = $otherDetails["school_id"];
-			//$description = $otherDetails["type_name"] . ": " . $otherDetails["set_name"] . '. ' . $otherDetails["description"]. " <small>" . 
-			//	$translations['contributed']['translation_text'] . ' ' . $otherDetails["username"] . ', ' . $otherDetails["school_name"] . '</small>';
 			
 			$typeName = $otherDetails["type_name"];
 			

@@ -32,10 +32,6 @@ class BioDivViewDashSpotter extends JViewLegacy
 		
 	$this->personId = (int)userID();
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("dashspotter");
-	
-	
 	if ( $this->personId ) {
 		
 		
@@ -51,9 +47,6 @@ class BioDivViewDashSpotter extends JViewLegacy
 		$topics = codes_getList( 'topictran', $features );
 		$this->topicIds = array_column($topics, 0);
 		
-		$errMsg = print_r ( $this->topicIds, true );
-		error_log ( "Spotter view, topics to display: " . $errMsg );
-		
 		// Get this users scores, avoid Gold standard or non-displayed ones when displaying
 		$this->scores = userExpertise($this->personId);
 		
@@ -63,8 +56,6 @@ class BioDivViewDashSpotter extends JViewLegacy
 		
 		$this->numMissingScores = count($this->topicIds) - $this->numTopicScores;
 		
-		$errMsg = print_r ( $this->scores, true );
-		error_log ( "Spotter view, scores: " . $errMsg );
 		
 	}
 	

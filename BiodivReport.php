@@ -20,8 +20,6 @@ class BiodivReport {
 	// This is also used as the max num of rows to write at a time to avoid memory limits
 	const REPORT_FILE_THRESHOLD = 4000;
 	
-	private static $translations = null;
-	
 	private $projectId;
 	private $projectName;
 	
@@ -219,19 +217,8 @@ class BiodivReport {
 	}
 	
 	
-		
-	public static function getTranslations () {
-		
-		if ( self::$translations == null ) {
-			self::$translations = getTranslations ( "BiodivReport" );
-		}
-		return self::$translations;
-	}
-	
 	
 	public static function getFilterValues ( $type ) {
-		
-		$translations = self::getTranslations();
 		
 		if ( $type == "module" ) {
 			
@@ -245,7 +232,7 @@ class BiodivReport {
 		
 			$filterValues = $db->loadAssocList("id", "name");
 			
-			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
 			
 			return $filterValues;
 		}
@@ -261,7 +248,7 @@ class BiodivReport {
 		
 			$filterValues = $db->loadAssocList("id", "name");
 			
-			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
 			
 			return $filterValues;
 		}
@@ -277,7 +264,23 @@ class BiodivReport {
 		
 			$filterValues = $db->loadAssocList("id", "name");
 			
-			$filterValues = array($translations['all']['translation_text']) + $filterValues;
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
+			
+			return $filterValues;
+		}
+		if ( $type == "trappingproject" ) {
+			
+			$filterValues = myTrappingProjects();
+			
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
+			
+			return $filterValues;
+		}
+		if ( $type == "spottingproject" ) {
+			
+			$filterValues = mySpottingProjects();
+		
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
 			
 			return $filterValues;
 		}
@@ -285,8 +288,6 @@ class BiodivReport {
 	
 	
 	public static function getSelectedValue ( $type, $filter ) {
-		
-		$translations = self::getTranslations();
 		
 		$selectedValue = 0;
 		
@@ -317,6 +318,24 @@ class BiodivReport {
 			}
 
 		}
+		else if ( $type == "trappingproject" ) {
+			
+			$filterObject = json_decode ( $filter );
+			
+			if ( $filterObject && property_exists($filterObject, "trappingproject") ) {
+				$selectedValue = $filterObject->trappingproject;
+			}
+
+		}
+		else if ( $type == "spottingproject" ) {
+			
+			$filterObject = json_decode ( $filter );
+			
+			if ( $filterObject && property_exists($filterObject, "spottingproject") ) {
+				$selectedValue = $filterObject->spottingproject;
+			}
+
+		}
 		
 		return $selectedValue;
 	}
@@ -325,7 +344,8 @@ class BiodivReport {
 	// List of the available project reports
 	public static function listReports () {
 		
-		$reports = codes_getList('reporttypetran');
+		$features = array("restriction"=>"seq > 0");
+		$reports = codes_getList('reporttypetran', $features);
 		
 		return $reports;
 	}
@@ -470,7 +490,43 @@ class BiodivReport {
 							$filterClause = "1";
 						}
 						break;
+						
+					case "USERSEQUENCE":
+					case "USERUPLOAD":
+					case "USERUPLOADAUDIO":
+					case "USERSPECIES":
+					case "USERSPECIESAUDIO":
+					case "USERSPECIESOTHERS":
+					case "USERSPECIESOTHERSAUDIO":
+					case "USERNOSPECIES":
+					case "USERNOSPECIESAUDIO":
+					case "USERALLSPECIES":
+					case "USERALLSPECIESAUDIO":
+						
+						error_log ( "filter = " . $filter );
+						
+						$filterObject = json_decode($filter);
+						
+						if ( property_exists($filterObject, "trappingproject") and ($filterObject->trappingproject != 0 )) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter1 = " . $db->quote($filterObject->trappingproject);
+							
+						}
+						else if ( property_exists($filterObject, "spottingproject") and ($filterObject->spottingproject != 0 )) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter1 = " . $db->quote($filterObject->spottingproject);
+							
+						}
+						
+						break;
+						
+						
 					default:
+						
 						$filterClause = "1";
 						break;
 			}
@@ -675,7 +731,7 @@ class BiodivReport {
 				->where("R.report_type = " . $this->reportType);
 		}
 		
-		//error_log("query created");
+		error_log(" remove rows select query created " . $query->dump());
 		
 		$db->setQuery($query);
 
@@ -1328,20 +1384,24 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.deployment_date, U.collection_date, U.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.deployment_date, U.collection_date, U.timestamp) as report_csv, P.project_id as filter1")
 				->from("Upload U")
 				->innerJoin("Site S on U.site_id = S.site_id and S.person_id = " . $this->personId)
-				->innerJoin("Options O5 on O5.option_id = S.habitat_id");
+				->innerJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on U.site_id = PSM.site_id and U.timestamp >= PSM.start_time and (U.timestamp <= PSM.end_time or PSM.end_time is NULL)")
+				->innerJoin("Project P on PSM.project_id = P.project_id");
 			
-			//error_log("query1 created: " . $query1->dump() );
+			error_log("query1 created: " . $query1->dump() );
 				
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.deployment_date, U.collection_date, U.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.deployment_date, U.collection_date, U.timestamp) as report_csv, P.project_id as filter1")
 				->from("Upload U")
 				->innerJoin("Site S on U.site_id = S.site_id and S.person_id = " . $this->personId)
-				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'");
+				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on U.site_id = PSM.site_id and U.timestamp >= PSM.start_time and (U.timestamp <= PSM.end_time or PSM.end_time is NULL)")
+				->innerJoin("Project P on PSM.project_id = P.project_id");
 			
 			//error_log("query1 created: " . $query1->dump() );
 				
@@ -1385,20 +1445,25 @@ private function generateAnimalDataAudio () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', P.project_prettyname, U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.timestamp) as report_csv, P.project_id as filter1")
 				->from("Upload U")
 				->innerJoin("Site S on U.site_id = S.site_id and S.person_id = " . $this->personId)
-				->innerJoin("Options O5 on O5.option_id = S.habitat_id");
+				->innerJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on U.site_id = PSM.site_id and U.timestamp >= PSM.start_time and (U.timestamp <= PSM.end_time or PSM.end_time is NULL)")
+				->innerJoin("Project P on PSM.project_id = P.project_id");
+				
 			
 			//error_log("query1 created: " . $query1->dump() );
 				
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.timestamp) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', P.project_prettyname, U.upload_id, U.site_id, REPLACE(S.site_name, ',', ' '), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), U.camera_tz, U.is_dst, U.utc_offset, U.timestamp) as report_csv, P.project_id as filter1")
 				->from("Upload U")
 				->innerJoin("Site S on U.site_id = S.site_id and S.person_id = " . $this->personId)
-				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'");
+				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on U.site_id = PSM.site_id and U.timestamp >= PSM.start_time and (U.timestamp <= PSM.end_time or PSM.end_time is NULL)")
+				->innerJoin("Project P on PSM.project_id = P.project_id");
 			
 			//error_log("query1 created: " . $query1->dump() );
 				
@@ -1406,7 +1471,7 @@ private function generateAnimalDataAudio () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv', 'filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1435,22 +1500,24 @@ private function generateUserSequenceData () {
 		$query2 = null;
 		
 		$query1 = $db->getQuery(true);
-		$query1->select("P.site_id as site_id, REPLACE(S.site_name, ',', ' ') as site_name, P.sequence_id as sequence_id, A.animal_id as animal_id, IF(A.animal_id>0, 1, 0) as animal_num from Photo P")
+		$query1->select("PR.project_id, PR.project_prettyname, P.site_id as site_id, REPLACE(S.site_name, ',', ' ') as site_name, P.sequence_id as sequence_id, A.animal_id as animal_id, IF(A.animal_id>0, 1, 0) as animal_num from Photo P")
 			->innerJoin("Site S on S.site_id = P.site_id and S.person_id = " . $this->personId )
 			->leftJoin("Animal A on P.photo_id = A.photo_id and A.species != 97")
-			->where("P.sequence_id > 0");
+			->where("P.sequence_id > 0")
+			->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+			->innerJoin("Project PR on PSM.project_id = PR.project_id");
 			
 		//error_log("USERSEQUENCE query1 created: " . $query1->dump());
 			
 		$query2 = $db->getQuery(true)
-             ->select( "a.site_id, a.site_name, a.sequence_id, IF(sum(a.animal_num)>0, 1, 0) as num_class" )
+             ->select( "a.project_id, a.project_prettyname, a.site_id, a.site_name, a.sequence_id, IF(sum(a.animal_num)>0, 1, 0) as num_class" )
 			 ->from('(' . $query1 . ') a')
 			 ->group('a.site_id, a.site_name, a.sequence_id');
 			 
 		//error_log("USERSEQUENCE query2 created: " . $query2->dump());
 		
 		$query3 = $db->getQuery(true)
-             ->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', b.site_id, b.site_name, count(*), sum(b.num_class)) as report_csv")
+             ->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', b.project_prettyname, b.site_id, b.site_name, count(*), sum(b.num_class)) as report_csv, b.project_id as filter1")
 			 ->from('(' . $query2 . ') b')
 			 ->group('b.site_id, b.site_name');
 		
@@ -1465,7 +1532,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query3);
 		
 		//error_log("queryInsert created");
@@ -1495,7 +1562,7 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1507,6 +1574,8 @@ private function generateUserSequenceData () {
 				->leftJoin("Options O3 on O3.option_id = A.gender")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1515,7 +1584,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1528,6 +1597,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD3 on OD3.option_id = A.gender and OD3.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1537,7 +1608,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1567,13 +1638,15 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id ) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id ) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
 				->innerJoin("Options O on O.option_id = A.species")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1582,7 +1655,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
@@ -1590,6 +1663,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD on OD.option_id = A.species and OD.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1599,7 +1674,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1632,7 +1707,7 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1644,6 +1719,8 @@ private function generateUserSequenceData () {
 				->leftJoin("Options O3 on O3.option_id = A.gender")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id != " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1652,7 +1729,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date ) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1665,6 +1742,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD3 on OD3.option_id = A.gender and OD3.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id != " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1674,7 +1753,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1707,13 +1786,15 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
 				->innerJoin("Options O on O.option_id = A.species")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id != " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1722,7 +1803,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, A.person_id+".$addRand.", A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
@@ -1730,6 +1811,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD on OD.option_id = A.species and OD.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id != " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1739,7 +1822,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1769,7 +1852,7 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv, PR.project_id as filter1")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1777,6 +1860,8 @@ private function generateUserSequenceData () {
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId )
 				->innerJoin("Upload U on P.upload_id = U.upload_id")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.photo_id is NULL")
 				->order("S.site_name, P.taken");
 			
@@ -1786,7 +1871,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', 'null', 'null', 'null', 'null', P.photo_id, P2.sequence_num, P2.upload_filename, P2.taken, U.deployment_date, U.collection_date) as report_csv, PR.project_id as filter1")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1794,6 +1879,8 @@ private function generateUserSequenceData () {
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
 				->innerJoin("Upload U on P.upload_id = U.upload_id")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.photo_id is NULL")
 				->order("S.site_name, P.taken");
 			
@@ -1804,7 +1891,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1834,11 +1921,13 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId )
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.photo_id is NULL")
 				->order("S.site_name, P.taken");
 			
@@ -1848,11 +1937,13 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, 'null', REPLACE(S.site_name, ',', ' '), P.upload_filename, P.taken, 'null', SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), S.latitude, S.longitude, REPLACE(S.grid_ref, ',', ' '), P.site_id, 'null', 'null', 'null', P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Photo P")
 				->leftJoin("Animal A on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id and S.person_id = " . $this->personId)
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.photo_id is NULL")
 				->order("S.site_name, P.taken");
 			
@@ -1863,7 +1954,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -1893,7 +1984,7 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'), P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'), P.taken, SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(O2.option_name, 'null'), IFNULL(O3.option_name, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1905,6 +1996,8 @@ private function generateUserSequenceData () {
 				->leftJoin("Options O3 on O3.option_id = A.gender")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1913,7 +2006,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), P.taken, SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(OD2.value, 'null'), IFNULL(OD3.value, 'null'), IFNULL(A.number, 'null'), REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), IFNULL(OD4.value, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("PhotoSequence PS on P.photo_id = PS.start_photo_id")
@@ -1926,6 +2019,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD3 on OD3.option_id = A.gender and OD3.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1935,7 +2030,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created: " . $queryInsert->dump());
@@ -1966,13 +2061,15 @@ private function generateUserSequenceData () {
 			// We have a table for this report to improve performance, but only updated periodically - try getting direct to start with
 			// Set up the select queries for the report
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(O.option_name, ',', ' -'),P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(O.option_name, ',', ' -'),P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(O5.option_name, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(O4.option_name, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id")
 				->innerJoin("Options O on O.option_id = A.species")
 				->leftJoin("Options O4 on O4.option_id = A.sure")
 				->leftJoin("Options O5 on O5.option_id = S.habitat_id")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1981,7 +2078,7 @@ private function generateUserSequenceData () {
 		}
 		else {
 			$query1 = $db->getQuery(true)
-				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv")
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('PlaySeq',P.sequence_id), PR.project_prettyname, REPLACE(IFNULL(OD.value, O.option_name), ',', ' -'), P.taken, REPLACE(IFNULL(A.notes, 'null'), ',', ' -'), SUBSTRING_INDEX(IFNULL(OD5.value, 'null'), ' ', 1), A.animal_id, A.timestamp, IFNULL(OD4.value, 'null'), P.photo_id) as report_csv, PR.project_id as filter1")
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.sequence_num = 1")
 				->innerJoin("Site S on P.site_id = S.site_id")
@@ -1989,6 +2086,8 @@ private function generateUserSequenceData () {
 				->leftJoin("OptionData OD on OD.option_id = A.species and OD.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD4 on OD4.option_id = A.sure and OD4.data_type = '" . $this->languageTag . "'")
 				->leftJoin("OptionData OD5 on OD5.option_id = S.habitat_id and OD5.data_type = '" . $this->languageTag . "'")
+				->innerJoin("ProjectSiteMap PSM on P.site_id = PSM.site_id and P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+				->innerJoin("Project PR on PSM.project_id = PR.project_id")
 				->where("A.species != 97")
 				->where("A.person_id = " . $this->personId)
 				->order("S.site_name, P.taken, A.timestamp");
@@ -1998,7 +2097,7 @@ private function generateUserSequenceData () {
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
-			->columns($db->qn(array('report_id','row_csv')))
+			->columns($db->qn(array('report_id','row_csv','filter1')))
 			->values($query1);
 		
 		//error_log("queryInsert created");
@@ -2266,7 +2365,7 @@ private function generateUserSequenceData () {
 			->columns($db->qn(array('report_id','row_csv','filter1','filter2','filter3')))
 			->values($concatQuery);
 		
-		error_log("queryInsert created: " . $queryInsert->dump());
+		//error_log("queryInsert created: " . $queryInsert->dump());
 		
 		$db->setQuery($queryInsert);
 		

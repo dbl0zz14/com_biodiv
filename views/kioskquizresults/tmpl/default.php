@@ -55,21 +55,21 @@ for ( $i = 0; $i < $this->numQuestions; $i++ ) {
 		print "<button class='media-btn' data-seq_id='".$seq->getId()."'><video src = '" . $mediafile . "' width='100%'></video></button>";
 	}
 	else if ( $seq->getMedia() == "audio" ) {
-		print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . $this->translations['review']['translation_text'] . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
+		print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . JText::_("COM_BIODIV_KIOSKQUIZRESULTS_REVIEW") . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
 	}
 	
 	print "<div class='row'>";
 	
 	print "<div class='col-md-6'>";
 	
-	print "<h5>" . "  " . $this->translations['you_sel']['translation_text'] . "</h5>";
+	print "<h5>" . "  " . JText::_("COM_BIODIV_KIOSKQUIZRESULTS_YOU_SEL") . "</h5>";
 	print "<p id='user_" . $seq->getId() . "'>" . $userSpeciesName . "</p>";
 	
 	print "</div>"; // col 6
 	
 	print "<div class='col-md-6'>";
 	
-	print "<h5>" . "  " . $this->translations['exp_sel']['translation_text'] . "</h5>";
+	print "<h5>" . "  " . JText::_("COM_BIODIV_KIOSKQUIZRESULTS_EXP_SEL") . "</h5>";
 	print "<p id='expert_" . $seq->getId() . "'>" . $correctSpeciesName . "</p>";
 	
 	print "</div>"; // col 6
@@ -95,11 +95,11 @@ print "</div>"; // results row
 
 
 print '<div class="col-md-4 col-md-offset-2">';
-print '	<button id="play_again" class="btn btn-lg btn-block btn-success h3 control_btn" >'.$this->translations['play_again']['translation_text'].'</button>';
+print '	<button id="play_again" class="btn btn-lg btn-block btn-success h3 control_btn" >'.JText::_("COM_BIODIV_KIOSKQUIZRESULTS_PLAY_AGAIN").'</button>';
 print '</div>';
 
 print '<div class="col-md-4">';
-print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_home" >'.$this->translations['back_home']['translation_text'].'</button>';
+print '	<button class="btn btn-lg btn-block btn-success h3 control_btn back_to_home" >'.JText::_("COM_BIODIV_KIOSKQUIZRESULTS_BACK_HOME").'</button>';
 print '</div>';
 
 // ------------------------------- Review carousel modal --------------------------------------
@@ -110,13 +110,13 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title"> '.$this->translations['review']['translation_text'].'</h4>';
+print '        <h4 class="modal-title"> '.JText::_("COM_BIODIV_KIOSKQUIZRESULTS_REVIEW").'</h4>';
 print '      </div>';
 print '      <div class="modal-body">';
 print '	    <div id="media_carousel" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button>';
+print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.JText::_("COM_BIODIV_KIOSKQUIZRESULTS_CLOSE").'</button>';
 print '      </div>';
 	  	  
 print '    </div>';

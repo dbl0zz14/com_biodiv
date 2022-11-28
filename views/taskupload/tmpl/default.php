@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_TASKUPLOAD_LOGIN").'</div>';
 	
 }
 
@@ -20,12 +20,12 @@ else {
 	if ( (count ( $this->schoolRoles ) > 1)  and !(Biodiv\SchoolCommunity::isEcologist()) ) {
 		
 		error_log ("More than one school role found for user " . $this->personId );
-		print '<h2>'.$this->translations['too_many_roles']['translation_text'].'</h2>';
+		print '<h2>'.JText::_("COM_BIODIV_TASKUPLOAD_TOO_MANY_ROLES").'</h2>';
 
 	}
 	else if ( count ( $this->schoolRoles ) == 0 ) {
 		error_log ("No school role found for user " . $this->personId );
-		print '<h2>'.$this->translations['no_role']['translation_text'].'</h2>';
+		print '<h2>'.JText::_("COM_BIODIV_TASKUPLOAD_NO_ROLE").'</h2>';
 
 	}
 	else {
@@ -36,8 +36,8 @@ else {
 
 		print '<div class="col-md-12">';
 		
-		print '<h2>'.$this->translations['well_done']['translation_text'].'</h2>';
-		print '<h3>'.$this->translations['upload']['translation_text'].'</h3>';
+		print '<h2>'.JText::_("COM_BIODIV_TASKUPLOAD_WELL_DONE").'</h2>';
+		print '<h3>'.JText::_("COM_BIODIV_TASKUPLOAD_UPLOAD").'</h3>';
 		print '<h3>'.$this->uploadName.'</h3>';
 		
 		print '</div>';
@@ -61,16 +61,16 @@ else {
 		print '<div class="col-md-12">';
 		
 		// Describe the upload
-		print '<label for="uploadDescription"><h4>'.$this->translations['upload_desc']['translation_text'].'</h4></label>';
+		print '<label for="uploadDescription"><h4>'.JText::_("COM_BIODIV_TASKUPLOAD_UPLOAD_DESC").'</h4></label>';
 		print '<textarea id="uploadDescription" name="uploadDescription" rows="2" cols="100"></textarea>';
 		print '<h2></h2>';
 		print '</div>';
 
 
-		print '<button type="submit" id="readytoupload" class="btn btn-primary btn-lg spaced chooseFiles">'.$this->translations['create_set']['translation_text'].'</button>';
+		print '<button type="submit" id="readytoupload" class="btn btn-primary btn-lg spaced chooseFiles">'.JText::_("COM_BIODIV_TASKUPLOAD_CREATE_SET").'</button>';
 			
 		
-		print '<button id="doneNoFiles_'.$this->taskId.'" class="btn btn-default btn-lg spaced doneNoFiles">'.$this->translations['no_files']['translation_text'].'</button>';
+		print '<button id="doneNoFiles_'.$this->taskId.'" class="btn btn-default btn-lg spaced doneNoFiles">'.JText::_("COM_BIODIV_TASKUPLOAD_NO_FILES").'</button>';
 		
 		
 		print '</form>';

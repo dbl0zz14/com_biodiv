@@ -26,8 +26,6 @@ class BioDivViewTrapper extends JViewLegacy
 
     public function display($tpl = null) 
     {
-	  // Get all the text snippets for this view in the current language
-	  $this->translations = getTranslations("trapper");
 	  
 	  $isCamera = getSetting("camera") == "yes";
 	  $this->siteHelper = new SiteHelper($isCamera);
@@ -35,102 +33,22 @@ class BioDivViewTrapper extends JViewLegacy
 	  $this->fields = $this->siteHelper->getFieldsArray();
 	  $this->help = $this->siteHelper->getHelpArray();
 	
-      // Assign data to the view
-	  /*
-	  $this->fields = array("site_name" => $this->translations['site_name']['translation_text'],
-				"grid_ref" => $this->translations['lat_lon']['translation_text']);
-	  $this->help = array("site_name" => $this->translations['site_help']['translation_text'],
-				"grid_ref" => $this->translations['loc_help']['translation_text']);
-				
-	  
-	  $this->fields['habitat_id'] = $this->translations['habitat']['translation_text'];
-	  $this->help['habitat_id'] = $this->translations['hab_help']['translation_text'];
-	  $this->fields['purpose_id'] = $this->translations['purpose']['translation_text'];
-	  $this->help['purpose_id'] = $this->translations['pur_help']['translation_text'];
-	  $this->fields['camera_id'] = $this->translations['camera']['translation_text'];
-	  $this->help['camera_id'] = str_replace("'", "&apos;", $this->translations['cam_help']['translation_text']);
-	  
-	  $this->fields['water_id'] = $this->translations['see_water']['translation_text'];
-	  $this->help['water_id'] = $this->translations['water_help']['translation_text'];
-	  $this->fields["camera_height"] = $this->translations['cam_height']['translation_text'];
-	  $this->help["camera_height"] = $this->translations['height_help']['translation_text'];
-	  $this->fields["notes"] = $this->translations['notes']['translation_text'];
-	  $this->help["notes"] = "Notes: Please note any other information pertinent to this location, such as \"there is a bird feeder nearby\".";
-	  
-	  */
-	  /*
-	  $db = JDatabase::getInstance(dbOptions());
-	  $query = $db->getQuery(true);
-	  $dbFields = array_keys($this->fields);
-	  $dbFields[] = "site_id";
-	  $query->select($db->quoteName($dbFields));
-	  $query->from("Site");
-	  $query->where("person_id = " . (int)userID());
+      $this->sites = $this->siteHelper->getSites();
 
-	  $db->setQuery($query);
-	  $this->sites = $db->loadAssocList("site_id");
-	  */
-	  $this->sites = $this->siteHelper->getSites();
-
-	  /*
-	  $this->siteCount = array();
-
-	  foreach($this->sites as $site_id => $site){
-		$query = $db->getQuery(true);
-		$query->select("COUNT(*)");
-		$query->from("Photo");
-		$query->where("site_id = " . $site_id);
-		$db->setQuery($query);
-		$numPhotos = $db->loadResult();
-		$this->siteCount[$site_id] = $numPhotos;
-	  }
-	  */
+	  
 	  $this->siteCount = $this->siteHelper->getSitePhotoCount();
 	  
 	  // Projects additions.
 	  $this->projecthelp = "All projects which this site and this user are members of.";
-	  //$this->projects = array();
 	  
 	  $this->userprojects = $this->siteHelper->getUserProjects();
 	  
 	  // For each user project get any additional data required
-	  //$this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
 	  $this->projectsitedata = $this->siteHelper->getProjectSiteData();
 	  
 	  $this->projectsitedataJSON = $this->siteHelper->getProjectSiteDataJSON();
 	  
-	  /*
-	  $this->projectsitedataJSON = array();
 	  
-	  $project_ids = array_keys($this->userprojects);
-	  foreach ($project_ids as $project_id ) {
-		  $strucs = array_column( array_filter($this->projectsitedata, function ($element) use ($project_id) {
-				return ($element["project_id"] == $project_id);
-			}), "struc");
-			if (count($strucs) > 0 ) {
-				$this->projectsitedataJSON[$project_id] = json_encode($strucs);
-			}
-	  }
-	  */
-		/*
-	  foreach($this->sites as $site_id => $site){
-		// Get list of projects this site is part of and which this user is a user of
-		$query = $db->getQuery(true);
-		$query->select("DISTINCT P.project_id AS proj_id, P.project_prettyname AS proj_prettyname");
-		$query->from("Project P");
-		$query->innerJoin("ProjectSiteMap PSM ON P.project_id = PSM.project_id");
-		$query->where("PSM.site_id = " . $site_id);
-		$query->where("PSM.end_time is NULL" );
-		$db->setQuery($query);
-		$siteprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
-		
-		// Remove any siteprojects where this user is not a member of the project.
-		$intersectprojects = array_intersect_key($this->userprojects, $siteprojects);
-		
-		$this->projects[$site_id] = array_keys($intersectprojects);
-		
-	  }
-	  */
 	  $this->projects = $this->siteHelper->getProjects();
 	  
 	  // Display the view

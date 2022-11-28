@@ -26,15 +26,9 @@ class BioDivViewKioskQuizStandard extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "BioDivViewKioskQuizStandard::display called" );
-		
 		// Assign data to the view
 		$this->personId = (int)userID();
 		
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskquizstandard");
-
-
 		if ( $this->personId ) {
 			$app = JFactory::getApplication();
 			$input = $app->input;
@@ -97,9 +91,6 @@ class BioDivViewKioskQuizStandard extends JViewLegacy
 			// Get the gold standard sequences for this topic
 			$this->sequenceIds = getTrainingSequences($this->topicId, 4);
 			
-			$errStr = print_r ( $this->sequenceIds, true );
-			//error_log ( "Got topic sequences: " . $errStr );
-			
 			// Get the details including correct species
 			$this->sequences = array();
 			foreach ( $this->sequenceIds as $seqId ) {
@@ -124,7 +115,6 @@ class BioDivViewKioskQuizStandard extends JViewLegacy
 			$this->dkId = $this->kioskSpecies->getDkId();
 			$this->otherId = $this->kioskSpecies->getOtherId();
 		}
-		//error_log ( "About to call template" );
 		
 		// Display the view
 		parent::display($tpl);

@@ -26,11 +26,6 @@ class BioDivViewPinResource extends JViewLegacy
 
     public function display($tpl = null) 
     {
-		error_log ( "LikeResource display function called" );
-		
-		// Get all the text snippets for this view in the current language
-		$this->translations = getTranslations("likeresource");
-		
 		$this->personId = userID();
 		
 		$this->resourceId = null;

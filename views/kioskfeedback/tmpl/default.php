@@ -13,7 +13,7 @@ error_log ( "Kiosk feedback template called" );
 print '<div class="col-md-12">';
 print '<div class="col-md-12">';
 
-print '<h1 class="text-center lower_heading"><strong>'.$this->translations['thankyou']['translation_text'] . '</strong></h1>';
+print '<h1 class="text-center lower_heading"><strong>'.JText::_("COM_BIODIV_KIOSKFEEDBACK_THANKYOU") . '</strong></h1>';
 	
 
 if ( $this->all_animals ) {
@@ -46,18 +46,18 @@ if ( $this->all_animals ) {
 	
 		
 	if ( $numRows == 1 ) {
-		print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
+		print '<h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKFEEDBACK_YOU_SPOTTED") . '</h2>';
 		
 		print "<div class='row spaced_row'>";
 	}
 	else if ( $numPerRow > 6 ) {
-		print '<h2 class="text-center classify_heading">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
+		print '<h2 class="text-center classify_heading">'.JText::_("COM_BIODIV_KIOSKFEEDBACK_YOU_SPOTTED") . '</h2>';
 		
 		//print "<div class='row half_spaced_row'>";
 		//print '</div>'; // row spaced_row
 	}
 	else {
-		print '<h2 class="text-center">'.$this->translations['you_spotted']['translation_text'] . '</h2>';
+		print '<h2 class="text-center">'.JText::_("COM_BIODIV_KIOSKFEEDBACK_YOU_SPOTTED") . '</h2>';
 	}
 		
 	for ( $i=0; $i<$numRows; $i++ ) {
@@ -246,15 +246,15 @@ if ( $this->all_animals ) {
 	
 }
 
-print '<h2 class="text-center" style="margin-top:5vh;">'.$this->translations['help_sci']['translation_text'] . '</h1>';
+print '<h2 class="text-center" style="margin-top:5vh;">'.JText::_("COM_BIODIV_KIOSKFEEDBACK_HELP_SCI") . '</h1>';
 
 
 print '<div class="col-md-4 col-md-offset-2">';
-print '	<button id="classify_again" class="btn btn-lg btn-block btn-success h2 control_btn" >'.$this->translations['classify_again']['translation_text'].'</button>';
+print '	<button id="classify_again" class="btn btn-lg btn-block btn-success h2 control_btn" >'.JText::_("COM_BIODIV_KIOSKFEEDBACK_CLASSIFY_AGAIN").'</button>';
 print '</div>';
 
 print '<div class="col-md-4">';
-print '	<button class="btn btn-lg btn-block btn-success h2 control_btn back_to_home" >'.$this->translations['home']['translation_text'].'</button>';
+print '	<button class="btn btn-lg btn-block btn-success h2 control_btn back_to_home" >'.JText::_("COM_BIODIV_KIOSKFEEDBACK_HOME").'</button>';
 print '</div>';
 
 print '</div>'; // col-12

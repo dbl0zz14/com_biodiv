@@ -26,12 +26,7 @@ class BioDivViewUpload extends JViewLegacy
 
     public function display($tpl = null) 
     {
-	  //error_log ( "Upload view display called " );
-	  
 	  $app = JFactory::getApplication();
-	  
-	  // Get all the text snippets for this view in the current language
-	  $this->translations = getTranslations("upload");
 	  
 	  // Get setting to determine whether camera deployment (or audio)
 	  $this->isCamera = getSetting("camera") == "yes";

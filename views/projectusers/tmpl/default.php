@@ -10,13 +10,13 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_PROJECTUSERS_LOGIN").'</div>';
 	
 }
 else if ( !$this->access ) {
 	
 	print '<div class="row">';
-	print '<div class="col-xs-12 col-sm-12 col-md-12 h4">'.$this->translations['no_access']['translation_text'].'</div>';
+	print '<div class="col-xs-12 col-sm-12 col-md-12 h4">'.JText::_("COM_BIODIV_PROJECTUSERS_NO_ACCESS").'</div>';
 	print '</div>';
 	
 }
@@ -25,9 +25,9 @@ else {
 	print '<div class="row">';
 	print '<div class="col-xs-12 col-sm-12 col-md-12">';
 	
-	print '<h2>'.$this->projectName . ' ' . $this->translations['project_users']['translation_text'] .'</h2>';
+	print '<h2>'.$this->projectName . ' ' . JText::_("COM_BIODIV_PROJECTUSERS_PROJECT_USERS") .'</h2>';
 	
-	print '<button type="button" class="btn btn-lg btn-primary" data-toggle="modal" data-target="#addUserModal">'.$this->translations['add_users']['translation_text'].'</button>';
+	print '<button type="button" class="btn btn-lg btn-primary" data-toggle="modal" data-target="#addUserModal">'.JText::_("COM_BIODIV_PROJECTUSERS_ADD_USERS").'</button>';
 	
 	if ( $this->userMessages ) {
 		
@@ -44,9 +44,9 @@ else {
 	print '<table class="table table-striped">';
 	print '<thead>';
 	print '<tr>';
-	print '<th>'.$this->translations['username']['translation_text'].'</th>';
-	print '<th>'.$this->translations['email']['translation_text'].'</th>';
-	print '<th>'.$this->translations['role']['translation_text'].'</th>';
+	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_USERNAME").'</th>';
+	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_EMAIL").'</th>';
+	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_ROLE").'</th>';
 	print '</tr>';
 	print '</thead>';
 	print '<tbody>';
@@ -78,18 +78,18 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.$this->translations['add_for']['translation_text'].' ' . $this->projectName.'</h4>';
+print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_PROJECTUSERS_ADD_FOR").' ' . $this->projectName.'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div>';
-print '     <h4>'.$this->translations['add_help']['translation_text'].'</h4>';
-print '     <label for="emailsInput">'.$this->translations['emails_label']['translation_text'].'</label>';
+print '     <h4>'.JText::_("COM_BIODIV_PROJECTUSERS_ADD_HELP").'</h4>';
+print '     <label for="emailsInput">'.JText::_("COM_BIODIV_PROJECTUSERS_EMAILS_LABEL").'</label>';
 print '     <textarea id="emailsInput" name="emailsInput" ></textarea>';
 print '     </div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" id="saveUsers" class="btn btn-primary" data-dismiss="modal">'.$this->translations['save']['translation_text'].'</button>';
-print '        <button type="button" class="btn" data-dismiss="modal">'.$this->translations['cancel']['translation_text'].'</button>';
+print '        <button type="button" id="saveUsers" class="btn btn-primary" data-dismiss="modal">'.JText::_("COM_BIODIV_PROJECTUSERS_SAVE").'</button>';
+print '        <button type="button" class="btn" data-dismiss="modal">'.JText::_("COM_BIODIV_PROJECTUSERS_CANCEL").'</button>';
 print '      </div>';
 	  	  
 print '    </div>';

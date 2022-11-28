@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 <?php
 
 if ( !$this->personId ) {
-	print '<a type="button" href="'.$this->translations['dash_page']['translation_text'].'" class="list-group-item btn btn-block" >'.$this->translations['login']['translation_text'].'</a>';
+	print '<a type="button" href="'.JText::_("COM_BIODIV_DASHLIKES_DASH_PAGE").'" class="list-group-item btn btn-block" >'.JText::_("COM_BIODIV_DASHLIKES_LOGIN").'</a>';
 }
 else {
 	print '<div class="row" style="margin-bottom:5px">';
@@ -22,7 +22,7 @@ else {
 	
 	// Create 3 dropdowns of filter options: site, species and year
 	
-	print "<label for='site_filter'>".$this->translations['site_filter']['translation_text']."</label>";
+	print "<label for='site_filter'>".JText::_("COM_BIODIV_DASHLIKES_SITE_FILTER")."</label>";
 		
 	print "<select id = 'site_select' name = 'site_filter' class = 'form-control likes_select'>";
 	
@@ -41,7 +41,7 @@ else {
 	print '</div>';
 	print '<div class="col-xs-12 col-sm-12 col-md-2">';
 	
-	print "<label for='year_filter'>".$this->translations['year_filter']['translation_text']."</label>";
+	print "<label for='year_filter'>".JText::_("COM_BIODIV_DASHLIKES_YEAR_FILTER")."</label>";
 		
 	print "<select id = 'year_select' name = 'year_filter' class = 'form-control likes_select'>";
 	
@@ -61,7 +61,7 @@ else {
 	print '<div class="col-xs-12 col-sm-12 col-md-2">';
 	
 	
-	print "<label for='species_filter'>".$this->translations['species_filter']['translation_text']."</label>";
+	print "<label for='species_filter'>".JText::_("COM_BIODIV_DASHLIKES_SPECIES_FILTER")."</label>";
 		
 	print "<select id = 'species_select' name = 'species_filter' class = 'form-control likes_select'>";
 	
@@ -85,7 +85,7 @@ else {
 	
 	// Create dropdown of options
 	
-	print "<label for='sort'>".$this->translations['sort_by']['translation_text']."</label>";
+	print "<label for='sort'>".JText::_("COM_BIODIV_DASHLIKES_SORT_BY")."</label>";
 		
 	print "<select id = 'sort_select' name = 'sort' class = 'form-control likes_select'>";
 	
@@ -110,7 +110,7 @@ else {
 	
 	// Create dropdown of options
 	
-	print "<label for='numperpage'>".$this->translations['num_per_page']['translation_text']."</label>";
+	print "<label for='numperpage'>".JText::_("COM_BIODIV_DASHLIKES_NUM_PER_PAGE")."</label>";
 		
 	print "<select id = 'num_select' name = 'numperpage' class = 'form-control likes_select'>";
 	
@@ -138,13 +138,7 @@ else {
 		
 			print '<div class="row" style="margin-bottom:5px">';
 			
-			error_log ( "likes template: totalLikes = " . $this->totalLikes );
-
-			error_log ( "likes template: numPerPage = " . $this->numPerPage );
-				
 			$numPages = ceil($this->totalLikes/$this->numPerPage);
-
-			error_log ("likes template: num pages = " . $numPages );
 
 			// This bit gives a max pagination displayed system ie automatically move the pages on
 			$numPagesDisplayed = 16;
@@ -204,21 +198,13 @@ else {
 	
 	// ---------------------- The likes
 	
-	error_log ( "Num likes = " . $this->numLikes );
-	
 	for ( $i=0; $i<$this->numLikes; $i++ ) {
 		
 		$currentLike = $this->likesArray[$i];
 		
-		error_log ( "Liked sequence: " . $currentLike['sequence_id'] );
-		
 		$seq = new Sequence($currentLike['sequence_id']);
 		
-		error_log ("Sequence created");
-		
 		$mediafile = array_values($seq->getMediaFiles())[0];
-		
-		error_log ("Media file: " . $mediafile);
 		
 		if ( $i%3 == 0 ) {
 			print '<div class="row">';
@@ -235,24 +221,22 @@ else {
 			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><video src = '" . $mediafile . "' width='100%'></video></button>";
 		}
 		else if ( $seq->getMedia() == "audio" ) {
-			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . $this->translations['review']['translation_text'] . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
+			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . JText::_("COM_BIODIV_DASHLIKES_REVIEW") . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
 		}
 		
 		print '<p></p>';
-		print '<div style="word-wrap: break-word;">' . $this->translations['filename']['translation_text'] . ' ' . $currentLike['upload_filename'] . '</div>';
+		print '<div style="word-wrap: break-word;">' . JText::_("COM_BIODIV_DASHLIKES_FILENAME") . ' ' . $currentLike['upload_filename'] . '</div>';
 		print '<p></p>';
-		print '<p>' . $this->translations['site']['translation_text'] . ' ' . $seq->getSiteName() . '</p>';
-		print '<p>' . $this->translations['taken']['translation_text'] . ' ' . $currentLike['taken'] . '</p>';
-		print '<p>' . $this->translations['liked']['translation_text'] . ' ' . $currentLike['like_time'] . '</p>';
+		print '<p>' . JText::_("COM_BIODIV_DASHLIKES_SITE") . ' ' . $seq->getSiteName() . '</p>';
+		print '<p>' . JText::_("COM_BIODIV_DASHLIKES_TAKEN") . ' ' . $currentLike['taken'] . '</p>';
+		print '<p>' . JText::_("COM_BIODIV_DASHLIKES_LIKED") . ' ' . $currentLike['like_time'] . '</p>';
 		if ( $this->likedByOthers == 1 ) {
-			print '<p>' . $this->translations['species_others']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
+			print '<p>' . JText::_("COM_BIODIV_DASHLIKES_SPECIES_OTHERS") . ' ' . $currentLike['species'] . '</p>';
 		}
 		else {
-			print '<p>' . $this->translations['species']['translation_text'] . ' ' . $currentLike['species'] . '</p>';
+			print '<p>' . JText::_("COM_BIODIV_DASHLIKES_SPECIES") . ' ' . $currentLike['species'] . '</p>';
 		}
 		
-		
-		error_log ("Buttons printed" );
 		
 		print '</div>'; // well
 		print '</div>'; // col-4
@@ -270,15 +254,7 @@ else {
 		
 		print '<div class="row">';
 	
-		//print '<div class="col-xs-12 col-sm-12 col-md-12">';
-		
-		error_log ( "likes template: totalLikes = " . $this->totalLikes );
-
-		error_log ( "likes template: numPerPage = " . $this->numPerPage );
-			
 		$numPages = ceil($this->totalLikes/$this->numPerPage);
-
-		error_log ("likes template: num pages = " . $numPages );
 
 		// This bit gives a max pagination displayed system ie automatically move the pages on
 		$numPagesDisplayed = 16;

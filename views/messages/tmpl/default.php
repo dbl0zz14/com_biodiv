@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_MESSAGES_LOGIN").'</div>';
 }
 else {
 	
@@ -38,7 +38,7 @@ else {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs">'.$this->translations['subheading']['translation_text'].'</small>';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_MESSAGES_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_MESSAGES_SUBHEADING").'</small>';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -58,11 +58,11 @@ else {
   
 
 	print '<div class="btn btn-info inboxTab active ">';
-	print $this->translations['inbox']['translation_text'];
+	print JText::_("COM_BIODIV_MESSAGES_INBOX");
 	print '</div>';
 	
 	print '<div class="btn btn-info sentMessagesTab  ">';
-	print $this->translations['sent_messages']['translation_text'];
+	print JText::_("COM_BIODIV_MESSAGES_SENT_MESSAGES");
 	print '</div>';
 	
 	print '</div>'; // btn-group
@@ -73,7 +73,7 @@ else {
 	
 	print '<div class="col-md-6 col-sm-4 col-xs-4 text-right">';
 	print '<button class="btn btn-primary" data-toggle="modal" data-target="#messageModal">';
-	print $this->translations['new_message']['translation_text'];
+	print JText::_("COM_BIODIV_MESSAGES_NEW_MESSAGE");
 	print '</button>';
 	print '</div>';
 	
@@ -96,7 +96,7 @@ else {
 	print '    <div class="modal-content">';
 	print '      <div class="modal-header">';
 	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	print '        <h4 class="modal-title">'.$this->translations['new_message']['translation_text'].'</h4>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_MESSAGES_NEW_MESSAGE").'</h4>';
 	print '      </div>';
 
 	print '	    <form id="newMessageForm" >';
@@ -105,23 +105,23 @@ else {
 
 	print '       <input type="hidden" name="sender" value="' . $this->personId . '"/>';
 
-	print '<h5><label for="recipientSelect">'.$this->translations['to']['translation_text'].'</label></h5>';
+	print '<h5><label for="recipientSelect">'.JText::_("COM_BIODIV_MESSAGES_TO").'</label></h5>';
 	print '<select id="recipientSelect" name="recipientSelect" class="form-control">';
-	print '<option value="" disabled selected hidden>'.$this->translations['sel_person']['translation_text'].'...</option>';
+	print '<option value="" disabled selected hidden>'.JText::_("COM_BIODIV_MESSAGES_SEL_PERSON").'...</option>';
 	foreach ( $this->recipients as $id=>$person ) {
 		if ( $id == $this->personId ) continue;
 		print '<option value="'.$id.'" >'.$person->name.'</option>';
 	}
 	print '</select>';
 
-	print '<h5><label for="messageText">'.$this->translations['message']['translation_text'].'</label></h5>';
+	print '<h5><label for="messageText">'.JText::_("COM_BIODIV_MESSAGES_MESSAGE").'</label></h5>';
 	print '<textarea id="messageText" name="messageText" rows="10" cols="50"></textarea>'; 
 
 	print '<h5><div id="messageMsg"></div></h5>';
 	print '     </div>';
 	print '	  <div class="modal-footer">';
-	print '        <button id="sendMessageBtn" type="submit" class="btn btn-primary" >'.$this->translations['send']['translation_text'].'</button>';
-	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button>';
+	print '        <button id="sendMessageBtn" type="submit" class="btn btn-primary" >'.JText::_("COM_BIODIV_MESSAGES_SEND").'</button>';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_MESSAGES_CLOSE").'</button>';
 	print '      </div>';
 	print '     </form>';
 			  
@@ -141,7 +141,7 @@ else {
 
 	print '      <div class="modal-header">';
 	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	print '        <h4 class="modal-title">'.$this->translations['new_message']['translation_text'].'</h4>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_MESSAGES_NEW_MESSAGE").'</h4>';
 	print '      </div>';
 
 	print '	    <form id="replyMessageForm" >';
@@ -156,7 +156,7 @@ else {
 	//print '<div class="row">';
 	//print '<div class="col-md-12">';
 
-	print '<h5><label for="replyText">'.$this->translations['message']['translation_text'].'</label></h5>';
+	print '<h5><label for="replyText">'.JText::_("COM_BIODIV_MESSAGES_MESSAGE").'</label></h5>';
 	print '<textarea id="replyText" name="replyText" rows="10" cols="50"></textarea>'; 
 
 	//print '</div>'; // col-12
@@ -168,8 +168,8 @@ else {
 
 
 	print '	  <div class="modal-footer">';
-	print '        <button id="replyMessageBtn" type="submit" class="btn btn-primary" >'.$this->translations['send']['translation_text'].'</button>';
-	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button>';
+	print '        <button id="replyMessageBtn" type="submit" class="btn btn-primary" >'.JText::_("COM_BIODIV_MESSAGES_SEND").'</button>';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_MESSAGES_CLOSE").'</button>';
 	print '      </div>';
 
 
@@ -191,7 +191,7 @@ else {
 
 	print '      <div class="modal-header">';
 	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	print '        <h4 class="modal-title">'.$this->translations['report_message']['translation_text'].'</h4>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_MESSAGES_REPORT_MESSAGE").'</h4>';
 	print '      </div>';
 
 	print '	    <form id="reportMessageForm" >';
@@ -201,17 +201,10 @@ else {
 	print '       <input type="hidden" name="reportMessage" value="1"/>';
 	print '       <input type="hidden" name="reportedMsgId" value=""/>';
 
-	//print '       <input id="reportedPerson" type="hidden" name="reportedPerson" value=""/>';
-
-
-	//print '<div class="row">';
-	//print '<div class="col-md-12">';
-
-	print '<h5><label for="reportText">'.$this->translations['reason']['translation_text'].'</label></h5>';
+	
+	print '<h5><label for="reportText">'.JText::_("COM_BIODIV_MESSAGES_REASON").'</label></h5>';
 	print '<textarea id="reportText" name="reportText" rows="10" cols="50"></textarea>'; 
 
-	//print '</div>'; // col-12
-	//print '</div>'; // row
 			
 
 	print '<h5><div id="reportMessageMsg"></div></h5>';
@@ -219,8 +212,8 @@ else {
 
 
 	print '	  <div class="modal-footer">';
-	print '        <button id="reportMessageBtn" type="submit" class="btn btn-primary" >'.$this->translations['send_report']['translation_text'].'</button>';
-	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.$this->translations['close']['translation_text'].'</button>';
+	print '        <button id="reportMessageBtn" type="submit" class="btn btn-primary" >'.JText::_("COM_BIODIV_MESSAGES_SEND_REPORT").'</button>';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_MESSAGES_CLOSE").'</button>';
 	print '      </div>';
 
 
@@ -240,7 +233,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

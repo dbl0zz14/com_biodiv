@@ -27,8 +27,7 @@ class BioDivViewTrainingTopic extends JViewLegacy
   
   public function display($tpl = null) 
   {
-    //error_log("TrainingTopic view - display called");
-	
+    
 	$person_id = (int)userID();
     
 	$person_id or die("No person_id");
@@ -46,34 +45,20 @@ class BioDivViewTrainingTopic extends JViewLegacy
 	// New topic so unset the db write flag
 	$app->setUserState('com_biodiv.written', '0');
 	
-	// Get all the text snippets for this view in the current language
-	$this->translations = getTranslations("training");
-	
-	// Get a set of sequences and correct answers for this topic.
-	//$this->sequences = getTrainingSequences($this->topic_id);
-	
 	// Get the species lists for this topic
 	$this->filters = getTopicFilters($this->topic_id);
 	foreach ( $this->filters as $filterId=>$filter ) {
 		$this->filters[$filterId]['species'] = getSpecies ( $filterId, false );
 	}
 	
-	//error_log("TrainingTopic view - about to create MediaCarousel");
-	
 	// Create the classes used to generate the carousel html code
 	$this->mediaCarousel = new MediaCarousel();
-	
-	error_log("TrainingTopic view - about to create SpeciesCarousel");
 	
 	$this->speciesCarousel = new SpeciesCarousel();
 	$this->speciesCarousel->setFilters ( $this->filters );
 	
-	error_log("TrainingTopic view - about to get sequences");
-	
 	// Get the gold standard sequences for this topic
 	$this->sequences = getTrainingSequences($this->topic_id, 8);
-	
-	//error_log("first seq id = " . $this->sequences[0]);
 	
 	// And set up the first one
 	$this->currentSequence = null;
@@ -81,9 +66,7 @@ class BioDivViewTrainingTopic extends JViewLegacy
 		$this->currentSequence = getTrainingSequence($this->sequences[0], $this->topic_id);
 	}
 	
-	//error_log("TrainingTopic view - about to call parent display");
-	
-    // Display the view
+	// Display the view
     parent::display($tpl);
   }
 }

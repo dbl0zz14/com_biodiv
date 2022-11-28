@@ -29,10 +29,7 @@ class BioDivViewSurvey extends JViewLegacy
     $person_id = (int)userID();
     $person_id or die("No person_id");
 
-    // Get all the survey text snippets
-	$this->translations = getTranslations("survey");
-	
-	$app = JFactory::getApplication();
+    $app = JFactory::getApplication();
     
 	$this->surveyId = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.survey', 'survey', 0);

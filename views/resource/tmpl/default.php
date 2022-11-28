@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 
 if ( !$this->personId ) {
 	// Please log in button
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCE_LOGIN").'</div>';
 	
 }
 
@@ -45,9 +45,9 @@ else if ( $this->resourceId ) {
 				
 	print '<div class="col-md-2 col-sm-4 col-xs-4">';
 
-	error_log ( "Back = " . $this->translations['back']['translation_text'] );
+	error_log ( "Back = " . JText::_("COM_BIODIV_RESOURCE_BACK") );
 	print '<button class="btn btn-primary backBtn" >';
-	print '<i class="fa fa-arrow-left"></i> ' . $this->translations['back']['translation_text'];
+	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_RESOURCE_BACK");
 	print '</button>';
 	
 	print '</div>'; // col-1
@@ -59,7 +59,7 @@ else if ( $this->resourceId ) {
 	print '<h2>';
 	print '<div class="row">';
 	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.$this->translations['heading']['translation_text'].'</span> <small class="hidden-xs hidden-sm">'.$this->translations['subheading']['translation_text'].'</small> ';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_RESOURCE_HEADING").'</span> <small class="hidden-xs hidden-sm">'.JText::_("COM_BIODIV_RESOURCE_SUBHEADING").'</small> ';
 	print '</div>'; // col-10
 	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
@@ -78,7 +78,7 @@ else if ( $this->resourceId ) {
 
 }
 else {
-	print ('<div class="col-md-12" >'.$this->translations['no_file']['translation_text'].'</div>');
+	print ('<div class="col-md-12" >'.JText::_("COM_BIODIV_RESOURCE_NO_FILE").'</div>');
 }
 
 
@@ -89,7 +89,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header">';
 print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

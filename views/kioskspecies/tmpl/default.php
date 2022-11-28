@@ -21,7 +21,7 @@ if ( !$this->person_id ) {
 	}
 	
 	if ( $this->photoAttribution ) {
-		print '<div class="image_attribution">' . $this->translations['species_image']['translation_text'] . ' ' . $this->photoAttribution . '</div>';
+		print '<div class="image_attribution">' . JText::_("COM_BIODIV_KIOSKSPECIES_SPECIES_IMAGE") . ' ' . $this->photoAttribution . '</div>';
 	}
 
 

@@ -30,9 +30,6 @@ class BioDivViewWildSpace extends JViewLegacy
 		//($person_id = (int)userID()) or die("No person_id");
 		$app = JFactory::getApplication();
 
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("wildspace");
-		
 		$this->personId = userID();
 		
 		$this->allSpecies = array();

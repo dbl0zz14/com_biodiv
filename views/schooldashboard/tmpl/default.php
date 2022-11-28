@@ -10,33 +10,33 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.$this->translations['login']['translation_text'].'</div>';
+	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_LOGIN").'</div>';
 }
 else if ( !$this->schoolId ) {
-	print '<h2>'.$this->translations['no_school']['translation_text'].'</h2>';
+	print '<h2>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_NO_SCHOOL").'</h2>';
 }
 else if ( $this->firstLoad ) {
 	
 	print '<div class="row">';
 	print '<div class="col-md-12">';
 
-	print '<h1 class="text-center">'.$this->translations['welcome']['translation_text'].'</h1>';
+	print '<h1 class="text-center">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_WELCOME").'</h1>';
 	
-	print '<h2 class="text-center bigSpaced">'.$this->translations['you_are']['translation_text'].'</h2>';
+	print '<h2 class="text-center bigSpaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_YOU_ARE").'</h2>';
 
 	
 	if ( ($this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE) or ($this->mySchoolRole == Biodiv\SchoolCommunity::ECOLOGIST_ROLE) ) {
 
-		print '<h5 class="text-center">'.$this->translations['policies_text']['translation_text'].'</h5>';
+		print '<h5 class="text-center">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_POLICIES_TEXT").'</h5>';
 			
-		print '<div class="text-center"><a href="'.$this->translations['policies_link']['translation_text'].'" target="_blank" rel="noopener noreferrer" class="btn btn-primary btnInSpace">'.
-			$this->translations['policies_btn']['translation_text'].'</a></div>';
+		print '<div class="text-center"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_POLICIES_LINK").'" target="_blank" rel="noopener noreferrer" class="btn btn-primary btnInSpace">'.
+			JText::_("COM_BIODIV_SCHOOLDASHBOARD_POLICIES_BTN").'</a></div>';
 	}
 	
 	
 	print '<div id="avatarArea">';
 	
-	print '<h3 class="text-center bigSpaced">'.$this->translations['choose_avatar']['translation_text'].'</h3>';
+	print '<h3 class="text-center bigSpaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_CHOOSE_AVATAR").'</h3>';
 	
 	//print '<div class="row">';
 	
@@ -69,19 +69,19 @@ else if ( $this->firstLoad ) {
 		print '</div>'; // row
 	}
 	
-	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.$this->translations['save_avatar']['translation_text'].'</button>';
+	print '<button id="saveAvatar" class="btn btn-primary btn-lg spaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_SAVE_AVATAR").'</button>';
 	
 	//print '</div>'; // row
 	print '</div>'; // avatarArea
 	
 	if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['dash_page']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_DASH_PAGE").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 	else if ( $this->mySchoolRole == Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['student_dash']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_STUDENT_DASH").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 	else if ( $this->mySchoolRole == Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.$this->translations['ecol_dash']['translation_text'].'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.$this->translations['dashboard']['translation_text'].'</button></a></div>';
+		print '<div id="goToDash" class="text-center" style="display:none"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_ECOL_DASH").'"><button class="btn btn-primary btn-lg studentDashboard bigSpaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_DASHBOARD").'</button></a></div>';
 	}
 
 		
@@ -91,25 +91,8 @@ else if ( $this->firstLoad ) {
 else {
 	
 	
-	// //print_r ( $this->badgeGroups );
-	// $param = new StdClass();
-	// $param->points = $this->myTotalPoints;
-	// $param->slogan = "Awesome Observer";
-	// $param->school = $this->schoolName;
-	// $param->username = Biodiv\SchoolCommunity::getUsername();
-	// //$param->avatar = "http://localhost/rhombus/images/Projects/BES/avatars/dance-147030_640.png";
-	// $param->avatar = $this->schoolUser->avatar;
-	
-	
 	print '<div class="row">';
 	if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		// print '<div class="col-md-2 col-sm-12 col-xs-12">'; 
-	
-		// Biodiv\SchoolCommunity::generateNav("schooldashboard");
-		
-		// print '</div>';
-		
-		// print '<div class="col-md-10 col-sm-12 col-xs-12">'; 
 		
 		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
@@ -132,16 +115,13 @@ else {
 	
 	print '<div id="displayArea">';
 	
-	// if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-		// print '<h1 class="teacherWelcome greenHeading"  >'.$this->translations['welcome']['translation_text'].'</h1>';
-	// }
 	if ( $this->mySchoolRole == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-		$heading = $this->translations['welcome']['translation_text'];
+		$heading = JText::_("COM_BIODIV_SCHOOLDASHBOARD_WELCOME");
 		$subheading = "";
 	}
 	else {
-		$heading = $this->translations['heading']['translation_text'];
-		$subheading = $this->translations['subheading']['translation_text'];
+		$heading = JText::_("COM_BIODIV_SCHOOLDASHBOARD_HEADING");
+		$subheading = JText::_("COM_BIODIV_SCHOOLDASHBOARD_SUBHEADING");
 	}
 	
 	//print '<h2>';
@@ -154,7 +134,7 @@ else {
 	if ( $this->kioskUrl ) {
 		
 		print '<a href="'.$this->kioskUrl.'" >';
-		print '<button class="btn btn-success projectBtn">'.$this->translations['to_project']['translation_text'].'</button>';
+		print '<button class="btn btn-success projectBtn">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_TO_PROJECT").'</button>';
 		print '</a>';
 	}
 	print '</div>'; // col-3
@@ -188,8 +168,6 @@ else {
 		
 	print '<th></th>';
 	print '<th></th>';
-	//print '<th>'.$this->translations['school_total']['translation_text'].'</th>';
-	//print '<th class="text-right">'.$this->schoolPoints.'</th>';
 	foreach ( $this->modules as $module ) {
 
 		print '<th class="text-center"><img class="img-responsive moduleIcon'.$module->name.'" src="'.$module->icon.'"></th>';
@@ -223,7 +201,7 @@ else {
 	print '<tr class="schoolGroupData">';
 		
 	print '<td></td>';
-	print '<td>'.$this->translations['totals']['translation_text'].'</td>';
+	print '<td>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_TOTAL").'</td>';
 	
 	foreach ( $this->moduleIds as $moduleId ) {
 		
@@ -239,7 +217,7 @@ else {
 	print '<tr class="schoolGroupData">';
 		
 	print '<td></td>';
-	print '<td>'.$this->translations['awards']['translation_text'].'</td>';
+	print '<td>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_AWARDS").'</td>';
 	
 	foreach ( $this->moduleIds as $moduleId ) {
 		
@@ -274,12 +252,12 @@ else {
 		print '<div class="panel panel-default yellowPanel ">';
 		print '<div class="panel-body">';
 	
-		print '<h3 class="panelHeading">'.$this->translations['congrats']['translation_text'].'</h3>';
+		print '<h3 class="panelHeading">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_CONGRATS").'</h3>';
 		
 		print '<div class="row">';
 		
 		print '<div class="col-md-7">';
-		print '<p class="spaced">'.$this->translations['school_reached']['translation_text'].' '.$this->newAward->awardName. '</p>';
+		print '<p class="spaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_SCHOOL_REACHED").' '.$this->newAward->awardName. '</p>';
 		print '</div>'; // col-7
 		
 		print '<div class="col-md-5">';
@@ -302,12 +280,12 @@ else {
 		print '<div class="panel panel-default yellowPanel">';
 		print '<div class="panel-body">';
 	
-		print '<h3 class="panelHeading">'.$this->translations['congrats']['translation_text'].'</h3>';
+		print '<h3 class="panelHeading">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_CONGRATS").'</h3>';
 		
 		print '<div class="row">';
 		
 		print '<div class="col-md-7">';
-		print '<p class="spaced">'.$this->translations['school_reached']['translation_text'].' '.$this->existingAward->awardName. '</p>';
+		print '<p class="spaced">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_SCHOOL_REACHED").' '.$this->existingAward->awardName. '</p>';
 		print '</div>'; // col-7
 		
 		print '<div class="col-md-5">';
@@ -331,22 +309,22 @@ else {
 		print '<div class="panel-body">';
 		
 		$imgSrc = $this->modules[$targetModule]->white_icon;
-		print '<div class="h3 panelHeading"><img class="img-responsive targetModuleIcon" src="'.$imgSrc.'"> '.$this->schoolPoints[$targetModule].' '.$this->translations['points']['translation_text'].'</div>';
+		print '<div class="h3 panelHeading"><img class="img-responsive targetModuleIcon" src="'.$imgSrc.'"> '.$this->schoolPoints[$targetModule].' '.JText::_("COM_BIODIV_SCHOOLDASHBOARD_POINTS").'</div>';
 		
-		print '<p>'.$this->translations['to_reach']['translation_text'].' '.$this->targetAward->awardName. ' '.$this->translations['school_needs']['translation_text'];
+		print '<p>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_TO_REACH").' '.$this->targetAward->awardName. ' '.JText::_("COM_BIODIV_SCHOOLDASHBOARD_SCHOOL_NEEDS");
 		
-		print ' <strong>'.$this->targetAward->pointsNeeded.' '.$this->translations['points']['translation_text'].'</strong>';
+		print ' <strong>'.$this->targetAward->pointsNeeded.' '.JText::_("COM_BIODIV_SCHOOLDASHBOARD_POINTS").'</strong>';
 		
-		print ' '.$this->translations['you_help']['translation_text'].'</p>';
+		print ' '.JText::_("COM_BIODIV_SCHOOLDASHBOARD_YOU_HELP").'</p>';
 		
 		if ( Biodiv\SchoolCommunity::isStudent() ) {
-			print '<div class="text-center"><a href="'.$this->translations['badges_link']['translation_text'].'" >';
+			print '<div class="text-center"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_BADGES_LINK").'" >';
 		}
 		else {
-			print '<div class="text-center"><a href="'.$this->translations['activity_link']['translation_text'].'" >';
+			print '<div class="text-center"><a href="'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_ACTIVITY_LINK").'" >';
 		}
 	
-		print '<button class="btn btn-default btn-lg">'.$this->translations['help_get']['translation_text'].'</button>';
+		print '<button class="btn btn-default btn-lg">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_HELP_GET").'</button>';
 		
 		print '</a></div>';
 		
@@ -380,7 +358,7 @@ else {
 	
 	print '<div class="row">';
 	
-	print '<div class="col-md-12 h3 panelHeading">'.$this->translations['events_heading']['translation_text'].'</div>';
+	print '<div class="col-md-12 h3 panelHeading">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_EVENTS_HEADING").'</div>';
 	
 	print '</div>';
 
@@ -407,7 +385,6 @@ print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
 print '      <div class="modal-header text-right">';
 print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title">'.$this->translations['review']['translation_text'].'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
 print '	    <div id="helpArticle" ></div>';

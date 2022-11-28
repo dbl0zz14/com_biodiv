@@ -409,8 +409,8 @@ class BiodivSurvey {
 		if ( $this->responseOptions == null ) {
 			
 			$responseTrns = BiodivSurvey::getResponseTranslations();
-			$err_str = print_r ( $responseTrns, true );
-			error_log ( "Response translations: " . $err_str );
+			//$err_str = print_r ( $responseTrns, true );
+			//error_log ( "Response translations: " . $err_str );
 			
 			$db = JDatabase::getInstance(dbOptions());
 			

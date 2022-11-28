@@ -53,16 +53,13 @@ class BioDivViewKioskQuizResultsMulti extends JViewLegacy
 		$this->questions = json_decode($qs);
 		$this->answers = json_decode($as);
 		
-		// Get the text snippets - enables multilingual
-		$this->translations = getTranslations("kioskquizresults");
-
 		$this->errorMsg = null;
 
-		if ( !$this->personId ) $errorMsg = $this->translations['no_person']['translation_text'];
-		if ( !$this->projectId ) $errorMsg = $this->translations['no_project']['translation_text'];
-		if ( !$this->topicId ) $errorMsg = $this->translations['no_topic']['translation_text'];
-		if ( !$this->questions ) $errorMsg = $this->translations['no_questions']['translation_text'];
-		if ( !$this->answers ) $errorMsg = $this->translations['no_answers']['translation_text'];
+		if ( !$this->personId ) $errorMsg = JText::_("COM_BIODIV_KIOSKQUIZRESULTSMULTI_NO_PERSON");
+		if ( !$this->projectId ) $errorMsg = JText::_("COM_BIODIV_KIOSKQUIZRESULTSMULTI_NO_PROJECT");
+		if ( !$this->topicId ) $errorMsg = JText::_("COM_BIODIV_KIOSKQUIZRESULTSMULTI_NO_TOPIC");
+		if ( !$this->questions ) $errorMsg = JText::_("COM_BIODIV_KIOSKQUIZRESULTSMULTI_NO_QUESTIONS");
+		if ( !$this->answers ) $errorMsg = JText::_("COM_BIODIV_KIOSKQUIZRESULTSMULTI_NO_ANSWERS");
 		
 
 		
