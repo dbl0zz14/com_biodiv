@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.6.5</version>
+  <version>3.6.6</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images, video and audio from camera traps or other recording devices</description>
  
