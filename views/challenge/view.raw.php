@@ -29,7 +29,7 @@ class BioDivViewChallenge extends JViewLegacy
       // Assign data to the view
 	  $this->person_id = (int)userID();
 	  
-	  $this->text = JText::_("COM_BIODIV_CHALLENGE_CHALLENGE_REC");
+	  $this->text = JText::_("COM_BIODIV_TRAINING_CHALLENGE_REC");
 	 
 	  // Display the view
 	  parent::display($tpl);

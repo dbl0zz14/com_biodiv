@@ -25,7 +25,7 @@ foreach ( $this->projects as $project ) {
 	print BIODIV_COMPONENT;
 	print "'/>";
 	print "<input type='hidden' name='project_id' value='".$project->project_id."'/>";
-	print "<button class='image-btn project-btn' type='submit' data-tooltip='".JText::_("COM_BIODIV_PROJECTS_TOOLTIP")."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+	print "<button class='image-btn project-btn' type='submit' data-tooltip='".JText::_("COM_BIODIV_PROJECT_TOOLTIP")."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
 	print "</form>";
 	
 	print '<div class="project-title">';
@@ -57,10 +57,10 @@ foreach ( $this->projects as $project ) {
 	print 'aria-valuenow="' . $progress["numClassifications"] . '"  aria-valuemin="0" ';
 	print 'aria-valuemax="' . $progress["numSequences"] . '" style="width:' . $progress["percentComplete"] . '%">';
 	if ( $multiple_complete ) {
-		print JText::_("COM_BIODIV_PROJECTS_KEEP_SPOT") . $add_note;
+		print JText::_("COM_BIODIV_PROJECT_KEEP_SPOT") . $add_note;
 	}
 	else {
-		print '' . $progress["percentComplete"] . JText::_("COM_BIODIV_PROJECTS_FRAC_CLASS") . $add_note;
+		print '' . $progress["percentComplete"] . JText::_("COM_BIODIV_PROJECT_FRAC_CLASS") . $add_note;
 	}
 	print '</div>';
 	print '</div>';
@@ -90,7 +90,7 @@ foreach ( $this->projects as $project ) {
 	}
 }
 print '<div class="row">';
-print "* " . JText::_("COM_BIODIV_PROJECTS_PROJ_NOTE") ;
+print "* " . JText::_("COM_BIODIV_PROJECT_PROJ_NOTE") ;
 print '</div>';
 
 

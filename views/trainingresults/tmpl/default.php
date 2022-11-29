@@ -13,7 +13,7 @@ defined('_JEXEC') or die;
 
 	$num_sequences = count($this->sequences);
 
-	print "<h4 class='modal-title' id='resultsTitle'>".$this->topicName . " - " . JText::_("COM_BIODIV_TRAININGRESULTS_YOU_SCORED")." " . $this->score . "/" . $this->totalSpecies . " </h4>";
+	print "<h4 class='modal-title' id='resultsTitle'>".$this->topicName . " - " . JText::_("COM_BIODIV_TRAINING_YOU_SCORED")." " . $this->score . "/" . $this->totalSpecies . " </h4>";
 	print "<p></p>";
 	
 	print "<div class='row'>";	
@@ -74,7 +74,7 @@ defined('_JEXEC') or die;
 				if ( $animal_gender != 84 ) $animal_name .= " " . codes_getOptionTranslation($animal_gender);
 				$animal_name .= ")";
 			}
-			$correct_names_sec[] = $animal_name . " " . JText::_("COM_BIODIV_TRAININGRESULTS_SEC");
+			$correct_names_sec[] = $animal_name . " " . JText::_("COM_BIODIV_TRAINING_SEC");
 		}
 		
 		$user_names = array();
@@ -111,21 +111,21 @@ defined('_JEXEC') or die;
 			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><video src = '" . $mediafile . "' width='100%'></video></button>";
 		}
 		else if ( $seq->getMedia() == "audio" ) {
-			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . JText::_("COM_BIODIV_TRAININGRESULTS_REVIEW") . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
+			print "<button class='media-btn' data-seq_id='".$seq->getId()."'><i class='fa fa-play'></i> " . JText::_("COM_BIODIV_TRAINING_REVIEW") . "<audio src = '" . $mediafile . "' width='100%'></audio></button>";
 		}
 		
 		print "<div class='row'>";
 		
 		print "<div class='col-md-6'>";
 		
-		print "<h4>" . "  " . JText::_("COM_BIODIV_TRAININGRESULTS_YOU_SEL") . "</h4>";
+		print "<h4>" . "  " . JText::_("COM_BIODIV_TRAINING_YOU_SEL") . "</h4>";
 		print "<p id='user_" . $seq->getId() . "'>" . implode(', <br>', $user_names) . "</p>";
 		
 		print "</div>"; // col 6
 		
 		print "<div class='col-md-6'>";
 		
-		print "<h4>" . "  " . JText::_("COM_BIODIV_TRAININGRESULTS_EXP_SEL") . "</h4>";
+		print "<h4>" . "  " . JText::_("COM_BIODIV_TRAINING_EXP_SEL") . "</h4>";
 		print "<p id='expert_" . $seq->getId() . "'>" . implode(', <br>', $correct_names) . "</p>";
 		print "<p id='expert_sec_" . $seq->getId() . "'>" . implode(', <br>', $correct_names_sec) . "</p>";
 		
@@ -135,7 +135,7 @@ defined('_JEXEC') or die;
 		
 		if ( !$allCorrect ) {
 			print "<hr>";
-			print "<button class='btn btn-primary challenge-btn' id='challengeBtn_" . $seq->getId() . "' data-seq_id='".$seq->getId()."'>" . JText::_("COM_BIODIV_TRAININGRESULTS_CHALLENGE") . "</button>";
+			print "<button class='btn btn-primary challenge-btn' id='challengeBtn_" . $seq->getId() . "' data-seq_id='".$seq->getId()."'>" . JText::_("COM_BIODIV_TRAINING_CHALLENGE") . "</button>";
 			print "<div id='challengeDone_" . $seq->getId() . "'></div>";
 		}
 		
@@ -160,7 +160,7 @@ defined('_JEXEC') or die;
 	print "		  <input type='hidden' name='view' value='training'/>";
 	print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
 	print "		  <button class='btn btn-success btn-lg' type='submit' >".
-				  JText::_("COM_BIODIV_TRAININGRESULTS_FINISH")."</button>";
+				  JText::_("COM_BIODIV_TRAINING_FINISH")."</button>";
 	print "		  </form>";
 	print "</div>"; // col-3
 	
@@ -169,7 +169,7 @@ defined('_JEXEC') or die;
 	print "		  <input type='hidden' name='view' value='status'/>";
 	print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
 	print "		  <button class='btn btn-success btn-lg' type='submit' >".
-				  JText::_("COM_BIODIV_TRAININGRESULTS_SPOT")."</button>";
+				  JText::_("COM_BIODIV_TRAINING_SPOT")."</button>";
 	print "		  </form>";
 	print "</div>"; // col-3
 	
@@ -186,7 +186,7 @@ defined('_JEXEC') or die;
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAININGRESULTS_REVIEW"); ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAINING_REVIEW"); ?> </h4>
       </div>
       <div class="modal-body">
 	    <div id="media_carousel" ></div>
@@ -207,7 +207,7 @@ defined('_JEXEC') or die;
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAININGRESULTS_CHALLENGE"); ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAINING_CHALLENGE"); ?> </h4>
       </div>
       <div class="modal-body">
 		
@@ -216,24 +216,24 @@ defined('_JEXEC') or die;
 		<input id='currSequenceId' type='hidden' name='sequence_id' value=''/>
 		
 		<div class="form-group">
-		<label for="challenge_expert"><?php print JText::_("COM_BIODIV_TRAININGRESULTS_EXPERT"); ?></label>
+		<label for="challenge_expert"><?php print JText::_("COM_BIODIV_TRAINING_EXPERT"); ?></label>
 		<textarea class="form-control" id="challenge_expert" name="expert_species" rows="2" maxlength='200' readonly></textarea>
 		</div>
 		
 		<div class="form-group">
-		<label for="challenge_suggestion"><?php print JText::_("COM_BIODIV_TRAININGRESULTS_SUGGEST"); ?></label>
+		<label for="challenge_suggestion"><?php print JText::_("COM_BIODIV_TRAINING_SUGGEST"); ?></label>
 		<textarea class="form-control" id="challenge_suggestion" name="user_species" rows="2" maxlength='200' ></textarea>
 		</div>
 		
 		<div class="form-group">
-		<label for="challenge_notes"><?php print JText::_("COM_BIODIV_TRAININGRESULTS_NOTES"); ?></label>
+		<label for="challenge_notes"><?php print JText::_("COM_BIODIV_TRAINING_NOTES"); ?></label>
 		<textarea class="form-control" id="challenge_notes" name="notes" rows="2" maxlength='200' ></textarea>
 		</div>
 		
       </div>
 	  <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><?php print JText::_("COM_BIODIV_TRAININGRESULTS_CANCEL"); ?></button>
-		<button type='button' class='btn btn-success' data-dismiss="modal" id='challenge-save'><?php print JText::_("COM_BIODIV_TRAININGRESULTS_SUBMIT")?></button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><?php print JText::_("COM_BIODIV_TRAINING_CANCEL"); ?></button>
+		<button type='button' class='btn btn-success' data-dismiss="modal" id='challenge-save'><?php print JText::_("COM_BIODIV_TRAINING_SUBMIT")?></button>
 	    </form>
       </div>
 	  	  
@@ -249,14 +249,14 @@ defined('_JEXEC') or die;
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAININGRESULTS_REVIEW"); ?> </h4>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_TRAINING_REVIEW"); ?> </h4>
       </div>
       <div class="modal-body">
-	    <div id="no_map"><h5> <?php print JText::_("COM_BIODIV_TRAININGRESULTS_NO_MAP"); ?> </h5></div>
+	    <div id="no_map"><h5> <?php print JText::_("COM_BIODIV_TRAINING_NO_MAP"); ?> </h5></div>
         <div id="map_canvas" style="width:500px;height:500px;"></div>
       </div>
 	  <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal"><?php print JText::_("COM_BIODIV_TRAININGRESULTS_CLOSE"); ?></button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal"><?php print JText::_("COM_BIODIV_TRAINING_CLOSE"); ?></button>
       </div>
 	  	  
     </div>

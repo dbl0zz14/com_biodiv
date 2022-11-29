@@ -201,7 +201,7 @@ else {
 	print '<tr class="schoolGroupData">';
 		
 	print '<td></td>';
-	print '<td>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_TOTAL").'</td>';
+	print '<td>'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_TOTALS").'</td>';
 	
 	foreach ( $this->moduleIds as $moduleId ) {
 		
