@@ -44,6 +44,7 @@ else {
 	print '<table class="table table-striped">';
 	print '<thead>';
 	print '<tr>';
+	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_USERID").'</th>';
 	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_USERNAME").'</th>';
 	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_EMAIL").'</th>';
 	print '<th>'.JText::_("COM_BIODIV_PROJECTUSERS_ROLE").'</th>';
@@ -53,6 +54,7 @@ else {
 
 	foreach ( $this->users as $currUser ) {
 		print '<tr>';
+		print '<td>'.$currUser->person_id.'</td>';
 		print '<td>'.$currUser->username.'</td>';
 		print '<td>'.$currUser->email.'</td>';
 		print '<td>'.$currUser->role.'</td>';
