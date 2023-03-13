@@ -78,10 +78,20 @@ else {
 	print '<div class="row">';
 	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "admindashboard");
 	
-	Biodiv\SchoolCommunity::generateNav("admindashboard");
+	print '</div>'; // col-12
 	
-	print '</div>';
+	print '</div>'; // row
+	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
+		
+		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
 		
 	
 
@@ -91,16 +101,9 @@ else {
 	
 	print '<h2>';
 	print '<div class="row">';
-	print '<div class="col-md-10 col-sm-10 col-xs-10">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12">';
 	print JText::_("COM_BIODIV_ADMINDASHBOARD_HEADING").' <small class="hidden-xs">'.JText::_("COM_BIODIV_ADMINDASHBOARD_SUBHEADING").'</small>';
-	print '</div>'; // col-10
-	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
-	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
-		print '<i class="fa fa-info"></i>';
-		print '</div>'; // helpButton
-	}
-	print '</div>'; // col-2
+	print '</div>'; // col-12
 	print '</div>'; // row
 	print '</h2>';  
 	
@@ -226,21 +229,21 @@ else {
 		print '</div>'; // userAdmin
 
 		
-		foreach ( $this->moduleIds as $moduleId ) {
+		foreach ( $this->lockLevels as $lockLevel=>$lockObject ) {
 			
-			$module = $this->modules[$moduleId];
+			//$module = $this->modules[$moduleId];
 			$studentTotal = 0;
 			$teacherTotal = 0;
-			if ( array_key_exists( $moduleId, $this->adminSummary->studentBadges ) ) {
-				$studentTotal = $this->adminSummary->studentBadges[$moduleId];
+			if ( array_key_exists( $lockLevel, $this->adminSummary->studentBadges ) ) {
+				$studentTotal = $this->adminSummary->studentBadges[$lockLevel];
 			}
-			if ( array_key_exists( $moduleId, $this->adminSummary->teacherBadges ) ) {
-				$teacherTotal = $this->adminSummary->teacherBadges[$moduleId];
+			if ( array_key_exists( $lockLevel, $this->adminSummary->teacherBadges ) ) {
+				$teacherTotal = $this->adminSummary->teacherBadges[$lockLevel];
 			}
 			$totalComplete = $studentTotal + $teacherTotal;
 			
-			print '<div class="'.$module->class_stem.'AdminSummary">';
-			print '<div class="panel actionPanel '.$module->class_stem.'Color">';
+			print '<div class="level'.$lockLevel.'AdminSummary">';
+			print '<div class="panel actionPanel level'.$lockLevel.'Color">';
 			print '<div class="panel-body">';
 			
 			print '<div class="summaryItemGrid">';
@@ -249,18 +252,19 @@ else {
 			
 			//print '<img src="'.$module->icon.'"  class="'.$module->class_stem.'Img img-responsive" alt="'.$module->name.' icon" />';
 			
-			$moduleIcon = $module->icon;
-			if ( $module->dark_bg ) {
-				$moduleIcon = $module->white_icon;
-			}
+			// $moduleIcon = $module->icon;
+			// if ( $module->dark_bg ) {
+				// $moduleIcon = $module->white_icon;
+			// }
 			
-			print '<img class="img-responsive adminIcon'.$module->name.'" src="'.$moduleIcon.'" alt="'.$module->name.' icon" />';
+			print '<img class="img-responsive" src="'.$lockObject->s_uncollected.'" alt="Level '.$lockLevel.' student icon" />';
+			print '<img class="img-responsive" src="'.$lockObject->t_uncollected.'" alt="Level '.$lockLevel.' teacher icon" />';
 			
 			print '</div>'; // summaryIcon
 			
 			print '<div class="summaryItemName h3 panelHeading text-center">';
 		
-			print $module->name;
+			print JText::_("COM_BIODIV_ADMINDASHBOARD_LEVEL_".$lockLevel);
 			
 			print '</div>'; // summaryName
 		
@@ -278,7 +282,7 @@ else {
 			
 			print '<div class="summaryItemBtn text-center">';
 			
-			print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$module->report_id."' data-filter='{\"module\":\"".$module->module_id."\"}'>".JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW")."</div>";
+			//print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$module->report_id."' data-filter='{\"module\":\"".$module->module_id."\"}'>".JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW")."</div>";
 			
 			print '</div>'; // summaryBtn
 			

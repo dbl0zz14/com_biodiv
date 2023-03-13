@@ -36,7 +36,15 @@ jQuery(document).ready(function(){
 				jQuery('#fileuploadspinner').hide();
 				//		    var url = BioDiv.root + "&task=sequence_photos&upload_id=" + BioDiv.upload_id;
 				//		    jQuery.ajax(url);
-				window.location.replace(BioDiv.root + "&view=upload");
+				
+				if ( BioDiv.badgeId && BioDiv.classId ) {
+					var url = "bes-upload-complete" + "&upload_id="
+								+ BioDiv.upload_id + "&class_id=" + BioDiv.classId + "&badge=" + BioDiv.badgeId;
+					window.location.replace(url);
+				}
+				else {
+					window.location.replace(BioDiv.root + "&view=upload");
+				}
 		}
 	});
 	

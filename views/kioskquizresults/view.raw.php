@@ -44,6 +44,7 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 		$this->topicId = $input->getInt('topic', 0);
 		$qs = $input->getString('questions', 0);
 		$as = $input->getString('answers', 0);
+		$this->badge = $input->getInt('badge', 0);
 		
 		//error_log ( "Project: " . $this->projectId );
 		//error_log ( "Topic: " . $this->topicId );
@@ -125,6 +126,10 @@ class BioDivViewKioskQuizResults extends JViewLegacy
 			// Ensure we don't rewrite this training session
 			$app->setUserState('com_biodiv.written', '1');
 			
+		}
+		
+		if ( $this->badge > 0 ) {
+			$badgeResult = checkBadge ( $this->badge );
 		}
 	
 		

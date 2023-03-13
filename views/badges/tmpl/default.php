@@ -8,379 +8,612 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-error_log ( "Badges template called" );
-
-/*
-$errMsg = print_r ( $this->data, true );
-error_log ( "Badges data:");
-error_log ( $errMsg );
-*/
 
 if ( !$this->personId ) {
 	
 	// Please log in button
 	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_BADGES_LOGIN").'</div>';
+}
+else if ( !$this->schoolUser ) {
+	
+	print '<h2>'.JText::_("COM_BIODIV_BADGES_NOT_SCH_USER").'</h2>';
 	
 }
+else if ( $this->notMyClass ) {
+	
+	print '<h2>'.JText::_("COM_BIODIV_BADGES_NOT_MY_CLASS").'</h2>';
+	
+}
+else if ( $this->chooseClass ) {
+	
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, $this->classId, "badges");
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
+	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
+		
+		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
+	
+	
+	// --------------------- Main content
+	
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	print '<h2 class="hidden-sm hidden-md hidden-lg">';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_BADGES_HEADING").'</span>';
+	print '</h2>';
+	
+	print '<div id="displayArea">';
+	
+	//print '<h3>'.JText::_("COM_BIODIV_BADGES_CHOOSE_CLASS").'</h3>';
+	print '<div class="row">';
+	
+	if ( count($this->classes) == 0 ) {
+		print '<div class="col-md-12 col-sm-12 col-xs-12">';
+		print '<h3>'.JText::_("COM_BIODIV_BADGES_NO_CLASS").'</h3>';
+		print '<h4>'.JText::_("COM_BIODIV_BADGES_CLASS_EXPLAIN").'</h4>';
+		print '<a href="bes-school-admin"><button type="button" class="btn btn-info" >'.JText::_("COM_BIODIV_BADGES_CLASS_SETUP").'</button></a>';
 
+		print '</div>'; // col-12
+	}
+	
+	print '</div>'; // row
+	
+	print '<div class="row">';
+	
+	$inactiveFound = false;
+
+	foreach ( $this->classes as $nextClass ) {
+		
+		if ( !$inactiveFound && $nextClass->is_active == false ) {
+			$inactiveFound = true;
+			print '</div>'; // active row end
+			print '<div class="row">';
+			print '<div class="col-md-12">';
+			print '<div href="#inactiveClasses" class="btn btn-info btn-lg vSpaced" role="button" data-toggle="collapse" >'.JText::_("COM_BIODIV_BADGES_SHOW_INACTIVE_CLASSES").'</div>';
+			print '</div>'; // inactive button
+			print '<div id="inactiveClasses" class="collapse">';
+		}
+		
+		
+		print '<div class="col-md-3 col-sm-4 col-xs-12">';
+		
+		$pageLink = 'bes-badges?class_id='.$nextClass->class_id;
+		
+		if ( $this->help ) {
+			$pageLink .= '&help=1';
+		}
+		
+		print '<a href="'.$pageLink.'">';
+		print '<div class="panel panel-default actionPanel chooseClassPanel" role="button" >';
+		print '<div class="panel-body">';
+		
+		print '<div class="h4 panelHeading">';
+		print $nextClass->name;
+		print '</div>';
+		
+		print '<div class="text-center"><img src="'.$nextClass->image.'" class="img-responsive" alt="'.$nextClass->name.' avatar" /></div>';
+		
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
+		
+		print '</div>'; // col-3
+		
+	}
+	
+	if ( $inactiveFound ) {
+		print '</div>'; // inactiveClasses
+	}
+	
+	print '</div>'; // row
+	
+	print '</div>'; // displayArea
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
+	
+}
 else {
 	
-	if ( $this->suggest ) {
-		print '<h4>'.JText::_("COM_BIODIV_BADGES_COULD_TRY").'</h4>';
+	if ( $this->classId ) {
+		$document = JFactory::getDocument();
+		$document->addScriptDeclaration("BioDiv.classId = '".$this->classId."';");
+	}
+	
+	if ( $this->newBadgeId ) {
+		$document = JFactory::getDocument();
+		$document->addScriptDeclaration("BioDiv.newBadgeId = '".$this->newBadgeId."';");
+	}
+	else if ( $this->newAwardId ) {
+		$document = JFactory::getDocument();
+		$document->addScriptDeclaration("BioDiv.newAwardId = '".$this->newAwardId."';");
+	}
+	
+	if ( $this->help ) {
+		Biodiv\Help::printBadgesHelp( $this->schoolUser, $this->classId );
 	}
 	
 	
-	if ( $this->displayBadges ) {
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, $this->classId, "badges");
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
+	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
 		
-		if ( $this->numToCollect == 0 ) {
-			print '<div class="row"><div class="col-md-6 h3" style="margin-top:20px;margin-bottom:20px">'.
-				JText::_("COM_BIODIV_BADGES_ALL_COLLECTED").'</div><div class="col-md-6 text-right">'.
-				'<a href="'.JText::_("COM_BIODIV_BADGES_WILD_SPACE_LINK").'" class="btn btn-primary" >'.JText::_("COM_BIODIV_BADGES_WILD_SPACE").'</button>'.'</a>'.'</div></div>';
-		}
-		else {
-			print '<button class="btn btn-primary collectBadges" style="margin-top:20px;margin-bottom:20px">'.
-				JText::_("COM_BIODIV_COLLECT_BADGES").'</button> '.'<a href="'.JText::_("COM_BIODIV_BADGES_WILD_SPACE_LINK").
-				'" class="btn btn-primary" >'.
-				JText::_("COM_BIODIV_BADGES_WILD_SPACE").'</button>'.'</a>';
-		}
+		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
+	
+	// --------------------- Main content
+	
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	print '<h2 class="hidden-sm hidden-md hidden-lg">';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_BADGES_HEADING").'</span>';
+	print '</h2>';
+	
+	print '<div id="displayArea">';
+	
+	if ( !$this->toCollect ) {
+	
+		print '<div class="panel">';
+		
+		print '<div class="row largeFilterButtons hidden-xs">';
+		
+		print '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">';
 		
 		
-		//print '<div class="row">';
+		// ---------------------------------- all badges
 		
-		$badgeCount = 0;
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="Clear filter button">';
 		
-		foreach ( $this->badgeGroupData as $groupId=>$data ) {
+		print '<div id="badgeFilter_All" class="btn filterBadgesBtn activeFilter ">';
 			
-			$badges = json_decode ( $data );
-					
-			foreach ( $badges as $badge ) {
-
-				foreach ( $badge->tasks as $task ) {
-					
-					if ( $task->status == Biodiv\Badge::COMPLETE ) {
-						if ( $badgeCount%6 == 0 ) {
-							print '<div class="row">';
-						}						
-						print '<div class="col-md-2 col-sm-3 col-xs-6">';
-						print '<img class="img-responsive" src="'.$badge->unlocked_image.'" alt = "unlocked badge image" />';
-						print '<div class="h5 text-center">'.$badge->badge_name.'</div>';
-						print '</div>'; // col-2
-						$badgeCount += 1;
-					}
-					else if ( $task->status == Biodiv\Badge::COLLECTED ) {
-						if ( $badgeCount%6 == 0 ) {
-							print '<div class="row">';
-						}	
-						print '<div class="col-md-2 col-sm-3 col-xs-6">';
-						print '<img class="img-responsive" src="'.$badge->badge_image.'" alt = "badge image" />';
-						print '<div class="h5 text-center">'.$badge->badge_name.'</div>';
-						print '</div>'; // col-2
-						$badgeCount += 1;
-					}
-					
-					if ( $badgeCount%6 == 0 ) {
-						print '</div>'; // row
-					}
-					
-				}
-			}
-		}
+		// $activeClass = '';
+		// $imageSrc = $this->allBadgesImg;
 		
-		if ( $badgeCount%6 != 0 ) {
+		$image = $this->allBadgesImg;
+		$activeImage = $this->allBadgesActiveImg;
+		$colorClass = "";
+		$activeClass = "";
+		$imageSrc = JURI::root().$image;
+		$activeImageSrc = JURI::root().$activeImage;
+		$activeClass = "activeFilterPanel";
+		$currImageSrc = JURI::root().$activeImage;
+		
+	
+		print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+		print '<div class="panel-body">';
+		
+		print '<div class="row">';
+		
+		//print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="filterBadgesIcon" alt="all badges icon" /></div>';
+		print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="all badges icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
+		print '</div>'; // row
+		
+		print '<div class="row">';
+		print '<div class="col-md-12 col-sm-12 col-xs-12 text-center filterText">'.JText::_("COM_BIODIV_BADGES_CLEAR_FILTERS").'</div>';
+		print '</div>'; // row
+		
+		print '</div>'; // panel-body
+		
+		print '</div>'; // panel
+		
+		//print $module->name;
+		print '</div>';
+			
+		print '</div>'; // btnGroup
+		
+		
+		
+		
+		//print '<div class="btn-group badgesItemWidth hidden-xs" role="group" aria-label="More badge filter buttons">';
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="More badge filter buttons">';
+		
+		foreach ( $this->allModules as $module ) {
+			
+			print '<div id="badgeFilter_' . $module->name.'" class="btn filterBadgesBtn ">';
+			
+			// $activeClass = '';
+			// $imageSrc = $module->icon;
+			
+			$image = $module->icon;
+			$activeImage = $module->white_icon;
+			$colorClass = "";
+			$activeClass = "";
+			$imageSrc = JURI::root().$image;
+			$activeImageSrc = JURI::root().$activeImage;
+			$activeClass = "";
+			$currImageSrc = $imageSrc;
+		
+			
+			//print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+			print '<div class="panel panel-default filterPanel toggleActive ">';
+			print '<div class="panel-body">';
+			
+			// -------------------------------------- module icon
+			print '<div class="row">';
+			
+			//print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="filterBadgesIcon" alt="module icon" /></div>';
+			print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="module icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
+
 			print '</div>'; // row
+			
+			print '<div class="row">';
+			print '<div class="col-md-12 col-sm-12 col-xs-12 text-center filterText">'.$module->name.'</div>';
+			print '</div>'; // row
+			
+			print '</div>'; // panel-body
+			
+			print '</div>'; // panel
+			
+			print '</div>';
+			
 		}
+		
+		print '</div>'; // btnGroup
+		
+		
+		
+		//print '<div class="btn-group badgesItemWidth hidden-xs" role="group" aria-label="More resource filter buttons">';
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="More resource filter buttons">';
+		
+		foreach ( $this->badgeGroups as $badgeGroup ) {
+			
+			print '<div id="badgeFilter_' . $badgeGroup->name.'" class="btn filterBadgesBtn ">';
+			
+			// $activeClass = '';
+			// $imageSrc = $badgeGroup->icon;
+			$image = $badgeGroup->icon;
+			$activeImage = $badgeGroup->inverse_icon;
+			$colorClass = "";
+			$activeClass = "";
+			$imageSrc = JURI::root().$image;
+			$activeImageSrc = JURI::root().$activeImage;
+			$activeClass = "";
+			$currImageSrc = $imageSrc;
+		
+			
+			print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+			print '<div class="panel-body">';
+			
+			// -------------------------------------- module icon
+			print '<div class="row">';
+			
+			//print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="filterBadgesIcon" alt="badge group icon" /></div>';
+			print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="badge group icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
 
-	}
-	
-	if ( !$this->displayBadges ) {
-		
-		if ( $this->collect ) {
+			print '</div>'; // row
 			
-			print '<button class="btn btn-primary collectedBadges" style="margin-top:20px;margin-bottom:20px">'.JText::_("COM_BIODIV_BADGES_SHOW_COLLECTED").'</button>';
-			print '<h3>'.JText::_("COM_BIODIV_BADGES_TAP_COLLECT").'</h3>';
+			print '<div class="row">';
+			print '<div class="col-md-12 col-sm-12 col-xs-12 text-center filterText">'.$badgeGroup->name.'</div>';
+			print '</div>'; // row
+			
+			print '</div>'; // panel-body
+			
+			print '</div>'; // panel
+			
+			print '</div>';
+		}	
+		
+		print '</div>'; // btnGroup
+		
+		print '</div>'; //col-12
+		
+		print '</div>'; //largeFilterButtons row
+		
+		
+		
+		
+		
+		print '<div class="row smallFilterButtons hidden-lg hidden-md hidden-sm">';
+		
+		print '<div class="col-md-12">';
+		
+		print '<div class="smallFilterGrid">';
+		
+		print '<div class="allBadgesButton">';
+		
+		// ---------------------------------- all badges
+		
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="Clear filter button">';
+		
+		print '<div id="badgeFilter_All" class="btn filterBadgesBtn activeFilter ">';
+			
+		// $activeClass = '';
+		// $imageSrc = $this->allBadgesImg;
+		
+		$image = $this->allBadgesImg;
+		$activeImage = $this->allBadgesActiveImg;
+		$colorClass = "";
+		$activeClass = "";
+		$imageSrc = JURI::root().$image;
+		$activeImageSrc = JURI::root().$activeImage;
+		$activeClass = "activeFilterPanel";
+		$currImageSrc = JURI::root().$activeImage;
+		
+	
+		print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+		print '<div class="panel-body">';
+		
+		print '<div class="row">';
+		
+		//print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="filterBadgesIcon" alt="all badges icon" /></div>';
+		print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="all badges icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
+		print '</div>'; // row
+		
+		print '<div class="row hidden-xs">';
+		print '<div class="col-md-12 col-sm-12 col-xs-12 text-center filterText">'.JText::_("COM_BIODIV_BADGES_CLEAR_FILTERS").'</div>';
+		print '</div>'; // row
+		
+		print '</div>'; // panel-body
+		
+		print '</div>'; // panel
+		
+		print '</div>';
+			
+		print '</div>'; // btnGroup
+		
+		print '</div>'; // allBadgesButton
+		
+		//print '<div class="col-xs-2 col-xs-offset-8">'
+		
+		
+		// print '<div class="btn-group badgesItemWidth" role="group" aria-label="Clear filter button">';
+		
+		// print '<div id="badgeFilter_All" class="btn filterBadgesBtn activeFilter ">';
+			
+		// // $activeClass = '';
+		// // $imageSrc = $this->allBadgesImg;
+		
+		// $image = $this->filterImg;
+		// $activeImage = $this->filterActiveImg;
+		// $colorClass = "";
+		// $activeClass = "";
+		// $imageSrc = JURI::root().$image;
+		// $activeImageSrc = JURI::root().$activeImage;
+		// $activeClass = "activeFilterPanel";
+		// $currImageSrc = JURI::root().$activeImage;
+		
+	
+		// print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+		// print '<div class="panel-body">';
+		
+		// print '<div class="row small-gutter">';
+		
+		// //print '<div class="col-md-12 text-center"><img src="'.$imageSrc.'" class="filterBadgesIcon" alt="all badges icon" /></div>';
+		// print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="all badges icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
+		// print '</div>'; // row
+		
+		// print '<div class="row hidden-xs">';
+		// print '<div class="col-md-12 col-sm-12 col-xs-12 text-center filterText">'.JText::_("COM_BIODIV_BADGES_FILTER").'</div>';
+		// print '</div>'; // row
+		
+		// print '</div>'; // panel-body
+		
+		// print '</div>'; // panel
+		
+		// print '</div>';
+			
+		// print '</div>'; // btnGroup
+		
+		
+		
+		
+		print '<div class="moduleButtons">';
+		
+		//print '<div class="btn-group badgesItemWidth hidden-xs" role="group" aria-label="More badge filter buttons">';
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="More badge filter buttons">';
+		
+		foreach ( $this->allModules as $module ) {
+			
+			print '<div id="badgeFilter_' . $module->name.'" class="btn filterBadgesBtn ">';
+			
+			// $activeClass = '';
+			// $imageSrc = $module->icon;
+			
+			$image = $module->icon;
+			$activeImage = $module->white_icon;
+			$colorClass = "";
+			$activeClass = "";
+			$imageSrc = JURI::root().$image;
+			$activeImageSrc = JURI::root().$activeImage;
+			$activeClass = "";
+			$currImageSrc = $imageSrc;
+		
+			
+			//print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+			print '<div class="panel panel-default filterPanel toggleActive ">';
+			print '<div class="panel-body">';
+			
+			// -------------------------------------- module icon
+			print '<div class="row">';
+			
+			print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="module icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
+	
+
+			print '</div>'; // row
+			
+			print '</div>'; // panel-body
+			
+			print '</div>'; // panel
+			
+			print '</div>';
 			
 		}
+		
+		
+		print '</div>'; // btnGroup
+		
+		print '</div>'; // moduleButtons
+		
+		
+		print '<div class="badgeGroupButtons">';
+		
+		//print '<div class="btn-group badgesItemWidth hidden-xs" role="group" aria-label="More resource filter buttons">';
+		print '<div class="btn-group badgesItemWidth" role="group" aria-label="More resource filter buttons">';
+		
+		foreach ( $this->badgeGroups as $badgeGroup ) {
+			
+			print '<div id="badgeFilter_' . $badgeGroup->name.'" class="btn filterBadgesBtn ">';
+			
+			// $activeClass = '';
+			// $imageSrc = $badgeGroup->icon;
+			$image = $badgeGroup->icon;
+			$activeImage = $badgeGroup->inverse_icon;
+			$colorClass = "";
+			$activeClass = "";
+			$imageSrc = JURI::root().$image;
+			$activeImageSrc = JURI::root().$activeImage;
+			$activeClass = "";
+			$currImageSrc = $imageSrc;
+		
+			
+			print '<div class="panel panel-default filterPanel toggleActive '.$activeClass.'">';
+			print '<div class="panel-body">';
+			
+			// -------------------------------------- module icon
+			print '<div class="row">';
+			
+			print '<div class="col-md-12"><img src="'.$currImageSrc.'" class="filterBadgesIcon" alt="badge group icon" data-icon="'.$imageSrc.'" data-activeicon="'.$activeImageSrc.'"/></div>';
 	
-		if ( $this->onOneLine ) {
-			print '<div class="row badgeGroup">';
-		}
+
+			print '</div>'; // row
+			
+			print '</div>'; // panel-body
+			
+			print '</div>'; // panel
+			
+			print '</div>';
+		}	
 		
-		$taskCount = 0;
+		print '</div>'; // btnGroup
 		
-		foreach ( $this->badgeGroupData as $groupId=>$data ) {
+		
+		print '</div>'; // moduleBtns
+		
+		print '</div>'; // smallFilterGrid
+		
+		print '</div>'; // col-12
+		
+		
+		print '</div>'; //smallFilterButtons row
+		
+		
+		
+		
+		
+		
+		
+		$badgeNum = 0;
+		foreach ( $this->badges as $level=>$levelBadges ) {
 			
-			$colorClassArray = getOptionData ( $groupId, "colorclass" );
-			if ( count($colorClassArray) > 0 ) {
-				$colorClass = $colorClassArray[0];
-			}
 			
-			$badges = json_decode ( $data );
-			//$badges = $data;
+			print '<h2 class="badgeHeading greenHeading badgesItemWidth">'.JText::_("COM_BIODIV_BADGES_LEVEL_".$level).'</h2>';
 			
-			$totalNumBadges = count((array)$badges);
-			
-			
-			if ( $this->singleBadgeGroup and $totalNumBadges == 0  ) {
-				print JText::_("COM_BIODIV_BADGES_NO_ACTIVITIES");
-			}
-			
-			
-			
-			
-			//error_log ( "Total num badges = " . $totalNumBadges );
-			
-			if ( !$this->onOneLine  ) {
-				if ( $totalNumBadges > 4 ) {
-					print '<div class="row badgeGroup" >';
-				}
-				else {
+			foreach ( $levelBadges as $badge ) {
+				
+				if ( $badgeNum % 4 == 0 ) {
 					print '<div class="row">';
 				}
-			}
-			
-				
-			
-			foreach ( $badges as $badge ) {
-				
-				foreach ( $badge->tasks as $task ) {
-					
-					if ( $this->completeOnly and $task->status < Biodiv\Badge::COMPLETE ) {
-						continue;
-					}
-					if ( $this->unlockedOnly and $task->status != Biodiv\Badge::UNLOCKED ) {
-						continue;
-					}
-					if ( $this->collect and $task->status != Biodiv\Badge::COMPLETE ) {
-						continue;
-					}
-					
-					$taskCount += 1;
-					$collectClass = "";
-					$highlightClass = "";
-					if ( $task->status == Biodiv\Badge::COMPLETE ) {
-						$collectClass = "collectTask";
-					}
-					
-					$highlightClass = $colorClass.'_border';
-						
-					// $lockedClass = "";
-					// if ( $task->status == Biodiv\Badge::LOCKED ) {
-						// $lockedClass = "lockedTask";
-					// }
-					
-					// if ( $this->collect ) {
-						// print '<div class="col-md-6">';
-					// }
-					// else {
-						print '<div class="col-md-3">';
-					//}
-					
-					
-					// If task has been collected we display the back
-					if ( $task->status != Biodiv\Badge::COLLECTED ) {
-						 
-						print '<div id="task_card_'.$task->task_id.'" class="panel taskPanel '.$collectClass.' ' .$highlightClass.'">';
-						
-						print '<div class="panel-heading taskHeading">';
-						
-						print '<div class="row small-gutter">';
-						
-						print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
-						print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
-						print '</div>';
-						print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
-						print $task->points . ' ' . JText::_("COM_BIODIV_BADGES_POINTS");
-						print '</strong></div>'; // col-6
-						print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
-						print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
-						print '</div>';
-						
-						print '<div class="col-md-12 col-sm-12 col-xs-12 h5 text-center taskText"><strong>';
-						print $badge->badge_name;
-						print '</strong></div>'; // col-12
-					
-						print '</div>'; // row
-							
-						print '</div>'; // panel heading
-						
-						print '<div class="panel-body taskBody">';
-						
-						if ( $task->status == Biodiv\Badge::LOCKED ) {
-							print '<div class="taskImage lockedTask">';
-							print '<div class="row ">';
-							print '<div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-8 col-xs-offset-2">';
-							print '<img class="img-responsive" src="'.$badge->locked_image.'" alt = "locked badge image" />';
-							print '</div>'; // col-8
-							print '</div>'; // row
-							print '</div>'; // taskImg
-						}
-						else if ( $task->status == Biodiv\Badge::PENDING ) {
-							print '<div class="taskImage lockedTask">';
-							print '<div class="row ">';
-							print '<div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-8 col-xs-offset-2">';
-							print '<img class="img-responsive" src="'.$badge->unlocked_image.'" alt = "unlocked badge image" />';
-							print '</div>'; // col-8
-							print '</div>'; // row
-							print '</div>'; // taskImg
-						}
-						else {
-							print '<div class="taskImage">';
-							print '<div class="row ">';
-							print '<div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-8 col-xs-offset-2">';
-							print '<img class="img-responsive" src="'.$badge->unlocked_image.'" alt = "unlocked badge image" />';
-							print '</div>'; // col-8
-							print '</div>'; // row
-							print '</div>'; // taskImg
-						}
-					
-						
-						$isLinkedTask = false;
-						if ( Biodiv\SchoolCommunity::isStudent() and $task->linked_task ) {
-							$isLinkedTask = true;
-						}
-						if ( $isLinkedTask ) {
-							print '<div class="taskDescription h5 text-center taskText">'.JText::_("COM_BIODIV_BADGES_TEACHER_TASK").'</div>';
-						}
-						else if ( $task->status == Biodiv\Badge::PENDING ) {
-							print '<div class="taskDescription h5 text-center taskText">'.JText::_("COM_BIODIV_BADGES_PENDING").'</div>';
-						}
-						else {
-							print '<div class="taskDescription h5 text-center taskText">'.$task->description.'</div>';
-						}
-						
-						
-						print '<div class="text-center taskButtons">';
-								
-						if ( $task->status == Biodiv\Badge::COMPLETE ) {
-							print '<div class="collectMessage">'.JText::_("COM_BIODIV_BADGES_COLLECT").'</div>';
-						}
-						else {
-							print '<div id="task_more_'.$task->task_id.'" class="btn btn-primary btn-sm task_btn" data-toggle="modal" data-target="#task_modal">'.
-										JText::_("COM_BIODIV_BADGES_MORE").'</div>';
-										
-							if ( !$this->viewOnly and !$isLinkedTask and $task->counted_by == "USER" and $task->status == Biodiv\Badge::UNLOCKED ) {
-								print '<div id="task_done_'.$task->task_id.'" class="btn btn-default btn-sm task_btn upload_task">'.JText::_("COM_BIODIV_BADGES_DONE").'</div>';
-							}
-						}
-						
-						print '</div>'; // text-center
-										
-						print '</div>'; // panel-body
-						
-						print '</div>'; // panel
-					
-					}
-					
-					if ( $task->status == Biodiv\Badge::COLLECTED ) {
-						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel '.$highlightClass.'" >';
-					}
-					else {
-						print '<div id="task_detail_'.$task->task_id.'" class="panel taskPanel turnTask '.$highlightClass.'" style="display:none; position:absolute; top:0; opacity:0;">';
-					}
-						
-					print '<div class="panel-heading taskHeading">';
-					
-					print '<div class="row small-gutter">';
-						
-					print '<div class="col-md-3 col-sm-3 col-xs-3 h4 text-left">';
-					print '<span class="'.$colorClass.'_text"><img src="'.$task->icon.'" class="img-responsive badgeGroupIcon" alt="badge group icon"/></span>';
-					print '</div>';
-					print '<div class="col-md-6 col-sm-6 col-xs-6 text-center"><strong>';
-					print $task->points . ' ' . JText::_("COM_BIODIV_BADGES_POINTS");
-					print '</strong></div>'; // col-6
-					print '<div class="col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 h4 text-left">';
-					print '<img src="'.$task->module_icon.'" class="img-responsive badgeGroupIcon" alt="module icon"/>';
-					print '</div>';
-					
-					
-					print '<div class="col-md-12 col-sm-10 col-xs-10 h5 text-center taskText"><strong>';
-					print $badge->badge_name;
-					print '</strong></div>'; // col-12
-					
-					
+				print '<div class="col-md-3 col-sm-3 col-xs-6">';
+				print '<div class="badgesItem badge_All badge_'.$badge->getModuleName().' badge_'.$badge->getBadgeGroupName().'">';
+				$badge->printBadge();
+				print '</div>'; // badgesItem
+				print '</div>'; // col-3
+				if ( $badgeNum % 4 == 3 ) {
 					print '</div>'; // row
-						
-					print '</div>'; // panel heading
-					
-					print '<div class="panel-body taskBody">';
-					
-					print '<div class="taskImage">';
-					print '<div class="row ">';
-					print '<div class="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-6 col-xs-offset-3">';
-					print '<img class="img-responsive" src="'.$badge->badge_image.'" alt = "blank badge image" />';
-					print '</div>'; // col-8
-					print '</div>'; // row
-					print '</div>'; // taskImg
-					
-					print '<div class="taskDescription h5 text-center taskText">'.$task->description.'</div>';
-					
-					print '<div class="text-center taskButtons">';
-					if ( $task->species_unlocked ) {
-						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal">'.JText::_("COM_BIODIV_BADGES_VIEW_SPECIES").'</div>';
-					}
-					else {
-						print '<div id="unlock_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn unlock_species"  data-toggle="modal" data-target="#species_modal">'.JText::_("COM_BIODIV_BADGES_UNLOCK_SPECIES").'</div>';
-						print '<div id="view_species_'.$task->task_id.'" class="btn btn-primary btn-sm species_btn "  data-toggle="modal" data-target="#species_modal" style="display:none">'.JText::_("COM_BIODIV_BADGES_VIEW_SPECIES").'</div>';
-					}
-					print '</div>';
-					
-					print '</div>'; // panel-body
-					
-					print '</div>'; // panel
-					
-					
-					
-					
-					print '</div>';  // col-3
-					
-				
 				}
+				
+				$badgeNum += 1;
+				
 			}
 			
-			//print '</section>';  // section
-			
-			//print '</div>'; // col-12
-			
-			//error_log ( "Closing badge group col" );
-			
-			if ( !$this->onOneLine ) {
-				print '</div>'; // badgeGroup row
+			print '<div class="row">';
+			print '<div class="col-md-2 col-sm-2 col-xs-6 col-md-offset-5 col-sm-offset-5 col-xs-offset-3">';
+			if ( array_key_exists($level, $this->awards) ) {
+				
+				$levelAward = $this->awards[$level];
+				print '<div class="badgesItemHeight">';
+				
+				print '<div role="button" class="printCert" data-toggle="modal" '.
+				'data-target="#certificateModal" data-pdfurl="'.JURI::root().$levelAward->getCertificate().'" '.
+				'data-pdfname="'.$this->certificateData->name.'" data-pdfdate="'.$levelAward->getAwardDate().'">';
+				$levelAward->printAward();
+				print '</div>';
+				
+				print '</div>';
+				
 			}
+			else {
+				
+				print '<div class="badgesItemHeight">';
+				$blankAward = $this->blankAwards[$level];
+				$blankAward->printAward();
+				print '</div>';
+				
+			}
+			print '</div>'; // col-2, offset
+			print '</div>'; // row
 			
 		}
 		
-		if ( $this->completeOnly and $taskCount == 0  ) {
-			print JText::_("COM_BIODIV_BADGES_NO_COMPLETE_MOD");
-		}
-		else if ( $this->unlockedOnly and $taskCount == 0  ) {
-			print JText::_("COM_BIODIV_BADGES_NO_UNLOCKED");
-		}
-		else if ( $this->suggest and $taskCount == 0  ) {
-			print JText::_("COM_BIODIV_BADGES_NO_SUGGEST");
-		}
-	
-		if ( $this->onOneLine ) {
-			print '</div>'; // row
-		}
+		print '</div>';
 	}
 	
+	print '</div>'; // displayArea
+	
+	print '</div>'; // panel
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
 	
 }
 
-print '<div id="task_modal" class="modal fade" role="dialog">';
+
+print '<div id="helpModal" class="modal fade" role="dialog">';
 print '  <div class="modal-dialog"  >';
 
 print '    <!-- Modal content-->';
 print '    <div class="modal-content">';
-print '      <div class="modal-header text-right">';
-print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-//print '        <h4 class="modal-title"> </h4>';
+print '      <div class="modal-header">';
+print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
 print '      </div>';
 print '     <div class="modal-body">';
-print '	    <div id="task_article" ></div>';
+print '	    <div id="helpArticle" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGES_CLOSE").'</button>';
 print '      </div>';
 	  	  
 print '    </div>';
@@ -390,7 +623,25 @@ print '</div>';
 
 
 
-print '<div id="species_modal" class="modal fade" role="dialog">';
+print '<div id="badgeModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header text-right">';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="badgeArticle" ></div>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
+
+
+print '<div id="speciesModal" class="modal fade" role="dialog">';
 print '  <div class="modal-dialog"  >';
 
 print '    <!-- Modal content-->';
@@ -400,10 +651,115 @@ print '        <div type="button" role="button" class="closeButton h3" data-dism
 //print '        <h4 class="modal-title"> </h4>';
 print '      </div>';
 print '     <div class="modal-body">';
-print '	    <div id="species_article" ></div>';
+print '     <ul class="nav nav-tabs modalNav">';
+print '       <li id="speciesTabItem" class="active"><a data-toggle="tab" href="#speciesTab">'.JText::_("COM_BIODIV_BADGES_SPECIES").'</a></li>';
+print '       <li id="activityTabItem" ><a data-toggle="tab" href="#activityTab">'.JText::_("COM_BIODIV_BADGES_ACTIVITY").'</a></li>';
+print '     </ul>';
+print '     <div class="tab-content">';
+print '       <div id="speciesTab" class="tab-pane fade in active">';
+print '	      <div id="speciesArticle" ></div>';
+print '       </div>';
+print '       <div id="activityTab" class="tab-pane fade">';
+print '	      <div id="activityArticle" ></div>';
+print '       </div>';
+print '     </div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>';
+print '        <button type="button" class="btn btn-primary" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGES_CLOSE").'</button>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
+
+
+print '<div id="awardModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header text-right">';
+//print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="besAward"></div>';
+print '      </div>';
+print '	  <div class="modal-footer">';
+if ( $this->certificateData and $this->newAward ) {
+	print '<button id="printCert" type="button" class="btn btn-lg btn-info" data-dismiss="modal" data-toggle="modal" '.
+				'data-target="#certificateModal" data-pdfurl="'.JURI::root().$this->newAward->getCertificate().'" '.
+				'data-pdfname="'.$this->certificateData->name.'" data-pdfdate="'.$this->newAward->getAwardDate().'">'.JText::_("COM_BIODIV_BADGES_PRINT_CERT").'</button>';
+}
+print '        <button type="button" class="btn btn-lg btn-primary reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGES_CONTINUE").'</button>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
+
+print '<div id="badgeCompleteModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header text-right">';
+//print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
+print '      </div>'; // modal-header
+print '     <div class="modal-body">';
+print '	    <div id="badgeComplete"></div>';
+print '      </div>'; // modal-body
+//print '	  <div class="modal-footer">';
+//print '        <button type="button" class="btn btn-lg btn-primary reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGES_CANCEL").'</button>';
+//print '      </div>'; // modal-footer
+	  	  
+print '    </div>'; // modal-content
+
+print '  </div>'; // modal-dialog
+print '</div>'; // modal
+
+
+print '<div id="badgeCollectModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header text-right">';
+//print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <div id="besBadge"></div>';
+print '      </div>';
+print '	  <div class="modal-footer text-center">';
+print '        <button type="button" class="btn btn-lg btn-primary reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGES_COLLECT_BADGE").'</button>';
+print '      </div>';
+	  	  
+print '    </div>';
+
+print '  </div>';
+print '</div>';
+
+
+print '<div id="certificateModal" class="modal fade" role="dialog">';
+print '  <div class="modal-dialog"  >';
+
+print '    <!-- Modal content-->';
+print '    <div class="modal-content">';
+print '      <div class="modal-header text-right">';
+//print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+//print '        <h4 class="modal-title"> </h4>';
+print '      </div>';
+print '     <div class="modal-body">';
+print '	    <iframe id="besCertificate"></iframe>';
+print '      </div>';
+print '	  <div class="modal-footer">';
+print '        <button type="button" class="btn btn-lg btn-primary reloadPage" data-dismiss="modal" >'.JText::_("COM_BIODIV_BADGES_CANCEL").'</button>';
 print '      </div>';
 	  	  
 print '    </div>';
@@ -414,6 +770,28 @@ print '</div>';
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
+JHTML::script("com_biodiv/commondashboard.js", true, true);
+JHTML::script("com_biodiv/resourcelist.js", true, true);
+JHTML::script("com_biodiv/resourceupload.js", true, true);
+JHTML::script("com_biodiv/badges.js", true, true);
+
+if ( $this->help ) {
+	JHTML::script("com_biodiv/help.js", true, true);
+}
+JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
+JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js", true, true);
+JHTML::script("https://unpkg.com/pdf-lib", true, true);
+//JHTML::script("https://unpkg.com/pdf-lib@1.4.0/dist/pdf-lib.min.js", array('cross_origin' => ''));
+
+//JHTML::script("https://unpkg.com/leaflet@1.7.1/dist/leaflet.js", array('integrity' => 'sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==', 'cross_origin' => ''));
+
+
+//JHTML::script("https://unpkg.com/downloadjs@1.4.7", true, true);
 
 ?>
+
+
+
+
 

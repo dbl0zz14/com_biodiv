@@ -13,4 +13,16 @@ jQuery(document).ready(function(){
 	jQuery("#schoolSpotlight").load(url, setReloadPage);
 	
 	
+	jQuery("#policiesDone").click(function () {
+		
+		jQuery("#policiesArea").addClass("hidden");
+		jQuery("#avatarArea").removeClass("hidden");
+	});
+	
+	jQuery("#changeAvatar").click( function () {
+		jQuery("#goToDash").addClass("hidden");
+		jQuery("#avatarSavedArea").addClass("hidden");
+		jQuery("#avatarArea").removeClass("hidden");
+		
+	});
 });

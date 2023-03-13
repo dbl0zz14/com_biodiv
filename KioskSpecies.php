@@ -17,11 +17,13 @@ class KioskSpecies {
 	private $maxSpeciesDisplayed;
 	
 	
-	function __construct( $projectId )
+	function __construct( $projectId, $topicId = null )
 	{
 		//error_log ( "KioskSpecies constructor called, projectId = " . $projectId );
 		
 		$this->projectId = $projectId;
+		
+		$this->topicId = $topicId;
 		
 		$this->maxSpeciesDisplayed = 20;
 		
@@ -57,6 +59,22 @@ class KioskSpecies {
 		return $this->speciesLists['allbirds'];
 	}
 	
+	public function getCommonInverts() {
+		return $this->speciesLists['commoninverts'];
+	}
+	
+	public function getAllInverts() {
+		return $this->speciesLists['allinverts'];
+	}
+	
+	public function getCommonInvertebrates() {
+		return $this->speciesLists['commonbirds'];
+	}
+	
+	public function getAllInvertebrates() {
+		return $this->speciesLists['allbirds'];
+	}
+	
 	public function getNothingId() {
 		return $this->nothingId;
 	}
@@ -80,18 +98,30 @@ class KioskSpecies {
 		$this->speciesLists['allmammals'] = array();
 		$this->speciesLists['commonbirds'] = array();
 		$this->speciesLists['allbirds'] = array();
+		$this->speciesLists['commoninverts'] = array();
+		$this->speciesLists['allinverts'] = array();
 		
 		$lang = langTag();
 		
 		// First get the ids of the kiosk filters
 		$db = JDatabase::getInstance(dbOptions());
-		$query = $db->getQuery(true);
-		$query->select("O.option_id")->from("Options O")
-			->innerJoin("ProjectOptions PO on PO.option_id = O.option_id and PO.project_id = " . $this->projectId )
-			->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = 'kiosklist'")
-			->where("O.struc = 'kioskfilter'" );
 		
-		//error_log("query to get list ids created: " . $query->dump() );
+		if ( $this->topicId ) {
+			// Find filter for this topic
+			$query = $db->getQuery(true);
+			$query->select("OD.value")->from("OptionData OD")
+				->where("OD.data_type = 'topicfilter' and OD.option_id = " . $this->topicId );
+		}
+		else {
+			
+			$query = $db->getQuery(true);
+			$query->select("O.option_id")->from("Options O")
+				->innerJoin("ProjectOptions PO on PO.option_id = O.option_id and PO.project_id = " . $this->projectId )
+				->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = 'kiosklist'")
+				->where("O.struc = 'kioskfilter'" );
+		}
+		
+		error_log("query to get list ids created: " . $query->dump() );
 		
 		$db->setQuery($query);
 		$listIds = $db->loadColumn();
@@ -109,7 +139,7 @@ class KioskSpecies {
 				->innerJoin("OptionData OD on SL.list_id = OD.option_id")
 				->order("type, name");
 				
-			//error_log("query to get species for lists created: " . $query->dump() );
+			error_log("query to get species for lists created: " . $query->dump() );
 		
 			$db->setQuery($query);
 			$allSpecies = $db->loadAssocList();

@@ -48,7 +48,7 @@ class BioDivViewKiosk extends JViewLegacy
 			$this->user_key = JRequest::getString("user_key");
 			$app->setUserState('com_biodiv.user_key', $this->user_key);
 		}
-
+		
 		$this->isSchoolUser = Biodiv\SchoolCommunity::isSchoolUser();
 		$this->logoPath = null;
 		if ( $this->isSchoolUser ) {

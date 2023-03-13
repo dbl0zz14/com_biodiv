@@ -14,6 +14,7 @@ else if($this->avatar ){
 	print '<img src="'.$this->avatar->image.'" class="img-responsive" alt="'.$this->avatar->name.' avatar" />';
 	print '<h3 class="text-center">'.$this->avatar->name.'</h3>';
 	
+	
 	print '</div>'; // col-2 5
 	print '</div>'; // row
 	

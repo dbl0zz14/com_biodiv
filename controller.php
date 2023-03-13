@@ -636,11 +636,25 @@ class BioDivController extends JControllerLegacy
 	
   }
 
+   function badge_kiosk_add_animal_next(){
+	  
+	$this->kiosk_add_animal ( 'kioskmediacarousel' );
+	
+  }
+
   
   // Simplified version for kiosk where there are no additional data, just one species id, then return a results template
   function kiosk_add_animal_finish(){
 	  
 	$this->kiosk_add_animal ( 'kioskfeedback' );
+	
+  }
+  
+  
+  // Simplified version for kiosk where there are no additional data, just one species id, then return a results template
+  function badge_kiosk_add_animal_finish(){
+	  
+	$this->kiosk_add_animal ( 'badgekioskfeedback' );
 	
   }
   
@@ -1017,20 +1031,12 @@ class BioDivController extends JControllerLegacy
 	
 		$setDetails = codes_getDetails($set_id, "resourceset");
 	
-		// $errMsg = print_r ( $setDetails, true );
-		// error_log ( "Got resource set details:" );
-		// error_log ( $errMsg );
-	
 		$resource_type = $setDetails['resource_type'];
 		$resource_type or die ("No resource_type");
 
 		$fail = 0;
 	
 		$files = JRequest::getVar('myfile', null, 'files', 'array'); 
-		
-		// $errMsg = print_r ( $files, true );
-		// error_log ( "Got files: " );
-		// error_log ( $errMsg );
 		
 		
 		if(!isset($files['tmp_name'])){
@@ -1050,7 +1056,7 @@ class BioDivController extends JControllerLegacy
 		}
 		if(!$fail){
 			
-			$resourceSet = new Biodiv\ResourceSet ( $set_id );
+			$resourceSet = Biodiv\ResourceSet::createFromId ( $set_id );
 			
 			//$details = codes_getDetails($set_id, "resourceset");
 			$resourceType = $resourceSet->getResourceType();
@@ -1157,6 +1163,180 @@ class BioDivController extends JControllerLegacy
 
   }
   
+  function verify_school_logo(){
+    
+	$app = JFactory::getApplication();
+	$input = $app->input;
+    $school_id = $input->getInt("school_id", 0);
+	error_log ( "Got school id = " . $school_id );
+    
+	if ( !Biodiv\SchoolCommunity::canEditSchool($school_id) ) {
+		error_log ("Cannot edit school " . $school_id );
+		die("Cannot edit school " . $school_id);
+	}
+	error_log ("verify_school_logo - can edit school " . $school_id );
+	
+    $guid = JRequest::getString('guid');
+    if(!$guid){
+      die("No guid");
+    }
+	
+	$done = JRequest::getBool('done');
+	
+	$db = JDatabase::getInstance(dbOptions());
+
+    if($done){
+	  error_log ( "Removing verify row" );
+      $query = $db->getQuery(true);
+      $query->delete($db->quoteName("LogoVerify"));
+      $query->where("school_id = " . (int)$school_id . " AND guid = '$guid'");
+      $db->setQuery($query);
+      $success = $db->execute();
+	  error_log ("Row removed success = " . $success );
+    }
+    else{
+      error_log ( "Adding verify row" );
+      $verify = new stdClass();
+      $verify->school_id = $school_id;
+      $verify->guid = $guid;
+      $success = $db->insertObject("LogoVerify", $verify);
+	  error_log ("Row added success = " . $success );
+    }
+	
+	return $success;
+
+  }
+  
+  
+  function upload_school_logo(){
+	  
+	$app = JFactory::getApplication();
+	$input = $app->input;
+    $school_id = $input->getInt("school_id", 0);
+	error_log ( "upload_school_logo - got school id = " . $school_id );
+	
+	if ( $school_id and Biodiv\SchoolCommunity::canEditSchool($school_id) ) {
+		
+		error_log ( "upload_school_logo - can edit school " . $school_id );
+	
+		$problem = false;
+	
+		$fail = 0;
+	
+		$files = JRequest::getVar('myfile', null, 'files', 'array'); 
+		
+		error_log ( "upload_school_logo - got myfile var" );
+		
+		if(!isset($files['tmp_name'])){
+		  error_log ( "No file uploaded" );
+		  addUploadMessage("error", "No file uploaded");
+		  $fail = 1;
+		}
+		$tmpNames = $files['tmp_name'];  // assuming multiple upload
+		$clientNames = $files['name'];  // assuming multiple upload
+		$fileSizes = $files['size'];  // assuming multiple upload
+		$fileTypes = $files['type'];  // assuming multiple upload
+		if(!is_array($tmpNames)){  // if single upload
+		  $tmpNames = array($tmpNames);
+		  $clientNames = array($clientNames);
+		  $fileSizes = array($fileSizes);
+		  $fileTypes = array($fileTypes);
+		}
+		if(!$fail){
+			
+			$dirPath = Biodiv\SchoolCommunity::getSchoolLogoPath();
+			
+			foreach($tmpNames as $index => $tmpName){
+			  
+				$clientName = $clientNames[$index];
+				$fileSize = $fileSizes[$index];
+				$fileType = $fileTypes[$index];
+				
+				error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
+				
+				if ( $fileSize > BIODIV_MAX_FILE_SIZE ){
+					error_log ( "Filesize too big" );
+					addUploadMessage("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE/1000000 . "MB");
+					$problem = true;
+					
+				}
+				
+				//	$tmpName = JFile::makeSafe($tmpName);
+				// NB can get this error if PHP max dilsize and upload size are too small:
+				else if(!is_uploaded_file($tmpName)){
+					//error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
+					
+					$maxSize = BIODIV_MAX_FILE_SIZE/1000000;
+					
+					addUploadMessage("error", "$clientName could not be uploaded - file may be too large (max filesize is ". $maxSize . "MB) or there may be a network problem");
+					$problem = true;
+				}
+				else {
+					
+					$ext = strtolower(JFile::getExt($clientName));
+					$newName = md5_file($tmpName) . "." . $ext;
+
+					$newFullName = "$dirPath/$newName";
+					
+					if(JFile::exists($newFullName)){
+						addUploadMessage("warning", "File already uploaded: $clientName");
+						//$problem = true;
+						
+						$result = Biodiv\SchoolCommunity::updateSchoolLogo ( $school_id, $newFullName );
+												
+						if ( !$result ) {
+							error_log ("Problem updating school logo instance" );
+							JFile::delete($newFullName);
+							$problem = true;
+						}
+					}
+					else {
+						
+						$exists = JFile::exists($tmpName);
+						if ( !$exists ) {
+							error_log ( "tmpName file does not exist" );
+						}
+						else {
+							error_log ( "tmpName file does exist, " . $tmpName );
+						}
+						
+						error_log ("About to call JFile::upload, newFullName = " . $newFullName );
+						
+						$success = JFile::upload($tmpName, $newFullName);
+						
+						error_log ("Uploaded file success = " . $success );
+						
+						if(!$success){
+							error_log ( "New file - upload failed... "   );
+							addUploadMessage("error","File upload unsuccessful for $clientName");
+							$problem = true;
+						}	
+						else {
+							
+							$result = Biodiv\SchoolCommunity::updateSchoolLogo ( $school_id, $newFullName );
+												
+							if ( !$result ) {
+								error_log ("Problem updating school logo instance" );
+								JFile::delete($newFullName);
+								$problem = true;
+							}
+						}
+					}
+				}
+				
+				if ( $problem ) addUploadMessage("error", "Failed to upload school logo " . $clientName );
+			
+			}
+		}
+	}
+	else {
+		error_log ("No school id or cannot edit school $school_id");
+	}
+
+  }
+  
+  
+  
   function save_resource () {
 	  
 	$success = true;
@@ -1228,6 +1408,27 @@ class BioDivController extends JControllerLegacy
 	return $success;
 	  
   }
+  
+	function write_badge_progress () {
+	   
+		$schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
+		if ( $schoolUser ) {
+			
+			if ( $schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+				
+				$app = JFactory::getApplication();
+				$input = $app->input;
+				
+				$badgeId = $input->getInt("badge", 0);
+				$classId = $input->getInt("class_id", 0);
+				$relatedId = $input->getInt("related", 0);
+				
+				Biodiv\Badge::writeBadgeProgress ( $schoolUser, $classId, $badgeId, $relatedId );
+			}
+		}
+	}
+  
+  
 
   function sequence_photos(){
     $app = JFactory::getApplication();
@@ -1446,28 +1647,26 @@ class BioDivController extends JControllerLegacy
 		$schoolIds = $input->get('school', array(), 'ARRAY');
 		
 		Biodiv\SchoolCommunity::pairEcologist ( $ecolId, $schoolIds );
-			
-		
+	
 	}
   }
   
-  
-  function edit_student () {
-	  
-	if ( Biodiv\SchoolCommunity::isTeacher() ) {
-		  
+  function delete_post () {
+	
+	$schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
+	if ( $schoolUser ) {
+		
 		$app = JFactory::getApplication();
 		$input = $app->input;
 			
-		$studentId = $input->getInt("studentId", 0);
-		$studentName = $input->getString("studentName", 0);
-		$includePoints = $input->getInt('studentActive', 0);
+		$setId = $input->getInt("set_id", 0);
 		
-		Biodiv\SchoolCommunity::editStudent ( $studentId, $studentName, $includePoints );
+		Biodiv\Post::deletePost ( $schoolUser, $setId );
 		
 	}
   }
-
+  
+  
   
   // upload more files with same deployment, collection dates as those given
   function upload_more () {
@@ -1526,7 +1725,10 @@ class BioDivController extends JControllerLegacy
     $site_id = JRequest::getInt('site_id');
     $site_id or die("No site_id");
     
-	$upload_id = addUpload ( $isCamera, $site_id );
+	$badge_id = JRequest::getInt('badge', 0);
+    $class_id = JRequest::getInt('class_id', 0);
+    
+	$upload_id = addUpload ( $isCamera, $site_id, $badge_id, $class_id );
 	
 	if(!$upload_id){
 	  $this->input->set('view', 'upload');

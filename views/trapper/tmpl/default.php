@@ -14,7 +14,6 @@ print "<h5 class='bg-warning highlighted add-padding-all'>".JText::_("COM_BIODIV
 
 print '<button type="button" id="add_site" class="btn btn-success btn-lg">'.JText::_("COM_BIODIV_TRAPPER_ADD_SITE").'</button>';
 
-
 if(count($this->sites) == 0){
   print "<p class='bg-warning'>".JText::_("COM_BIODIV_TRAPPER_NO_SITES")."</p>\n";
  }
@@ -154,7 +153,11 @@ if(count($this->sites) == 0){
 	 $editLink .= " class='biodiv_editable_checklist biodiv_edit_site_${site_id}'";
 	 $editLink .= " data-type='checklist'></a>";
 	 print "<td>" . $editLink . "</td>\n";
-     print "<td><a href='". BIODIV_ROOT . "&view=upload&site_id=$site_id'>" . biodiv_label_icons("upload", JText::_("COM_BIODIV_TRAPPER_UPLOAD")) . "</a></td>\n";
+	 $uploadUrl = "&view=upload&site_id=".$site_id;
+	 if ( $this->badge && $this->classId ) {
+		 $uploadUrl .= "&badge=".$this->badge."&class_id=".$this->classId;
+	 }
+     print "<td><a href='". BIODIV_ROOT . $uploadUrl ."'>" . biodiv_label_icons("upload", JText::_("COM_BIODIV_TRAPPER_UPLOAD")) . "</a></td>\n";
      print "<td data-toggle='tooltip' data-placement='top' title='".JText::_("COM_BIODIV_TRAPPER_EDIT_HELP")."'><a class='biodiv_edit_enable' id='biodiv_edit_site_${site_id}'>" . biodiv_label_icons("edit", JText::_("COM_BIODIV_TRAPPER_EDIT")) . "</a></td>\n";
 	 
      print "</tr>";

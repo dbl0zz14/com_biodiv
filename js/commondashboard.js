@@ -1,5 +1,8 @@
 
 
+//import { PDFDocument } from 'pdf-lib'
+
+
 function flyBee () {
 	
 	let path = anime.path('#path');
@@ -65,8 +68,107 @@ function flyBee () {
 }
 
 
+	
+function spinImage () {
+	
+	let countJumps = 0;
+	let animation = anime({
+		autoplay: false,
+		targets: [".spinImage"],
+	 
+		keyframes: [
+			{ scaleX: 0.9, translateX:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 0.0, translateX:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 1.0, translateY:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 0.0, translateX:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 1.0, translateY:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 0.0, translateX:0 },
+			{ scaleX: 0.5, translateX:0 },
+			{ scaleX: 1.0, translateY:0 }
+		  ],
+	 
+		duration: 1000,
+		easing: 'easeOutQuad'
+	});
+
+	animation.restart();
+	
+};
+
 
 	
+function expandImage () {
+	
+	let countJumps = 0;
+	let animate = anime({
+		autoplay: false,
+		targets: [".expandImage"],
+	 
+		keyframes: [
+			{ scaleY: 1.0, scaleX: 1.0, translateY:0 },
+			{ scaleY: 1.2, scaleX: 1.2, translateY:10 },
+			{ scaleY: 1.0, scaleX: 1.0, translateY:0 }
+		  ],
+	 
+		duration: 1000,
+		easing: 'easeOutQuad',
+		complete: () => {
+			countJumps += 1;
+			if ( countJumps < 2 ) {
+				animate.restart();
+			}
+		}
+	});
+
+	animate.restart();
+	
+};
+
+
+
+function wobbleImage () {
+	
+	let countJumps = 0;
+	let bounceUp = anime({
+		autoplay: false,
+		targets: [".wobbleImage"],
+	 
+		keyframes: [
+			{ rotate: -10 },
+			{ rotate: 9, translateY:-2 },
+			{ rotate: -8, translateY:-4 },
+			{ rotate: 7, translateY:-6 },
+			{ rotate: -6, translateY:-8 },
+			{ rotate: 5, translateY:-6 },
+			{ rotate: -4, translateY:-5 },
+			{ rotate: 3, translateY:-4 },
+			{ rotate: -2, translateY:-2 },
+			{ rotate: 1, translateY:-1 },
+			{ rotate: 0, translateY:0 }
+		  ],
+	 
+		duration: 1000,
+		easing: 'easeOutQuad'
+		// complete: () => {
+			// countJumps += 1;
+			// if ( countJumps < 4 ) {
+				// bounceUp.restart();
+			// }
+		// }
+	});
+
+	bounceUp.restart();
+	
+};
+
+
+
+
 function animateAvatar () {
 	
 	let countJumps = 0;
@@ -169,49 +271,28 @@ function displayAllBadges () {
 };
 
 
-function badgesLoaded () {
+// function badgesLoaded () {
 	
-	setReloadPage();
+	// setReloadPage();
 	
-	jQuery(".badge_card").click( function () {
+	// jQuery(".badge_card").click( function () {
 		
-		let badgeCardId = this.id;
-		let idbits = badgeCardId.split("_");
-		let badgeId = idbits.pop();
+		// let badgeCardId = this.id;
+		// let idbits = badgeCardId.split("_");
+		// let badgeId = idbits.pop();
 		
-		let tasksShown = jQuery('#badge_tasks_' + badgeId).text();
+		// let tasksShown = jQuery('#badge_tasks_' + badgeId).text();
 		
-		if ( tasksShown ) {
-			emptyTasks ( badgeId );
-		}
-		else {
-			displayTasks ( badgeId );
-		}
+		// if ( tasksShown ) {
+			// emptyTasks ( badgeId );
+		// }
+		// else {
+			// displayTasks ( badgeId );
+		// }
 	
-	});
-}
+	// });
+// }
 
-
-
-function tasksLoaded () {
-	
-	setReloadPage();
-	
-	jQuery(".collectTask").click ( collectTask );
-	
-	jQuery(".task_btn").click ( displayTaskArticle );
-	
-	jQuery(".species_btn").click ( displaySpeciesArticle );
-	
-	jQuery(".upload_task").click ( uploadTask );
-	
-	jQuery(".unlock_species").click ( unlockSpecies );
-	
-	jQuery(".collectedBadges").click ( displayCollected );
-	
-	jQuery(".collectBadges").click ( collectBadges );
-	
-}
 
 
 function collectTask () {
@@ -253,43 +334,20 @@ function collectTask () {
 }
 	
 
-function displayTaskArticle () {
-	
-	let taskCardId = this.id;
-	let idbits = taskCardId.split("_");
-	let taskId = idbits.pop();
-	
-	jQuery('#task_article').empty();
-	
-	let url = BioDiv.root + "&view=task&format=raw&id=" + taskId;
-	jQuery('#task_article').load(url, setReloadPage);
-	
-};
 
-
-function displaySpeciesArticle () {
-	
-	let taskCardId = this.id;
-	let idbits = taskCardId.split("_");
-	let taskId = idbits.pop();
-	
-	jQuery('#species_article').empty();
-	
-	let url = BioDiv.root + "&view=species&format=raw&id=" + taskId;
-	jQuery('#species_article').load(url, setReloadPage);
-	
-};
 
 
 function displayHelpArticle () {
 	
 	let taskCardId = this.id;
 	let idbits = taskCardId.split("_");
-	let articleId = idbits.pop();
+	//let articleId = idbits.pop();
+	let helpType = idbits.pop();
 	
 	jQuery('#helpArticle').empty();
 	
-	let url = BioDiv.root + "&view=article&format=raw&id=" + articleId;
+	//let url = BioDiv.root + "&view=article&format=raw&id=" + articleId;
+	let url = BioDiv.root + "&view=helparticle&format=raw&type=" + helpType;
 	jQuery('#helpArticle').load(url, setReloadPage);
 	
 };
@@ -324,23 +382,23 @@ function unlockSpecies () {
 
 
 
-function setUploadButtons () {
+// function setUploadButtons () {
 	
-	setUploadButton();
-	setTaskUploadButton();
+	// setUploadButton();
+	// setTaskUploadButton();
 	
-	jQuery(".doneNoFiles").click( function() {
-		let noFilesId = this.id;
-		let idbits = noFilesId.split("_");
-		let taskId = idbits.pop();
+	// jQuery(".doneNoFiles").click( function() {
+		// let noFilesId = this.id;
+		// let idbits = noFilesId.split("_");
+		// let taskId = idbits.pop();
 		
-		let url = BioDiv.root + "&view=updatetask&format=raw&done=1&id=" + taskId;
-		jQuery('#displayArea').load(url, taskDoneOrUploaded);
-		//jQuery('#uploadTask').load(url, taskDoneOrUploaded);
-	});
+		// let url = BioDiv.root + "&view=updatetask&format=raw&done=1&id=" + taskId;
+		// jQuery('#displayArea').load(url, taskDoneOrUploaded);
+		// //jQuery('#uploadTask').load(url, taskDoneOrUploaded);
+	// });
 	
 	
-}
+// }
 
 function taskDoneOrUploaded () {
 	
@@ -628,17 +686,188 @@ function triggerForm () {
 	jQuery(this).find("form").trigger("submit");
 }
 	
-
-// function reloadCurrentPage () {
-	// window.location.reload(true);
-// }
 	
+function loadResourceSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	
+	const href = "bes-resource-set?set_id=" + setId;
+	
+	window.location.href = href;
+}
 
-// function setReloadPage () {	
-	// jQuery ('.reloadPage').click( function () {
-		// reloadCurrentPage();
-	// });
-// }
+
+function toggleLike () {
+	
+	//e.preventDefault();
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	if ( jQuery("#resourceSet_" + setId).hasClass("likedByMe") ) {
+		unlikeSetId ( setId);
+	}
+	else {
+		likeSetId ( setId );
+	}
+	
+}
+
+function likeSet ( e ) {
+	
+	e.preventDefault();
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	likeSetId ( setId );
+}
+
+
+function unlikeSet ( e ) {
+	
+	e.preventDefault();
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	unlikeSetId ( setId );
+	
+}
+
+function likeSetId ( setId ) {
+	
+	jQuery("#likeSet_" + setId).hide();
+	jQuery("#unlikeSet_" + setId).show();
+	jQuery("#resourceSet_" + setId).addClass ( "likedByMe" );
+	let likeUrl = BioDiv.root + "&view=likeresourceset&format=raw&like=1&id=" + setId;
+	jQuery("#numSetLikes_" + setId).load(likeUrl);
+	
+}
+
+
+function unlikeSetId ( setId ) {
+	
+	jQuery("#unlikeSet_" + setId).hide();
+	jQuery("#likeSet_" + setId).show();
+	jQuery("#resourceSet_" + setId).removeClass ( "likedByMe" );
+	let likeUrl = BioDiv.root + "&view=likeresourceset&format=raw&like=0&id=" + setId;
+	jQuery("#numSetLikes_" + setId).load(likeUrl);
+}
+
+
+function faveSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	faveSetId ( setId );
+}
+
+
+function unfaveSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	unfaveSetId ( setId );
+	
+}
+
+function faveSetId ( setId ) {
+	
+	jQuery("#faveSet_" + setId).hide();
+	jQuery("#unfaveSet_" + setId).show();
+	jQuery("#resourceSet_" + setId).addClass ( "favedByMe" );
+	let faveUrl = BioDiv.root + "&view=favouriteresourceset&format=raw&fave=1&id=" + setId;
+	jQuery.ajax(faveUrl);
+	
+}
+
+
+function unfaveSetId ( setId ) {
+	
+	jQuery("#unfaveSet_" + setId).hide();
+	jQuery("#faveSet_" + setId).show();
+	jQuery("#resourceSet_" + setId).removeClass ( "favedByMe" );
+	let faveUrl = BioDiv.root + "&view=favouriteresourceset&format=raw&fave=0&id=" + setId;
+	jQuery.ajax(faveUrl);
+}
+
+
+function pinSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	pinSetId ( setId );
+}
+
+
+function unpinSet () {
+	
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	unpinSetId ( setId );
+	
+}
+
+function pinSetId ( setId ) {
+	
+	jQuery("#pinSet_" + setId).hide();
+	jQuery("#unpinSet_" + setId).show();
+	let faveUrl = BioDiv.root + "&view=pinresourceset&format=raw&pin=1&id=" + setId;
+	jQuery.ajax(faveUrl);
+	
+}
+
+
+function unpinSetId ( setId ) {
+	
+	jQuery("#unpinSet_" + setId).hide();
+	jQuery("#pinSet_" + setId).show();
+	let faveUrl = BioDiv.root + "&view=pinresourceset&format=raw&pin=0&id=" + setId;
+	jQuery.ajax(faveUrl);
+}
+
+
+function displayReadOnlyBadgeArticle () {
+	
+	jQuery("#badgeModal").modal('show');
+	
+	let badgeBtnId = this.id;
+	let idbits = badgeBtnId.split("_");
+	let badgeId = idbits.pop();
+	
+	jQuery('#badgeArticle').empty();
+	
+	let url = BioDiv.root + "&view=badgearticle&format=raw&readonly=1&id=" + badgeId;
+	jQuery('#badgeArticle').load(url, badgeArticleLoaded);
+	
+};
+
+
+function displayBadgeCompleteArticle () {
+	
+	jQuery("#badgeModal").modal('show');
+	
+	let badgeBtnId = this.id;
+	let idbits = badgeBtnId.split("_");
+	let badgeId = idbits.pop();
+	
+	jQuery('#badgeArticle').empty();
+	
+	let url = BioDiv.root + "&view=badgearticle&format=raw&complete=1&id=" + badgeId;
+	jQuery('#badgeArticle').load(url, badgeArticleLoaded);
+	
+};
+
+
+function badgeArticleLoaded () {
+	
+	setReloadPage();
+		
+}
 
 
 async function loadPdfThumb () {
@@ -700,12 +929,166 @@ async function loadPdfThumb () {
 function loadPdfThumbnails () {
 	jQuery(".pdfThumb").each(loadPdfThumb);
 }
+
+async function modifyPdf() {
+      // Fetch an existing PDF document
+      const url = 'https://pdf-lib.js.org/assets/with_update_sections.pdf'
+  		const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
+
+      // Load a PDFDocument from the existing PDF bytes
+      const pdfDoc = await PDFDocument.load(existingPdfBytes)
+
+      // Embed the Helvetica font
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+
+      // Get the first page of the document
+      const pages = pdfDoc.getPages()
+      const firstPage = pages[0]
+
+      // Get the width and height of the first page
+      const { width, height } = firstPage.getSize()
+
+      // Draw a string of text diagonally across the first page
+      firstPage.drawText('This text was added with JavaScript!', {
+        x: 5,
+        y: height / 2 + 300,
+        size: 50,
+        font: helveticaFont,
+        color: rgb(0.95, 0.1, 0.1),
+        rotate: degrees(0),
+      })
+
+      // Serialize the PDFDocument to bytes (a Uint8Array)
+      const pdfBytes = await pdfDoc.save()
+	  
+}
+
+
+async function loadCertificate() {
 	
+	//await import("https://unpkg.com/pdf-lib@1.4.0/dist/pdf-lib.min.js");
+	//await import(PDFDocument);
+	
+	const pdfUrl = jQuery(this).data("pdfurl");
+	const pdfName = jQuery(this).data("pdfname");
+	const pdfDate = jQuery(this).data("pdfdate");
+	
+	const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
+	
+	// Load a PDFDocument from the existing PDF bytes
+	//const pdfDoc = await PDFLib.PDFDocument.create();
+    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+	
+	// Embed the Helvetica font
+    const helveticaFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+	
+	// Get the first page of the document
+	const pages = pdfDoc.getPages();
+	const firstPage = pages[0];
+
+	// Get the width and height of the first page
+	const { width, height } = firstPage.getSize();
+
+	// What's our text width
+	const textWidth = helveticaFont.widthOfTextAtSize(pdfName, 30);
+	const textStart = (width - textWidth) / 2;
+	
+	firstPage.drawText(pdfName, {
+		x: textStart,
+		y: height * 0.75 ,
+		size: 30,
+		font: helveticaFont,
+		color: PDFLib.rgb(0.3,0.3,0.3),
+		rotate: PDFLib.degrees(0),
+	})
+	
+	firstPage.drawText(pdfDate, {
+		x: width*0.75,
+		y: height * 0.25 ,
+		size: 14,
+		font: helveticaFont,
+		color: PDFLib.rgb(0.3,0.3,0.3),
+		//rotate: PDFLib.degrees(0),
+	})
+	
+	const viewerPrefs = pdfDoc.catalog.getOrCreateViewerPreferences();
+	viewerPrefs.setHideToolbar(true);
+	viewerPrefs.setHideMenubar(true);
+	viewerPrefs.setHideWindowUI(true);
+	
+	const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+	document.getElementById('besCertificate').src = pdfDataUri;
+	  
+	  
+	  
+	// const url = 'https://pdf-lib.js.org/assets/with_update_sections.pdf'
+  		// const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
+
+      // // Load a PDFDocument from the existing PDF bytes
+      // const pdfDoc = await PDFDocument.load(existingPdfBytes)
+
+      // // Embed the Helvetica font
+      // const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+
+      // // Get the first page of the document
+      // const pages = pdfDoc.getPages()
+      // const firstPage = pages[0]
+
+      // // Get the width and height of the first page
+      // const { width, height } = firstPage.getSize()
+
+      // // Draw a string of text diagonally across the first page
+      // firstPage.drawText('This text was added with JavaScript!', {
+        // x: 5,
+        // y: height / 2 + 300,
+        // size: 50,
+        // font: helveticaFont,
+        // color: rgb(0.95, 0.1, 0.1),
+        // rotate: degrees(0),
+      // })
+
+      // // Serialize the PDFDocument to bytes (a Uint8Array)
+      // const pdfBytes = await pdfDoc.save()
+
+			// // Trigger the browser to download the PDF document
+      // download(pdfBytes, "pdf-lib_modification_example.pdf", "application/pdf");
+    // }
+	
+	
+	// const pdfDoc = await PDFLib.PDFDocument.create();
+	// const page = pdfDoc.addPage([350, 400]);
+	// page.moveTo(110, 200);
+	// page.drawText('Hello World!');
+	// const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+	// document.getElementById('pdf').src = pdfDataUri;
+}
+
+
+function toggleActiveFilter () {
+	
+	let allTogglable = jQuery(".toggleActive");
+	allTogglable.removeClass("activeFilterPanel");
+	allTogglable.find("img").each( function () {
+		let icon = jQuery(this).data("icon");
+		jQuery(this).attr("src", icon); 
+	});
+	
+	let currElement = jQuery(this);
+	let currImage = currElement.find("img");
+	let activeIcon = currImage.data("activeicon");
+	
+	currElement.addClass("activeFilterPanel");
+	currImage.attr("src", activeIcon );
+}	
+
+
+
 	
 jQuery(document).ready(function(){
 	
 	setReloadPage();
 	
+	jQuery(".toggleActive").click(toggleActiveFilter);
 	
 	// ------------------------------- new userAgent
 	
@@ -714,20 +1097,21 @@ jQuery(document).ready(function(){
 		jQuery(this).addClass("active");
 	});
 	
-	jQuery("#saveAvatar").click( function() {
+	jQuery(".saveAvatar").click( function() {
 		
-		let activeAvatars = jQuery(".avatarBtn.active");
-		if ( activeAvatars.length > 0 ) {
-			let id = activeAvatars[0].id;
-			let idbits = id.split("_");
-			let avatarId = idbits.pop();
+		let id = jQuery(this).attr("id");
+		let idbits = id.split("_");
+		let avatarId = idbits.pop();
+		
+		let url = BioDiv.root + "&view=saveavatar&format=raw&id=" + avatarId;
+		jQuery("#avatarSavedArea").load(url, function () {
+			jQuery("#avatarSavedArea").removeClass("hidden");
+			jQuery("#avatarArea").addClass("hidden");
+			setReloadPage();
+			jQuery("#goToDash").removeClass("hidden");
 			
-			let url = BioDiv.root + "&view=saveavatar&format=raw&id=" + avatarId;
-			jQuery("#avatarArea").load(url, function () {
-				setReloadPage();
-				jQuery("#goToDash").show();
-			});
-		}
+		});
+	
 		
 		
 	});
@@ -812,6 +1196,7 @@ jQuery(document).ready(function(){
 	jQuery(".studentCelebration").each(loadStudentCelebration);
 	
 	loadPdfThumbnails();
+	
 	
 	//loadAllProgress();
 	

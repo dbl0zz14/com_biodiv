@@ -28,7 +28,7 @@ class BioDivViewResourceSet extends JViewLegacy
     {
 		$this->personId = userID();
 		
-		$this->isEcologist = false;
+		//$this->isEcologist = false;
 		
 		if ( $this->personId ) {
 			
@@ -37,15 +37,17 @@ class BioDivViewResourceSet extends JViewLegacy
 			
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 			
-			$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
+			//$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
 			
 			$this->helpOption = codes_getCode ( "searchresources", "beshelp" );
+			
+			$this->badgeSchemeLink = "bes-badge-scheme";
 			
 			$this->canEdit = false;
 			
 			if ( $this->setId ) {
 				
-				$this->resourceSet = new Biodiv\ResourceSet($this->setId);
+				$this->resourceSet = Biodiv\ResourceSet::createFromId ( $this->setId );
 				
 				$this->resourceFiles = $this->resourceSet->getFiles();
 				

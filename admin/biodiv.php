@@ -21,7 +21,7 @@ include_once "BiodivReport.php";
 include_once "BiodivTransifex.php";
 
 //require_once 'libraries/vendor/guzzlehttp/guzzle/src/Client.php';
-
+require 'libraries/vendor/autoload.php';
 
 define('BIODIV_ADMIN_ROOT', JURI::base() . '?option=' . BIODIV_COMPONENT);
 $document = JFactory::getDocument();
@@ -957,6 +957,45 @@ function createReportFile ( $type, $headings, $rows ) {
 	return $url;
 }
 
+
+function createReportFileTxt ( $type, $rows ) {
+	
+	$reportRoot = JPATH_SITE."/biodivimages/reports";
+	$filePath = $reportRoot."/admin/";
+	
+	$t=time();
+	$dateStr = date("Ymd_His",$t);
+	$filename = $type . '_' . $dateStr . ".txt";
+	
+	$tmpTxtFile = $filePath . "/tmp_" . $filename;
+	$newTxtFile = $filePath . "/" . $filename;
+	
+	// Has the report already been created?
+	if ( !file_exists($newTxtFile) ) {
+		
+		// Creates a new csv file and store it in directory
+		// Rename once finished writing to file
+		if (!file_exists($filePath)) {
+			mkdir($filePath, 0755, true);
+		}
+		
+		$tmpTxt = fopen ( $tmpTxtFile, 'w');
+		
+		// Put each row
+		foreach ( $rows as $row ) {
+			fputs($tmpTxt, $row . "\r\n");
+		}
+		
+		fclose($tmpTxt);
+		
+		rename ( $tmpTxtFile, $newTxtFile );
+
+	}
+	
+	$url = JURI::root()."/biodivimages/reports/admin/".$filename;
+	return $url;
+}
+
 function getAllArticlesForTranslation ( $page, $length ) {
 	
 	$db = JFactory::getDBO();
@@ -1026,6 +1065,19 @@ function getSupportedLanguage ( $tag ) {
 	$lang = $db->loadObject();
 	
 	return $lang;
+}
+
+
+function getSpeciesTranslationLists () {
+	
+	$db = JDatabase::getInstance(dbOptions());
+	
+	$query = $db->getQuery(true)
+			->select("*")
+			->from("SpeciesTranslationLists");
+	$db->setQuery($query);
+	
+	return $db->loadObjectList("id");
 }
 
 

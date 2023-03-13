@@ -10,125 +10,155 @@ defined('_JEXEC') or die;
 
 
 if ( !$this->personId ) {
-	// Please log in button
 	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_STUDENTPROGRESS_LOGIN").'</div>';
-	
 }
-
+else if ( !$this->schoolUser ) {
+	print '<h2>'.JText::_("COM_BIODIV_STUDENTPROGRESS_NOT_SCH_USER").'</h2>';
+}
 else {
 	
 	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "teacherzone");
+	
+	print '</div>'; // col-12
+	print '</div>'; // row
+	
+	// --------------------- Main content
+	
+	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	
+	print '<div id="displayArea">';
+	
+	print '<a href="'.$this->educatorPage.'" class="btn btn-success homeBtn" >';
+	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_STUDENTPROGRESS_EDUCATOR_ZONE");
+	print '</a>';
+	
+	print '<h2><span class="greenHeading">'.JText::_("COM_BIODIV_STUDENTPROGRESS_HEADING").'</span></h2>';
 
-		
+	print '<div class="row">';
+	
 	foreach ( $this->students as $studentId=>$student ) {
 		
 		print '<div class="col-md-4 col-sm-6 col-xs-12">';
 		print '<div class="panel">';
 		print '<div class="panel-body">';
-		print '<div class="row">';
-		print '<div class="col-md-5 col-sm-5 col-xs-5">';
-		print '<img class="img-responsive avatar progressAvatar" src="'.$student->avatar.'" />';
-		print '</div>'; // col-5
-		print '<div class="col-md-7 col-sm-7 col-xs-7">';
+		// print '<div class="row">';
+		// print '<div class="col-md-5 col-sm-5 col-xs-5">';
+		
+		print '<div class="progressGrid">';
+		print '<div class="progressAvatar">';
+		print '<img class="img-responsive avatar" src="'.$student->avatar.'" />';
+		print '</div>'; // progressAvatar
+		
+		print '<div class="progressName">';
 		print '<div>'.$student->name.'</div>';
+		print '</div>'; // progressName
+		
+		print '<div class="progressUsername">';
 		print '<div>'.$student->username.'</div>';
-		print '<div>'.$student->grandTotal.' '.JText::_("COM_BIODIV_STUDENTPROGRESS_POINTS").'</div>';
-		print '</div>'; // col-7
-		print '</div>'; // row
+		print '</div>'; // progressUsername
 		
-		print '<div class="row small-gutter">';
-				
-		print '<div class="col-md-4 col-sm-4 col-xs-4">';	
-		print '</div>';
-		
-		foreach ( $this->modules as $module ) {
-			$moduleId = $module->module_id;
-			$moduleImg = $module->icon;
-			$imgClass = "moduleIcon" . $module->name;
-			print '<div class="col-md-2 col-sm-2 col-xs-2">';	
-			print '<img src="'.$moduleImg.'" class="'.$imgClass.'">';
-			print '</div>';
+		if ( $student->max_level == 3 ) {
+			
+			print '<div class="progressAward_1 progressAwardImg">';
+			print '<img class="img-responsive" src="'.$this->award1->image.'" />';
+			print '</div>'; // progressAward_1
+			
+			print '<div class="progressAward_2 progressAwardImg">';
+			print '<img class="img-responsive" src="'.$this->award2->image.'" />';
+			print '</div>'; // progressAward_2
+			
+			print '<div class="progressAward_3 progressAwardImg">';
+			print '<img class="img-responsive" src="'.$this->award3->image.'" />';
+			print '</div>'; // progressAward_3
+			
+		}
+		else if ( $student->max_level == 2 ) {
+			
+			print '<div class="progressAward_1">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award1->image.'" />';
+			print '</div>'; // progressAward_1
+			
+			print '<div class="progressAward_2">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award2->image.'" />';
+			print '</div>'; // progressAward_2
+			
+			print '<div class="progressAward_3">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award3->uncollected_image.'" />';
+			print '</div>'; // progressAward_3
+			
+		}
+		else if ( $student->max_level == 1 ) {
+			
+			print '<div class="progressAward_1">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award1->image.'" />';
+			print '</div>'; // progressAward_1
+			
+			print '<div class="progressAward_2">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award2->uncollected_image.'" />';
+			print '</div>'; // progressAward_2
+			
+			print '<div class="progressAward_3">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award3->uncollected_image.'" />';
+			print '</div>'; // progressAward_3
+			
+		}
+		else {
+			
+			print '<div class="progressAward_1">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award1->uncollected_image.'" />';
+			print '</div>'; // progressAward_1
+			
+			print '<div class="progressAward_2">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award2->uncollected_image.'" />';
+			print '</div>'; // progressAward_2
+			
+			print '<div class="progressAward_3">';
+			print '<img class="img-responsive progressAwardImg" src="'.$this->award3->uncollected_image.'" />';
+			print '</div>'; // progressAward_3
+			
 		}
 		
+		// print '<div class="progressBadges">';
+		// print 'Badges progress here';
+		// print '</div>'; // progressBadges
+		
+		$currentBadgeId = 1;
+		$badges = explode(',', $student->badges);
+		foreach ( $this->levels as $level=>$levelText ) {
+			$maxBadgeId = $this->maxBadgeIds[$level];
+			$colorClass = strtolower($levelText);
+			print '<div class="progressLevel_'.$level.'">';
+			print $levelText;
+			print '</div>'; // progressLevel
 			
-		print '</div>'; // row
-	
-	
-		//foreach ( $student->progress as $badgeGroup=>$numPoints ) {
-		//foreach ( $student->progress as $badgeGroup=>$studentPoints ) {
-		foreach ( $this->badgeGroups as $badgeGroup=>$badgeGroupName ) {
-			
-			print '<div class="row small-gutter">';
+			for ( $i = $currentBadgeId; $i <= $maxBadgeId; $i++ ) {
 				
-			print '<div class="col-md-4 col-sm-4 col-xs-4 text-left">';
-	
-			print '<div>'.$this->badgeGroups[$badgeGroup].' </div>';
-			
-			print '</div>'; // col-4
-			
-			$studentPoints = null;
-			
-			if ( array_key_exists ($badgeGroup, $student->progress) ) {
-				$studentPoints = $student->progress[$badgeGroup];
-			}
-			
-			//foreach ($studentPoints as $moduleId=>$numPoints ) {
-			foreach ( $this->moduleIds as $moduleId ) {
-				
-				$available = 0;
-				if ( array_key_exists($badgeGroup, $this->availablePoints) && array_key_exists($moduleId, $this->availablePoints[$badgeGroup]) ) {
-					$available = $this->availablePoints[$badgeGroup][$moduleId];
-				}
-				
-				$numPoints = 0;
-				if ( $studentPoints && array_key_exists($moduleId, $studentPoints) ) {
-					$numPoints = $studentPoints[$moduleId];
-				}
-				if ( $available > 0 ) {
-					$width = round(100*$numPoints/$available);
+				print '<div class="progressBadge_'.$i.'">';
+					
+				if ( in_array($i, $badges) ) {
+					print '<i class="fa fa-lg fa-circle '.$colorClass.'"></i>';
 				}
 				else {
-					$width = 0;
+					print '<i class="fa fa-lg fa-circle-o '.$colorClass.'"></i>';
 				}
-		
-				print '<div class="col-md-2 col-sm-2 col-xs-2">';
-	
-				print '<div class="progress studentProgress" >';
-				print '<div class="progress-bar" role="progressbar" aria-valuenow="'.$numPoints.'" aria-valuemin="2" aria-valuemax="'.$available.'" style="width:'.$width.'%; background-color:'.$this->badgeGroupColour[$badgeGroup].'">'.$numPoints.'</div>';
-				print '</div>';
-				
-				print '</div>'; // col-2
-				
+				print '</div>'; // progressLevel
 			}
-			
-			print '</div>'; // row
-			
-			
+			$currentBadgeId = $maxBadgeId + 1;
 		
 		}
-		print '<div class="row small-gutter">';
-				
-		print '<div class="col-md-4 col-sm-4 col-xs-4">';
-		print JText::_("COM_BIODIV_STUDENTPROGRESS_TOTAL");		
-		print '</div>';
 		
-		foreach ( $this->moduleIds as $moduleId ) {
-			print '<div class="col-md-2 col-sm-2 col-xs-2">';
-			$totalForModule = 0;			
-			if ( array_key_exists ( $moduleId, $student->totalPoints ) ) {
-				$totalForModule = $student->totalPoints[$moduleId];
-			}
-			print $totalForModule;
-			print '</div>';
-		}
-		
-			
-		print '</div>'; // row
+		print '</div>'; // progressGrid
 		
 		print '</div>'; // panel-body
 		print '</div>'; // panel
-		print '</div>'; // col-3
+		print '</div>'; // col-4
+				
 	}
+	
+	print '</div>'; // displayArea
 
 	print '</div>'; // col-12
 

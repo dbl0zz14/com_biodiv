@@ -17,53 +17,36 @@ else {
 	
 	print '<div class="row">';
 	
-	if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		
-		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "teacherzone");
 	
-		Biodiv\SchoolCommunity::generateNav("resourcehub");
+	print '</div>';
 		
-		print '</div>';
-		
-		 
-	
-	}
-	else {
-		
-		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
-		
-		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
-		
-		print '</div>';
-	}
-	
 	print '</div>'; // row
 	
-	print '<div class="row">';
-				
-	print '<div class="col-md-2 col-sm-4 col-xs-4">';
-
-	print '<a href="'.JText::_("COM_BIODIV_RESOURCESET_HUB_PAGE").'" class="btn btn-primary homeBtn" >';
-	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_RESOURCESET_RESOURCES_HOME");
-	print '</a>';
-	
-	print '</div>'; // col-1
-
-	print '</div>'; // row
-				
-				
-	print '<h2>';
-	print '<div class="row">';
-	print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	print '<span class="greenHeading">'.JText::_("COM_BIODIV_RESOURCESET_HEADING").'</span> <small class="hidden-xs hidden-sm">'.JText::_("COM_BIODIV_RESOURCESET_SUBHEADING").'</small> ';
-	print '</div>'; // col-10
-	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
 	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<div id="helpButton_resourcehub" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
 		print '<i class="fa fa-info"></i>';
 		print '</div>'; // helpButton
 	}
-	print '</div>'; // col-2
+	
+	// --------------------- Main content
+	
+	print '<div class="row">';
+	
+	print '<div class="col-md-12 col-sm-12 col-xs-12">';
+
+	print '<a href="'.JText::_("COM_BIODIV_RESOURCESET_HUB_PAGE").'" class="btn btn-success homeBtn" >';
+	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_RESOURCESET_RESOURCES_HOME");
+	print '</a>';
+	
+	
+	print '<h2>';
+	print '<div class="row">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12">';
+	print '<span class="greenHeading">'.JText::_("COM_BIODIV_RESOURCESET_HEADING").'</span> <small class="hidden-xs hidden-sm">'.JText::_("COM_BIODIV_RESOURCESET_SUBHEADING").'</small> ';
+	print '</div>'; // col-12
 	print '</div>'; // row
 	print '</h2>'; 
 	
@@ -71,19 +54,7 @@ else {
 	print '<div class="panel">';
 	print '<div class="panel-body">';
 	
-	print '<div class="row">';
-	print '<div class="col-md-10">';
-	print '<div class="h3">'.$this->resourceSet->getSetName().'</div>';
-	print '</div>'; // col-10
-	print '<div class="col-md-2">';
-	
-	if ( $this->canEdit ) {
-		print '<div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.JText::_("COM_BIODIV_RESOURCESET_ADD_FILES").'</div>';
-	}
-	
-	print '</div>'; // col-2
-	print '</div>'; // row
-	
+	$this->resourceSet->printFullHeader();
 	
 	// Resource files rows
 	$i = 0;
@@ -150,6 +121,10 @@ else {
 	
 	print '</div>'; // panel-body
 	print '</div>'; // panel
+	
+	print '</div>'; // col-12
+	
+	print '</div>'; // row
 
 	print '<div id="editModal" class="modal fade" role="dialog">';
 	print '  <div class="modal-dialog"  >';
@@ -191,6 +166,23 @@ else {
 
 	print '  </div>'; // modal dialog
 	print '</div>'; // addFilesModal
+
+
+	print '<div id="addBadgeModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header text-right">';
+	print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '	    <div id="addBadgeArea" ></div>';
+	print '      </div>';			  
+	print '    </div>'; // modal-content
+
+	print '  </div>'; // modal dialog
+	print '</div>'; // addBadgeModal
 
 
 	if ( $this->gotMessages > 0 ) {
@@ -236,6 +228,30 @@ else {
 
 	print '  </div>';
 	print '</div>';
+	
+	
+	// ------------------------------ Badge article modal
+	print '<div id="badgeModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header text-right">';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '	    <div id="badgeArticle" ></div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <a href="'.$this->badgeSchemeLink.'"><button type="button" class="btn btn-primary">'.JText::_("COM_BIODIV_RESOURCESET_VIEW_SCHEME").'</button></a>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCESET_CLOSE").'</button>';
+	print '      </div>';	  	  
+	print '    </div>';
+
+	print '  </div>';
+	print '</div>';
+
+
+
 
 
 }

@@ -22,7 +22,7 @@ else {
 	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-	Biodiv\SchoolCommunity::generateNav("resourcehub");
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "teacherzone");
 	
 	print '</div>';
 	

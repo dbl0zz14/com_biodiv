@@ -28,15 +28,18 @@ class BioDivViewSearchResources extends JViewLegacy
     {
 		$this->personId = userID();
 		
-		$this->isEcologist = false;
+		//$this->isEcologist = false;
 		
 		if ( $this->personId ) {
 			
 			$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
 			
-			$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
+			//$this->isEcologist = Biodiv\SchoolCommunity::isEcologist();
 			
-			$this->helpOption = codes_getCode ( "searchresources", "beshelp" );
+			$this->helpOption = codes_getCode ( "resourcehub", "beshelp" );
+			
+			$this->educatorPage = "bes-educator-zone";
+			$this->badgeSchemeLink = "bes-badge-scheme";
 			
 			$this->resourceTypes = Biodiv\ResourceFile::getResourceTypes();
 			
@@ -62,13 +65,33 @@ class BioDivViewSearchResources extends JViewLegacy
 			if (property_exists($settingsObj, 'featured')) {
 				$this->featuredImg = $settingsObj->featured;
 			}
+			$this->featuredActiveImg = "";
+			if (property_exists($settingsObj, 'featured_inv')) {
+				$this->featuredActiveImg = $settingsObj->featured_inv;
+			}
 			$this->moreFiltersImg = "";
 			if (property_exists($settingsObj, 'more_filters')) {
 				$this->moreFiltersImg = $settingsObj->more_filters;
 			}
+			$this->moreFiltersActiveImg = "";
+			if (property_exists($settingsObj, 'more_filters_inv')) {
+				$this->moreFiltersActiveImg = $settingsObj->more_filters_inv;
+			}
 			$this->clearFiltersImg = "";
 			if (property_exists($settingsObj, 'clear_filters')) {
 				$this->clearFiltersImg = $settingsObj->clear_filters;
+			}
+			$this->clearFiltersActiveImg = "";
+			if (property_exists($settingsObj, 'clear_filters_inv')) {
+				$this->clearFiltersActiveImg = $settingsObj->clear_filters_inv;
+			}
+			$this->textSearchImg = "";
+			if (property_exists($settingsObj, 'text_search')) {
+				$this->textSearchImg = $settingsObj->text_search;
+			}
+			$this->textSearchActiveImg = "";
+			if (property_exists($settingsObj, 'text_search_inv')) {
+				$this->textSearchActiveImg = $settingsObj->text_search_inv;
 			}
 			
 			$this->totalNumResources = 0;
@@ -81,6 +104,8 @@ class BioDivViewSearchResources extends JViewLegacy
 			
 			$this->heading = "";
 			
+			$this->help = $input->getInt('help', 0);
+			
 			$this->setId = $input->getInt('set_id', 0);
 			
 			$this->getFav = $input->getInt('fav', 0);
@@ -91,27 +116,32 @@ class BioDivViewSearchResources extends JViewLegacy
 			
 			$this->getNew = $input->getInt('new', 0);
 			
+			$this->badgeId = $input->getInt('badge', 0);
+			
 			$this->getApprove = $input->getInt('approve', 0);
 			
 			$this->student = $input->getInt('student', 0);
 			
 			$this->resType = $input->getInt('type', 0);
 			
-			$this->searchStr = $input->getString('search', 0);
+			$searchInput = $input->getString('search', 0);
+			
+			$this->searchStr = null;
+			
+			if ( $searchInput ) {
+				$this->searchStr = filter_var($searchInput, FILTER_SANITIZE_STRING);
+			}
 			
 			//error_log ("Search str = " . $this->searchStr );
 			
 			$this->page = $input->getInt('page', 1);
 			
-			$jsonFilter = $input->getString('filter',0);
+			$this->jsonFilter = $input->getString('filter',0);
 			
 			$this->filter = null;
-			if ( $jsonFilter ) {
-				$this->filter = json_decode ( $jsonFilter );
+			if ( $this->jsonFilter ) {
+				$this->filter = json_decode ( $this->jsonFilter );
 			}
-			
-			$errMsg = print_r ( $this->filter, true );
-			error_log ( "Filter array: " . $errMsg );
 			
 			$this->includeSet = false;
 			$this->includeDoneTasks = false;
@@ -142,135 +172,162 @@ class BioDivViewSearchResources extends JViewLegacy
 										Biodiv\SchoolCommunity::COMMUNITY=>JText::_("COM_BIODIV_SEARCHRESOURCES_SHARE_COMMUNITY"));			
 			
 			
-			if ( $this->setId ) {
+			// if ( $this->setId ) {
 				
-				$this->resourceSet = new Biodiv\ResourceSet($this->setId);
+				// $this->resourceSet = new Biodiv\ResourceSet($this->setId);
 				
-				$this->resourceFiles = $this->resourceSet->getFiles();
+				// $this->resourceFiles = $this->resourceSet->getFiles();
 				
-				$this->heading = $this->resourceSet->getSetName();
+				// $this->heading = $this->resourceSet->getSetName();
 				
-			}
-			else if ( $this->getFav ) {
+			// }
+			// else if ( $this->getFav ) {
 				
-				$searchResults = Biodiv\ResourceFile::getFavResources( $this->filter, $this->page );
+				// $searchResults = Biodiv\ResourceFile::getFavResources( $this->filter, $this->page );
+				
+				// $this->totalNumResources = $searchResults->total;
+				// $this->resourceFiles = $searchResults->resources;
+				
+				// $numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				// $this->numPages = ceil($this->totalNumResources/$numPerPage);
+				
+				// $this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?fav=1';
+				
+			// }
+			// else if ( $this->getLatest ) {
+				
+				// $this->setId = Biodiv\ResourceSet::getLastSetId();
+				
+				// $this->resourceSet = new Biodiv\ResourceSet($this->setId);
+				
+				// $this->resourceFiles = $this->resourceSet->getFiles();
+				
+				// $this->heading = $this->resourceSet->getSetName();
+				
+			// }
+			// else if ( $this->getMine ) {
+				
+				// $searchResults = Biodiv\ResourceFile::getMyResources( $this->filter, $this->page );
+				
+				// $this->totalNumResources = $searchResults->total;
+				// $this->resourceFiles = $searchResults->resources;
+				
+				// $numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				// $this->numPages = ceil($this->totalNumResources/$numPerPage);
+				
+				// $this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?mine=1';
+			// }
+			// else if ( $this->getNew ) {
+				
+				// $searchResults = Biodiv\ResourceFile::getNewResources( $this->filter, $this->page );
+				
+				// $this->totalNumResources = $searchResults->total;
+				// $this->resourceFiles = $searchResults->resources;
+				
+				// $numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				// $this->numPages = ceil($this->totalNumResources/$numPerPage);
+				
+				// $this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?new=1';
+				
+			// }
+			// else if ( $this->getApprove ) {
+				
+				// // Should have tasklist view and refactor the common code
+				// $this->resourceFiles = Biodiv\ResourceFile::getResourcesForApproval();
+				// $this->includeSet = true;
+				// $this->includeDoneTasks = true;
+				
+				// $this->doneTasksNoFiles = Biodiv\Task::getNoFileTasksForApproval();
+				
+			// }
+			// else if ( $this->student ) {
+				
+				// // Should have tasklist view and refactor the common code
+				// $this->resourceFiles = Biodiv\ResourceFile::getStudentResources();
+				// $this->includeSet = true;
+				// $this->includeDoneTasks = true;
+				
+				
+			// }
+			// else if ( $this->resType ) {
+				
+				// //error_log ("Got resource type " . $this->resType );
+				
+				// $searchResults = Biodiv\ResourceFile::getResourcesByType( $this->resType, $this->filter, $this->page );
+				
+				// $this->totalNumResources = $searchResults->total;
+				// $this->resourceFiles = $searchResults->resources;
+				
+				// $numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				// $this->numPages = ceil($this->totalNumResources/$numPerPage);
+				
+				// $this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?type='.$this->resType;
+				
+			// }
+			if ( $this->badgeId ) {
+				
+				$searchResults = Biodiv\ResourceSet::getBadgeResourceSets( $this->schoolUser, $this->badgeId, $this->page );
 				
 				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
+				$this->resourceSets = $searchResults->sets;
 				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				$numPerPage = Biodiv\ResourceSet::NUM_PER_PAGE;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
-				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?fav=1';
+				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?filter=["badge_'.$this->badgeId.'"]';
 				
-			}
-			else if ( $this->getLatest ) {
-				
-				$this->setId = Biodiv\ResourceSet::getLastSetId();
-				
-				$this->resourceSet = new Biodiv\ResourceSet($this->setId);
-				
-				$this->resourceFiles = $this->resourceSet->getFiles();
-				
-				$this->heading = $this->resourceSet->getSetName();
-				
-			}
-			else if ( $this->getMine ) {
-				
-				$searchResults = Biodiv\ResourceFile::getMyResources( $this->filter, $this->page );
-				
-				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
-				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
-				$this->numPages = ceil($this->totalNumResources/$numPerPage);
-				
-				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?mine=1';
-			}
-			else if ( $this->getNew ) {
-				
-				$searchResults = Biodiv\ResourceFile::getNewResources( $this->filter, $this->page );
-				
-				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
-				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
-				$this->numPages = ceil($this->totalNumResources/$numPerPage);
-				
-				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?new=1';
-				
-			}
-			else if ( $this->getApprove ) {
-				
-				// Should have tasklist view and refactor the common code
-				$this->resourceFiles = Biodiv\ResourceFile::getResourcesForApproval();
-				$this->includeSet = true;
-				$this->includeDoneTasks = true;
-				
-				$this->doneTasksNoFiles = Biodiv\Task::getNoFileTasksForApproval();
-				
-			}
-			else if ( $this->student ) {
-				
-				// Should have tasklist view and refactor the common code
-				$this->resourceFiles = Biodiv\ResourceFile::getStudentResources();
-				$this->includeSet = true;
-				$this->includeDoneTasks = true;
-				
-				
-			}
-			else if ( $this->resType ) {
-				
-				//error_log ("Got resource type " . $this->resType );
-				
-				$searchResults = Biodiv\ResourceFile::getResourcesByType( $this->resType, $this->filter, $this->page );
-				
-				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
-				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
-				$this->numPages = ceil($this->totalNumResources/$numPerPage);
-				
-				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?type='.$this->resType;
+				$this->activeBtn = "filter";
 				
 			}
 			else if ( $this->searchStr ) {
 				
 				//error_log ("Got search string " . $this->searchStr );
 				
-				$searchResults = Biodiv\ResourceFile::searchResources( $this->searchStr, $this->filter, $this->page );
+				$searchResults = Biodiv\ResourceSet::searchResourceSets( $this->schoolUser, $this->searchStr, $this->filter, $this->page );
 				
 				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
+				$this->resourceSets = $searchResults->sets;
 				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				$numPerPage = Biodiv\ResourceSet::NUM_PER_PAGE;
+				$this->pageLabelsShown = 6;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
 				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE").'?search='.$this->searchStr;
 				
+				$this->activeBtn = "search";
 			}
 			else {
 				
 				$this->noArgs = true;
 				
-				// If no parameters get the default resources for this person
-				// Default is any pinned resources.
-				// If no pinned resources, get last upload.
-				//$this->setId = Biodiv\ResourceSet::getLastSetId();
-				$searchResults = Biodiv\ResourceFile::getPinnedResources( $this->filter, $this->page );
+				// If no parameters get all resources
+				$searchResults = Biodiv\ResourceSet::searchResourceSets( $this->schoolUser, null, $this->filter, $this->page );
 				
 				$this->totalNumResources = $searchResults->total;
-				$this->resourceFiles = $searchResults->resources;
+				$this->resourceSets = $searchResults->sets;
 				
-				$numPerPage = Biodiv\ResourceFile::NUM_PER_PAGE;
+				$numPerPage = Biodiv\ResourceSet::NUM_PER_PAGE;
+				$this->pageLabelsShown = 6;
 				$this->numPages = ceil($this->totalNumResources/$numPerPage);
 				
 				$this->href = JText::_("COM_BIODIV_SEARCHRESOURCES_SEARCH_PAGE");
 				
 				$this->heading = JText::_("COM_BIODIV_SEARCHRESOURCES_PINNED_RESOURCES");
 				
+				if ( $this->filter ) {
+					if ( (count($this->filter) == 1) and in_array("pin", $this->filter) ) {
+						$this->activeBtn = "featured";
+					}
+					else {
+						$this->activeBtn = "filter";
+					}
+				}
+				else {
+					$this->activeBtn = "all";
+				}
+				
 			}
-		
+			
 		}
 
 		// Display the view

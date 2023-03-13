@@ -27,32 +27,38 @@ class BioDivViewTrapper extends JViewLegacy
     public function display($tpl = null) 
     {
 	  
-	  $isCamera = getSetting("camera") == "yes";
-	  $this->siteHelper = new SiteHelper($isCamera);
+		$app = JFactory::getApplication();
+		$input = $app->input;
+		
+		$this->badge = $input->getInt('badge', 0);
+		$this->classId = $input->getInt('class_id', 0);
 	  
-	  $this->fields = $this->siteHelper->getFieldsArray();
-	  $this->help = $this->siteHelper->getHelpArray();
-	
-      $this->sites = $this->siteHelper->getSites();
+		$isCamera = getSetting("camera") == "yes";
+		$this->siteHelper = new SiteHelper($isCamera);
 
-	  
-	  $this->siteCount = $this->siteHelper->getSitePhotoCount();
-	  
-	  // Projects additions.
-	  $this->projecthelp = "All projects which this site and this user are members of.";
-	  
-	  $this->userprojects = $this->siteHelper->getUserProjects();
-	  
-	  // For each user project get any additional data required
-	  $this->projectsitedata = $this->siteHelper->getProjectSiteData();
-	  
-	  $this->projectsitedataJSON = $this->siteHelper->getProjectSiteDataJSON();
-	  
-	  
-	  $this->projects = $this->siteHelper->getProjects();
-	  
-	  // Display the view
-	  parent::display($tpl);
+		$this->fields = $this->siteHelper->getFieldsArray();
+		$this->help = $this->siteHelper->getHelpArray();
+
+		$this->sites = $this->siteHelper->getSites();
+
+
+		$this->siteCount = $this->siteHelper->getSitePhotoCount();
+
+		// Projects additions.
+		$this->projecthelp = "All projects which this site and this user are members of.";
+
+		$this->userprojects = $this->siteHelper->getUserProjects();
+
+		// For each user project get any additional data required
+		$this->projectsitedata = $this->siteHelper->getProjectSiteData();
+
+		$this->projectsitedataJSON = $this->siteHelper->getProjectSiteDataJSON();
+
+
+		$this->projects = $this->siteHelper->getProjects();
+
+		// Display the view
+		parent::display($tpl);
 
 	}
 }

@@ -30,8 +30,6 @@ class BioDivViewTask extends JViewLegacy
 		
 		$this->personId = (int)userID();
 		
-		error_log ( "Task: person id = " . $this->personId );
-	  
 		if ( $this->personId ) {
 			
 			//Check whether set id 

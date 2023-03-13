@@ -38,11 +38,6 @@ function setUploadButton () {
 	
 }
 
-function setTaskUploadButton () {
-	
-	jQuery('#taskUploadForm').submit(createResourceSet);
-}
-
 function createResourceSet(e) {
 	
 	let url = BioDiv.root + "&view=newresourceset&format=raw";
@@ -58,6 +53,16 @@ function createResourceSet(e) {
 	if ( formId == "resourceUploadForm" ) {
 		
 		success = validateResourceForm(fd);
+	}
+	
+	if ( formId == "badgeUploadForm" ) {
+		
+		success = validateBadgeUploadForm(fd);
+	}
+	
+	if ( formId == "uploadPostForm" ) {
+		
+		success = validateUploadPostForm(fd);
 	}
 	
 	if ( success ) {
@@ -80,6 +85,105 @@ function createResourceSet(e) {
 	}
 	
 }
+
+
+function validateResourceForm ( fd ) {
+	
+	let success = true;
+	
+	// For resourceUploadForm, check values
+	if ( fd.has("uploadName") ) {
+		
+		let maxChars = jQuery("#uploadNameCount").data("maxchars");
+		let actualChars = fd.get("uploadName").length;
+		
+		if ( actualChars <= maxChars ) {
+			jQuery ('[name=uploadName]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Title has too many chars: " + fd.get("uploadName") );
+			success = false;
+			jQuery ('[name=uploadName]').addClass('invalid');
+		}
+	}
+	else {
+		console.log ( "Form has no uploadName: " + fd.get("uploadName") );
+		success = false;
+		jQuery ('[name=uploadName]').addClass('invalid');
+		
+	}
+	
+	if ( fd.has("uploadDescription") ) {
+		
+		let maxChars = jQuery("#uploadDescriptionCount").data("maxchars");
+		let actualChars = fd.get("uploadDescription").length;
+		
+		if ( actualChars <= maxChars ) {
+			jQuery ('[name=uploadDescription]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Description has too many chars: " + fd.get("uploadDescription") );
+			success = false;
+			jQuery ('[name=uploadDescription]').addClass('invalid');
+		}
+	}
+	
+	
+	if ( fd.has("source") && (fd.get("source") == "external") ) {
+		if ( fd.has("externalPermission") && fd.get("externalPermission") == true ) {
+			jQuery ('[name=externalPermission]').removeClass('invalid');
+			if ( fd.has("externalText") && (fd.get("externalText").length > 0) ) {
+				jQuery ('[name=externalText]').removeClass('invalid');
+			}
+			else {
+				success = false;
+				jQuery ('[name=externalText]').addClass('invalid');
+			}
+		}
+		else {
+			success = false;
+			jQuery ('[name=externalPermission]').addClass('invalid');
+		}
+	}
+	
+	return success;
+}
+
+
+
+function validateBadgeUploadForm ( fd ) {
+	
+	let success = true;
+	
+	// For badgeUploadForm, check values
+	if ( fd.has("uploadDescription") ) {
+		
+		let maxChars = jQuery("#uploadDescriptionCount").data("maxchars");
+		let actualChars = fd.get("uploadDescription").length;
+		
+		if ( actualChars <= maxChars ) {
+			jQuery ('[name=uploadDescription]').removeClass('invalid');
+		}
+		else {
+			console.log ( "Description has too many chars: " + fd.get("uploadDescription") );
+			success = false;
+			jQuery ('[name=uploadDescription]').addClass('invalid');
+		}
+	}
+	
+	return success;
+}
+
+
+
+function validateUploadPostForm ( fd ) {
+	
+	let success = true;
+	
+	return success;
+}
+
+
 
 function resourceSetCreated ( data ) {
 	jQuery("#uploadFiles").html(data);
@@ -120,7 +224,11 @@ function doUpload ( isSchool = false ) {
 
 		onSuccess: function(files, data, xhr, pd){
 			jQuery.ajax(checkUploadUrl + "&done=1");
-			//		    alert(data);
+			// const classId = BioDiv.classId;
+			// const badgeId = BioDiv.badge;
+			// if ( badgeId && classId ) {
+				// checkForClassBadge();	
+			// }
 		},
 
 		onError: function(files,status,errMsg,pd){
@@ -159,23 +267,19 @@ function doSchoolUpload () {
 		
 		onSubmit:function(files)
 		{
-			console.log ( "upload resource files on submit function" );
 			jQuery('#fileuploadspinner').show();
 			jQuery.ajax(checkUploadUrl);
 		},
 
 		onSuccess: function(files, data, xhr, pd){
-			console.log ( "upload resource file success, verifying" );
 			jQuery.ajax(checkUploadUrl + "&done=1");
 			//		    alert(data);
 		},
 
 		onError: function(files,status,errMsg,pd){
-			console.log("upload resource file error: " + errMsg);
 		},
 
 		afterUploadAll: function(){
-			console.log ( "upload resource files all uploaded" );
 			jQuery('#fileuploadspinner').hide();
 			schoolUploadDone();
 			

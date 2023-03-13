@@ -14,46 +14,25 @@ if ( !$this->personId ) {
 	print '<div type="button" class="list-group-item btn btn-block reloadPage" >'.JText::_("COM_BIODIV_RESOURCE_LOGIN").'</div>';
 	
 }
-
+else if ( !$this->schoolUser ) {
+	print '<h2>'.JText::_("COM_BIODIV_RESOURCE_NOT_SCH_USER").'</h2>';
+}
 else if ( $this->resourceId ) {
 	
 	print '<div class="row">';
 	
-	if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE ) {
-		
-		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-		Biodiv\SchoolCommunity::generateNav("resourcehub");
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "teacherzone");
 		
-		print '</div>';
+	print '</div>';
 		
-		 
+	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
-	}
-	else {
-		
-		print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
-		
-		Biodiv\SchoolCommunity::generateStudentMasthead ( 0, null, 0, 0, 0, true, true );
-		
-		print '</div>';
-	}
-	
-	print '</div>'; // row
-	
-	print '<div class="row">';
-				
-	print '<div class="col-md-2 col-sm-4 col-xs-4">';
-
-	error_log ( "Back = " . JText::_("COM_BIODIV_RESOURCE_BACK") );
-	print '<button class="btn btn-primary backBtn" >';
+	print '<button class="btn btn-success backBtn" >';
 	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_RESOURCE_BACK");
 	print '</button>';
 	
-	print '</div>'; // col-1
-
-	print '</div>'; // row
-				
 	print '<div id="displayArea">';
 				
 	print '<h2>';
@@ -75,6 +54,9 @@ else if ( $this->resourceId ) {
 	$this->resourceFile->printFull();
 	
 	print '</div>'; // displayArea
+	
+	print '</div>'; // col-12
+	print '</div>'; // row
 
 }
 else {
@@ -108,5 +90,6 @@ JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/resource.js", true, true);
+JHTML::script("com_biodiv/resourceupload.js", true, true);
 
 ?>

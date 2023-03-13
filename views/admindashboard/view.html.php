@@ -52,8 +52,9 @@ class BioDivViewAdminDashboard extends JViewLegacy
 	}
 	else {
 		
-		$this->modules = Biodiv\Module::getModules();
-		$this->moduleIds = array_keys ( $this->modules );
+		// $this->modules = Biodiv\Module::getModules();
+		// $this->moduleIds = array_keys ( $this->modules );
+		$this->lockLevels = Biodiv\Badge::getLockLevels ( $this->schoolUser );
 		
 		$adminSettings = getSetting("school_admin");
 		$adminSettingsObj = json_decode($adminSettings);

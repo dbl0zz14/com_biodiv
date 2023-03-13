@@ -23,6 +23,7 @@ include_once "BiodivFFMpeg.php";
 include_once "BiodivFile.php";
 include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
+include_once "BiodivRecaptcha.php";
 include_once "KioskSpecies.php";
 include_once "Biodiv/BeginnerQuiz.php";
 include_once "Biodiv/ResourceSet.php";
@@ -36,6 +37,9 @@ include_once "Biodiv/MessageList.php";
 include_once "Biodiv/Award.php";
 include_once "Biodiv/SchoolSpecies.php";
 include_once "Biodiv/Module.php";
+include_once "Biodiv/Post.php";
+include_once "Biodiv/Help.php";
+
 
 
 define('BIODIV_MAX_FILE_SIZE', 50000000);
@@ -1444,10 +1448,16 @@ function getSpotterStatistics () {
 		->order("month_classified DESC");
     $db->setQuery($query);
 	
-	error_log ( "getSpotterStatistics, this month query: " . $query->dump() );
+	//error_log ( "getSpotterStatistics, this month query: " . $query->dump() );
 	
     $thisMonth = $db->loadAssocList("person_id");
+	
 	$userThisMonthPos = array_search ( $personId, array_keys($thisMonth) );
+	$thisMonthZero = true;
+	
+	if ( array_key_exists ( $personId, $thisMonth ) && $thisMonth[$personId]["month_classified"] > 0 ) {
+		$thisMonthZero = false;
+	};
 	
 	$prevMonthEnd = date('Ymd', strtotime("last day of last month"));
 	
@@ -1459,13 +1469,29 @@ function getSpotterStatistics () {
 		->order("month_classified DESC");
     $db->setQuery($query);
 	
-    error_log ( "getSpotterStatistics, prev month query: " . $query->dump() );
-	
 	$prevMonth = $db->loadAssocList("person_id");
+	
 	$userPrevMonthPos = array_search ( $personId, array_keys($prevMonth) );
 	
-	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_PREV_MONTH"), getOrdinal($userPrevMonthPos + 1)) );
-	array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_THIS_MONTH"), getOrdinal($userThisMonthPos + 1)) );
+	$prevMonthZero = true;
+	
+	if ( array_key_exists ( $personId, $prevMonth ) && $prevMonth[$personId]["month_classified"] > 0 ) {
+		$prevMonthZero = false;
+	};
+	
+	
+	if ( $prevMonthZero ) {
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_PREV_MONTH"), '-') );
+	}
+	else {
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_PREV_MONTH"), getOrdinal($userPrevMonthPos + 1)) );
+	}
+	if ( $thisMonthZero ) {
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_THIS_MONTH"), '-') );
+	}
+	else {
+		array_push( $statRows, array(JText::_("COM_BIODIV_STATUS_THIS_MONTH"), getOrdinal($userThisMonthPos + 1)) );
+	}
 		
 	return $statRows;
 }	
@@ -4504,6 +4530,124 @@ function getProjectUsers($project_id){
   return $users;
 }
 
+
+function createProject( $projectName, $prettyName, $projectDescription, $accessLevel, $parentProject,
+						$imageDir, $imageFile, $articleId, $listingLevel, $priority, $displayOptions,
+						$speciesLists, $projectAdmins, $isSchoolProject, $existingSchoolId, $newSchoolName ) {
+	
+		
+	$db = \JDatabaseDriver::getInstance(dbOptions());
+	
+	// Create project
+	$fields = new \StdClass();
+	$fields->project_name = $projectName;
+	$fields->project_prettyname = $prettyName;
+	$fields->project_description = $projectDescription;
+	$fields->access_level = $accessLevel;
+	if ( $parentProject ) {
+		$fields->parent_project_id = $parentProject;
+	}
+	$fields->dirname = $imageDir;
+	$fields->image_file = $imageFile;
+	$fields->article_id = $articleId;
+	$fields->listing_level = $listingLevel;
+	
+	$success = $db->insertObject("Project", $fields, 'project_id');
+	if(!$success){
+		error_log ( "Project insert failed" );
+	}	
+	
+	$projectId = $fields->project_id;
+	
+	if ( $success ) {
+		
+		// Set classification priority
+		$priorityFields = new \StdClass();
+		$priorityFields->project_id = $projectId;
+		$priorityFields->option_id = $priority;
+		
+		$success = $db->insertObject("ProjectOptions", $priorityFields);
+		if(!$success){
+			error_log ( "ProjectOptions insert classification priority failed" );
+		}
+		
+		// Set displayOptions
+		foreach ( $displayOptions as $displayId ) {
+			$displayFields = new \StdClass();
+			$displayFields->project_id = $projectId;
+			$displayFields->option_id = $displayId;
+			
+			$success = $db->insertObject("ProjectOptions", $displayFields);
+			if(!$success){
+				error_log ( "ProjectOptions display option failed" );
+			}
+		}
+		
+		// Set species lists
+		foreach ( $speciesLists as $listId ) {
+			$speciesFields = new \StdClass();
+			$speciesFields->project_id = $projectId;
+			$speciesFields->option_id = $listId;
+			
+			$success = $db->insertObject("ProjectOptions", $speciesFields);
+			if(!$success){
+				error_log ( "ProjectOptions species list option failed" );
+			}
+		}
+		
+		// Set project admins
+		foreach ( $projectAdmins as $projectAdmin ) {
+			$adminFields = new \StdClass();
+			$adminFields->project_id = $projectId;
+			$adminFields->person_id = $projectAdmin;
+			$adminFields->role_id = 1;
+			
+			$success = $db->insertObject("ProjectUserMap", $adminFields);
+			if(!$success){
+				error_log ( "ProjectUserMap species list option failed" );
+			}
+		}
+		
+		if ( $isSchoolProject == 1 ) {
+			
+			$schoolFields = new \StdClass();
+			
+			if ( $existingSchoolId > 0 ) {
+				$schoolFields->school_id = $existingSchoolId;
+				$schoolFields->project_id = $projectId;
+			
+				$success = $db->updateObject("School", $schoolFields, 'school_id');
+				if(!$success){
+					error_log ( "School project update failed" );
+				}
+			}
+		}
+		else if ( $isSchoolProject == 2 ) {
+			
+			$schoolFields = new \StdClass();
+			
+			if ( strlen ( $newSchoolName ) > 0 ) {
+				$schoolFields->name = $newSchoolName;
+				$schoolFields->project_id = $projectId;
+				$schoolFields->image = $imageDir . '/' . $imageFile;
+			
+				$success = $db->insertObject("School", $schoolFields, 'school_id');
+				if(!$success){
+					error_log ( "School project insert failed" );
+				}
+			}
+		}
+		return (object)array("projectFields"=>$fields, "schoolFields"=>$schoolFields);
+	}
+	else {
+		return null;
+	}
+	
+}
+
+
+
+
 function isFavourite($photo_id){
   if ( count(myLikes($photo_id)) > 0 ) {
 	  return true;
@@ -7008,7 +7152,7 @@ function getLogos ( $project_id ) {
 
 
 
-function addUpload ( $isCamera, $site_id ) {
+function addUpload ( $isCamera, $site_id, $badge_id = null, $class_id = null ) {
 	
 	//error_log ( "addUpload ( $isCamera, $site_id ) called" );
 	
@@ -7074,8 +7218,14 @@ function addUpload ( $isCamera, $site_id ) {
 		$fields->utc_offset = $utc_offset;
 		$upload_id = codes_insertObject($fields, 'upload');
 		$app->setUserState('com_biodiv.upload_id', $upload_id);
+		
 	}
-	
+	if ( $badge_id ) {
+		$app->setUserState('com_biodiv.badge_id', $badge_id);
+	}
+	if ( $class_id ) {
+		$app->setUserState('com_biodiv.class_id', $class_id);
+	}
 	//error_log ( "addUpload returning, upload_id = " . $upload_id );
 	
 	
@@ -7451,13 +7601,15 @@ function getAssociatedArticleId ( $article_id ) {
 	
 	$assoc_id = null;
 
-	if ($article_id != null)
+	if ( $lang && ($article_id != null) )
 	{
 		$associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $article_id);
 		
 		//print_r($associations);
 		if ( $associations ) {
-			$assoc_id = $associations[$lang]->id;
+			if ( array_key_exists( $lang, $associations ) ) {
+				$assoc_id = $associations[$lang]->id;
+			}
 		}
 	}
 	
@@ -7619,6 +7771,7 @@ function writeTestResults ( $topicId, $sequencesJson, $answersJson, $scorePercen
 	$fields->answers = $answersJson;
 	$fields->score = $scorePercent;
 	$success = $db->insertObject("UserTest", $fields);
+	$userTestId = $db->insertid();
 	if(!$success){
 		error_log ( "UserTest insert failed" );
 	}
@@ -7679,7 +7832,7 @@ function writeTestResults ( $topicId, $sequencesJson, $answersJson, $scorePercen
 		}
 	}
 	
-	return $success;
+	return $userTestId;
 	
 }
 

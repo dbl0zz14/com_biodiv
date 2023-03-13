@@ -10,324 +10,533 @@ defined('_JEXEC') or die;
 
 class Award {
 	
+	private $schoolUser;
 	private $personId;
 	private $awardId;
-	private $awardName;
-	private $awardType;
-	private $moduleId;
-	private $badgeGroupId;
-	private $threshold;
+	private $type;
+	private $name;
+	private $level;
+	private $image;
+	private $uncollectedImage;
+	private $certificate;
+	private $collected;
+	private $userAwardTable;
+	private $classId;
+	private $awardDate;
 	
 	
-	function __construct( $awardId, $awardType, $awardName, $moduleId, $badgeGroupId, $threshold )
+	function __construct( $schoolUser, $classId, $awardId, $type, $name, $level, $image, $uncollectedImage, $certificate, $collected, $awardDate )
 	{
 		
-		$this->personId = userID();
+		if ( !$schoolUser ) {
+			$this->schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		else {
+			$this->schoolUser = $schoolUser;
+		}
+		$this->personId = $this->schoolUser->person_id;
+		$this->userAwardTable = "StudentAwards";
+		if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+			$this->userAwardTable = "TeacherAwards";
+		}
+		
+		$this->classId = $classId;
 		$this->awardId = $awardId;
-		$this->awardName = $awardName;
-		$this->awardType = $awardType;
-		$this->moduleId = $moduleId;
-		$this->badgeGroupId = $badgeGroupId;
-		$this->threshold = $threshold;
-	}
-	
-	public function newAwards () {
+		$this->type = $type;
+		$this->name = $name;
+		$this->level = $level;
+		$this->image = $image;
+		$this->uncollectedImage = $uncollectedImage;
+		$this->certificate = $certificate;
+		$this->collected = $collected;
+		$this->awardDate = $awardDate;
 		
 	}
 	
 	
-	public static function getSchoolAwards ( $schoolId, $module=1 ) {
+	public function getAwardId() {
+		return $this->awardId;
+	}
+	
+	
+	public function getName() {
+		return $this->name;
+	}
+	
+	
+	public function getWhoFor() {
 		
-		$personId = userID();
-		
-		$schoolAwards = array();
-		
-		if ( $personId ) {
-			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
-			
-			$query = $db->getQuery(true)
-				->select("A.*, AO.threshold_per_user as override,  IFNULL(SA.sa_id,0) as existing_award, M.name as module, SA.timestamp as award_time from Award A")
-				->innerJoin("Module M on A.module_id = M.module_id" )
-				->leftJoin("SchoolAwards SA on SA.award_id = A.award_id and SA.school_id = " . $schoolId )
-				->leftJoin("AwardOverride AO on AO.school_id = " . $schoolId . " and AO.award_id = A.award_id")
-				->where("A.module_id = " . $module )
-				->where("award_winner = " . $db->quote("SCHOOL") )
-				->order("A.seq");		
-			
-			$db->setQuery($query);
-			
-			//error_log("Award::getSchoolAwards  select query created: " . $query->dump());
-			
-			$schoolAwards = $db->loadObjectList();
+		if ( $this->classId ) {
+			$classDetails = SchoolCommunity::getClassDetails($this->schoolUser, $this->classId);
+			return $classDetails->name;
 		}
-		
-		return $schoolAwards;
-	}
-	
-	
-	public static function getSchoolModuleAwards ( $schoolId ) {
-		
-		$personId = userID();
-		
-		$schoolAwards = array();
-		
-		if ( $personId ) {
-			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
-
-
-			$maxSelect = "select A.module_id, max(seq) as seq from Award A inner join SchoolAwards SA using (award_id) where SA.school_id = ".$schoolId." group by A.module_id";
-
-			$query = $db->getQuery(true)
-				->select("A.module_id as module_id, A.seq as seq, A.award_id as awardId, A.award_type as awardType, A.award_name as awardName from Award A")
-				->innerJoin("(".$maxSelect.") SA on A.module_id = SA.module_id and A.seq = SA.seq")
-				->where("A.award_winner = 'SCHOOL'");
-				
-			
-			$db->setQuery($query);
-			
-			//error_log("SchoolCommunity constructor select query created: " . $query->dump());
-			
-			$moduleAwards = $db->loadObjectList("module_id");
-			
+		else {
+			return $this->schoolUser->username;
 		}
-		
-		return $moduleAwards;
 	}
 	
 	
-	public static function getMaxSchoolModuleAwards () {
+	public function getCertificate () {
+		return $this->certificate;
+	}
+	
+	
+	public function getAwardDate() {
+		return $this->awardDate;
+	}
+	
+	
+	public function getDisplayImage() {
+		if ( $this->collected ) {
+			return $this->image;
+		}
+		else {
+			return $this->uncollectedImage;
+		}
+	}
+	
+	
+	public function isNew() {
+		return !$this->collected;
+	}
+	
+	
+	public function isCollected() {
+		return $this->collected;
+	}
+	
+	
+	public function collect () {
 		
 		$personId = userID();
 		
-		$schoolAwards = array();
-		
-		if ( $personId ) {
+		if ( $personId == $this->personId ) {
+			
+			$this->collected = 1;
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true);
 
+			// Fields to update.
+			$fields = array(
+				$db->quoteName('collected') . ' = 1',
 
-			$maxSelect = "select SA.school_id, A.module_id, max(seq) as seq from Award A inner join SchoolAwards SA using (award_id) group by SA.school_id, A.module_id";
+			);
 
-			$query = $db->getQuery(true)
-				->select("A.module_id as moduleId, SA.school_id as schoolId, S.name as schoolName, A.seq as seq, A.award_id as awardId, A.award_type as awardType, A.award_name as awardName from Award A")
-				->innerJoin("(".$maxSelect.") SA on A.module_id = SA.module_id and A.seq = SA.seq")
-				->innerJoin("School S on S.school_id = SA.school_id")
-				->where("A.award_winner = 'SCHOOL'")
-				->order("seq DESC, schoolName");
-				
-			
-			$db->setQuery($query);
-			
-			//error_log("SchoolCommunity constructor select query created: " . $query->dump());
-			
-			$moduleAwards = $db->loadObjectList();
-			
-			$schoolAwards = array();
-			foreach ($moduleAwards as $moduleAward) {
-				$schoolName = $moduleAward->schoolName;
-				$moduleId = $moduleAward->moduleId;
-				if ( !array_key_exists( $schoolName, $schoolAwards ) ) {
-					
-					$schoolAwards[$schoolName] = array();
-				}
-				if ( !array_key_exists( $moduleId, $schoolAwards[$schoolName] ) ) {
-					
-					$schoolAwards[$schoolName][$moduleId] = $moduleAward;
-				}
+			// Conditions for which records should be updated.
+			if ( $this->classId ) {
+				$conditions = array(
+					$db->quoteName('class_id') . ' = ' . $this->classId,
+					$db->quoteName('award_id') . ' = ' . $this->awardId
+				);
+			}
+			else {
+				$conditions = array(
+					$db->quoteName('person_id') . ' = ' . $personId,
+					$db->quoteName('award_id') . ' = ' . $this->awardId
+				);
 			}
 			
-		}
-		
-		return $schoolAwards;
-	}
-	
-	
-	
-	public static function getSchoolTargetAwards ( $schoolId, $module=1 ) {
-		
-		$personId = userID();
-		
-		$schoolAwards = array();
-		
-		if ( $personId ) {
-			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
-			
-			$query = $db->getQuery(true)
-				->select("A.*, M.name as module from Award A")
-				->innerJoin("Module M on A.module_id = M.module_id and M.module_id = " . $module )
-				->where("A.award_winner = " . $db->quote("SCHOOL") )
-				->where("A.award_id not in (select award_id from SchoolAwards where school_id = ". $schoolId . ")" )
-				->order("M.module_id, A.seq");		
-			
+			$query->update($db->quoteName($this->userAwardTable))->set($fields)->where($conditions);
+
 			$db->setQuery($query);
 			
-			//error_log("Award::getSchoolAwards  select query created: " . $query->dump());
+			error_log("Award::collect update query created: " . $query->dump());
+
+			$success = $db->execute();
 			
-			$schoolAwards = $db->loadObjectList();
-		}
-		
-		return $schoolAwards;
+			if(!$success){
+				error_log ( $userAwardTable . " insert failed" );
+			}
+		}	
 	}
 	
 	
-	public static function getStudentTargetAwards () {
+	public function printAward ( $includeName = true ) {
 		
-		$personId = userID();
+		print '<a id="awardBtn_'.$this->awardId.'" class="awardBtn" >';
+		print '<div class="awarditem">';
+		if ( $this->collected ) {
+			$animateClass = 'expandImage';
+			if ( $this->classId ) {
+				$animateClass = 'wobbleImage';
+			}
+			print '<img src="'.$this->image.'" class="img-responsive '.$animateClass.'">';
+		}
+		else {
+			print '<img src="'.$this->uncollectedImage.'" class="img-responsive ">';
+		}
+		if ( $includeName ) {
+			print '<div class="awardName h4 text-center">'.$this->name.'</div>';
+		}
+		print '</div>';
+		print '</a>';
+	}
+	
+	
+	public static function createFromId ( $schoolUser, $classId, $awardId ) {
 		
-		$schoolAwards = array();
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
 		
-		if ( $personId ) {
+		$userAwardTable = "StudentAwards";
+		$isTeacher = false;
+		$userAwardWhere = "UA.person_id = " . $personId;
+		if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+			$isTeacher = true;
+			$userAwardTable = "TeacherAwards";
+			$userAwardWhere = "UA.class_id = " . $classId;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.award_id, A.type, A.name, A.level, A.image, A.uncollected_image, A.certificate, UA.collected, ".
+				"DATE_FORMAT(UA.timestamp, '%D %M %Y') as award_date from " . $userAwardTable . " UA")
+			->innerJoin("Award A on A.award_id = UA.award_id")
+			->where("A.role_id = " . $schoolUser->role_id )
+			->where($userAwardWhere)
+			->where("A.award_id = " . $awardId );
+			
+		$db->setQuery($query);
+		
+		error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$award = $db->loadObject();
+		
+		$newAward = new self ( $schoolUser, $classId, $award->award_id, $award->type, $award->name, $award->level, 
+								$award->image, $award->uncollected_image, $award->certificate, $award->collected, $award->award_date );
+		
+		
+		return $newAward;
+	}
+	
+	
+	
+	public static function getNewAwardId ( $schoolUser ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+			
+		if ( $schoolUser ) {
+			$personId = $schoolUser->person_id;
+			
+			$userAwardTable = "StudentAwards";
+			$isTeacher = false;
+			$userAwardWhere = "UA.person_id = " . $personId;
+			if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+				$isTeacher = true;
+				$userAwardTable = "TeacherAwards";
+				$userAwardWhere = "UA.class_id = " . $classId;
+			}
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
 			$query = $db->getQuery(true)
-				->select("A.*, O.option_name as badge_group, M.name as module from Award A")
-				->innerJoin("Options O on O.option_id = A.badge_group_id and O.struc = " . $db->quote("badgegroup"))
-				->innerJoin("Module M on M.module_id = A.module_id ")
-				->where("A.award_winner = " . $db->quote("STUDENT") )
-				->where("A.award_id not in (select award_id from UserAwards where person_id = ". $personId . ")" )
-				->order("A.seq");		
-			
-			$db->setQuery($query);
-			
-			//error_log("Award::getSchoolAwards  select query created: " . $query->dump());
-			
-			$schoolAwards = $db->loadObjectList();
-		}
-		
-		return $schoolAwards;
-	}
-	
-	
-	
-	public static function getStudentStars ( $module = 1 ) {
-		
-		$personId = userID();
-		
-		$starAwards = array();
-		
-		if ( $personId ) {
-			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
-			
-			$query = $db->getQuery(true)
-				->select("A.badge_group_id as group_id, MAX(A.seq) as num_stars from Award A")
-				->innerJoin("UserAwards UA on UA.award_id = A.award_id and UA.person_id = ". $personId )
-				->where("A.module_id = " . $module . " and A.award_type = 'STAR' and A.award_winner = " . $db->quote("STUDENT") )
-				->group("group_id");		
-			
-			$db->setQuery($query);
-			
-			//error_log("Award::getStudentStars  select query created: " . $query->dump());
-			
-			$starAwards = $db->loadObjectList("group_id");
-		}
-		
-		return $starAwards;
-	}
-	
-	
-	
-	public static function getTotalStars ( $module = null ) {
-		
-		$personId = userID();
-		
-		$moduleStr = "";
-		
-		if ( $module ) {
-			$moduleStr = "A.module_id = " . $module . " and ";
-		}
-		
-		$starAwards = array();
-		
-		if ( $personId ) {
-			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
-			
-			$query = $db->getQuery(true)
-				->select("COUNT(A.seq) as num_stars from Award A")
-				->innerJoin("UserAwards UA on UA.award_id = A.award_id and UA.person_id = ". $personId )
-				->where( $moduleStr . "A.award_type = 'STAR' and A.award_winner = " . $db->quote("STUDENT") );
+				->select("UA.award_id from " . $userAwardTable . " UA")
+				->where($userAwardWhere)
+				->where("UA.collected = 0")
+				->order("A.level");
 				
 			$db->setQuery($query);
 			
-			//error_log("Award::getTotalStars  select query created: " . $query->dump());
+			//error_log("unlockBadges new tasks query created: " . $query->dump());
 			
-			$starAwards = $db->loadResult();
+			$awardId = $db->loadResult();
+			
+			return $awardId;
 		}
-		
-		return $starAwards;
+		else {
+			return null;
+		}
 	}
 	
 	
 	
-	public static function updateAwards () {
+
+	
+	public static function addAward ( $schoolUser, $level, $classId = null ) {
 		
-		$personId = userID();
+		error_log ( "addAward called" );
 		
-		if ( $personId ) {
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$userAwardTable = "StudentAwards";
+		$isTeacher = false;
+		$userAwardWhere = "UA.person_id = " . $personId;
+		if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+			$isTeacher = true;
+			$userAwardTable = "TeacherAwards";
+			$userAwardWhere = "UA.class_id = " . $classId;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Create a new query object.
+		$query = $db->getQuery(true);
+		
+		$query
+			->select("award_id")
+			->from("Award where role_id = " . $schoolUser->role_id . " and level = " . $level);
+
+		// Set the query using our newly populated query object and execute it.
+		$db->setQuery($query);
+		
+		$awardId = $db->loadResult();
+
+
+		$award = new \StdClass();
+		$award->person_id = $personId;
+		$award->level = $level;
+		$award->award_id = $awardId;
+		
+		if ( $isTeacher ) {
+			if ( $classId ) {
+				$award->class_id = $classId;
+			}
+		}
+		
+		$success = $db->insertObject($userAwardTable, $award);
+		
+		if(!$success){
+			error_log ( $userAwardTable . " insert failed" );
+		}
+		
+	}
+	
+	
+	public static function getAwardsPlusBlanks ( $schoolUser = null, $classId = null ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$userAwardTable = "StudentAwards";
+		$isTeacher = false;
+		$userAwardWhere = "UA.person_id = " . $personId;
+		if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+			$isTeacher = true;
+			$userAwardTable = "TeacherAwards";
+			$userAwardWhere = "UA.class_id = " . $classId;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.award_id, A.type, A.name, A.level, A.image, A.uncollected_image, A.certificate, " .
+				"IFNULL(UA.collected,0) as collected, IFNULL(DATE_FORMAT(UA.timestamp, '%D %M %Y'),0) as award_date from Award A")
+			->leftJoin($userAwardTable . " UA on A.award_id = UA.award_id and " . $userAwardWhere)
+			->where("A.role_id = " . $schoolUser->role_id )
+			->order("A.level");
 			
-			$db = \JDatabaseDriver::getInstance(dbOptions());
+		$db->setQuery($query);
+		
+		error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$awards = $db->loadObjectList("level");
+		
+		$awardObjects = array();
+		foreach ( $awards as $level=>$award ) {
+			$newAward = new self ( $schoolUser, $classId, $award->award_id, $award->type, $award->name, $award->level, $award->image, $award->uncollected_image, $award->certificate, $award->collected, $award->award_date );
+			$awardObjects[$level] = $newAward;
+		}
+		
+		return $awardObjects;
+	}
+	
+	
+	public static function getAwards ( $schoolUser = null, $classId = null ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$userAwardTable = "StudentAwards";
+		$isTeacher = false;
+		$userAwardWhere = "UA.person_id = " . $personId;
+		if ( $schoolUser->role_id == SchoolCommunity::TEACHER_ROLE ) {
+			$isTeacher = true;
+			$userAwardTable = "TeacherAwards";
+			$userAwardWhere = "UA.class_id = " . $classId;
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.award_id, A.type, A.name, A.level, A.image, A.uncollected_image, A.certificate, UA.collected, " .
+				"DATE_FORMAT(UA.timestamp, '%D %M %Y') as award_date from " . $userAwardTable . " UA")
+			->innerJoin("Award A on A.level = UA.level")
+			->where("A.role_id = " . $schoolUser->role_id )
+			->where($userAwardWhere)
+			->order("A.level");
 			
-			$query = $db->getQuery(true)
-				->select("A.*, O.option_name as badge_group, M.name as module from Award A")
-				->innerJoin("Options O on O.option_id = A.badge_group_id and O.struc = " . $db->quote("badgegroup"))
-				->innerJoin("Module M on M.module_id = A.module_id ")
-				->innerJoin("SchoolUsers SU on SU.role_id = A.role_id and SU.person_id = " . $personId )
-				->where("A.award_id not in (select award_id from UserAwards where person_id = ". $personId . ")" );		
+		$db->setQuery($query);
+		
+		error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$awards = $db->loadObjectList("level");
+		
+		$awardObjects = array();
+		foreach ( $awards as $level=>$award ) {
+			$newAward = new self ( $schoolUser, $classId, $award->award_id, $award->type, $award->name, $award->level, $award->image, $award->uncollected_image, $award->certificate, $award->collected, $award->award_date );
+			$awardObjects[$level] = $newAward;
+		}
+		
+		return $awardObjects;
+	}
+	
+	
+	public static function getBlankAwards ( $schoolUser = null ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.award_id, A.type, A.name, A.level, A.image, A.uncollected_image, A.certificate from Award A")
+			->where("A.role_id = " . $schoolUser->role_id )
+			->order("A.level");
 			
-			$db->setQuery($query);
+		$db->setQuery($query);
+		
+		//error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$awards = $db->loadObjectList("level");
+		
+		
+		$awardObjects = array();
+		foreach ( $awards as $level=>$award ) {
+			$newAward = new self ( $schoolUser, null, $award->award_id, $award->type, $award->name, $award->level, $award->image, 
+									$award->uncollected_image, $award->certificate, 0, 0 );
+			$awardObjects[$level] = $newAward;
+		}
+		
+		return $awardObjects;
+	}
+	
+	
+	public static function getAllBlankAwards () {
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.role_id, A.award_id, A.type, A.name, A.level, A.image, A.uncollected_image from Award A")
+			->order("A.role_id, A.level");
 			
-			//error_log("Award::updateAwards  select query created: " . $query->dump());
+		$db->setQuery($query);
+		
+		error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		$awards = $db->loadObjectList();
+		
+		
+		$awardObjects = array();
+		foreach ( $awards as $award ) {
+			if ( !array_key_exists($award->role_id, $awardObjects) ) {
+				$awardObjects[$award->role_id] = array();
+			}
+			$awardObjects[$award->role_id][$award->level] = $award;
+		}
+		
+		$errMsg = print_r ( $awardObjects, true );
+		error_log ( "awardObjects: " . $errMsg );
+		
+		return $awardObjects;
+	}
+	
+	
+	public static function getCollectedAwards ( $schoolUser = null ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("* from Award A")
+			->order("A.level, A.role_id");
 			
-			$possibleAwards = $db->loadObjectList();
-			
-			if ( count($possibleAwards) > 0 ) {
-				
-				$roleId = $possibleAwards[0]->role_id;
-			
-				$userPoints = Task::getUserPointsByGroup($roleId);
-				
-				// $errMsg = print_r ( $userPoints, true );
-				// error_log ( "User points : " . $errMsg );
-				
-				foreach ( $possibleAwards as $award ) {
-					
-					//if ( array_key_exists($award->badge_group_id, $userPoints) and $userPoints[$award->badge_group_id] >= $award->threshold_per_user ) {
-						
-					$moduleId = $award->module_id;
-					$groupId = $award->badge_group_id;
-					
-					if ( array_key_exists($moduleId, $userPoints) and array_key_exists($groupId, $userPoints[$moduleId]) and $userPoints[$moduleId][$groupId] >= $award->threshold_per_user ) {
-						
-						$query = $db->getQuery(true);
-						
-						$awardFields = (object) [
-							'person_id' => $personId,
-							'award_id' => $award->award_id
-						];		
-						
-						$result = $db->insertObject("UserAwards", $awardFields);
+		$db->setQuery($query);
+		
+		error_log("unlockBadges new tasks query created: " . $query->dump());
+		
+		//Used directly so don't create objects
+		$awards = $db->loadObjectList();
+		
+		$teacherAwards = array();
+		$studentAwards = array();
+		$awardObjects = array( SchoolCommunity::TEACHER_ROLE=>$teacherAwards,
+								SchoolCommunity::STUDENT_ROLE=>$studentAwards );
 								
-						if ( !$result ) {
-							error_log ( "Award::updateAwards failed to write user award" );
-						}
-						else {
-							$awardTitle = $award->award_name . ' ' . $award->module . ' ' . $award->badge_group;
-							SchoolCommunity::addNotification("Well done. You achieved " . $awardTitle . "!");
-							SchoolCommunity::logEvent ( false, SchoolCommunity::SCHOOL, "achieved " . $awardTitle  );
-						}
-					}
-				}
-			}
+		foreach ( $awards as $award ) {
+			
+			$awardObjects[$award->role_id][$award->level] = $award;
+			
 		}
+		
+		return $awardObjects;
 	}
 	
 	
-	
+	public static function getSchoolAwards ( $schoolUser = null ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$personId = $schoolUser->person_id;
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("A.* from Award A")
+			->innerJoin("StudentAwards SA on SA.award_id = A.award_id")
+			->innerJoin("SchoolUsers SU on SU.person_id = SA.person_id")
+			->where("SA.collected = 1")
+			->where("SU.school_id = " . $schoolUser->school_id);
+			
+		$db->setQuery($query);
+		
+		error_log("getSchoolAwards award students query created: " . $query->dump());
+		
+		//Used directly so don't create objects
+		$studentAwards = $db->loadObjectList();
+		
+		
+		$query = $db->getQuery(true)
+			->select("A.* from Award A")
+			->innerJoin("TeacherAwards TA on TA.award_id = A.award_id")
+			->innerJoin("SchoolClass SC on SC.class_id = TA.class_id")
+			->where("TA.collected = 1")
+			->where("SC.school_id = " . $schoolUser->school_id);
+			
+		$db->setQuery($query);
+		
+		error_log("getSchoolAwards award students query created: " . $query->dump());
+		
+		//Used directly so don't create objects
+		$teacherAwards = $db->loadObjectList();
+		
+		
+		
+		$awardObjects = (object)array( "classAwards"=>$teacherAwards,
+								"studentAwards"=>$studentAwards );
+								
+		return $awardObjects;
+	}
 }
 
 

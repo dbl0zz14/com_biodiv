@@ -27,6 +27,10 @@ class BioDivViewUpload extends JViewLegacy
     public function display($tpl = null) 
     {
 	  $app = JFactory::getApplication();
+	  $input = $app->input;
+	  $this->badge = $input->getInt('badge', 0);
+	  $this->classId = $input->getInt('class_id', 0);
+	  
 	  
 	  // Get setting to determine whether camera deployment (or audio)
 	  $this->isCamera = getSetting("camera") == "yes";

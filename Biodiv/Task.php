@@ -434,13 +434,16 @@ class Task {
 	
 	public function checkTaskComplete () {
 		
-		$isComplete = false;
+		$returnObj = new \stdClass();
+		$returnObj->isComplete = false;
+		$returnObj->numAchieved = 0;
+		$returnObj->numRequired = 0;
 		
 		if ( $this->taskDetail->counted_by == "SYSTEM" ) {
 			
 			if ( $this->taskDetail->task_type == "CLASSIFY" ) {
 				
-				$threshold = $this->taskDetail->threshold;
+				$returnObj->numRequired = $this->taskDetail->threshold;
 				
 				$db = \JDatabaseDriver::getInstance(dbOptions());
 			
@@ -452,13 +455,13 @@ class Task {
 				
 				//error_log("Task constructor select query created: " . $query->dump());
 				
-				$numClassifies = $db->loadResult();
+				$returnObj->numAchieved = $db->loadResult();
 				
-				if ( $numClassifies >= $threshold ) $isComplete = true;
+				if ( $returnObj->numAchieved >= $returnObj->numRequired ) $returnObj->isComplete = true;
 			}
 			else if ( $this->taskDetail->task_type == "UPLOAD" ) {
 				
-				$threshold = $this->taskDetail->threshold;
+				$returnObj->numRequired = $this->taskDetail->threshold;
 				
 				$db = \JDatabaseDriver::getInstance(dbOptions());
 			
@@ -470,13 +473,13 @@ class Task {
 				
 				//error_log("Task constructor select query created: " . $query->dump());
 				
-				$numUploads = $db->loadResult();
+				$returnObj->numAchieved = $db->loadResult();
 				
-				if ( $numUploads >= $threshold ) $isComplete = true;
+				if ( $returnObj->numAchieved >= $returnObj->numRequired ) $returnObj->isComplete = true;
 			}
 			else if ( $this->taskDetail->task_type == "QUIZ" ) {
 				
-				$threshold = $this->taskDetail->threshold;
+				$returnObj->numRequired = $this->taskDetail->threshold;
 				$relatedJSON = $this->taskDetail->related_json;
 				
 				$jsonObj = json_decode ( $relatedJSON );
@@ -497,21 +500,19 @@ class Task {
 					
 					//error_log("Task checkTaskComplete select query created: " . $query->dump());
 					
-					$numQuizzes = $db->loadResult();
+					$returnObj->numAchieved = $db->loadResult();
 					
-					if ( $numQuizzes >= $threshold ) $isComplete = true;
+					if ( $returnObj->numAchieved >= $returnObj->numRequired ) $returnObj->isComplete = true;
 				}
 				else {
 					error_log ("Task::checkTaskComplete system task json incorrectly configured");
-					$isComplete = false;
+					$returnObj->isComplete = false;
 				}
 			}
 			
 		}
-		else if ( $this->taskDetail->counted_by == "USER" ) {
-		}
 		
-		return $isComplete;
+		return $returnObj;
 	}
 	
 	// Link the resource set to this task and update it to be pending or done.
@@ -557,6 +558,69 @@ class Task {
 	}
 	
 	
+	public static function checkSystemTaskJustCompleted ( $taskId ) {
+		
+		
+		$personId = userID();
+		
+		$userTaskTable = "StudentTasks";
+		if ( SchoolCommunity::isTeacher() or SchoolCommunity::isEcologist() ) {
+			$userTaskTable = "TeacherTasks";
+		}
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		$query = $db->getQuery(true)
+			->select("UT.task_id from " . $userTaskTable . " UT")
+			->innerJoin("SystemTasks ST2 on ST2.task_id = UT.task_id and UT.person_id = " . $personId)
+			->where("UT.task_id = " . $taskId)
+			->where("UT.status > " . Badge::LOCKED )
+			->where("UT.status < " . Badge::COMPLETE );
+			
+		
+		$db->setQuery($query);
+		
+		$systemTasks = $db->loadColumn();
+		
+		if ( count($systemTasks) == 0 ) {
+			return null;
+		}
+		
+		$systemTask = new self ( $taskId );
+		$taskStatus = $systemTask->checkTaskComplete();
+		
+		$errMsg = print_r ( $taskStatus, true );
+		error_log ( "Task status = " . $errMsg );
+		if ( $taskStatus->isComplete ) {
+			
+			// Update StudentTasks table
+			
+			$query = $db->getQuery(true);
+					
+			$fields = array(
+				$db->quoteName('status') . ' = ' . Badge::COMPLETE
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('task_id') . ' = ' . $taskId,
+				$db->quoteName('person_id') . ' = ' . $personId,
+				$db->quoteName('status') . ' != ' . Badge::COLLECTED
+			);
+
+			$query->update($userTaskTable)->set($fields)->where($conditions);
+			
+			$db->setQuery($query);
+			$result = $db->execute();
+			
+			SchoolCommunity::addNotification($systemTask->getTaskName() . " " . \JText::_("COM_BIODIV_TASK_COMPLETED"));
+			SchoolCommunity::logEvent ( false, SchoolCommunity::SCHOOL,  'completed the ' . $systemTask->getBadgeName() . ' ' . 'badge'  );
+		}
+		
+		return $taskStatus;
+		
+	}
+	
 	public static function checkSystemTasks () {
 		
 		
@@ -582,8 +646,8 @@ class Task {
 		foreach ( $systemTasks as $taskId ) {
 			
 			$systemTask = new self ( $taskId );
-			
-			if ( $systemTask->checkTaskComplete() ) {
+			$taskStatus = $systemTask->checkTaskComplete();
+			if ( $taskStatus->isComplete ) {
 				
 				// Update StudentTasks table
 				

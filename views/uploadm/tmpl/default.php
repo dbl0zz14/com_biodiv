@@ -16,6 +16,11 @@ JHTML::stylesheet("jquery-upload-file/uploadfile.css", array(), true);
 <?php
   $document = JFactory::getDocument();
 $document->addScriptDeclaration("BioDiv.upload_id = ".$this->upload_id.";");
+
+if ( $this->badge && $this->classId ) {
+	$document->addScriptDeclaration("BioDiv.badgeId = ".$this->badge.";");
+	$document->addScriptDeclaration("BioDiv.classId = ".$this->classId.";");
+}
 JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
 JHTML::script("com_biodiv/uploadm.js", false, true);
 ?>

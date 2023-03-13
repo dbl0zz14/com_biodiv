@@ -17,29 +17,34 @@ else {
 	print '<div class="row">';
 	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
+	Biodiv\SchoolCommunity::generateNav($this->schoolUser, null, "admindashboard");
 	
-	Biodiv\SchoolCommunity::generateNav("admindashboard");
+	print '</div>'; // col-12
 	
-	print '</div>';
+	print '</div>'; // row
+	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
+		
+		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
 		
 	
 
 	// -------------------------------  Main page content
 	
+	print '<div class="row">';
+	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
 	print '<h2>';
 	print '<div class="row">';
-	print '<div class="col-md-10 col-sm-10 col-xs-10">';
+	print '<div class="col-md-12 col-sm-12 col-xs-12">';
 	print JText::_("COM_BIODIV_SCHOOLUSERS_HEADING").' <small class="hidden-xs">'.JText::_("COM_BIODIV_SCHOOLUSERS_SUBHEADING").'</small>';
-	print '</div>'; // col-10
-	print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
-	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
-		print '<i class="fa fa-info"></i>';
-		print '</div>'; // helpButton
-	}
-	print '</div>'; // col-2
+	print '</div>'; // col-12
 	print '</div>'; // row
 	print '</h2>';  
 	

@@ -27,7 +27,9 @@ print '<div id="kiosk"></div>';
 
 
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/mediacarousel.js", true, true);
+JHTML::script("com_biodiv/kioskcommon.js", true, true);
 JHTML::script("com_biodiv/kiosk.js", true, true);
 JHTML::script("com_biodiv/kioskclassify.js", true, true);
 JHTML::script("com_biodiv/kioskquiz.js", true, true);

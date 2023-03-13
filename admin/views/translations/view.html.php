@@ -27,8 +27,12 @@ class BioDivViewTranslations extends JViewLegacy
 	public function display($tpl = null) 
 	{
 		
+		$this->speciesTrans = getSpeciesTranslationLists();
+		
 		// Display the view
 		parent::display($tpl);
+		
+		
     }
 }
 

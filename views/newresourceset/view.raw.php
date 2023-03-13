@@ -27,9 +27,10 @@ class BioDivViewNewResourceSet extends JViewLegacy
     public function display($tpl = null) 
     {
 		
-		$this->person_id = (int)userID();
-
-		if ( !$this->person_id ) {
+		$this->schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
+		$this->personId = $this->schoolUser->person_id;
+		
+		if ( !$this->personId ) {
 			
 			error_log("NewResourceSet view: no person id" );
 			
@@ -42,20 +43,26 @@ class BioDivViewNewResourceSet extends JViewLegacy
 			$input = $app->input;
 			
 			$this->loaded = false;
-			
+			$this->isBadge = false;
+			$this->isPost = false;
+				
 			$setName = $input->getString('uploadName', 0);
+			
+			error_log ( "Set name = " . $setName );
 			
 			if ( $setName ) {
 				
 				$resourceType = $input->getInt('resourceType', 0);
 				$setText = $input->getString('uploadDescription', 0);
 				$school = $input->getInt('school', 0);
-				$taskId = $input->getInt('task', 0);
+				$this->badgeId = $input->getInt('badge', 0);
+				$classId = $input->getInt('classId', 0);
 				$students = $input->getInt('studentCheckBox', 0);
 				$isSchoolTask = $input->getInt('schoolTask', 0);
 				$source = $input->getString('source', 0);
 				$externalText = $input->getString('externalText', 0);
 				$shareLevel = $input->getInt('shareLevel', 0);
+				$this->toPost = $input->getInt('post', 0);
 				
 				$tags = $input->get('tag', array(), 'ARRAY');
 				
@@ -64,50 +71,64 @@ class BioDivViewNewResourceSet extends JViewLegacy
 				$uploadParams->externalText = $externalText;
 				$uploadParams->shareLevel = $shareLevel;
 				
-				if ( ($taskId > 0) and (count($tags) == 0) ) {
-					$task = new Biodiv\Task($taskId);
-					$tags[] = $task->getModuleTagId();
-				}
+				// if ( ($badgeId > 0) and (count($tags) == 0) ) {
+					// $badge = Biodiv\Badge::createFromId($badgeId);
+					// $tags[] = $task->getModuleTagId();
+				// }
 				$uploadParams->tags = $tags;
-					
 				
 				$this->resourceSet = Biodiv\ResourceSet::createResourceSet ( $school, $resourceType, $setName, $setText, json_encode($uploadParams));
 				
+				$errMsg = print_r ( $this->resourceSet, true );
+				error_log ( "New resource set: " . $errMsg );
+				
 				$this->newSetId = $this->resourceSet->getSetId();
 				
-				// If there's a task, associate this set id with the task
-				if ( $taskId > 0 ) {
+				if ( $this->toPost ) {
+					
+					$this->resourceSet->postSet();
+				}
+				
+				//error_log ("New set id = " . $this->newSetId);
+				
+				// If there's a badge, associate this set id with the badge
+				if ( $this->badgeId > 0 ) {
+					
+					$this->isBadge = true;
 					
 					if ( $isSchoolTask ) {
 						
-						foreach ( $students as $studentId ) {
+						// foreach ( $students as $studentId ) {
 							
-							if ( Biodiv\SchoolCommunity::isMyStudent ( $studentId ) ) {
+							// if ( Biodiv\SchoolCommunity::isMyStudent ( $studentId ) ) {
 								
-								// A new student needs tasks copying over to the StudentTasks table
-								if ( Biodiv\SchoolCommunity::isNewUser ( $studentId ) ) {
-									Biodiv\Badge::unlockBadges ( $studentId );
-								}
+								// // A new student needs tasks copying over to the StudentTasks table
+								// if ( Biodiv\SchoolCommunity::isNewUser ( $studentId ) ) {
+									// Biodiv\Badge::unlockBadges ( $studentId );
+								// }
 					
-								$task = new Biodiv\Task ( $taskId, $studentId );
-								$task->linkResourceSet ( $this->newSetId, true, true );
+								// $task = new Biodiv\Task ( $taskId, $studentId );
+								// $task->linkResourceSet ( $this->newSetId, true, true );
 																
-							}
-						}
-						Biodiv\SchoolCommunity::logEvent ( true, Biodiv\SchoolCommunity::SCHOOL, "completed the " . $task->getBadgeName() . " badge" );
+							// }
+						// }
+						// Biodiv\SchoolCommunity::logEvent ( true, Biodiv\SchoolCommunity::SCHOOL, "completed the " . $task->getBadgeName() . " badge" );
 					}
 					else {
-						$task = new Biodiv\Task ( $taskId );
-						// Only students linking their own tasks need to be approved.
-						if ( Biodiv\SchoolCommunity::isStudent() ) {
-							$task->linkResourceSet ( $this->newSetId, false, false );
-						}
-						else {
-							$task->linkResourceSet ( $this->newSetId, false, true );
-						}
+						
+						$badge = Biodiv\Badge::createFromId($this->schoolUser, $classId, $this->badgeId);
+						
+						$badge->linkResourceSet ( $this->newSetId, $setText );
 						
 					}
 					
+				}
+				else {
+					$postTypeId = codes_getCode ( "Post", "resource" );
+					
+					if ( $postTypeId == $resourceType ) {
+						$this->isPost = true;
+					}
 				}
 				
 				$app->setUserState('com_biodiv.resource_set_id', $this->newSetId);

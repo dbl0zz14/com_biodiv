@@ -4,6 +4,9 @@ let currentBeginnerSequence = 0;
 let currentStandardSequence = 0;
 let quizSpeciesAnswers = null;
 
+//let currentBadge = null;
+
+
 
 function kioskQuizSuccess () {
 		
@@ -287,6 +290,13 @@ function displayNextQuestionOrFinish() {
 		};
 		
 		let resultsView = "kioskquizresults";
+		if ( BioDiv.badge > 0 ) {
+			postData.badge = BioDiv.badge;
+			resultsView = "badgekioskquizresults";
+			if ( BioDiv.classId ) {
+				postData.class_id = BioDiv.classId;
+			}
+		}
 		if ( isAudioQuiz() ) {
 			resultsView = "kioskquizresultsmulti";
 		}			
@@ -365,6 +375,8 @@ function standardResultsLoaded ( data ) {
 		
 	});
 	
+	setReloadPage();
+	
 	jQuery('#play_again_multi').click(function (){
 		
 		var url = BioDiv.root + "&view=kioskquizstandardaudio&format=raw";
@@ -407,6 +419,8 @@ function kioskStandardQuizSuccess () {
 	
 	jQuery('#classify_bird').click( displaySelectBird );
 	
+	jQuery('#classify_invert').click( displaySelectInvert );
+	
 	jQuery('.species_select').click( speciesSelected );
 	
 	jQuery('#not_on_mammal_list').click(function (){
@@ -431,6 +445,18 @@ function kioskStandardQuizSuccess () {
 	
 	jQuery('#scroll_down_birds').click(function (){
 		displayAllBirds( 1 );
+	});
+		
+	jQuery('#not_on_invert_list').click(function (){
+		displayAllInverts( 0 );
+	});
+	
+	jQuery('#scroll_up_inverts').click(function (){
+		displayAllInverts( -1 );
+	});
+	
+	jQuery('#scroll_down_inverts').click(function (){
+		displayAllInverts( 1 );
 	});
 		
 	jQuery('.back_to_filter').click( displayWhatSee );

@@ -32,6 +32,10 @@ class BioDivViewUploadM extends JViewLegacy
 	  
 	  $this->upload_id = $app->getUserState('com_biodiv.upload_id');
 	  
+	  $input = $app->input;
+	  $this->badge = $input->getInt('badge', 0);
+	  $this->classId = $input->getInt('class_id', 0);
+	  
 	  if(!$this->upload_id){
 	    die("No upload_id");
 	  }

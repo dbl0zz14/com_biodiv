@@ -27,6 +27,12 @@ print "<h2>". JText::_("COM_BIODIV_UPLOAD_START_NEW")."</h2>";
 print "<form role='form' action='".$this->root . "&task=add_upload&site_id=".$this->site_id."'";
 print " method='post' class='form-inline'>";
 
+if ( $this->badge ) {
+	print "<input type='hidden' name='badge' value='".$this->badge."'/>";
+}
+if ( $this->classId ) {
+	print "<input type='hidden' name='class_id' value='".$this->classId."'/>";
+}
 
 // Deployment date and times only relevant for camera deployments, as opposed to recordings on phones etc.
 // However timezone is relevant for all media types

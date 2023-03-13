@@ -284,6 +284,51 @@ function displayAllBirds ( page ) {
 	
 }
 
+function displayAllInverts ( page ) {
+	
+	jQuery('#invert_buttons').hide();
+	
+	let allInverts = jQuery(".all_inverts_species");
+	allInverts.hide();
+	
+	let totalInverts = allInverts.length;
+	let numPages = Math.ceil(totalInverts/maxSpeciesDisplayed);
+		
+	if ( page == 0 ) currMammalsPage = 0;
+	else if ( page == -1 ){
+		currInvertsPage = Math.max(0, currInvertsPage-1);
+	}
+	else if ( page == 1 ) {
+		currInvertsPage = Math.min(currInvertsPage+1, numPages );
+	}
+	
+	let start = currInvertsPage*maxSpeciesDisplayed;
+	
+	let displaySlice = jQuery(".all_inverts_species").slice(start, start + maxSpeciesDisplayed);
+	displaySlice.show();
+	
+	if ( start == 0 ) {
+		jQuery("#scroll_up_inverts").prop('disabled', true);
+	}
+	else {
+		jQuery("#scroll_up_inverts").prop('disabled', false);
+	}
+	
+	if ( start + maxSpeciesDisplayed >= totalInverts ) {
+		jQuery("#scroll_down_inverts").prop('disabled', true);
+	}
+	else {
+		jQuery("#scroll_down_inverts").prop('disabled', false);
+	}
+		
+		
+	jQuery('#all_invert_buttons').show();
+	
+	
+	jQuery('#scroll_info').show();
+	
+}
+
 function displaySelectMammal () {
 	
 	// NB could be classify or quiz
@@ -316,6 +361,25 @@ function displaySelectBird () {
 	jQuery('#select_info').show();
 	
 	currentClassifyPage = classifyPage.COMMONBIRDS;
+}
+
+
+function displaySelectInvert () {
+	
+	jQuery('#species_helplet').empty();
+	
+	jQuery('.classify_heading').hide();
+	jQuery('#classify_select').show();
+	jQuery('#quiz_select').show();
+	
+	
+	jQuery('.species_group').hide();
+	jQuery('#invert_buttons').show();
+	
+	jQuery(".mwinfo").hide();
+	jQuery('#select_info').show();
+	
+	currentClassifyPage = classifyPage.COMMONINVERTS;
 }
 
 
@@ -577,6 +641,7 @@ function kioskNextClipSuccess () {
 function feedbackSuccess () {
 	
 	setBackgroundImage();
+	setReloadPage();
 	
 	jQuery('#classify_again').click(function (){
 		
@@ -601,15 +666,28 @@ addClassification = function ( photoId, speciesId ) {
 	
 		let url = BioDiv.root + "&task=kiosk_add_animal_next&format=raw&photo_id=" + photoId + "&species=" + speciesId;
 		
+		if ( BioDiv.badge > 0 ) {
+			url = BioDiv.root + "&task=badge_kiosk_add_animal_next&format=raw&photo_id=" + photoId + "&species=" + speciesId + "&badge=" + BioDiv.badge;
+			if ( BioDiv.classId ) {
+				url += "&class_id=" + BioDiv.classId;
+			}
+		}
+		
 		jQuery(".loader").removeClass("invisible");
 		
 		jQuery('#media_carousel').load(url, kioskAddAnimalSuccess);
 	}
 	else {
 		
-		console.log("Reached max classifications");
-		
 		let url = BioDiv.root + "&task=kiosk_add_animal_finish&format=raw&photo_id=" + photoId + "&species=" + speciesId;
+		
+		if ( BioDiv.badge > 0 ) {
+			url = BioDiv.root + "&task=badge_kiosk_add_animal_finish&format=raw&photo_id=" + photoId + "&species=" + speciesId + "&badge=" + BioDiv.badge;
+			if ( BioDiv.classId ) {
+				url += "&class_id=" + BioDiv.classId;
+			}
+		}
+		
 		
 		jQuery('#kiosk').load(url, feedbackSuccess);
 	}

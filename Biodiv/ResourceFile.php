@@ -14,6 +14,10 @@ class ResourceFile {
 	const NUM_PER_PAGE = 8;
 	const NUM_DAYS_NEW = 14;
 	
+	const MAX_TITLE_CHARS = 50;
+	const MAX_DESC_CHARS = 200;
+	const MAX_POST_CHARS = 120;
+	
 	private $resourceId;
 	private $resourceType;
 	private $personId;
@@ -38,8 +42,8 @@ class ResourceFile {
 	private static $types = null;
 	private static $tagGroups = null;
 	
-	private static $maxTitleChars = 50;
-	private static $maxDescChars = 200;
+	// private static $maxTitleChars = 50;
+	// private static $maxDescChars = 200;
 		
 	
 	
@@ -156,6 +160,7 @@ class ResourceFile {
 		
 			$query = $db->getQuery(true)
 					->select("RT.* from ResourceType RT")
+					->where("RT.seq > 0")
 					->order("RT.seq");
 					
 			$db->setQuery($query);
@@ -557,13 +562,14 @@ class ResourceFile {
 			// print '<audio src="'.$this->url.'" type="'.$this->ftype.'" oncontextmenu="return false;" disablePictureInPicture controlsList="nodownload noplaybackrate" class="'.$displayClass.'"  ></audio>';
 		// }
 		else if ( strpos($this->ftype, "pdf") !== false ) {
-			print '<div id="pdfThumb_'.$this->resourceId.'" class="text-center pdfThumb" data-pdfurl="'.$this->url.'">';
+			print '<div id="pdfThumb_'.$this->resourceId.'" class="text-center pdfThumb '.$displayClass.'" data-pdfurl="'.$this->url.'">';
 			print '<canvas id="pdfCanvas_'.$this->resourceId.'"  class="pdfCanvas"></canvas>';
 			print '</div>';
 			
 		}
 		else {
 			
+			print '<div class="'.$displayClass.'">';
 			print '<div class="defaultThumbnail text-center">';
 			
 			print $this->printFileTypeIcon();
@@ -585,6 +591,7 @@ class ResourceFile {
 			else {
 				print '<div class="text-center h5">'.\JText::_("COM_BIODIV_RESOURCEFILE_OTHER_DOC").'</div>';
 			}
+			print '</div>';
 		}
 	}
 	
@@ -718,16 +725,16 @@ class ResourceFile {
 		print '<p>'.\JText::_("COM_BIODIV_RESOURCEFILE_SOURCE").' '.$this->getSourceText().'</p>';
 		print '</div>';
 		
-		print '<div class="resourceCardLikes text-right">';
-		$numLikes = $this->numLikes;
-		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
-		}
-		else {
+		// print '<div class="resourceCardLikes text-right">';
+		// $numLikes = $this->numLikes;
+		// if ( $numLikes == 1 ) {
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
+		// }
+		// else {
 			
-			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
-		}
-		print '</div>';
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
+		// }
+		// print '</div>';
 		
 		print '<div class="resourceCardTags">';
 		$this->printTags();
@@ -738,6 +745,103 @@ class ResourceFile {
 		
 		print '</div>'; // panel-body
 		print '</div>'; //panel
+		
+		
+	}
+	
+	public function printSummary ( $idTag = null ) {
+		
+		$resourceId = $this->resourceId;
+		
+		$tagStr = "";
+		if ( $idTag ) $tagStr = $idTag.'_';
+		
+		$shareStatus = array(SchoolCommunity::PERSON=>"fa fa-lock",
+								SchoolCommunity::SCHOOL=>"fa fa-building-o",
+								SchoolCommunity::COMMUNITY=>"fa fa-globe",
+								SchoolCommunity::ECOLOGISTS=>"fa fa-leaf");
+		
+		$shareOptions = array(SchoolCommunity::PERSON=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_PRIVATE"),
+								SchoolCommunity::SCHOOL=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_SCHOOL"),
+								SchoolCommunity::COMMUNITY=>\JText::_("COM_BIODIV_RESOURCEFILE_SHARE_COMMUNITY"));
+					
+		
+		//print '<div id="resource_'.$tagStr.$resourceId.'" class="panel resource_panel ">';
+		
+		$filterClasses = ' isType_'.$this->resourceType;
+		if ( $this->isPin ) $filterClasses .= ' isPin';
+		if ( $this->isFavourite ) $filterClasses .= ' isFav';
+		if ( userID() == $this->personId ) $filterClasses .= ' isMine';
+		
+		foreach ($this->getTagIds() as $tagId ) {
+			$filterClasses .= ' isTag_' . $tagId;
+		}
+		
+		
+		//print '<div class="panel-body resource_panel_body '.$filterClasses.'">';
+		
+		$colorClass = self::getClassStem ( $this->resourceType );
+		$colorClass .= "Color";
+		
+		$accessLevel = $this->accessLevel;
+		$shareIconClass = $shareStatus[$accessLevel];
+		
+		// The card grid
+		print '<div class="resourceCardGrid">';
+		
+		print '<div class="resourceCardFileType '.$colorClass.' text-left">';
+		$this->printFiletypeIcon();
+		
+		if ( $this->numInSet > 1 ) {
+			print ' +' . ($this->numInSet - 1);
+		}
+		print '</div>';
+		
+		print '<div class="resourceCardType '.$colorClass.' text-center">';
+		print self::getTypeName ( $this->resourceType );
+		print '</div>';
+		
+		print '<div class="resourceCardShare '.$colorClass.' text-right">';
+		print '<i class="'.$shareIconClass.'"></i>';
+		print '</div>';
+		
+		print '<div class="resourceCardThumbnail">';
+		//$this->printThumbnail( "cardResource" );
+		$this->printThumbnail( "cardResource resourceThumb" );
+		print '</div>';
+		
+		// print '<div class="resourceCardTitle">';
+		// print '<h4>'.$this->title.'</h4>';
+		// print '</div>';
+		
+		// print '<div class="resourceCardDescription">';
+		// print '<p>'.$this->description.'</p>';
+		// print '</div>';
+		
+		// print '<div class="resourceCardSource">';
+		// print '<p>'.\JText::_("COM_BIODIV_RESOURCEFILE_SOURCE").' '.$this->getSourceText().'</p>';
+		// print '</div>';
+		
+		// print '<div class="resourceCardLikes text-right">';
+		// $numLikes = $this->numLikes;
+		// if ( $numLikes == 1 ) {
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
+		// }
+		// else {
+			
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
+		// }
+		// print '</div>';
+		
+		// print '<div class="resourceCardTags">';
+		// $this->printTags();
+		// print '</div>';
+		
+		print '</div>'; // resourceCardGrid
+		
+		
+		// print '</div>'; // panel-body
+		// print '</div>'; //panel
 		
 		
 	}
@@ -780,55 +884,67 @@ class ResourceFile {
 			$numExtras = $this->numInSet - 1;
 			print ' +'.$numExtras;
 		}
-		print '</div>';
+		print '</div>'; // fullResourceFileType
 		
 		print '<div class="fullResourceType '.$colorClass.' h4">';
 		print self::getTypeName ( $this->resourceType );
-		print '</div>';
+		print '</div>'; // fullResourceType
 		
 		print '<div class="fullResourceShareLevel '.$colorClass.' text-right h4">';
 		print '<i class="'.$shareIconClass.'"></i>';
-		print '</div>';
+		print '</div>'; // fullResourceShareLevel
 		
-		print '<div class="fullResourceShare">';
-		if ( $resourcePerson == $userId ) {
-			print '<div id="share_resource_'.$tagStr.$resourceId.'" class="share_resource share_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					\JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'</div></div>';
+		// print '<div class="fullResourceShare">';
+		// if ( $resourcePerson == $userId ) {
+			// print '<div id="share_resource_'.$tagStr.$resourceId.'" class="share_resource share_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+					// \JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'"   ><h4 ><i class="fa fa-share-alt fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_SHARE").'</div></div>';
 					
-			print '<div id="shareMenu" class="miniMenu" style="display:none;">';
+			// print '<div id="shareMenu" class="miniMenu" style="display:none;">';
 				
-			$isStudent = SchoolCommunity::isStudent();
-			if ( !$isStudent )  {
-				foreach ($shareOptions as $shareId=>$shareOpt ) {
-					print '<div id="share_resource_'.$tagStr.$shareId.'_'.$resourceId.'" class="share_resource_btn share_resource_'.$shareId.'_'.$resourceId.
-						' h4 btn miniMenuBtn text-left" ><div class="menuIcon"><i class="' . 
-						$shareStatus[$shareId] . '"></i></div><div class="menuText">' . $shareOpt . '</div></div>';
-				}
-			}
+			// $isStudent = SchoolCommunity::isStudent();
+			// if ( !$isStudent )  {
+				// foreach ($shareOptions as $shareId=>$shareOpt ) {
+					// print '<div id="share_resource_'.$tagStr.$shareId.'_'.$resourceId.'" class="share_resource_btn share_resource_'.$shareId.'_'.$resourceId.
+						// ' h4 btn miniMenuBtn text-left" ><div class="menuIcon"><i class="' . 
+						// $shareStatus[$shareId] . '"></i></div><div class="menuText">' . $shareOpt . '</div></div>';
+				// }
+			// }
 			
-			print '        <button id="hide_shareMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
+			// print '        <button id="hide_shareMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
 		
-			print '</div>'; //shareMenu
+			// print '</div>'; //shareMenu
 				
-		}
-		print '</div>'; // fullResourceShare
+		// }
+		// print '</div>'; // fullResourceShare
 		
-		print '<div class="fullResourceLike">';
-		if ( $this->isLike ) {
+		if ( self::canEdit($resourceId) ) {
 			
-			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
-			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"><h4 ><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
-		}
-		else {
+			print '<div class="fullResourceEdit">';
+			print '<div id="resourceEdit_'.$resourceId.'" class="edit_resource text-center" role="button" data-toggle="modal" data-target="#editModal" ><h4><i class="fa fa-pencil-square-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_EDIT").'</div></div>';
+			print '</div>'; //fullResourceEdit
 			
-			print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
-			print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
+			print '<div class="fullResourceDelete">';
+			print '<div id="deleteResource_'.$resourceId.'" class="deleteResource text-center" role="button"><h4><i class="fa fa-trash-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_DELETE").'</div></div>';
+			print '</div>'; //fullResourceDelete
 		}
-		print '</div>';
+		
+		
+		// print '<div class="fullResourceLike">';
+		// if ( $this->isLike ) {
+			
+			// print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'"  style="display:none;" ><h4><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
+			// print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"><h4 ><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
+		// }
+		// else {
+			
+			// print '<div id="like_resource_'.$tagStr.$resourceId.'" class="like_resource like_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'" ><h4 ><i class="fa fa-heart-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_LIKE").'</div></div>';
+			// print '<div id="unlike_resource_'.$tagStr.$resourceId.'" class="unlike_resource unlike_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'"  style="display:none;"><h4><i class="fa fa-heart fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNLIKE").'</div></div>';
+		// }
+		// print '</div>'; // fullResourceLike
 		
 		print '<div class="fullResourceDownload">';
 		print '<div id="download_resource_'.$tagStr.$resourceId.'" class="download_resource text-center" role="button" data-toggle="tooltip" title="'.
@@ -836,66 +952,67 @@ class ResourceFile {
 			'" download="'.$this->filename.'"><h4><i class="fa fa-download fa-lg"></i></h4></a><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_DOWNLOAD").'</div></div>';
 		print '</div>';
 		
-		print '<div class="fullResourceBookmark">';
-		if ( $this->isFavourite ) {
+		// print '<div class="fullResourceBookmark">';
+		// if ( $this->isFavourite ) {
 			
-			print '<div id="favourite_resource_'.$tagStr.$resourceId.
-				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
-			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
-				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
-		}
-		else {
+			// print '<div id="favourite_resource_'.$tagStr.$resourceId.
+				// '" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'"  style="display:none;" ><h4><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
+			// print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
+				// '" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"><h4 ><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
+		// }
+		// else {
 			
-			print '<div id="favourite_resource_'.$tagStr.$resourceId.
-				'" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
-			print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
-				'" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-				\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
-		}
-		print '</div>';
+			// print '<div id="favourite_resource_'.$tagStr.$resourceId.
+				// '" class="favourite_resource favourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'" ><h4 ><i class="fa fa-bookmark-o fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_FAVOURITE").'</div></div>';
+			// print '<div id="unfavourite_resource_'.$tagStr.$resourceId.
+				// '" class="unfavourite_resource unfavourite_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+				// \JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'"  style="display:none;"><h4><i class="fa fa-bookmark fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_UNFAVOURITE").'</div></div>';
+		// }
+		// print '</div>'; // fullResourceBookmark
 		
 		//if ( $resourcePerson == $userId ) {
-		if ( self::canEdit($resourceId) ) {
+		// if ( self::canEdit($resourceId) ) {
 			
-			print '<div class="fullResourceMoreOptions">';
+			// print '<div class="fullResourceMoreOptions">';
 		
-			print '<div id="more_resource_'.$tagStr.$resourceId.'" class="more_resource more_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
-					\JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'</div></div>';
+			// print '<div id="more_resource_'.$tagStr.$resourceId.'" class="more_resource more_resource_'.$resourceId.' text-center" role="button" data-toggle="tooltip" title="'.
+					// \JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'"   ><h4 ><i class="fa fa-ellipsis-h fa-lg"></i></h4><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_MORE_OPTIONS").'</div></div>';
 			
-			print '<div id="moreMenu" class="miniMenu" style="display:none;">';
+			// print '<div id="moreMenu" class="miniMenu" style="display:none;">';
 			
-			print '<div id="resourceEdit_'.$resourceId.'" class="edit_resource miniMenuBtn h4" role="button" data-toggle="modal" data-target="#editModal">';
-			print '<div class="menuIcon"><i class="fa fa-pencil-square-o fa-lg"></i></div>';
-			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_EDIT").'</div>';
-			print '</div>';
+			// print '<div id="resourceEdit_'.$resourceId.'" class="edit_resource miniMenuBtn h4" role="button" data-toggle="modal" data-target="#editModal">';
+			// print '<div class="menuIcon"><i class="fa fa-pencil-square-o fa-lg"></i></div>';
+			// print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_EDIT").'</div>';
+			// print '</div>';
 			
-			print '<div id="deleteResource_'.$resourceId.'" class="deleteResource miniMenuBtn h4" role="button" >';
-			print '<div class="menuIcon"><i class="fa fa-trash-o fa-lg"></i></div>';
-			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_DELETE").'</div>';
-			print '</div>';
+			// print '<div id="deleteResource_'.$resourceId.'" class="deleteResource miniMenuBtn h4" role="button" >';
+			// print '<div class="menuIcon"><i class="fa fa-trash-o fa-lg"></i></div>';
+			// print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_DELETE").'</div>';
+			// print '</div>';
 			
-			print '<div id="viewSet_'.$this->setId.'" class="viewSet miniMenuBtn h4">';
-			print '<a href="'.\JText::_("COM_BIODIV_RESOURCEFILE_RESOURCE_SET_PAGE").'?set_id='.$this->setId.'" ><div class="menuIcon"><i class="fa fa-files-o fa-lg"></i></div>';
-			print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_VIEW_SET").'</div></a>';
-			print '</div>';
+			// print '<div id="viewSet_'.$this->setId.'" class="viewSet miniMenuBtn h4">';
+			// print '<a href="'.\JText::_("COM_BIODIV_RESOURCEFILE_RESOURCE_SET_PAGE").'?set_id='.$this->setId.'" ><div class="menuIcon"><i class="fa fa-files-o fa-lg"></i></div>';
+			// print '<div class="menuText">'.\JText::_("COM_BIODIV_RESOURCEFILE_VIEW_SET").'</div></a>';
+			// print '</div>';
 			
-			print '        <button id="hide_moreMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
+			// print '        <button id="hide_moreMenu" type="button" class="btn btn-default hideMiniMenu" >'.\JText::_("COM_BIODIV_RESOURCEFILE_CANCEL").'</button>';
 		
-			print '</div>'; //moreMenu
+			// print '</div>'; //moreMenu
 			
-			print '</div>'; // moreOptions
+			// print '</div>'; // moreOptions
 			
-		}
-		else {
-			print '<div class="fullResourceMoreOptions">';
+		// }
+		// else {
+			//print '<div class="fullResourceMoreOptions">';
+			print '<div class="fullResourceViewSet">';
 			print '<div id="viewSet_'.$this->setId.'" class="viewSet text-center">';
 			print '<a href="'.\JText::_("COM_BIODIV_RESOURCEFILE_RESOURCE_SET_PAGE").'?set_id='.$this->setId.'" ><h4><i class="fa fa-files-o fa-lg"></i></h4></a><div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCEFILE_VIEW_SET");
 			print '</div></div>';
-			print '</div>'; // moreOptions
-		}
+			print '</div>'; // fullResourceViewSet
+		// }
 		
 		
 		print '<div class="fullResourceTitle">';
@@ -914,19 +1031,19 @@ class ResourceFile {
 		$this->printTags();
 		print '</div>';
 		
-		print '<div class="fullResourceNumLikes text-right">';
-		print '<div id="num_likes_'.$tagStr.$resourceId.'" class="h5 num_likes_'.$resourceId.'">';
+		// print '<div class="fullResourceNumLikes text-right">';
+		// print '<div id="num_likes_'.$tagStr.$resourceId.'" class="h5 num_likes_'.$resourceId.'">';
 		
-		$numLikes = $this->numLikes;
-		if ( $numLikes == 1 ) {
-			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
-		}
-		else {
+		// $numLikes = $this->numLikes;
+		// if ( $numLikes == 1 ) {
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_SINGLE_LIKE");
+		// }
+		// else {
 			
-			print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
-		}
-		print '</div>'; // num_likes
-		print '</div>';
+			// print '' . $numLikes . ' ' . \JText::_("COM_BIODIV_RESOURCEFILE_MANY_LIKES");
+		// }
+		// print '</div>'; // num_likes
+		// print '</div>';
 		
 		print '<div class="fullResourceDoc">';
 		$this->printResource( "fullResource" );
@@ -955,7 +1072,7 @@ class ResourceFile {
 		print '    </div>'; // modal-content
 
 		print '  </div>'; // modal dialog
-		print '</div>'; // uploadModal
+		print '</div>'; // editModal
 		
 		
 		print '</div>'; // panel-body
@@ -1032,7 +1149,7 @@ class ResourceFile {
 		}
 		print '<label for="uploadName"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_NAME_UPLOAD").'</h4></label>';
 		print '<input type="text" id="uploadName" name="uploadName" value = "'.$title.'">';
-		print '<div id="uploadNameCount" class="text-right" data-maxchars="'.self::$maxTitleChars.'">0/'.self::$maxTitleChars.'</div>';
+		print '<div id="uploadNameCount" class="text-right" data-maxchars="'.self::MAX_TITLE_CHARS.'">0/'.self::MAX_TITLE_CHARS.'</div>';
 		
 		
 		// Describe the upload
@@ -1043,7 +1160,7 @@ class ResourceFile {
 
 		print '<label for="uploadDescription"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_UPLOAD_DESC").'</h4></label>';
 		print '<textarea id="uploadDescription" name="uploadDescription" rows="2" cols="100" >'.$desc.'</textarea>';
-		print '<div id="uploadDescriptionCount" class="text-right" data-maxchars="'.self::$maxDescChars.'">0/'.self::$maxDescChars.'</div>';
+		print '<div id="uploadDescriptionCount" class="text-right" data-maxchars="'.self::MAX_DESC_CHARS.'">0/'.self::MAX_DESC_CHARS.'</div>';
 		
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
 		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
@@ -1129,6 +1246,47 @@ class ResourceFile {
 			
 			$pageNum++;
 		}
+		
+		
+
+		// // ------------------------- Badge mapping?
+		// $existingBadges = null;
+		// if ( $resource ) {
+			// $existingBadges = $resource->getBadgeIds();
+		// }
+		
+		// print '<div id="resourceMeta_'.$pageNum.'"  class="metaPage" style="display:none">';
+		
+		// print '<h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_ANY_BADGES").'</h4>';
+	
+		// foreach($allBadges as $badge){
+			
+			// $badgeId = $badge->getBadgeId();
+			// $badgeName = $badge->getBadgeName();
+			// $badgeDesc = $badge->getTaskName();
+			
+			// $checked = "";
+			// if ( $existingBadges && in_array($badgeId, $existingBadges) ) {
+				// $checked = "checked";
+			// }
+			
+			// print '<div class="uploadBadge">';
+			// print '<input type="checkbox" id="badge_'.$badgeId.'" name="badge[]" value="'.$badgeId.'" '.$checked.'>';
+			// print '<label for="badge_'.$badgeId.'" class="uploadLabel">'.$badgeName.': '.$badgeDesc.'</label>';
+			// print '</div>';
+		// }
+		
+		// print '<div id="resourceBack_'.$pageNum.'" class="btn btn-default btn-lg resourceBackBtn"  >';
+		// print \JText::_("COM_BIODIV_RESOURCEFILE_BACK");
+		// print '</div>'; // resourceBack
+		
+		// print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
+		// print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
+		// print '</div>'; // resourceNext
+		
+		// print '</div>'; // resourceMeta
+		
+		// $pageNum++;
 		
 		
 
@@ -1253,6 +1411,65 @@ class ResourceFile {
 		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
 		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
 		print '</div>'; // resourceNext
+		
+		print '</div>'; // resourceMeta
+		
+		return $pageNum;
+		
+	}
+	
+	
+	public static function printPostMetaCapture ( $schoolUser = null,$resourceId = null ) {
+		
+		if ( $schoolUser == null ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		$resource = null;
+		if ( $resourceId ) {
+			$resource = self::createResourceFileFromId ( $resourceId );
+			
+			// $errMsg = print_r ( $resource, true );
+			// error_log ( "printMetaCapture: Resource = " . $errMsg );
+		}
+		// $resourceTypes = self::getResourceTypes();
+		// $tagGroups = self::getResourceTags();
+		//$schoolRoles = SchoolCommunity::getSchoolRoles();
+		// $isEcologist = SchoolCommunity::isEcologist();
+		
+		$pageNum = 1;
+	
+		// -------------------------School, title and description
+		print '<div id="resourceMeta_'.$pageNum.'" class="metaPage">';
+
+		print '<input type="hidden" name="school" value="'.$schoolUser->school_id.'"/>';
+		
+		print '<input type="hidden" name="uploadName" value="'.$schoolUser->school.'_'.$schoolUser->person_id.'_'.date("Y-m-d").'"/>';
+		
+		$resourceTypeId = codes_getCode ( "Post", "resource" );
+		error_log ( "Resource type for Post = " . $resourceTypeId );
+		
+		print '<input type="hidden" name="resourceType" value="'.$resourceTypeId.'"/>';
+		
+		print '<input type="hidden" name="shareLevel" value="'.SchoolCommunity::COMMUNITY.'"/>';
+		
+		print '<input type="hidden" name="source" value="role"/>';
+		
+		
+		// Describe the upload
+		$desc = "";
+		if ( $resource ) {
+			$desc = $resource->getDescription();
+		}
+
+		print '<label for="uploadDescription"><h4>'.\JText::_("COM_BIODIV_RESOURCEFILE_POST_TEXT").'</h4></label>';
+		print '<textarea id="uploadDescription" name="uploadDescription" rows="2" cols="100" >'.$desc.'</textarea>';
+		print '<div id="uploadDescriptionCount" class="text-right" data-maxchars="'.self::MAX_POST_CHARS.'">0/'.self::MAX_POST_CHARS.'</div>';
+		
+		print '<div id="resourceNext_'.$pageNum.'" class="btn btn-primary btn-lg resourceNextBtn"  >';
+		print \JText::_("COM_BIODIV_RESOURCEFILE_NEXT");
+		print '</div>'; // uploadNext
+		
+		print '</div>'; // newUpload
 		
 		print '</div>'; // resourceMeta
 		
@@ -1535,6 +1752,8 @@ class ResourceFile {
 	
 	}
 	
+	
+	
 	/*
 	public static function getPinnedResources () {
 		
@@ -1735,6 +1954,7 @@ class ResourceFile {
 			->innerJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 			->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 			->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+			->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 			->where("R.person_id = ". $personId )
 			->where("R.deleted = 0");
 							
@@ -1752,6 +1972,7 @@ class ResourceFile {
 			->innerJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 			->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 			->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+			->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 			->where("R.access_level = " . $COMMUNITY )
 			->where("R.deleted = 0");
 		
@@ -1776,6 +1997,7 @@ class ResourceFile {
 					->innerJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("FR.person_id = " . $personId)
 					->where("R.school_id = " . $schoolId)
 					->where("R.access_level not in (" . $PERSON . ", " . $ECOLOGISTS . ")" )
@@ -1800,6 +2022,7 @@ class ResourceFile {
 					->innerJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.school_id = " . $schoolId )
 					->where("R.access_level != " . $PERSON )
 					->where("R.deleted = 0");
@@ -1822,6 +2045,7 @@ class ResourceFile {
 				->innerJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 			->where("R.access_level = " . $ECOLOGISTS )
 			->where("R.deleted = 0");
 			
@@ -1908,11 +2132,7 @@ class ResourceFile {
 		$allFavResources = array();
 		$finalQuery = null;
 		
-		// foreach ( $schoolRoles as $schoolRole ) {
-			
-			// $schoolId = $schoolRole['school_id'];
-			// $roleId = $schoolRole['role_id'];
-			$favResources = null;
+		$favResources = null;
 			
 		if ( $isAdmin ) {
 			$finalQuery = $db->getQuery(true)
@@ -1922,6 +2142,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.deleted = 0");
 
 				
@@ -1941,6 +2162,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.person_id = " . $personId )
 					->where("R.deleted = 0");
 				
@@ -1956,6 +2178,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.school_id in ( " . $allSchoolsStr . ") and R.access_level = " . SchoolCommunity::SCHOOL )
 					->where("R.deleted = 0");
 				
@@ -1972,6 +2195,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.access_level = " . SchoolCommunity::COMMUNITY )
 					->where("R.deleted = 0");
 					
@@ -2000,6 +2224,7 @@ class ResourceFile {
 					->innerJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
 					->where("R.deleted = 0");
 
@@ -2029,6 +2254,184 @@ class ResourceFile {
 		$allFavResources  = $db->loadAssocList("resource_id");
 		
 		return (object)array("total"=>$totalRows, "resources"=>$allFavResources);
+		
+	}
+	
+	public static function getBadgeResources ($filters, $page = 1, $pageLength = self::NUM_PER_PAGE) {
+		
+		$personId = userID();
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$whereStr = self::getFilterWhereStr($filters);
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Loop through my school roles and add files accordingly
+		$schoolRoles = SchoolCommunity::getSchoolRoles();
+		
+		$isAdmin = false;
+		$ecolSchools = array();
+		$teacherSchools = array();
+		$allSchools = array();
+		foreach ( $schoolRoles as $schoolRole ) {
+			if ( $schoolRole['role_id'] == SchoolCommunity::ADMIN_ROLE ) {
+				$isAdmin = true;
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::TEACHER_ROLE ) {
+				$teacherSchools[] = $schoolRole['school_id'];
+			}
+			else if ( $schoolRole['role_id'] == SchoolCommunity::ECOLOGIST_ROLE ) {
+				$ecolSchools[] = $schoolRole['school_id'];
+			}
+			$allSchools[] = $schoolRole['school_id'];
+		}
+		
+		$ecolSchoolsStr = "";
+		$teacherSchoolsStr = "";
+		$allSchoolsStr = "";
+		if ( count($ecolSchools) > 0 ) {
+			$ecolSchoolsStr = implode (',', $ecolSchools);
+		}
+		if ( count($teacherSchools) > 0 ) {
+			$teacherSchoolsStr = implode (',', $teacherSchools);
+		}
+		if ( count($allSchools) > 0 ) {
+			$allSchoolsStr = implode (',', $allSchools);
+		}
+		
+		$allBadgeResources = array();
+		$finalQuery = null;
+		
+		$favResources = null;
+			
+		if ( $isAdmin ) {
+			$finalQuery = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->innerJoin("BadgeResourceSet BRS on BRS.set_id = R.set_id")
+					->where("R.deleted = 0");
+
+				
+				if ( $filters ) {
+					$finalQuery->where($whereStr);
+				}
+		}
+		else {
+			
+			if ( count($teacherSchools) > 0 or count($ecolSchools) > 0 ) {
+			
+				// My own resources
+				$query = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->innerJoin("BadgeResourceSet BRS on BRS.set_id = R.set_id")
+					->where("R.person_id = " . $personId )
+					->where("R.deleted = 0");
+				
+				if ( $filters ) {
+					$query->where($whereStr);
+				}
+				
+				// School resources
+				$query2 = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->innerJoin("BadgeResourceSet BRS on BRS.set_id = R.set_id")
+					->where("R.school_id in ( " . $allSchoolsStr . ") and R.access_level = " . SchoolCommunity::SCHOOL )
+					->where("R.deleted = 0");
+				
+				if ( $filters ) {
+					$query2->where($whereStr);
+				}
+				
+				
+				// Community resources
+				$query3 = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->innerJoin("BadgeResourceSet BRS on BRS.set_id = R.set_id")
+					->where("R.access_level = " . SchoolCommunity::COMMUNITY )
+					->where("R.deleted = 0");
+					
+				if ( $filters ) {
+					$query3->where($whereStr);
+				}
+				
+				
+
+				$query4 = $query->union($query2)->union($query3) ;
+		
+			}
+			if ( $finalQuery ) {
+				$finalQuery = $finalQuery->union($query4);
+			}
+			else {
+				$finalQuery = $query4;
+			}
+		
+			if ( count($ecolSchools) > 0 ) {
+				// Ecologist resources
+				$query = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->innerJoin("BadgeResourceSet BRS on BRS.set_id = R.set_id")
+					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
+					->where("R.deleted = 0");
+
+				
+				if ( $filters ) {
+					$query->where($whereStr);
+				}
+				
+				$finalQuery = $finalQuery->union($query);
+			};
+		
+		}
+		
+		$finalQuery->order("tstamp DESC");
+		
+		$db->setQuery($finalQuery);
+		
+		error_log("ResourceFile::getBadgeResources query created: " . $finalQuery->dump());
+		
+		$db->execute();
+		$totalRows = $db->getNumRows();
+		
+		$start = ($page-1)*$pageLength;
+		
+		$db->setQuery($finalQuery, $start, $pageLength);
+		
+		$allBadgeResources  = $db->loadAssocList("resource_id");
+		
+		return (object)array("total"=>$totalRows, "resources"=>$allBadgeResources);
 		
 	}
 	
@@ -2361,7 +2764,7 @@ class ResourceFile {
 				
 	}
 	
-	private static function getFilterWhereStr($filters) {
+	public static function getFilterWhereStr($filters) {
 	
 		$typeArray = array();
 		$tagArray = array();
@@ -2414,7 +2817,149 @@ class ResourceFile {
 	}
 	
 	
-	public static function searchResources ( $searchStr , $filters, $page = 1, $pageLength = self::NUM_PER_PAGE) {
+	public static function searchResources ( $schoolUser, $searchStr , $filters, $page = 1, $pageLength = self::NUM_PER_PAGE) {
+		
+		if ( $schoolUser == null ) {
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		
+		$personId = $schoolUser->person_id;
+		
+		if ( !$personId ) {
+			return null;
+		}
+		
+		$whereStr = self::getFilterWhereStr($filters);
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+		
+		// Get resources matching search
+		// All my files matching search plus all shared with my school files matching search plus all shared with community matching search
+		
+		$roleId = $schoolUser->role_id;
+		$schoolId = $schoolUser->school_id;
+		
+		$allSearchResources = array();
+		
+		$finalQuery = null;
+		
+		if ( $roleId == SchoolCommunity::ADMIN_ROLE ) {
+			
+			$finalQuery = $db->getQuery(true)
+				->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+					"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+					"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+				->where("R.deleted = 0");
+			
+			if ( $searchStr ) {
+				$query->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+			}
+				
+			if ( $filters ) {
+				$finalQuery->where($whereStr);
+			}
+		}
+		else {	
+			
+			if ( $roleId == SchoolCommunity::TEACHER_ROLE or $roleId == SchoolCommunity::ECOLOGIST_ROLE ) {
+			
+				// My own resources
+				$query = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->where("R.person_id = " . $personId )
+					->where("R.deleted = 0");
+				
+				if ( $searchStr ) {
+					$query->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+				}
+					
+				if ( $filters ) {
+					$query->where($whereStr);
+				}
+					
+				
+				// School resources
+				$query2 = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
+					->where("R.deleted = 0");
+				
+				if ( $searchStr ) {
+					$query2->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+				}
+				if ( $filters ) {
+					$query2->where($whereStr);
+				}
+				
+				// Community resources
+				$query3 = $db->getQuery(true)
+					->select("R.timestamp as tstamp, R.resource_id as resource_id, R.filetype, R.upload_filename, R.title, R.description, R.source, R.external_text, R.url, R.access_level, R.person_id, R.school_id, " .
+						"IFNULL(PR.pr_id, 0) as is_pin, IFNULL(FR.fr_id, 0) as is_fav, IFNULL(LR.lr_id, 0) as is_like, " .
+						"(select count(*) from LikedResource LRALL where LRALL.resource_id = R.resource_id) as num_likes, (select count(*) from Resource R2 where R2.set_id = R.set_id) as num_in_set, R.resource_type, R.set_id, R.s3_status  from Resource R")
+					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
+					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
+					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
+					->where("R.access_level = " . SchoolCommunity::COMMUNITY )
+					->where("R.deleted = 0");
+					
+				if ( $searchStr ) {
+					$query3->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
+				}
+				if ( $filters ) {
+					$query3->where($whereStr);
+				}
+				
+
+				$finalQuery = $query->union($query2)->union($query3) ;
+				
+			}
+			
+		}
+		
+		$finalQuery->order("tstamp DESC");
+		
+		//error_log("ResourceFile::searchResurces query created: " . $finalQuery->dump());
+		
+		$db->setQuery($finalQuery);
+		$db->execute();
+		
+		$totalRows = $db->getNumRows();
+		
+		//error_log ( "ResourceFile search total rows = " . $totalRows );
+		
+		$start = ($page-1)*$pageLength;
+		
+		$db->setQuery($finalQuery, $start, $pageLength);
+		
+		//error_log("ResourceFile::searchResurces query created: " . $finalQuery->dump());
+		
+		//$db->execute();
+		
+		$allSearchResources  = $db->loadAssocList("resource_id");
+		
+		return (object)array("total"=>$totalRows, "resources"=>$allSearchResources);
+		
+		
+	}
+	
+	public static function searchResourcesPrev ( $searchStr , $filters, $page = 1, $pageLength = self::NUM_PER_PAGE) {
 		
 		$personId = userID();
 		
@@ -2445,6 +2990,7 @@ class ResourceFile {
 				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 				->where("R.deleted = 0")
 				->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
 				
@@ -2468,6 +3014,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.person_id = " . $personId )
 						->where("R.deleted = 0")
 						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
@@ -2485,6 +3032,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
 						->where("R.deleted = 0")
 						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
@@ -2501,6 +3049,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.access_level = " . SchoolCommunity::COMMUNITY )
 						->where("R.deleted = 0")
 						->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
@@ -2530,6 +3079,7 @@ class ResourceFile {
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
 					->where("R.deleted = 0")
 					->where("MATCH(R.upload_filename, R.title, R.description, R.readable, R.external_text) AGAINST ('".$searchStr."' IN NATURAL LANGUAGE MODE)");
@@ -2600,6 +3150,7 @@ class ResourceFile {
 				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 				->where("R.deleted = 0")
 				->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
 			
@@ -2627,6 +3178,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.person_id = " . $personId )
 						->where("R.deleted = 0")
 						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
@@ -2644,6 +3196,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.school_id = " . $schoolId . " and R.access_level = " . SchoolCommunity::SCHOOL )
 						->where("R.deleted = 0")
 						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
@@ -2661,6 +3214,7 @@ class ResourceFile {
 						->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 						->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 						->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+						->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 						->where("R.access_level = " . SchoolCommunity::COMMUNITY )
 						->where("R.deleted = 0")
 						->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
@@ -2690,6 +3244,7 @@ class ResourceFile {
 					->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 					->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 					->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+					->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 					->where("R.access_level = " . SchoolCommunity::ECOLOGISTS )
 					->where("R.deleted = 0")
 					->where("(TIMESTAMPDIFF(DAY, R.timestamp, NOW())<".self::NUM_DAYS_NEW.")");
@@ -2768,6 +3323,7 @@ class ResourceFile {
 				->leftJoin("FavouriteResource FR on FR.resource_id = R.resource_id and FR.person_id = " . $personId)
 				->leftJoin("PinnedResource PR on PR.resource_id = R.resource_id")
 				->leftJoin("LikedResource LR on LR.resource_id = R.resource_id and LR.person_id = " . $personId)
+				->innerJoin("ResourceType RT on RT.type_id = R.resource_type and RT.seq > 0")
 				->where("R.person_id = " . $personId )
 				->where("R.deleted = 0")
 				->order("tstamp DESC");

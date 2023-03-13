@@ -34,11 +34,15 @@ class BioDivViewGenerate extends JViewLegacy
 		$this->species = $input->getInt('species', 0);
 		$this->options = $input->getInt('opt', 0);
 		
+		$this->listTranId = $input->getInt('tranid', 0);
+		
+		
 		$languages = getSupportedLanguages();
 		
 		if ( $this->species == 1 ) {
 			
 			$this->title = "Species file for translation";
+			
 			
 			$options = dbOptions();
 			$db = JDatabaseDriver::getInstance($options);
@@ -62,13 +66,27 @@ class BioDivViewGenerate extends JViewLegacy
 				$tableName = strtoupper($lang->transifex_code);
 				$query->leftJoin("OptionData ".$tableName." on O.option_id = ".$tableName.".option_id and ".$tableName.".data_type = " . $db->quote($lang->tag));
 			}
+			
+			$reportType = "Species";
+			if ( $this->listTranId ) {
+				
+				$speciesTrans = getSpeciesTranslationLists();
+				$listTran = $speciesTrans[$this->listTranId];
+				$listSql = $listTran->list_sql;
+				$reportType .= "_" . $listTran->list_name;
+				
+				$query->innerJoin("SpeciesList S on S.species_id = O.option_id")
+					->where($listSql);
+				
+			}
+			
 				
 			$query->where("struc in ( 'mammal', 'bird', 'invertebrate' )")
 				->order("struc, option_name");
 
 			$db->setQuery($query);
 			
-			//error_log("generateTranslateOptions select query created " . $query->dump());
+			error_log("generateTranslateOptions select query created " . $query->dump());
 			
 			$this->speciesToTranslate = $db->loadObjectList("option_id");
 			
@@ -118,7 +136,7 @@ class BioDivViewGenerate extends JViewLegacy
 				array_push($rows, $speciesArray);
 			}
 			
-			$this->reportURL = createReportFile ( "SpeciesForTranslation", $headings, $rows );
+			$this->reportURL = createReportFile ( $reportType, $headings, $rows );
 			
 		}
 		else if ( $this->options == 1 ) {
@@ -152,7 +170,7 @@ class BioDivViewGenerate extends JViewLegacy
 			
 			$this->options = $db->loadObjectList("option_id");
 			
-			$headings = array("Key", "en-GB", "Context"); 
+			$headings = array("Key", "en", "Context"); 
 			
 			foreach ($languages as $id=>$lang) {
 				$headings[] = $lang->transifex_code;

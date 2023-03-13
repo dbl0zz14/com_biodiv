@@ -69,10 +69,28 @@ class BiodivHelper {
 		$this->db->setQuery($query, 0, 1);
 		$user = $this->db->loadObject();
 		
-		$user_str = print_r ($user, true );
-		error_log($user_str);
+		// $user_str = print_r ($user, true );
+		// error_log($user_str);
 
 		return $user;
+	}
+
+	// Find the group id, given the name
+	function getUserGroupId ( $groupName ) {
+		
+		// Get config details so can get to user table
+		$config = Factory::getConfig();
+		
+		$groupId = null;
+		
+		$table ="" . $config->get("db") . "." . $config->get("dbprefix") . "usergroups";
+		
+		$query = $this->db->getQuery(true);
+		$query = 'SELECT id FROM ' . $table . ' WHERE title = ' . $this->db->quote($groupName);
+		$this->db->setQuery($query, 0, 1);
+		$groupId = $this->db->loadResult();
+		
+		return $groupId;
 	}
 
 	// Return the expertise details for a single user id as a list of objects
