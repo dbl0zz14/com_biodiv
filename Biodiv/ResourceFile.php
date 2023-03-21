@@ -160,6 +160,27 @@ class ResourceFile {
 		
 			$query = $db->getQuery(true)
 					->select("RT.* from ResourceType RT")
+					->order("RT.seq");
+					
+			$db->setQuery($query);
+				
+			//error_log("Set id select query created: " . $query->dump());
+				
+			self::$types = $db->loadObjectList("type_id");
+		}
+		
+		return self::$types;
+	
+	}
+	
+	public static function getDisplayResourceTypes () {
+		
+		if ( self::$types == null ) {
+			$options = dbOptions();
+			$db = \JDatabaseDriver::getInstance($options);
+		
+			$query = $db->getQuery(true)
+					->select("RT.* from ResourceType RT")
 					->where("RT.seq > 0")
 					->order("RT.seq");
 					

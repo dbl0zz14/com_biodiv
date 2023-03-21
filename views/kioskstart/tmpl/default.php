@@ -21,7 +21,7 @@ print '</div>'; // opaque-bg
 
 print '<div class="row">';
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 print '	<button id="kiosk_start" class="btn btn-lg btn-block btn-success h2" type="submit">'.JText::_("COM_BIODIV_KIOSKSTART_START_HERE").'</button>';
 
@@ -29,7 +29,7 @@ print '</div>';
 
 
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 if ( $this->birdsOnly ) {
 	print '	<button id="kiosk_birds" class="btn btn-lg btn-block btn-success h2" type="submit">'.JText::_("COM_BIODIV_KIOSKSTART_LEARN_BIRDS").'</button>';
@@ -42,14 +42,14 @@ print '</div>';
 
 
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 print '	<button id="kiosk_classify" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_CLASSIFY").'</button>';
 
 print '</div>';
 
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 print '	<button id="kiosk_quiz" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_TAKE_QUIZ").'</button>';
 
@@ -57,7 +57,7 @@ print '</div>';
 
 
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 print '	<button id="kiosk_map" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_MAP").'</button>';
 
@@ -65,7 +65,7 @@ print '</div>';
 
 
 
-print '<div class="col-md-4">';
+print '<div class="col-md-4 col-sm-4 col-xs-6">';
 
 print '	<button id="kiosk_project" class="btn btn-lg btn-block btn-success h2" >'.JText::_("COM_BIODIV_KIOSKSTART_LEARN_PROJECT").'</button>';
 

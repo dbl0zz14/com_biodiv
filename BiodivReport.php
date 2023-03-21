@@ -191,6 +191,9 @@ class BiodivReport {
 				case "ACTIVITY":
 					$this->generateActivityData ();
 					break;
+				case "BADGECOMPLETE":
+					$this->generateLevelActivityData ();
+					break;
 				default:
 					error_log ("No report type found for " . $this->reportTypeName );
 			}
@@ -279,6 +282,15 @@ class BiodivReport {
 		if ( $type == "spottingproject" ) {
 			
 			$filterValues = mySpottingProjects();
+		
+			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
+			
+			return $filterValues;
+		}
+		
+		if ( $type == "level" ) {
+		
+			$filterValues = array(1=>"Bronze", 2=>"Silver", 3=>"Gold");
 		
 			$filterValues = array(JText::_("COM_BIODIV_BIODIVREPORT_ALL")) + $filterValues;
 			
@@ -460,12 +472,8 @@ class BiodivReport {
 			$db = JDatabase::getInstance(dbOptions());
 			switch ( $this->reportTypeName ) {
 					case "ACTIVITY":
-						error_log ( "filter = " . $filter );
 						
 						$filterObject = json_decode($filter);
-						
-						$errMsg = print_r ( $filterObject, true );
-						error_log ( "Filter object: " . $errMsg );
 						
 						if ( property_exists($filterObject, "module") and ($filterObject->module != 0 )) {
 							if ( $filterClause != null ) {
@@ -491,6 +499,34 @@ class BiodivReport {
 						}
 						break;
 						
+					case "BADGECOMPLETE":
+						$filterObject = json_decode($filter);
+						
+						if ( property_exists($filterObject, "level") and ($filterObject->level != 0 )) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter1 = " . $db->quote($filterObject->level);
+							
+						}
+						if ( property_exists($filterObject, "school") and ($filterObject->school != 0 ) ) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter2 = " . $db->quote($filterObject->school);
+						}
+						if ( property_exists($filterObject, "role") and ($filterObject->role != 0 ) ) {
+							if ( $filterClause != null ) {
+								$filterClause .= " and ";
+							}
+							$filterClause .= "filter3 = " . $db->quote($filterObject->role);
+						}
+						if ( $filterClause == null ) {
+							$filterClause = "1";
+						}
+						break;
+						
+						
 					case "USERSEQUENCE":
 					case "USERUPLOAD":
 					case "USERUPLOADAUDIO":
@@ -502,8 +538,6 @@ class BiodivReport {
 					case "USERNOSPECIESAUDIO":
 					case "USERALLSPECIES":
 					case "USERALLSPECIESAUDIO":
-						
-						error_log ( "filter = " . $filter );
 						
 						$filterObject = json_decode($filter);
 						
@@ -731,13 +765,13 @@ class BiodivReport {
 				->where("R.report_type = " . $this->reportType);
 		}
 		
-		error_log(" remove rows select query created " . $query->dump());
+		//error_log(" remove rows select query created " . $query->dump());
 		
 		$db->setQuery($query);
 
 		$reportIds = $db->loadColumn();
 		
-		$err_msg = print_r ( $reportIds, true );
+		//$err_msg = print_r ( $reportIds, true );
 		//error_log ( "removePreviousRows, reportIds: " . $err_msg );
 		
 		// delete all ReportRows for previous reports.
@@ -1391,7 +1425,7 @@ private function generateAnimalDataAudio () {
 				->innerJoin("ProjectSiteMap PSM on U.site_id = PSM.site_id and U.timestamp >= PSM.start_time and (U.timestamp <= PSM.end_time or PSM.end_time is NULL)")
 				->innerJoin("Project P on PSM.project_id = P.project_id");
 			
-			error_log("query1 created: " . $query1->dump() );
+			//error_log("query1 created: " . $query1->dump() );
 				
 		}
 		else {
@@ -2144,7 +2178,7 @@ private function generateUserSequenceData () {
 			->where("PUM.project_id in (" . $projectStr . ")")
 			->order("PUM.person_id");
 			
-		error_log("query1 created: " . $query1->dump() );
+		//error_log("query1 created: " . $query1->dump() );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
@@ -2193,14 +2227,14 @@ private function generateUserSequenceData () {
 			->innerJoin($userDb . "." . $prefix ."users U on PUM.person_id = U.id")
 			->where("PUM.project_id in (" . $projectStr . ")");
 		
-		error_log("query1 created: " . $query1->dump() );
+		//error_log("query1 created: " . $query1->dump() );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
 			->columns($db->qn(array('report_id','row_csv')))
 			->values($query1);
 		
-		error_log("queryInsert created: " . $queryInsert->dump());
+		//error_log("queryInsert created: " . $queryInsert->dump());
 		
 		$db->setQuery($queryInsert);
 		
@@ -2218,14 +2252,14 @@ private function generateUserSequenceData () {
 			->where("PUM.project_id in (" . $projectStr . ")")
 			->where("LTM.end_date is NULL");
 			
-		error_log("query2 created: " . $query2->dump() );
+		//error_log("query2 created: " . $query2->dump() );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
 			->columns($db->qn(array('report_id','row_csv')))
 			->values($query2);
 		
-		error_log("queryInsert created: " . $queryInsert->dump());
+		//error_log("queryInsert created: " . $queryInsert->dump());
 		
 		$db->setQuery($queryInsert);
 		
@@ -2243,14 +2277,14 @@ private function generateUserSequenceData () {
 			->where("PUM.project_id in (" . $projectStr . ")")
 			->where("UTS.end_date is NULL");
 			
-		error_log("query3 created: " . $query3->dump() );
+		//error_log("query3 created: " . $query3->dump() );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
 			->columns($db->qn(array('report_id','row_csv')))
 			->values($query3);
 		
-		error_log("queryInsert created: " . $queryInsert->dump());
+		//error_log("queryInsert created: " . $queryInsert->dump());
 		
 		$db->setQuery($queryInsert);
 		
@@ -2285,23 +2319,23 @@ private function generateUserSequenceData () {
 			->innerJoin($userDb . "." . $prefix ."users U on R.person_id = U.id")
 			->order("R.timestamp DESC");
 		
-		error_log("query1 created: " . $query1->dump() );
+		//error_log("query1 created: " . $query1->dump() );
 		
 		$queryInsert = $db->getQuery(true)
 			->insert('ReportRows')
 			->columns($db->qn(array('report_id','row_csv')))
 			->values($query1);
 		
-		error_log("queryInsert created: " . $queryInsert->dump());
+		//error_log("queryInsert created: " . $queryInsert->dump());
 		
 		$db->setQuery($queryInsert);
 		
-		error_log("About to execute");
+		//error_log("About to execute");
 
 		$db->execute();
 
 	}
-		
+	
 	// Get activities completed
 	private function generateActivityData () {
 		
@@ -2349,12 +2383,94 @@ private function generateUserSequenceData () {
 			
 		$query = $query1->union($query2)->order("date DESC");
 		
-		error_log("Activity report query created: " . $query->dump() );
+		//error_log("Activity report query created: " . $query->dump() );
 		
 		$concatQuery = $db->getQuery(true)
 			//->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', O.option_name, B.name, S.name, R.display_text, U.username, ST.complete_date) as report_csv")
 			
 			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('ViewSet',set_id), module_name, badge_group, badge_name, points, school, role, person, date) as report_csv, module_id as filter1, school_id as filter2, role_id as filter3")
+			->from("(" . (string)$query . " ) AS Temp");
+			
+		
+		//error_log("concatQuery created: " . $concatQuery->dump() );
+		
+		$queryInsert = $db->getQuery(true)
+			->insert('ReportRows')
+			->columns($db->qn(array('report_id','row_csv','filter1','filter2','filter3')))
+			->values($concatQuery);
+		
+		//error_log("queryInsert created: " . $queryInsert->dump());
+		
+		$db->setQuery($queryInsert);
+		
+		$db->execute();
+
+	}
+		
+	// Get activities completed
+	private function generateLevelActivityData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		
+		$options = dbOptions();
+		$db = JDatabaseDriver::getInstance($options);
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		
+		$db = JDatabase::getInstance(dbOptions());
+		
+		$query1 = $db->getQuery(true)
+			->select( "IFNULL(SB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, SB.complete_date as date")
+			->from("StudentBadges SB")
+			->innerJoin("Badge B on B.badge_id = SB.badge_id")
+			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("SchoolUsers SU on SU.person_id = SB.person_id") 
+			->innerJoin("School S on S.school_id = SU.school_id")
+			->innerJoin("Role R on R.role_id = SU.role_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
+			->innerJoin($userDb . "." . $prefix ."users U on SB.person_id = U.id")
+			->where("SB.status > " . Biodiv\Badge::PENDING);
+		
+		$query2 = $db->getQuery(true)
+			->select( "IFNULL(TB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, SC.name as person, TB.complete_date as date")
+			->from("TeacherBadges TB")
+			->innerJoin("Badge B on B.badge_id = TB.badge_id")
+			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("SchoolUsers SU on SU.person_id = TB.person_id") 
+			->innerJoin("School S on S.school_id = SU.school_id")
+			->innerJoin("Role R on R.role_id = SU.role_id")
+			->innerJoin("Module M on M.module_id = B.module_id")
+			->innerJoin("SchoolClass SC on TB.class_id = SC.class_id")
+			->where("TB.status > " . Biodiv\Badge::PENDING);
+		
+			
+		// $query2 = $db->getQuery(true)
+			// ->select( "IFNULL(TT.set_id,0) as set_id, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, T.points as points, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, TT.complete_date as date")
+			// ->from("TeacherTasks TT")
+			// ->innerJoin("Task T on T.task_id = TT.task_id")
+			// ->innerJoin("Badge B on B.badge_id = T.badge_id")
+			// ->innerJoin("Options O on O.option_id = B.badge_group")
+			// ->innerJoin("SchoolUsers SU on SU.person_id = TT.person_id") 
+			// ->innerJoin("School S on S.school_id = SU.school_id")
+			// ->innerJoin("Role R on R.role_id = SU.role_id")
+			// ->innerJoin("Module M on M.module_id = B.module_id")
+			// ->innerJoin($userDb . "." . $prefix ."users U on TT.person_id = U.id")
+			// ->where("TT.status > " . Biodiv\Badge::PENDING);
+		
+			
+		$query = $query1->union($query2)->order("date DESC");
+		
+		//error_log("Activity report query created: " . $query->dump() );
+		
+		$concatQuery = $db->getQuery(true)
+			//->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', O.option_name, B.name, S.name, R.display_text, U.username, ST.complete_date) as report_csv")
+			
+			->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', CONCAT('ViewSet',set_id), level, module_name, badge_group, badge_name, school, role, person, date) as report_csv, level as filter1, school_id as filter2, role_id as filter3")
 			->from("(" . (string)$query . " ) AS Temp");
 			
 		

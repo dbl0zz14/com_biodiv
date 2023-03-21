@@ -97,6 +97,8 @@ else {
 
 	// -------------------------------  Main page content
 	
+	print '<div class="row">';
+	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
 	print '<h2>';
@@ -217,6 +219,8 @@ else {
 		
 		print '<div class="summaryItemBtn text-center">';
 			
+		print '<a href="'.$this->schoolsPage.'"><div class="btn btn-lg btn-default" role="button">'.JText::_("COM_BIODIV_ADMINDASHBOARD_SCHOOLS_ADMIN").'</div></a>';
+		
 		print '<a href="'.JText::_("COM_BIODIV_ADMINDASHBOARD_USER_ADMIN_PAGE").'"><div class="btn btn-lg btn-default" role="button">'.JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW_ADMIN").'</div></a>';
 		
 		print '</div>'; // summaryBtn
@@ -248,7 +252,7 @@ else {
 			
 			print '<div class="summaryItemGrid">';
 		
-			print '<div class="summaryItemIcon h3 text-center">';
+			print '<div class="summaryItemIcon1 h3 text-center">';
 			
 			//print '<img src="'.$module->icon.'"  class="'.$module->class_stem.'Img img-responsive" alt="'.$module->name.' icon" />';
 			
@@ -257,10 +261,15 @@ else {
 				// $moduleIcon = $module->white_icon;
 			// }
 			
-			print '<img class="img-responsive" src="'.$lockObject->s_uncollected.'" alt="Level '.$lockLevel.' student icon" />';
-			print '<img class="img-responsive" src="'.$lockObject->t_uncollected.'" alt="Level '.$lockLevel.' teacher icon" />';
+			print '<img class="img-responsive" src="'.$lockObject->s_white.'" alt="Level '.$lockLevel.' student icon" />';
 			
-			print '</div>'; // summaryIcon
+			print '</div>'; // summaryIcon1
+			
+			print '<div class="summaryItemIcon2 h3 text-center">';
+			
+			print '<img class="img-responsive" src="'.$lockObject->t_white.'" alt="Level '.$lockLevel.' teacher icon" />';
+			
+			print '</div>'; // summaryIcon2
 			
 			print '<div class="summaryItemName h3 panelHeading text-center">';
 		
@@ -282,7 +291,7 @@ else {
 			
 			print '<div class="summaryItemBtn text-center">';
 			
-			//print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$module->report_id."' data-filter='{\"module\":\"".$module->module_id."\"}'>".JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW")."</div>";
+			print "<div class='btn btn-lg btn-primary report-btn' role='button' data-report-type='".$lockObject->report_id."' data-filter='{\"level\":\"".$lockLevel."\"}'>".JText::_("COM_BIODIV_ADMINDASHBOARD_VIEW")."</div>";
 			
 			print '</div>'; // summaryBtn
 			

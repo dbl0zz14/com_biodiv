@@ -1861,7 +1861,7 @@ class SchoolCommunity {
 		
 		if ( ($personId == $schoolUser->person_id) && ($schoolUser->role_id == self::TEACHER_ROLE) )
 		{
-			print '<div class="schoolAccountGrid headingGrid">';
+			print '<div class="schoolAccountGrid headingGrid hidden-xs">';
 			print '<div class="schoolAccountImage text-center">';
 			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_AVATAR");
 			print '</div>'; // schoolAccountImage
@@ -1891,7 +1891,7 @@ class SchoolCommunity {
 		if ( ($personId == $schoolUser->person_id) && ($schoolUser->role_id == self::TEACHER_ROLE) )
 		{
 		
-			print '<div class="schoolAccountGrid headingGrid">';
+			print '<div class="schoolAccountGrid headingGrid hidden-xs">';
 			print '<div class="schoolAccountImage text-center">';
 			print \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_AVATAR");
 			print '</div>'; // schoolAccountImage
@@ -3435,7 +3435,7 @@ class SchoolCommunity {
 			if ( $kiosk ) {
 				
 				$subject = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_SUBJECT");
-				$msg = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_MESSAGE") . ' <a href="'.\JURI::root().'/bes-school-dashboard">'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_LINK_TEXT").'</a>';
+				$msg = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_MESSAGE") . ' <a href="'.\JURI::root().'/bes-school-admin">'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_LINK_TEXT").'</a>';
 				
 				self::notifyUser ( $newSchoolSignup->person_id, $subject, $msg );
 				

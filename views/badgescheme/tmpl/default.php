@@ -69,11 +69,11 @@ else {
 		print '<h4 class="text-center vSpaced">'.JText::_("COM_BIODIV_BADGESCHEME_COMPLETE_".$lockLevel).'</h4>';
 		
 		
-		print '<div class="row small-gutter badgeSchemeRow badgeSchemeHeader">';
+		print '<div class="row small-gutter badgeSchemeRow badgeSchemeHeader hidden-xs">';
 			
 		print '<div class="col-md-12">';
 		
-		print '<div class="badgeSchemeGrid h4 thickFont">';
+		print '<div class="badgeSchemeGrid h4 thickFont ">';
 		
 		print '<div class="badgeSchemeClassOnly text-center">';
 		print JText::_("COM_BIODIV_BADGESCHEME_CLASS_ONLY");
@@ -122,11 +122,14 @@ else {
 			
 			print '<div class="col-md-12">';
 			
+			print '<div class="hidden-lg hidden-md hidden-sm"><hr/></div>';
+			
 			print '<div class="badgeSchemeGrid">';
 			
 			print '<div class="badgeSchemeClassOnly text-center">';
 			if ( !($badge->getLinkedBadge() > 0) ) {
-				print '<i class="fa fa-check fa-2x" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_BADGESCHEME_CLASS_ONLY_TOOLTIP").'"></i>'; 
+				 print '<i class="fa fa-check fa-2x hidden-xs" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_BADGESCHEME_CLASS_ONLY_TOOLTIP").'"></i>';
+                 print '<div class="hidden-lg hidden-md hidden-sm">'.JText::_("COM_BIODIV_BADGESCHEME_CLASS_ONLY_TOOLTIP").'</div>'; 
 			}
 			print '</div>'; // classOnlyBadge
 			

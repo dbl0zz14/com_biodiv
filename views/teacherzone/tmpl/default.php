@@ -24,38 +24,26 @@ else {
 	print '</div>'; // col-12
 	print '</div>'; // row
 	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
+		
+		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
+
 	// --------------------- Main content
 	
-	print '<div class="row menuGridRow">';
+	print '<div class="row ">';
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 
 	
 	print '<h2 class="hidden-sm hidden-md hidden-lg">';
 	print '<span class="greenHeading">'.JText::_("COM_BIODIV_TEACHERZONE_HEADING").'</span>';
 	print '</h2>';
 	
-	print '<div id="displayArea">';
+	print '<div id="displayArea menuGridRow">';
 	
-	
-	// print '<h2>';
-	// print '<div class="row">';
-	// print '<div class="col-md-10 col-sm-10 col-xs-10">';
-	// print '<span class="greenHeading">'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_HEADING").'</span> <small class="hidden-xs">'.JText::_("COM_BIODIV_SCHOOLCOMMUNITY_SUBHEADING").'</small>';
-	// print '</div>'; // col-10
-	// print '<div class="col-md-2 col-sm-2 col-xs-2 text-right">';
-	// if ( $this->helpOption > 0 ) {
-		// print '<div id="helpButton_'.$this->helpOption.'" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
-		// print '<i class="fa fa-info"></i>';
-		// print '</div>'; // helpButton
-	// }
-	// print '</div>'; // col-2
-	// print '</div>'; // row
-	// print '</h2>';  
-	
-	//print '<h3>'.JText::_("COM_BIODIV_TEACHERZONE_WHAT_DO").'</h3>';
-	
-	// print '<div class="row small-gutter">';
-	
-	// print '<div class="col-md-12">';
 	
 	print '<div class="teacherZoneGrid">';
 	
@@ -91,70 +79,80 @@ else {
 	
 	print '</div>'; // teacherZoneBadgeScheme
 	
-	print '<div class="teacherZoneSchoolAdmin">';
+	if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
 		
-	$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_SCHOOL_ADMIN");
-	print '<a href="'.$this->schoolAdminLink.'">';
-	print '<div class="panel panel-default actionPanel" role="button" >';
-	print '<div class="panel-body">';
-	print '<div class="h4 panelHeading text-center">';
-	print $buttonHeading;
-	print '</div>';
-	print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-building-o fa-3x optionsIcon"></i></div>';
-	print '</div>'; // panel-body
-	print '</div>'; // panel
-	print '</a>';
-	
-	print '</div>'; // teacherZoneSchoolAdmin
-	
-	print '<div class="teacherZoneStudentProgress">';
+		print '<div class="teacherZoneSchoolAdmin">';
+			
+		$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_SCHOOL_ADMIN");
+		print '<a href="'.$this->schoolAdminLink.'">';
+		print '<div class="panel panel-default actionPanel" role="button" >';
+		print '<div class="panel-body">';
+		print '<div class="h4 panelHeading text-center">';
+		print $buttonHeading;
+		print '</div>';
+		print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-building-o fa-3x optionsIcon"></i></div>';
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
 		
-	$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_STUDENT_PROGRESS");
-	print '<a href="'.$this->studentProgressLink.'">';
-	print '<div class="panel panel-default actionPanel" role="button" >';
-	print '<div class="panel-body">';
-	print '<div class="h4 panelHeading text-center">';
-	print $buttonHeading;
-	print '</div>';
-	print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-tasks fa-3x optionsIcon"></i></div>';
-	print '</div>'; // panel-body
-	print '</div>'; // panel
-	print '</a>';
+		print '</div>'; // teacherZoneSchoolAdmin
 	
-	print '</div>'; // teacherZoneStudentProgress
 	
-	// print '<div class="teacherZoneMessages">';
+		print '<div class="teacherZoneStudentProgress">';
+			
+		$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_STUDENT_PROGRESS");
+		print '<a href="'.$this->studentProgressLink.'">';
+		print '<div class="panel panel-default actionPanel" role="button" >';
+		print '<div class="panel-body">';
+		print '<div class="h4 panelHeading text-center">';
+		print $buttonHeading;
+		print '</div>';
+		print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-tasks fa-3x optionsIcon"></i></div>';
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
 		
-	// $buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_MESSAGES");
-	// print '<a href="'.$this->messagesLink.'">';
-	// print '<div class="panel panel-default actionPanel" role="button" >';
-	// print '<div class="panel-body">';
-	// print '<div class="h4 panelHeading text-center">';
-	// print $buttonHeading;
-	// print '</div>';
-	// print '<div class="text-center h3 vSpaced"><i class="fa fa-comments-o fa-3x"></i></div>';
-	// print '</div>'; // panel-body
-	// print '</div>'; // panel
-	// print '</a>';
+		print '</div>'; // teacherZoneStudentProgress
 	
-	// print '</div>'; // teacherZoneMessages
 	
-	print '<div class="teacherZoneStudentWork">';
+	
+		print '<div class="teacherZoneStudentWork">';
+			
+		$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_WORK");
+		print '<a href="'.$this->workLink.'">';
+		print '<div class="panel panel-default actionPanel" role="button" >';
+		print '<div class="panel-body">';
+		print '<div class="h4 panelHeading text-center">';
+		print $buttonHeading;
+		print '</div>';
+		print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-file-text fa-3x optionsIcon"></i></div>';
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
 		
-	$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_WORK");
-	print '<a href="'.$this->workLink.'">';
-	print '<div class="panel panel-default actionPanel" role="button" >';
-	print '<div class="panel-body">';
-	print '<div class="h4 panelHeading text-center">';
-	print $buttonHeading;
-	print '</div>';
-	print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-file-text fa-3x optionsIcon"></i></div>';
-	print '</div>'; // panel-body
-	print '</div>'; // panel
-	print '</a>';
+		print '</div>'; // teacherZoneStudentWork
 	
-	print '</div>'; // teacherZoneStudentWork
+	}
+	if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::ADMIN_ROLE  ) {
 		
+		print '<div class="teacherZoneSchoolAdmin">'; // cheat the layout
+			
+		$buttonHeading = JText::_("COM_BIODIV_TEACHERZONE_WORK");
+		print '<a href="'.$this->workLink.'">';
+		print '<div class="panel panel-default actionPanel" role="button" >';
+		print '<div class="panel-body">';
+		print '<div class="h4 panelHeading text-center">';
+		print $buttonHeading;
+		print '</div>';
+		print '<div class="text-center h3 vSpaced teacherColor"><i class="fa fa-file-text fa-3x optionsIcon"></i></div>';
+		print '</div>'; // panel-body
+		print '</div>'; // panel
+		print '</a>';
+		
+		print '</div>'; // teacherZoneSchoolAdmin
+
+	}
+	
 	print '</div>'; // teacherZoneGrid
 	
 	

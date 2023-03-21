@@ -29,7 +29,7 @@ if ( $this->badge > 0  ) {
 				$compStr = "" . $this->badgeResult->numAchieved . " " . JText::_("COM_BIODIV_BADGEKIOSKFEEDBACK_CLASSNS_".$this->badge) ;
 			}
 			$toGo = $this->badgeResult->numRequired - $this->badgeResult->numAchieved;
-			print '<div class="col-md-12 text-center lower_heading"><h2>'. JText::_("COM_BIODIV_BADGEKIOSKFEEDBACK_YOU_".$this->badge) .' '
+			print '<div class="col-md-12 text-center spaced_row"><h2>'. JText::_("COM_BIODIV_BADGEKIOSKFEEDBACK_YOU_".$this->badge) .' '
 							.$compStr.' '. JText::_("COM_BIODIV_BADGEKIOSKFEEDBACK_TOWARDS_".$this->badge) .' - '. $toGo . ' ' . 
 							JText::_("COM_BIODIV_BADGEKIOSKFEEDBACK_TO_GO"). '</h2></div>';
 		}

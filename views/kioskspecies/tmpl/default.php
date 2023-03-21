@@ -13,7 +13,8 @@ if ( !$this->person_id ) {
 
  
 	if ( $this->imageSrc ) {
-		print '<img style="max-height:48vh; max-width:100%; margin:0;, padding:0;" src="' . $this->imageSrc . '" />';
+		//print '<img style="max-height:48vh; max-width:100%; margin:0;, padding:0;" src="' . $this->imageSrc . '" />';
+		print '<img src="' . $this->imageSrc . '" class="img-responsive"/>';
 	}
 	
 	if ( $this->appearance ) {

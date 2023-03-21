@@ -53,22 +53,24 @@ else {
 }
 
 
-print '  <div class="col-md-12">';
-print '  <div class="col-md-12">';
-print '  <div class="col-md-10 col-md-offset-1 h1 text-center slight_lower">'.JText::_("COM_BIODIV_KIOSKMAP_MAP_HEADING").'</div>';  
-print ' <div>'; // col-12
-print ' <div>'; // col-12
+//print '  <div class="col-md-12">';
+//print '  <div class="col-md-12">';
+print '  <div class="row">';
+print '  <div class="col-md-8 col-md-offset-2 h2 text-center map_header">'.JText::_("COM_BIODIV_KIOSKMAP_MAP_HEADING").'</div>';   
+print ' <div>'; // row
+//print ' <div>'; // col-12
+//print ' <div>'; // col-12
 
 
+
+print '<div id="map_buttons" class="text-center map_row">';
 
 print '<div class="row">';
-print '<div id="map_buttons" class="col-md-12 text-center">';
 
 
+print '<div class="form-inline " >';
 
-print '<div class="form-inline col-md-12 col-sm-12 col-xs-12 " >';
-
-print '<div class="col-md-2">';
+print '<div class="col-md-2 col-sm-4 col-xs-4">';
 
 print ' <div class="btn-group" style="margin-bottom:4px;"> ';
 print '  <button class="btn btn-success small_btn" id="project_area" >'.JText::_("COM_BIODIV_KIOSKMAP_ZOOM_PROJECT").'</button> ';
@@ -77,14 +79,14 @@ print '</div>'; // btn-group
 print '</div>'; // col-2
 
 
-print '<div class="col-md-2">';
+print '<div class="col-md-2 col-sm-4 col-xs-4">';
 
 print '<div class="btn-group"  style="margin-bottom:4px;"><button type="button" class="btn btn-success small_btn" id="discover_areas" disabled>'.JText::_("COM_BIODIV_KIOSKMAP_SHOW_AREAS").'</button></div>';
 
 print '</div>'; // col-2
 
 
-print '<div class="col-md-2">';
+print '<div class="col-md-2 col-sm-4 col-xs-4">';
 
 print ' <div class="btn-group" style="margin-bottom:4px;"> ';
 print '  <button class="btn btn-success small_btn" id="discover_sites" >'.JText::_("COM_BIODIV_KIOSKMAP_TOGGLE_SITES").'</button> ';
@@ -94,7 +96,7 @@ print '</div>'; // btn-group
 print '</div>'; // col-2
 
 
-print '<div class="col-md-6">';
+print '<div class="col-md-6 col-sm-12 col-xs-12">';
 
 print ' <div class="input-group" style="margin-bottom:4px;">';
 //print '<select class="form-control form-control-sm" name = "species_id" id="species_select">';
@@ -114,22 +116,25 @@ print '</span>';
 print '</div>'; // input-group
 
 
-print '</div>'; // col-8
+print '</div>'; // col-6
 
-print '</div>'; // col-12
+print '</div>'; // form-inline
 
 
-print '</div>'; // col-8
 print '</div>'; // row
 
+print '</div>'; // map-buttons
+
+print '<div class="map_row">';
 print '<div class="row">';
-print '<div class="col-md-12">';
-print '<div class="col-md-12">';
+//print '<div class="col-md-12">';
+//print '<div class="col-md-12">';
 
 // -------------- LHS ------------------------
 print '<div class="col-xs-12 col-sm-12 col-md-8">';
 
-print '<div id="discovermap" style="width:100%; height:70vh;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
+//print '<div id="discovermap" style="width:100%; height:70vh;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
+print '<div id="discovermap" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
 
 
 print '<h5 class="">'.JText::_("COM_BIODIV_KIOSKMAP_DATA_WARN").'</h5>';
@@ -141,22 +146,34 @@ print '<div class="col-xs-12 col-sm-12 col-md-4">';
 
 
 
+// print '<div id="sightingschart_message"></div>';
+// print '<div id="uploadschart_message"></div>';
+// print '<div class="table-responsive discover-chart" style="padding: 0; height:37vh; width:25vw; overflow:hidden;">';
+// print '  <canvas id="sightingschart" class="table"></canvas>';
+// print '</div>';
+
+// print '<div class="table-responsive discover-chart" style="padding: 0; height:32vh; overflow:hidden;">';
+// print '<canvas id="uploadschart" class="table"></canvas>';
+// print '</div>';
+
 print '<div id="sightingschart_message"></div>';
 print '<div id="uploadschart_message"></div>';
-print '<div class="table-responsive discover-chart" style="padding: 0; height:37vh; width:25vw; overflow:hidden;">';
+print '<div class="table-responsive discover-chart" >';
 print '  <canvas id="sightingschart" class="table"></canvas>';
 print '</div>';
 
-print '<div class="table-responsive discover-chart" style="padding: 0; height:32vh; overflow:hidden;">';
+print '<div class="table-responsive discover-chart" >';
 print '<canvas id="uploadschart" class="table"></canvas>';
 print '</div>';
 
+
 print '</div>'; // col-4
 
-print '</div>'; // col-12
-print '</div>'; // col-12
+//print '</div>'; // col-12
+//print '</div>'; // col-12
 
 print '</div>'; // row
+print '</div>'; // map_row
 
 ?>
 

@@ -34,6 +34,9 @@ else {
 		print '</div>'; // helpButton
 	}
 	
+	print '<a href="'.$this->dashboardPage.'" class="btn btn-success homeBtn" >';
+	print '<i class="fa fa-arrow-left"></i> ' . JText::_("COM_BIODIV_SCHOOLSADMIN_ADMIN_DASH");
+	print '</a>';
 
 	// -------------------------------  Main page content
 	

@@ -244,7 +244,7 @@ else {
 	}
 	print '<h3 class="heavy vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_DETAILS").'</h3>';
 	print '<div class="row">';
-	print '<div class="col-xs-12">';
+	print '<div class="col-md-12">';
 	print '<h4>'.JText::_("COM_BIODIV_SCHOOLADMIN_SCHOOL_EXPLAIN").'</h4>';
 	if ( $this->checklist ) {
 		print '<h4>'.JText::_("COM_BIODIV_SCHOOLADMIN_TAP_SCHOOL_COMPLETE").'</h4>';

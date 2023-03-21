@@ -1293,7 +1293,7 @@ class ResourceSet {
 					"RS.person_id, RS.resource_type, RS.set_name, RS.description, TB.complete_text, SC.school_id, " .
 					"count(R.resource_id) as num_in_set, " .
 					"GROUP_CONCAT( DISTINCT CONCAT_WS( ',', CONCAT_WS('|', " .
-						"R.resource_id, R.resource_type, R.filetype, R.url, R.access_level ) ) SEPARATOR '^') as resources, " .
+						"R.resource_id, R.resource_type, R.filetype, R.url, R.access_level, R.s3_status ) ) SEPARATOR '^') as resources, " .
 					"RS.timestamp as tstamp	" .
 					"from TeacherBadges TB")
 				->innerJoin("SchoolClass SC on SC.class_id = TB.class_id")

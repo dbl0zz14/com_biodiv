@@ -1479,7 +1479,7 @@ class Badge {
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
 			$query = $db->getQuery(true)
-				->select("distinct A.level, A.image as t_award, A.uncollected_image as t_uncollected, A2.image as s_award, A2.uncollected_image as s_uncollected from Award A")
+				->select("distinct A.level, A.image as t_award, A.uncollected_image as t_uncollected, A.white_image as t_white, A2.image as s_award, A2.uncollected_image as s_uncollected, A2.white_image as s_white, A.report_id from Award A")
 				->innerJoin("Award A2 on A2.level = A.level")
 				->where("A.role_id = " . SchoolCommunity::TEACHER_ROLE)
 				->where("A2.role_id = " . SchoolCommunity::STUDENT_ROLE);

@@ -45,6 +45,8 @@ class BioDivViewSchoolsAdmin extends JViewLegacy
 	
 	if ( $this->isAdmin ) {
 		
+		$this->dashboardPage = "bes-admin-dashboard";
+		
 		$this->allSchools = Biodiv\SchoolCommunity::getAllSchools();
 		
 		$this->newSchools = Biodiv\SchoolCommunity::getUnapprovedSchools( $this->schoolUser );

@@ -50,6 +50,7 @@ class BioDivViewSchoolUsers extends JViewLegacy
 		$this->ecologists = Biodiv\SchoolCommunity::getEcologists();
 		//$this->ecologists = Biodiv\SchoolCommunity::getUsersByRole(Biodiv\SchoolCommunity::ECOLOGIST_ROLE);
 		
+		$this->dashboardPage = "bes-admin-dashboard";
 	}
 	
     // Display the view

@@ -27,11 +27,13 @@ print '<div class="col-md-12 col-sm-12 col-xs-12">';
 print '<h3>'.JText::_("COM_BIODIV_SCHOOLREGISTER_EXPLAIN").'</h3>';
 print '<h4 class="vSpaced">'.JText::_("COM_BIODIV_SCHOOLREGISTER_NEXT").'</h4>';
 
+print '<h4 class="vSpaced text-danger"><strong>'.JText::_("COM_BIODIV_SCHOOLREGISTER_NOTE").'</strong></h4>';
+
 print '</div>';
 
 print '<div class="col-md-8 col-sm-10 col-xs-12">';
 
-print '<a href="bes-school-dashboard"><button class="btn btn-info btn-lg">'.JText::_("COM_BIODIV_SCHOOLREGISTER_GOT_APPROVAL").'</button></a>';
+print '<a href="bes-login"><button class="btn btn-info btn-lg">'.JText::_("COM_BIODIV_SCHOOLREGISTER_GOT_APPROVAL").'</button></a>';
 
 print '<form id="signupForm">';
 

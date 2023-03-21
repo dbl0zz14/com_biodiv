@@ -60,6 +60,8 @@ class BioDivViewAdminDashboard extends JViewLegacy
 		$adminSettingsObj = json_decode($adminSettings);
 		$this->resourceReportId = $adminSettingsObj->resourcereport;
 		
+		$this->schoolsPage = "bes-schools-admin";
+		
 		$this->mySchools = array();
 		$this->adminSummary = null;
 		if ( $this->isAdmin ) {
@@ -67,8 +69,6 @@ class BioDivViewAdminDashboard extends JViewLegacy
 			$this->adminSummary = Biodiv\SchoolCommunity::getAdminSummary();
 			$this->reports = BiodivReport::listSchoolReports();
 			
-			$errMsg = print_r ( $this->adminSummary, true );
-			error_log ( "Admin summary: " . $errMsg );
 		}
 	}
 	
