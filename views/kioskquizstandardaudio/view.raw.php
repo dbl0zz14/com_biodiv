@@ -86,7 +86,7 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 			// Get the gold standard sequences for this topic
 			$this->sequenceIds = getTrainingSequences($this->topicId, 4);
 			
-			$errStr = print_r ( $this->sequenceIds, true );
+			//$errStr = print_r ( $this->sequenceIds, true );
 			//error_log ( "Got topic sequences: " . $errStr );
 			
 			// Get the details including correct species
@@ -98,15 +98,64 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 			
 			// And set the species lists up
 			
-			$this->kioskSpecies = new KioskSpecies($this->projectId);
+			$this->kioskSpecies = new KioskSpecies($this->projectId, $this->topicId);
 			
 			$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();
 			
 			// Truncate the common species list if required.
-			$this->commonMammals = array_slice($this->kioskSpecies->getCommonMammals(), 0, $this->maxSpeciesDisplayed);
-			$this->allMammals = $this->kioskSpecies->getAllMammals();
-			$this->commonBirds = array_slice($this->kioskSpecies->getCommonBirds(), 0, $this->maxSpeciesDisplayed);
-			$this->allBirds = $this->kioskSpecies->getAllBirds();
+			$commonM = $this->kioskSpecies->getCommonMammals();
+			if ( count($commonM) > 0 ) {
+				$this->commonMammals = array_slice($commonM, 0, $this->maxSpeciesDisplayed);
+				$this->speciesButtonCount += 1;
+			}
+			else {
+				$this->commonMammals = null;
+			}
+			$allM = $this->kioskSpecies->getAllMammals();
+			if ( count($allM) > 0 ) {
+				$this->allMammals = $allM;
+			}
+			else {
+				$this->allMammals = null;
+			}
+			
+			$commonB = $this->kioskSpecies->getCommonBirds();
+			if ( count($commonB) > 0 ) {
+				$this->commonBirds = array_slice($commonB, 0, $this->maxSpeciesDisplayed);
+				$this->speciesButtonCount += 1;
+			}
+			else {
+				$this->commonBirds = null;
+			}
+			$allB = $this->kioskSpecies->getAllBirds();
+			if ( count($allB) > 0 ) {
+				$this->allBirds = $allB;
+			}
+			else {
+				$this->allBirds = null;
+			}
+			
+			$commonI = $this->kioskSpecies->getCommonInverts();
+			if ( count($commonI) > 0 ) {
+				$this->commonInverts = array_slice($commonI, 0, $this->maxSpeciesDisplayed);
+				$this->speciesButtonCount += 1;
+			}
+			else {
+				$this->commonInverts = null;
+			}
+			$allI = $this->kioskSpecies->getAllInverts();
+			if ( count($allI) > 0 ) {
+				$this->allInverts = $allI;
+			}
+			else {
+				$this->allInverts = null;
+			}
+			
+			
+			// $this->commonMammals = array_slice($this->kioskSpecies->getCommonMammals(), 0, $this->maxSpeciesDisplayed);
+			// $this->allMammals = $this->kioskSpecies->getAllMammals();
+			// $this->commonBirds = array_slice($this->kioskSpecies->getCommonBirds(), 0, $this->maxSpeciesDisplayed);
+			// $this->allBirds = $this->kioskSpecies->getAllBirds();
 			
 			$this->nothingId = $this->kioskSpecies->getNothingId();
 			$this->humanId = $this->kioskSpecies->getHumanId();

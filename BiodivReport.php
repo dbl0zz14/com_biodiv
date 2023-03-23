@@ -2425,10 +2425,10 @@ private function generateUserSequenceData () {
 		$db = JDatabase::getInstance(dbOptions());
 		
 		$query1 = $db->getQuery(true)
-			->select( "IFNULL(SB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, SB.complete_date as date")
+			->select( "IFNULL(SB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, BG.name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, U.username as person, SB.complete_date as date")
 			->from("StudentBadges SB")
 			->innerJoin("Badge B on B.badge_id = SB.badge_id")
-			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
 			->innerJoin("SchoolUsers SU on SU.person_id = SB.person_id") 
 			->innerJoin("School S on S.school_id = SU.school_id")
 			->innerJoin("Role R on R.role_id = SU.role_id")
@@ -2437,10 +2437,10 @@ private function generateUserSequenceData () {
 			->where("SB.status > " . Biodiv\Badge::PENDING);
 		
 		$query2 = $db->getQuery(true)
-			->select( "IFNULL(TB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, O.option_name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, SC.name as person, TB.complete_date as date")
+			->select( "IFNULL(TB.set_id,0) as set_id, B.lock_level as level, M.name as module_name, M.module_id as module_id, BG.name as badge_group, B.name as badge_name, S.school_id as school_id, S.name as school, R.role_id as role_id, R.display_text as role, SC.name as person, TB.complete_date as date")
 			->from("TeacherBadges TB")
 			->innerJoin("Badge B on B.badge_id = TB.badge_id")
-			->innerJoin("Options O on O.option_id = B.badge_group")
+			->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
 			->innerJoin("SchoolUsers SU on SU.person_id = TB.person_id") 
 			->innerJoin("School S on S.school_id = SU.school_id")
 			->innerJoin("Role R on R.role_id = SU.role_id")
@@ -2465,7 +2465,7 @@ private function generateUserSequenceData () {
 			
 		$query = $query1->union($query2)->order("date DESC");
 		
-		//error_log("Activity report query created: " . $query->dump() );
+		error_log("LevelActivity report query created: " . $query->dump() );
 		
 		$concatQuery = $db->getQuery(true)
 			//->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', O.option_name, B.name, S.name, R.display_text, U.username, ST.complete_date) as report_csv")
