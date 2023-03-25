@@ -134,7 +134,7 @@ class KioskSpecies {
 		if ( $lang == 'en-GB' ) {
 			
 			$query = $db->getQuery(true);
-			$query->select("OD.value as type, O.option_id as id, O.option_name as name, O.article_id as article")->from("Options O")
+			$query->select("distinct OD.value as type, O.option_id as id, O.option_name as name, O.article_id as article")->from("Options O")
 				->innerJoin("SpeciesList SL on SL.species_id = O.option_id and SL.list_id in (" . implode(',', $listIds) . ")")
 				->innerJoin("OptionData OD on SL.list_id = OD.option_id")
 				->order("type, name");
@@ -146,7 +146,7 @@ class KioskSpecies {
 		}
 		else {
 			$query = $db->getQuery(true);
-			$query->select("OD.value as type, O.option_id as id, OD2.value as name, O.article_id as article")->from("Options O")
+			$query->select("distinct OD.value as type, O.option_id as id, OD2.value as name, O.article_id as article")->from("Options O")
 				->innerJoin("SpeciesList SL on SL.list_id = O.option_id and SL.list_id in (" . implode(',', $listIds) . ")")
 				->innerJoin("OptionData OD on SL.species_id = OD.option_id")
 				->innerJoin("OptionData OD2 on O.option_id = OD2.option_id and OD2.data_type = '" . $lang . "'")
