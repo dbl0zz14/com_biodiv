@@ -58,33 +58,43 @@ class BioDivViewEditSchoolUser extends JViewLegacy
 				//$password = $input->getInt('password', 0);
 		
 		
-				$password = $input->getInt('password', 0);
+				$password = $input->getString('password', 0);
+				$password2 = $input->getString('password2', 0);
 				
 				if ( $password && (strlen($password) == 0) ) $password = null;
 				
-				// sanitise inputs
-				
-				if ( $this->schoolId ) {
-					error_log ( "calling editSchool" );
-					$this->editUserResult = Biodiv\SchoolCommunity::editSchool ( $this->schoolUser, $this->schoolId, $schoolName );
-					error_log ( "editSchool complete" );
+				$passwordProblem = false;
+				if ( $password ) {
+					
+					if ( strcmp($password, $password2) !== 0 ) {
+						
+						error_log ( "Passwords don't match" );
+						$passwordProblem = true;
+					}
 				}
-				else if ( $this->teacherId ) {
-					error_log ( "calling editTeacher" );
-					$this->editUserResult = Biodiv\SchoolCommunity::editTeacher ( $this->schoolUser, $this->teacherId, $teacherName, $teacherActive, $password );
-					error_log ( "editTeacher complete" );
+				if ( !$passwordProblem ) {
+					
+					if ( $this->schoolId ) {
+						error_log ( "calling editSchool" );
+						$this->editUserResult = Biodiv\SchoolCommunity::editSchool ( $this->schoolUser, $this->schoolId, $schoolName );
+						error_log ( "editSchool complete" );
+					}
+					else if ( $this->teacherId ) {
+						error_log ( "calling editTeacher" );
+						$this->editUserResult = Biodiv\SchoolCommunity::editTeacher ( $this->schoolUser, $this->teacherId, $teacherName, $teacherActive, $password );
+						error_log ( "editTeacher complete" );
+					}
+					else if ( $this->classId ) {
+						error_log ( "calling editClass" );
+						$this->editUserResult = Biodiv\SchoolCommunity::editClass ( $this->schoolUser, $this->classId, $className, $classAvatar, $isActive );
+						error_log ( "editClass complete" );
+					}
+					else if ( $this->studentId ) {
+						error_log ( "calling editStudent" );
+						$this->editUserResult = Biodiv\SchoolCommunity::editStudent ( $this->schoolUser, $this->studentId, $studentName, $studentClassId, $includePoints, $password, $password2 );
+						error_log ( "editStudent complete" );
+					}
 				}
-				else if ( $this->classId ) {
-					error_log ( "calling editClass" );
-					$this->editUserResult = Biodiv\SchoolCommunity::editClass ( $this->schoolUser, $this->classId, $className, $classAvatar, $isActive );
-					error_log ( "editClass complete" );
-				}
-				else if ( $this->studentId ) {
-					error_log ( "calling editStudent" );
-					$this->editUserResult = Biodiv\SchoolCommunity::editStudent ( $this->schoolUser, $this->studentId, $studentName, $studentClassId, $includePoints, $password );
-					error_log ( "editStudent complete" );
-				}
-				
 			}
 		}
 	  

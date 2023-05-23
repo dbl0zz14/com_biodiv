@@ -19,6 +19,7 @@ include_once "codes.php";
 include_once "BiodivHelper.php";
 include_once "BiodivReport.php";
 include_once "BiodivTransifex.php";
+include_once "Biodiv/Users.php";
 
 //require_once 'libraries/vendor/guzzlehttp/guzzle/src/Client.php';
 require 'libraries/vendor/autoload.php';
@@ -996,7 +997,7 @@ function createReportFileTxt ( $type, $rows ) {
 	return $url;
 }
 
-function getAllArticlesForTranslation ( $page, $length ) {
+function getAllArticlesForTranslation ( $page, $length, $searchStr = null ) {
 	
 	$db = JFactory::getDBO();
 	
@@ -1005,8 +1006,12 @@ function getAllArticlesForTranslation ( $page, $length ) {
 		->from($db->quoteName('#__content', 'C'))
 		->innerJoin($db->quoteName('#__categories', 'CA'))
 		->where("C.catid = CA.id")
-		->where("C.language = " . $db->quote('en-GB') )
+		->where("C.language = " . $db->quote('en-GB')  )
 		->order("C.modified DESC");
+		
+	if ( $searchStr ) {
+		$query->where('C.title like "%'.$searchStr.'%"');
+	}
 
 	$db->setQuery($query);
 	$db->execute();
@@ -1017,7 +1022,7 @@ function getAllArticlesForTranslation ( $page, $length ) {
 		
 	$db->setQuery($query, $start, $length);
 	
-	//error_log("getUsername select query created: " . $query->dump());
+	error_log("getAllArticlesForTranslation select query created: " . $query->dump());
 	
 	$articles = $db->loadObjectList("article_id");
 		
@@ -1078,6 +1083,55 @@ function getSpeciesTranslationLists () {
 	$db->setQuery($query);
 	
 	return $db->loadObjectList("id");
+}
+
+
+function getOptionsHeadings () {
+	
+	$languages = getSupportedLanguages();
+	
+	$headings = array("Key", "en-GB", "Context"); 
+			
+	foreach ($languages as $id=>$lang) {
+		$headings[] = $lang->transifex_code;
+	}
+	
+	return $headings;
+}
+
+
+function getNonSpeciesOptionsForTranslation () {
+	
+	$languages = getSupportedLanguages();
+	
+	$db = JDatabase::getInstance(dbOptions());
+		
+	$query = $db->getQuery(true);
+	
+	$selectStr = "O.option_id, O.option_name, O.struc, O.article_id";
+	
+	foreach ($languages as $id=>$lang) {
+		$selectStr .= ", ".strtoupper($lang->transifex_code).".value as ".strtolower($lang->transifex_code);
+	}
+		
+	$query->select($selectStr)
+		->from("Options O");
+		
+	foreach ($languages as $id=>$lang) {
+		$tableName = strtoupper($lang->transifex_code);
+		$query->leftJoin("OptionData ".$tableName." on O.option_id = ".$tableName.".option_id and ".$tableName.".data_type = " . $db->quote($lang->tag));
+	}
+				
+	$query->where("struc not in ( 'mammal', 'bird', 'invertebrate', 'beshelp', 'camera', 'kiosk', 'kiosktutorial', 'logo', 'projectdisplay' )")
+		->order("struc, option_name");
+
+	$db->setQuery($query);
+	
+	error_log("generateTranslateSpeciesData select query created " . $query->dump());
+	
+	$options = $db->loadObjectList("option_id");
+	
+	return $options;
 }
 
 

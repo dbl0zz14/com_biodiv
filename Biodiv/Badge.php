@@ -1211,6 +1211,7 @@ class Badge {
 			if ( ($status == self::COMPLETE) && $completeText ) {
 				error_log ("Adding complete_text");
 				$fields[] = $db->quoteName('complete_text') . ' = ' . $db->quote($completeText);
+				$fields[] = $db->quoteName('complete_date') . ' = ' . "NOW()";  
 			}
 
 			// Conditions for which records should be updated.

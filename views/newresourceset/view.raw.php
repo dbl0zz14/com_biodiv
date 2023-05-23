@@ -48,7 +48,7 @@ class BioDivViewNewResourceSet extends JViewLegacy
 				
 			$setName = $input->getString('uploadName', 0);
 			
-			error_log ( "Set name = " . $setName );
+			//error_log ( "Set name = " . $setName );
 			
 			if ( $setName ) {
 				
@@ -79,8 +79,8 @@ class BioDivViewNewResourceSet extends JViewLegacy
 				
 				$this->resourceSet = Biodiv\ResourceSet::createResourceSet ( $school, $resourceType, $setName, $setText, json_encode($uploadParams));
 				
-				$errMsg = print_r ( $this->resourceSet, true );
-				error_log ( "New resource set: " . $errMsg );
+				// $errMsg = print_r ( $this->resourceSet, true );
+				// error_log ( "New resource set: " . $errMsg );
 				
 				$this->newSetId = $this->resourceSet->getSetId();
 				

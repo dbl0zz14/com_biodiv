@@ -1,3 +1,21 @@
+# 23/5/23 - Version 3.7.2
+* BES phase 3, final changes
+* BES phase 3, email user on sigup reject
+* BES phase 3, Validation on signup so org name must be added
+* BES phase 3, Update email confirmation text
+* BES phase 3, Allow teachers to reset passwords for students
+* BES phase 3, Resource card walkthrough display fix
+* BES phase 3, Restrict community posts and other resource descriptions so length cannot exceed 200 chars
+* BES phase 3, Carousel pdf display fix
+* BES phase 3, PDF display on Safari Mac fix
+* BES phase 3, Add a quick search filter to show only community level resources
+* BES phase 3, Allow resource set title and description to be edited
+* BES phase 3, Allow pdfs to be displayed on community page
+* BES phase 3, Fix student progress on mobile device
+* BES phase 3, Ensure upload dates are not in the future and that deployment is not after collection.
+* BES phase 3, Generate file for NBN and upload to S3
+* Handle eggs as a classifying option
+
 # 21/3/23 - Version 3.7.1
 * BES phase 3, changes to support admin user
 * BES phase 3, kiosk on small screen

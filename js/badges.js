@@ -99,6 +99,7 @@ function badgeComplete () {
 function badgeCompleteLoaded () {
 	
 	setReloadPage();
+	setInputCounters();
 	jQuery(".resourceNextBtn").click(resourceNext);
 	jQuery(".resourceBackBtn").click(resourceBack);
 	

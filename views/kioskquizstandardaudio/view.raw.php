@@ -102,6 +102,8 @@ class BioDivViewKioskQuizStandardAudio extends JViewLegacy
 			
 			$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();
 			
+			$this->speciesButtonCount += 1;
+			
 			// Truncate the common species list if required.
 			$commonM = $this->kioskSpecies->getCommonMammals();
 			if ( count($commonM) > 0 ) {

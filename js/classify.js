@@ -2,6 +2,8 @@ jQuery(document).ready(function(){
 	
 	const maxClassifications = BioDiv.maxclass;
 	
+	const eggsId = BioDiv.eggsId;
+	
 	const numSpeciesPerPage = 36;
 	
 	
@@ -169,13 +171,26 @@ jQuery(document).ready(function(){
 		checkRadioDefault ('sure');
 		jQuery('#classify_notes').val('');
 		
-		
 		jQuery('#species_helplet').empty();
 		jQuery('.species_classify').show();
+		
+		if ( species_id == eggsId ) {
+			
+			let firstInput = jQuery("input[name='gender']").first();
+			let firstParent = firstInput.parents('.species_classify').first();
+			firstParent.hide();
+			
+			firstInput = jQuery("input[name='age']").first();
+			firstParent = firstInput.parents('.species_classify').first();
+			firstParent.hide();
+		}
+		
 		var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
 		jQuery('#species_helplet').load(url);
 		
 	});
+	
+	
 
 
 	jQuery('#classify-save').click(function (){

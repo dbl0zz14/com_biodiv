@@ -39,10 +39,11 @@ include_once "Biodiv/SchoolSpecies.php";
 include_once "Biodiv/Module.php";
 include_once "Biodiv/Post.php";
 include_once "Biodiv/Help.php";
+include_once "Biodiv/Users.php";
 
 
 
-define('BIODIV_MAX_FILE_SIZE', 50000000);
+define('BIODIV_MAX_FILE_SIZE', 80000000);
 define('BIODIV_ADMIN_MAX_FILE_SIZE', 180000000);
 
 // link to javascript stuff
@@ -4373,7 +4374,7 @@ function getSubProjectsById($project_id, $exclude_private = false){
   $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
 		->where("parent_project_id is not NULL");
   // exclude private projects
-  if ( $exclude_private ) {
+  if ( $exclude_private == false ) {
 	  $query->where("access_level < 3");
   }
   $db->setQuery($query);

@@ -58,7 +58,7 @@ function postsLoaded () {
 	jQuery(".deletePost").click(deletePost);
 	jQuery("#deleteNow").click(deletePostNow);
 	setReloadPage();
-	
+	loadPdfThumbnails();
 	if ( jQuery("#newBadge").data("newbadgeid") ) {
 		jQuery("#badgeCompleteModal").modal('show');
 	}

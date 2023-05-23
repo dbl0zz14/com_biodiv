@@ -89,6 +89,19 @@ class BioDivViewClassify extends JViewLegacy
 		  }
 	  }
 	  
+	  $this->projectPage = null;
+	  error_log ("About to check project page for " . $this->project_id );
+	  if ( $this->project_id ) {
+		  error_log ("Checking for project page");
+		  $projectPages = getSingleProjectOptions ( $this->project_id, "projectpage");
+		  $errMsg = print_r ( $projectPages, true );
+		  error_log ("Got project pages: " . $errMsg);
+		  
+		  if ( count($projectPages) > 0 ) {
+			  $this->projectPage = $projectPages[0]["option_name"];
+			  error_log ("projectPage set to " . $this->projectPage );
+		  }
+	  }
 	  
 	  $this->sequence = null;
 	  // Need to do a check here so that refresh doesn't load next sequence......
@@ -186,6 +199,8 @@ class BioDivViewClassify extends JViewLegacy
 		$this->nextseq = JText::_("COM_BIODIV_CLASSIFY_NEXT_SEQ") . " <span class='fa fa-arrow-circle-right'/>";
 
 		$this->classifyInputs = getClassifyInputs();
+		
+		$this->eggsId = codes_getCode('Eggs', 'species');
 	  
 	  }
 

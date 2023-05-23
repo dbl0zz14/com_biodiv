@@ -18,6 +18,12 @@ if ( $this->photo_id ) {
   $document->addScriptDeclaration("BioDiv.west = ".$this->location->getWest().";");
   $document->addScriptDeclaration("BioDiv.north = ".$this->location->getNorth().";");
   $document->addScriptDeclaration("BioDiv.east = ".$this->location->getEast().";");
+  
+  $document->addScriptDeclaration("BioDiv.eggsId = ".$this->eggsId.";");
+}
+
+if ( $this->projectPage ) {
+	print '<div class="col-md-12"><a href="'.$this->projectPage.'" class="btn btn-primary">'.JText::_("COM_BIODIV_CLASSIFY_PROJECT_PAGE").'</a></div>';
 }
 
 if(!$this->photo_id){

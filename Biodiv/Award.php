@@ -203,7 +203,7 @@ class Award {
 			
 		$db->setQuery($query);
 		
-		error_log("unlockBadges new tasks query created: " . $query->dump());
+		//error_log("unlockBadges new tasks query created: " . $query->dump());
 		
 		$award = $db->loadObject();
 		
@@ -260,8 +260,6 @@ class Award {
 
 	
 	public static function addAward ( $schoolUser, $level, $classId = null ) {
-		
-		error_log ( "addAward called" );
 		
 		if ( !$schoolUser ) {
 			$schoolUser = SchoolCommunity::getSchoolUser();
@@ -339,7 +337,7 @@ class Award {
 			
 		$db->setQuery($query);
 		
-		error_log("unlockBadges new tasks query created: " . $query->dump());
+		//error_log("unlockBadges new tasks query created: " . $query->dump());
 		
 		$awards = $db->loadObjectList("level");
 		
@@ -381,7 +379,7 @@ class Award {
 			
 		$db->setQuery($query);
 		
-		error_log("unlockBadges new tasks query created: " . $query->dump());
+		//error_log("unlockBadges new tasks query created: " . $query->dump());
 		
 		$awards = $db->loadObjectList("level");
 		
@@ -450,8 +448,8 @@ class Award {
 			$awardObjects[$award->role_id][$award->level] = $award;
 		}
 		
-		$errMsg = print_r ( $awardObjects, true );
-		error_log ( "awardObjects: " . $errMsg );
+		//$errMsg = print_r ( $awardObjects, true );
+		//error_log ( "awardObjects: " . $errMsg );
 		
 		return $awardObjects;
 	}
@@ -506,11 +504,12 @@ class Award {
 			->innerJoin("StudentAwards SA on SA.award_id = A.award_id")
 			->innerJoin("SchoolUsers SU on SU.person_id = SA.person_id")
 			->where("SA.collected = 1")
+			->where("SU.include_points = 1")
 			->where("SU.school_id = " . $schoolUser->school_id);
 			
 		$db->setQuery($query);
 		
-		error_log("getSchoolAwards award students query created: " . $query->dump());
+		//error_log("getSchoolAwards award students query created: " . $query->dump());
 		
 		//Used directly so don't create objects
 		$studentAwards = $db->loadObjectList();
@@ -521,11 +520,12 @@ class Award {
 			->innerJoin("TeacherAwards TA on TA.award_id = A.award_id")
 			->innerJoin("SchoolClass SC on SC.class_id = TA.class_id")
 			->where("TA.collected = 1")
+			->where("SC.is_active = 1")
 			->where("SC.school_id = " . $schoolUser->school_id);
 			
 		$db->setQuery($query);
 		
-		error_log("getSchoolAwards award students query created: " . $query->dump());
+		//error_log("getSchoolAwards award students query created: " . $query->dump());
 		
 		//Used directly so don't create objects
 		$teacherAwards = $db->loadObjectList();

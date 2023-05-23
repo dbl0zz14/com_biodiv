@@ -318,10 +318,10 @@ else {
 	print '</div>'; // col-12
 	print '<div class="col-xs-12">';
 	print '<div id="addClass" class="btn btn-primary btn-lg vSpaced addClass" role="button" data-toggle="modal" data-target="#addClassModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_CLASS").'</div>';
+	print '<div id="resetClasses" class="btn btn-info btn-lg vSpaced hSpaced" role="button" data-toggle="modal" data-target="#resetClassesModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</div>';
 	if ( $this->checklist ) {
 		print '<div class="btn btn-info btn-lg vSpaced hSpaced classComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS_COMPLETE").'</div>';
 	}
-	//print '<div id="resetClasses" class="btn btn-info btn-lg vSpaced" role="button" data-toggle="modal" data-target="#resetClassesModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</div>';
 	print '</div>'; // col-12
 	print '<div id="classList" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 h4">';
 	
@@ -357,6 +357,7 @@ else {
 	print '</div>'; // col-12
 	print '<div class="col-xs-12">';
 	print '<div id="addStudent" class="btn btn-primary btn-lg vSpaced addStudent" role="button" data-toggle="modal" data-target="#addSchoolUserModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_STUDENT").'</div>';
+	print '<div id="batch" class="btn btn-info btn-lg vSpaced hSpaced batchAddStudents" role="button" data-toggle="modal" data-target="#batchStudentsModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_BATCH_ADD").'</div>';
 	if ( $this->checklist ) {
 		print '<div class="btn btn-info btn-lg vSpaced hSpaced studentComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_STUDENT_COMPLETE").'</div>';
 	}
@@ -446,7 +447,7 @@ print '<input type="email" id="suEmail"  name="suEmail">';
 print '</div>';
 
 print '<div class="vSpaced">';
-print '<label for="suEmail2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL").'</label>';
+print '<label for="suEmail2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL2").'</label>';
 print '<input type="email" id="suEmail2"  name="suEmail2">';
 print '</div>';
 
@@ -472,6 +473,86 @@ print '</form>';
 print '    </div>'; // modalContent
 print '  </div>';
 print '</div>';
+
+
+
+// -------------------------------------- batch create users 
+
+if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+	print '<div id="batchStudentsModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="batchStudents">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_BATCH_USERS").'</h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+
+	echo JHtml::_( 'form.token' );
+
+	$schoolNameArray = explode(' ', $this->schoolUser->school);
+	$schoolInitials = "";
+	foreach ( $schoolNameArray as $word ) {
+		$schoolInitials .= $word[0];
+	}
+	error_log ( "schoolInitials = " . $schoolInitials );
+
+	print '<input id="tandCsChecked" type="hidden" name="tandCsChecked" value="1"/>';
+	
+	print '<input id="fileStem" type="hidden" name="fileStem" value="batchstudents"/>';
+
+	print '<input id="emailDomain" type="hidden" name="emailDomain" value="'.$schoolInitials.$this->schoolUser->school_id.$this->domainDefault.'"/>';
+	
+	print '<input id="userGroup" type="hidden" name="userGroup" value="'.$this->studentGroup.'"/>';
+	
+	print '<input id="project" type="hidden" name="project" value="'.$this->schoolUser->project_id.'"/>';
+	
+	print '<input id="addToSchool" type="hidden" name="addToSchool" value="1"/>';
+	
+	print '<input id="school" type="hidden" name="school" value="1"/>';
+
+	print '<div class="vSpaced ">';
+	print '<label for="batchClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
+	print '<select id = "batchClassId" name = "batchClassId" class = "form-control">';
+	print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';			
+	foreach( $this->classes as $nextClass ){
+		print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
+	}
+	print '</select>';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="userStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_USER_STEM").'</label>';
+	print '  <input type="text" id="userStem" name="userStem">';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="passwordStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_PWD_STEM").'</label>';
+	print '  <input type="text" id="passwordStem" name="passwordStem">';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="numUsers">'.JText::_("COM_BIODIV_SCHOOLADMIN_NUM_USERS").'</label>';
+	print '  <input type="number" id="numUsers" name="numUsers" min="1" max="30">';
+	print '</div>';
+
+	print '<div id="newUsersMsg" class="vSpaced"></div>';
+
+	print '<div id="newUsers" class="vSpaced"></div>';
+
+	print '</div>';
+
+	print '	  <div class="modal-footer">';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+}
 
 
 
@@ -521,10 +602,10 @@ print '        <button type="button" class="close" data-dismiss="modal">&times;<
 print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</h4>';
 print '      </div>';
 print '     <div class="modal-body">';
-print '<input id="resetSchoolId" type="hidden" name="resetSchoolId" value="0"/>';
+
 print '<div class="vSpaced">';
 print '<h3>'.JText::_("COM_BIODIV_SCHOOLADMIN_SURE_RESET").'</h3>';
-print '        <button type="submit" class="btn btn-primary btn-lg vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+print '        <button type="submit" class="btn btn-primary btn-lg vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET_CONFIRM").'</button>';
 print '</div>';
 print '</div>';
 print '	  <div class="modal-footer">';
@@ -685,10 +766,15 @@ foreach( $this->classes as $nextClass ){
 print '</select>';
 print '</div>';
 
-// print '<div class="vSpaced">';
-// print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
-// print '<input type="password" id="password"  name="password">';
-// print '</div>';
+print '<div class="vSpaced">';
+print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
+print '<input type="password" id="password"  name="password">';
+print '</div>';
+
+print '<div class="vSpaced">';
+print '<label for="password2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CONFIRM_PWD").'</label>';
+print '<input type="password" id="password2"  name="password2">';
+print '</div>';
 
 print '<div class="vSpaced">';
 print '<div><label for="studentActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';

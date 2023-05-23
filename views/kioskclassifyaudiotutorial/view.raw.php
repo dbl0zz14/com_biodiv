@@ -140,9 +140,16 @@ class BioDivViewKioskClassifyAudioTutorial extends JViewLegacy
 			
 			// Sanity check that the primary species matches the tutorial json
 			$primarySpecies = $nextTrainingSeq->getPrimarySpecies();
-			if ( count ( array_intersect($primarySpecies, $seq->species) ) < 1 ) {
+			$primaries = array();
+			foreach ( $primarySpecies as $species ) {
+				$primaries[] = $species->id;
+			}
+			if ( count ( array_intersect($primaries, $seq->species) ) < 1 ) {
 				$sequenceError = "No matching species in " . $seq->sequenceId;
 			}
+			// if ( count ( array_intersect($primarySpecies, $seq->species) ) < 1 ) {
+				// $sequenceError = "No matching species in " . $seq->sequenceId;
+			// }
 			
 			$seqIdsArray[] = $seq->sequenceId;
 			
@@ -168,6 +175,7 @@ class BioDivViewKioskClassifyAudioTutorial extends JViewLegacy
 		
 		//error_log ( "BioDivViewKioskClassifyTutorial::display about to create speciesLists" );
 		
+		// Hardcode teh project here to get the correct species lists
 		$this->kioskSpecies = new KioskSpecies($this->projectId);
 		
 		$this->maxSpeciesDisplayed = $this->kioskSpecies->getMaxSpeciesDisplayed();

@@ -1017,6 +1017,7 @@ JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/schooldashboard.js", true, true);
 
+JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
 
 JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
 JHTML::script("com_biodiv/project.js", true, true);

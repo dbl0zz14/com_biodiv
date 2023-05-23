@@ -80,10 +80,12 @@ else if ( $this->schoolUser ) {
 	
 	print '<div id="resourceMeta_2" class="metaPage" style="display:none;">';
 	
-	print '<div class="vSpaced" >';
-	print '<input type="checkbox" id="post" name="post" value="1" >';
-	print '<label for="post" class="uploadLabel">'.\JText::_("COM_BIODIV_BADGECOMPLETE_POST").'</label>';
-	print '</div>'; // vSpaced
+	if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+		print '<div class="vSpaced" >';
+		print '<input type="checkbox" id="post" name="post" value="1" >';
+		print '<label for="post" class="uploadLabel">'.\JText::_("COM_BIODIV_BADGECOMPLETE_POST").'</label>';
+		print '</div>'; // vSpaced
+	}
 		
 	print '<div id="resourceBack_2" class="btn btn-default btn-lg resourceBackBtn"  >';
 	print \JText::_("COM_BIODIV_BADGECOMPLETE_BACK");

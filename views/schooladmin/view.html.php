@@ -39,6 +39,16 @@ class BioDivViewSchoolAdmin extends JViewLegacy
 		$this->helpOption = codes_getCode ( "schooladmin", "beshelp" );
 			
 		$this->educatorPage = "bes-educator-zone";
+		
+		$allDefaults = json_decode(getSetting("bes_defaults"));
+		$this->domainDefault = $allDefaults->email_domain;
+		
+		$joomlaDb = JFactory::getDbo();
+        $joomlaDb->setQuery( 'SELECT id' .
+                        ' FROM `#__usergroups`' .
+						' WHERE title = "School Student"' );
+                        
+        $this->studentGroup = $joomlaDb->loadResult();
 			
 		$input = JFactory::getApplication()->input;
 			

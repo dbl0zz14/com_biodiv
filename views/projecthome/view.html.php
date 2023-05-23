@@ -35,6 +35,11 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	$app = JFactory::getApplication();
 	
+	$input = $app->input;
+		
+	$this->includePrivate = $input->getInt('private', 0);
+		
+	
 	// Determine whether audio site
 	$isCamera = getSetting("camera") == "yes";
 	$this->classifyView = $isCamera ? "classify" : "classifybirds";
@@ -53,7 +58,12 @@ class BioDivViewProjecthome extends JViewLegacy
 	// Just get the option names.
 	$this->displayOptions = array_column($displayOptionArray, 'option_name');
 	
-	$this->subProjects = getSubProjectsById($this->project_id, true);
+	if ( $this->includePrivate ) {
+		$this->subProjects = getSubProjectsById($this->project_id, false);
+	}
+	else {
+		$this->subProjects = getSubProjectsById($this->project_id, true);
+	}
 	
 	// Remove this project from the sub projects list...
 	unset($this->subProjects[$this->project_id]);

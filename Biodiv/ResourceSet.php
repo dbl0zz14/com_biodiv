@@ -155,7 +155,8 @@ class ResourceSet {
 												"R.resource_type, " .
 												"R.filetype, ".
 												"R.url, ".
-												"R.access_level ".
+												"R.access_level, ".
+												"R.s3_status ".
 											") ".
 							") SEPARATOR '^') as resources, ".
 						"(select GROUP_CONCAT( DISTINCT CONCAT_WS(',', BRS.badge_id, B.name, B.badge_image)  SEPARATOR '|' ) from BadgeResourceSet BRS ".
@@ -539,6 +540,23 @@ class ResourceSet {
 		}
 		
 		print '</div>'; // fullResourceSetAdd
+		
+		
+		print '<div class="fullResourceSetEdit">';
+		
+		if ( $canEdit ) {
+			
+			print '<div id="editSet_'.$this->setId.'" class="editSet text-center" role="button" '.
+					'data-toggle="modal" data-target="#editSetModal">'.
+					'<h4><i class="fa fa-lg fa-pencil-square-o"></i></h4>'.
+					'<div class="hidden-xs">'.\JText::_("COM_BIODIV_RESOURCESET_EDIT_TEXT").'</div></div>';
+			
+			// data-toggle="tooltip" title="'.	\JText::_("COM_BIODIV_RESOURCESET_ADD_FILES").'"
+			//print '<h4><div id="addFilesToSet_'.$this->setId.'" class="btn btn-primary addFilesToSet" data-toggle="modal" data-target="#addFilesModal">'.\JText::_("COM_BIODIV_RESOURCESET_ADD_FILES").'</div></h4>';
+		}
+		
+		print '</div>'; // fullResourceSetEdit
+		
 		
 		$shareOptions = array(SchoolCommunity::PERSON=>\JText::_("COM_BIODIV_RESOURCESET_SHARE_PRIVATE"),
 								SchoolCommunity::SCHOOL=>\JText::_("COM_BIODIV_RESOURCESET_SHARE_SCHOOL"),
@@ -967,6 +985,10 @@ class ResourceSet {
 				else if ( $keyVal[0] == 'new' ) {
 					$whereArray[] = " (TIMESTAMPDIFF(DAY, RS.timestamp, NOW())<".self::NUM_DAYS_NEW . ") " ;
 				}
+				else if ( $keyVal[0] == 'community' ) {
+					$whereArray[] = " R.access_level = " . SchoolCommunity::COMMUNITY . " ";
+				}
+				
 			}
 			if ( count($typeArray) > 0 ) {
 				$whereArray[] = " R.resource_type in (" . implode(',', $typeArray) . ") ";

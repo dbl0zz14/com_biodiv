@@ -48,7 +48,7 @@ class BioDivViewKioskClassifyAudioProject extends JViewLegacy
 			// Get secondary project or default to MammalWeb Britain
 			$db = JDatabase::getInstance(dbOptions());
 			$query = $db->getQuery(true)
-					->select("OD.data_type, OD.value")
+					->select("OD.value")
 					->from("OptionData OD")
 					->innerJoin("Options O on O.option_id = OD.option_id and O.struc = 'kiosk'")
 					->innerjoin("ProjectOptions PO on PO.option_id = OD.option_id and OD.data_type = 'secondaryproject'")

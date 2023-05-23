@@ -1336,6 +1336,39 @@ class BioDivController extends JControllerLegacy
   }
   
   
+  function save_resource_set () {
+	  
+	$success = false;
+	
+	$setId = $this->input->getInt('setId', 0 );
+	
+	if ( $setId ) {
+		
+		if ( Biodiv\ResourceSet::canEdit ( $setId ) ) {
+			
+			$title = $this->input->getString('uploadName', 0 );
+			$description = $this->input->getString('uploadDescription', 0 );
+			
+			$fields = new stdClass();
+			$fields->set_id = $setId;
+			if ($title ) $fields->set_name = $title;
+			if ($description ) $fields->description = $description;
+						
+			$db = JDatabase::getInstance(dbOptions());
+
+			$success = $db->updateObject('ResourceSet', $fields, 'set_id');
+			
+			if(!$success){
+				error_log ( "Resource set update failed" );
+			}
+			
+		}
+	}
+
+	return $success;
+	  
+  }
+  
   
   function save_resource () {
 	  

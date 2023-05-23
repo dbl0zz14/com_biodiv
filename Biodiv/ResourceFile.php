@@ -16,7 +16,7 @@ class ResourceFile {
 	
 	const MAX_TITLE_CHARS = 50;
 	const MAX_DESC_CHARS = 200;
-	const MAX_POST_CHARS = 120;
+	const MAX_POST_CHARS = 200;
 	
 	private $resourceId;
 	private $resourceType;
@@ -583,7 +583,7 @@ class ResourceFile {
 			// print '<audio src="'.$this->url.'" type="'.$this->ftype.'" oncontextmenu="return false;" disablePictureInPicture controlsList="nodownload noplaybackrate" class="'.$displayClass.'"  ></audio>';
 		// }
 		else if ( strpos($this->ftype, "pdf") !== false ) {
-			print '<div id="pdfThumb_'.$this->resourceId.'" class="text-center pdfThumb '.$displayClass.'" data-pdfurl="'.$this->url.'">';
+			print '<div id="pdfThumb_'.$this->resourceId.'" class="text-center pdfThumb newThumb '.$displayClass.'" data-pdfurl="'.$this->url.'">';
 			print '<canvas id="pdfCanvas_'.$this->resourceId.'"  class="pdfCanvas"></canvas>';
 			print '</div>';
 			

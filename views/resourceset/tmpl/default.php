@@ -147,6 +147,27 @@ else {
 	print '</div>'; // editModal
 	
 	
+	print '<div id="editSetModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header text-right">';
+	print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '	    <div id="editSetArea" ></div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="button" class="btn btn-default" data-dismiss="modal">'.JText::_("COM_BIODIV_RESOURCESET_CANCEL").'</button>';
+	print '      </div>';
+			  
+	print '    </div>'; // modal-content
+
+	print '  </div>'; // modal dialog
+	print '</div>'; // editTextModal
+
+
 	print '<div id="addFilesModal" class="modal fade" role="dialog">';
 	print '  <div class="modal-dialog"  >';
 
@@ -265,6 +286,7 @@ JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/resourceset.js", true, true);
 JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
 JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
+JHTML::script("com_biodiv/pdfjs/pdf.worker.js", true, true);
 
 
 ?>

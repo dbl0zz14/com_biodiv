@@ -122,7 +122,19 @@ class Post {
 			else if ( $mainType == "audio" ) {
 				print '<audio src="'.$file[2].'" type="'.$filetype.'" oncontextmenu="return false;" disablePictureInPicture controls controlsList="nodownload noplaybackrate" class="postMedia"  ></audio>';
 			}
-			
+			else if ( strpos($filetype, "pdf") !== false ) {
+				
+				$s3Status = $file[3];
+				$url = $file[2];
+				if ( $s3Status == 0 ) {
+					$url = \JURI::root().$file[2];
+				}
+				
+				print '<div id="pdfThumb_'.$file[0].'" class="text-center pdfThumb newThumb postMedia" data-pdfurl="'.$url.'">';
+				print '<canvas id="pdfCanvas_'.$file[0].'"  class="pdfCanvas"></canvas>';
+				print '</div>';
+				
+			}
 			print '</div>'; // carousel-item
 			$i++;
 		}
@@ -213,7 +225,7 @@ class Post {
 		
 			
 			$query = $db->getQuery(true)
-				->select("RS.school_id, PRS.person_id, S.name, S.image, RS.set_id, PRS.timestamp as tstamp, RS.description as text, GROUP_CONCAT(DISTINCT CONCAT_WS('|',R.resource_id,R.filetype,R.url)) as files, count(LRS.like_id) as num_likes, count(LRS2.like_id) as my_likes from ResourceSet RS")
+				->select("RS.school_id, PRS.person_id, S.name, S.image, RS.set_id, PRS.timestamp as tstamp, RS.description as text, GROUP_CONCAT(DISTINCT CONCAT_WS('|',R.resource_id,R.filetype,R.url, R.s3_status)) as files, count(LRS.like_id) as num_likes, count(LRS2.like_id) as my_likes from ResourceSet RS")
 				->innerJoin("PostedResourceSet PRS on PRS.set_id = RS.set_id")
 				->innerJoin("Resource R on R.set_id = RS.set_id")
 				->innerJoin("School S on S.school_id = RS.school_id")
@@ -278,7 +290,7 @@ class Post {
 		$allPosts = array();
 		
 		$query = $db->getQuery(true)
-			->select("RS.school_id, PRS.person_id, S.name, S.image, RS.set_id, PRS.timestamp as tstamp, RS.description as text, GROUP_CONCAT(DISTINCT CONCAT_WS('|',R.resource_id,R.filetype,R.url)) as files, count(LRS.like_id) as num_likes, count(LRS2.like_id) as my_likes from ResourceSet RS")
+			->select("RS.school_id, PRS.person_id, S.name, S.image, RS.set_id, PRS.timestamp as tstamp, RS.description as text, GROUP_CONCAT(DISTINCT CONCAT_WS('|',R.resource_id,R.filetype,R.url, R.s3_status)) as files, count(LRS.like_id) as num_likes, count(LRS2.like_id) as my_likes from ResourceSet RS")
 			->innerJoin("PostedResourceSet PRS on PRS.set_id = RS.set_id")
 			->innerJoin("Resource R on R.set_id = RS.set_id")
 			->innerJoin("School S on S.school_id = RS.school_id")

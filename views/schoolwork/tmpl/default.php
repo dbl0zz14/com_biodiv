@@ -32,7 +32,7 @@ else {
 	// --------------------- Info button
 	
 	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_schooladmin" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<div id="helpButton_schoolwork" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
 		print '<i class="fa fa-info"></i>';
 		print '</div>'; // helpButton
 	}
@@ -312,6 +312,7 @@ print '</div>';
 JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/schoolwork.js", true, true);
+JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
 
 
 ?>

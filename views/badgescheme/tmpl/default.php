@@ -24,6 +24,15 @@ else {
 	print '</div>'; // col-12
 	print '</div>'; // row
 	
+	// --------------------- Info button
+	
+	if ( $this->helpOption > 0 ) {
+		
+		print '<div id="helpButton_badgescheme" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<i class="fa fa-info"></i>';
+		print '</div>'; // helpButton
+	}
+
 	// --------------------- Main content
 	
 	print '<div class="row">';

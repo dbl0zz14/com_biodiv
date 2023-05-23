@@ -872,45 +872,74 @@ function badgeArticleLoaded () {
 
 async function loadPdfThumb () {
 	
-	let pdfUrl = jQuery(this).data("pdfurl");
+	const pdfUrl = jQuery(this).data("pdfurl");
 	
 	const canvasId = jQuery(this).find('canvas').attr("id");
-	let pdfThumb = jQuery(this);
+	const pdfThumb = jQuery(this);
+	
+	pdfThumb.removeClass('newThumb');
 	
 	let imgWidth = pdfThumb.width();
+	let imgHeight = pdfThumb.height();
+	
+	if ( imgHeight == 0 ) {
+		imgHeight = 150;
+	}
+	
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "../media/com_biodiv/js/pdfjs/pdf.worker.js";
 	
 	const loadingTask = pdfjsLib.getDocument(pdfUrl);
 	
-	const pdf = await loadingTask.promise;
-	
-	const page = await pdf.getPage(1);
-	
-	const scale = 1;
-	const viewport = page.getViewport({ scale });
-	
-	
-	let pdfOriginalWidth = viewport.width;
-	
-	let scaleRequired = 1.2 * imgWidth / pdfOriginalWidth;
-	
-	const thumbCanvas = document.getElementById(canvasId);
-	const context = thumbCanvas.getContext("2d");
-
-	const transform = scaleRequired !== 1 
-	  ? [scaleRequired, 0, 0, scaleRequired, 0, 0] 
-	  : null;
-
-	//
-	// Render PDF page into canvas context
-	//
-	const renderContext = {
-	  canvasContext: context,
-	  transform,
-	  viewport,
-	};
-	page.render(renderContext);
+	//(async () => {
 		
+	//	var loadingTask = pdfjsLib.getDocument('helloworld.pdf');
+	//	loadingTask.promise.then(function(pdf) {
+	//	  // you can now use *pdf* here
+	//	});
 	
+	loadingTask.promise.then ( async function(pdf) {
+		//const pdf = await loadingTask.promise;
+		
+		const page = await pdf.getPage(1);
+		
+		const scale = 1;
+		//const scale = 0.8;
+		const viewport = page.getViewport({ scale });
+		
+		
+		const pdfOriginalWidth = viewport.width;
+		
+		//const scaleRequired = 1.2 * imgWidth / pdfOriginalWidth;
+		
+		// test
+		const scaleRequired = imgWidth/pdfOriginalWidth ;
+		
+		const thumbCanvas = document.getElementById(canvasId);
+		thumbCanvas.height = imgHeight;
+		thumbCanvas.width = imgWidth;
+		const context = thumbCanvas.getContext("2d");
+
+		const transform = scaleRequired !== 1 
+		  ? [scaleRequired, 0, 0, scaleRequired, 0, 0] 
+		  : null;
+		  
+		//let testTransform =  [scaleRequired, 0, 0, scaleRequired, 0, 0];
+
+		//
+		// Render PDF page into canvas context
+		//
+		const renderContext = {
+		  canvasContext: context,
+		  transform: transform,
+		  viewport: viewport
+		  //transform,
+		  //testTransform,
+		  //viewport,
+		};
+		page.render(renderContext);
+			
+	});
 	
 	/*
 	pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -927,7 +956,26 @@ async function loadPdfThumb () {
 }
 
 function loadPdfThumbnails () {
-	jQuery(".pdfThumb").each(loadPdfThumb);
+	
+	jQuery(".item.active > div > div > div.resourceCardThumbnail > .pdfThumb").each(loadPdfThumb);
+	
+	jQuery(".item.active > .pdfThumb").each(loadPdfThumb);
+	
+	if ( jQuery(".carousel").length == 0 ) {
+		jQuery(".resourceCardThumbnail > .pdfThumb").each(loadPdfThumb);
+	}
+	
+	
+	jQuery(".setCarousel").on('slid.bs.carousel', function () {
+		jQuery(this).find(".item.active > div > div > div.resourceCardThumbnail > .pdfThumb.newThumb").each(loadPdfThumb);
+		jQuery(this).find(".item.active .pdfThumb.newThumb").each(loadPdfThumb);
+	});
+	
+	jQuery(".postCarousel").on('slid.bs.carousel', function () {
+		jQuery(this).find(".item.active .pdfThumb.newThumb").each(loadPdfThumb);
+	});
+	
+	
 }
 
 async function modifyPdf() {
@@ -993,9 +1041,12 @@ async function loadCertificate() {
 	const textWidth = helveticaFont.widthOfTextAtSize(pdfName, 30);
 	const textStart = (width - textWidth) / 2;
 	
+	const dateWidth = helveticaFont.widthOfTextAtSize(pdfDate, 14);
+	const dateStart = (width - dateWidth) / 2;
+	
 	firstPage.drawText(pdfName, {
 		x: textStart,
-		y: height * 0.75 ,
+		y: height * 0.53 ,
 		size: 30,
 		font: helveticaFont,
 		color: PDFLib.rgb(0.3,0.3,0.3),
@@ -1003,8 +1054,8 @@ async function loadCertificate() {
 	})
 	
 	firstPage.drawText(pdfDate, {
-		x: width*0.75,
-		y: height * 0.25 ,
+		x: dateStart,
+		y: height * 0.37 ,
 		size: 14,
 		font: helveticaFont,
 		color: PDFLib.rgb(0.3,0.3,0.3),
@@ -1196,6 +1247,8 @@ jQuery(document).ready(function(){
 	jQuery(".studentCelebration").each(loadStudentCelebration);
 	
 	loadPdfThumbnails();
+	
+	
 	
 	
 	//loadAllProgress();

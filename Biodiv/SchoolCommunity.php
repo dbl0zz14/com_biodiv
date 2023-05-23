@@ -2372,6 +2372,62 @@ class SchoolCommunity {
 	}
 	
 	
+	public static function resetClasses ( $schoolUser ) {
+		
+		if ( !$schoolUser ) {
+			$schoolUser = self::getSchoolUser();
+		}
+		
+		$result = array();
+		$result["errors"] = array();
+		
+		if ( $schoolUser->role_id == self::TEACHER_ROLE ) {
+			
+			$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true);
+			$query->select("*")
+				->from( "SchoolClass" )
+				->where( "school_id = " . $schoolUser->school_id )
+				->where( "is_active = 1"  );
+			$db->setQuery($query);
+			
+			$activeClasses = $db->loadObjectList(); 
+			
+			$dateTag = date('d-m-Y h:i');
+			
+			foreach ( $activeClasses as $activeClass ) {
+				
+				$fields = new \StdClass();
+				$fields->name = $activeClass->name . ' ' . $dateTag;
+				$fields->class_id = $activeClass->class_id;
+				$fields->is_active = 0;
+				
+				$success = $db->updateObject("SchoolClass", $fields,  "class_id");
+				if(!$success){
+					error_log ( "SchoolClass update failed" );
+					$result["errors"][] = array("error"=>"Class ".$activeClass->name." - problem updating");
+				}	
+				else {
+					$newFields = new \StdClass();
+					$newFields->name = $activeClass->name;
+					$newFields->avatar = $activeClass->avatar;
+					$newFields->school_id = $activeClass->school_id;
+					
+					$success = $db->insertObject("SchoolClass", $newFields);
+					if(!$success){
+						error_log ( "SchoolClass insert failed" );
+						$result["errors"][] = array("error"=>"Class ".$className." - problem creating");
+					}	
+				}
+			}
+		}
+		
+		return $result;
+		
+	}
+	
+	
 	public static function registerNewSchool ( $name, $username, $email, $password, 
 												$schoolName, $postcode, $website, $wherehear, $terms ) {
 		
@@ -2974,7 +3030,7 @@ class SchoolCommunity {
 	}
 
 
-	public static function editStudent ( $schoolUser, $studentId, $studentName, $studentClass, $includePoints, $password = null ) {
+	public static function editStudent ( $schoolUser, $studentId, $studentName, $studentClass, $includePoints, $password = null, $password2 = null ) {
 		
 		if ( !$schoolUser ) {
 			$schoolUser = self::getSchoolUser();
@@ -2996,6 +3052,7 @@ class SchoolCommunity {
 				
 				if ( $password ) {
 					$data['password'] = $password;
+					$data['password2'] = $password2;
 				}
 				
 				$user = null;
@@ -3330,6 +3387,19 @@ class SchoolCommunity {
 			$db->setQuery($query);
 			$result = $db->execute();	
 			
+			
+			$query = $db->getQuery(true)
+				->select("* from SchoolSignup where signup_id = " . $signupId);	
+			
+			$db->setQuery($query);
+			
+			$newSchoolSignup = $db->loadObject();
+			
+			$subject = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_REJECT_SUBJECT");
+			$msg = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_REJECT_MESSAGE") . '<p>'.$comment.'</p>';
+				
+			self::notifyUser ( $newSchoolSignup->person_id, $subject, $msg );
+			
 		}
 	}
 	
@@ -3344,7 +3414,7 @@ class SchoolCommunity {
 		
 		if ( $schoolUser->role_id == self::ADMIN_ROLE ) {
 			
-			error_log ( "createSchool got admin role" );
+			//error_log ( "createSchool got admin role" );
 			
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
@@ -4274,6 +4344,7 @@ class SchoolCommunity {
 			$query = $db->getQuery(true)
 				->select("count(TB.tb_id) as class_badges from TeacherBadges TB" )
 				->innerJoin("SchoolUsers SU on TB.person_id = SU.person_id and SU.school_id = ".$schoolId)
+				->innerJoin("SchoolClass SC on SC.class_id = TB.class_id and SC.is_active = 1")
 				->where("TB.status = " . Badge::COLLECTED);
 			
 			$db->setQuery($query);
@@ -4286,6 +4357,7 @@ class SchoolCommunity {
 			$query = $db->getQuery(true)
 				->select("count(SB.sb_id) as student_badges from StudentBadges SB" )
 				->innerJoin("SchoolUsers SU on SB.person_id = SU.person_id and SU.school_id = ".$schoolId)
+				->where("SU.include_points = 1")
 				->where("SB.status = " . Badge::COLLECTED);
 			
 			$db->setQuery($query);

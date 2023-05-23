@@ -2490,6 +2490,53 @@ private function generateUserSequenceData () {
 	}
 		
 	
+	// // Standalone report creation utility function
+	// public static function createReportFile ( $folder, $filename, $headings, $rows ) {
+	
+		// $reportRoot = JPATH_SITE."/biodivimages/reports";
+		// $filePath = $reportRoot."/".$folder."/";
+		
+		// // $t=time();
+		// // $dateStr = date("Ymd_His",$t);
+		// // $filename = $type . '_' . $dateStr . ".csv";
+		
+		// $tmpCsvFile = $filePath . "/tmp_" . $filename;
+		// $newCsvFile = $filePath . "/" . $filename;
+		
+		// // Has the report already been created?
+		// if ( !file_exists($newCsvFile) ) {
+			
+			// error_log ("File " . $newCsvFile . " created for writing" );
+			
+			// // Creates a new csv file and store it in directory
+			// // Rename once finished writing to file
+			// if (!file_exists($filePath)) {
+				// mkdir($filePath, 0755, true);
+			// }
+			
+			// $tmpCsv = fopen ( $tmpCsvFile, 'w');
+			
+			// // First put the headings
+			// if ( $headings ) {
+				// fputcsv($tmpCsv, $headings);
+			// }
+			
+			// // Then each row
+			// foreach ( $rows as $row ) {
+				// fputcsv($tmpCsv, $row);
+			// }
+			
+			// fclose($tmpCsv);
+			
+			// rename ( $tmpCsvFile, $newCsvFile );
+
+		// }
+		
+		// $url = JURI::root()."/biodivimages/reports/".$folder."/".$filename;
+		// return $url;
+	// }
+
+
 }
 
 ?>

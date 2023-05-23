@@ -637,6 +637,16 @@ print '<input type="checkbox" id="filter_new" name="filter_new" value="new" '.$c
 print '<label for="filter_new" class="uploadLabel ">'.JText::_("COM_BIODIV_SEARCHRESOURCES_RECENT").'</button>'.'</label>';
 print '</div>';
 
+print '<div>';
+$checked = "";
+if ( $this->filter && in_array ( "community", $this->filter )  ) {
+	$checked = 'checked';
+}
+print '<input type="checkbox" id="filter_community" name="filter_community" value="community" '.$checked.'>';
+print '<label for="filter_community" class="uploadLabel ">'.JText::_("COM_BIODIV_SEARCHRESOURCES_COMMUNITY").'</button>'.'</label>';
+print '</div>';
+
+
 
 print '</div>'; // col-4
 
@@ -667,6 +677,9 @@ JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/resourceupload.js", true, true);
 JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
+//JHTML::script("com_biodiv/pdfjs/pdf.worker.js", true, true);
+//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.228/pdf.min.js", false, true);
+
 
 JHTML::script("com_biodiv/searchresources.js", true, true);
 JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);

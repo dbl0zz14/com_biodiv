@@ -14,7 +14,7 @@ class Help {
 	const STUDENT_USER_BADGE = 2;
 	const CLASS_SYSTEM_BADGE = 29;
 	const CLASS_USER_BADGE = 30;
-	const RESOURCE_SET = 82;
+	const RESOURCE_SET = 2234;
 	
 	
 	function __construct( $id )

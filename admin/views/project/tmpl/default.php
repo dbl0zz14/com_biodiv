@@ -188,6 +188,7 @@ print '</div>';
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/admin.js", true, true);
 
 ?>

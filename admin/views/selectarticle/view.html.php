@@ -34,7 +34,16 @@ class BioDivViewSelectArticle extends JViewLegacy
 		$this->page = $input->getString('page', 1);
 		$this->length = $input->getString('length', $this->defaultNumPerPage);
 		
-		$articleObj = getAllArticlesForTranslation( $this->page, $this->length );
+		$searchInput = $input->getString('search', 0);
+			
+		$this->searchStr = null;
+		
+		if ( $searchInput ) {
+			$this->searchStr = filter_var($searchInput, FILTER_SANITIZE_STRING);
+			error_log ( "Sanitized search str = " . $this->searchStr );
+		}
+		
+		$articleObj = getAllArticlesForTranslation( $this->page, $this->length, $this->searchStr );
 		
 		$this->totalNumArticles = $articleObj->total;
 		$this->articles = $articleObj->articles;

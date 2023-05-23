@@ -24,8 +24,12 @@ print "<div class='col-md-6'>";
 print "<h2>". JText::_("COM_BIODIV_UPLOAD_START_NEW")."</h2>";
 
 
-print "<form role='form' action='".$this->root . "&task=add_upload&site_id=".$this->site_id."'";
-print " method='post' class='form-inline'>";
+//print "<form id='uploadForm' role='form' action='".$this->root . "&task=add_upload&site_id=".$this->site_id."'";
+//print "<form id='uploadForm' role='form' ";
+print "<form id='uploadForm' role='form' action='".$this->root . "&task=add_upload"."'";
+print " method='post' class='form-inline' onsubmit='return validateUploadForm()'>";
+
+print "<input type='hidden' name='site_id' value='".$this->site_id."'/>";
 
 if ( $this->badge ) {
 	print "<input type='hidden' name='badge' value='".$this->badge."'/>";
@@ -173,10 +177,13 @@ if ( $this->isCamera ) {
 print "</div> <!-- .row -->";
 
 }
-
+	
 
 
 print " <div style='display: block; margin-top: 20px;'>";
+
+print '<h5 id="uploadDateErrorMsg" style="display:none">'.JText::_("COM_BIODIV_UPLOAD_DATE_ERROR").'</h5>';
+
 print "	<button type='submit' id='add_upload' class='btn btn-success btn-lg'>".biodiv_label_icons('upload', JText::_("COM_BIODIV_UPLOAD_UPLOAD"))."</button>";
 print " <button type='button' class='btn btn-danger btn-lg mw_help' data-dismiss='modal'>".biodiv_label_icons('help', JText::_("COM_BIODIV_UPLOAD_HELP"))."</button>";
 	

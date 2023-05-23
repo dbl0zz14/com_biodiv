@@ -50,16 +50,17 @@ function doLogoUpload () {
 			
 		}
 	});
-	
-	
 }
 
 function activateAllAccountButtons () {
+	
+	setReloadPage();
 	
 	jQuery(".addTeacher").click(setAddTeacherFields);
 	jQuery(".addStudent").click(setAddStudentFields);
 	jQuery('#addSchoolUserForm').submit(addSchoolUser);
 	jQuery('#addClassForm').submit(addClass);
+	jQuery('#resetClassesForm').submit(resetClasses);
 	
 	jQuery(".schoolOnly").click(showSchoolSection);
 	jQuery(".teachersOnly").click(showTeachersSection);
@@ -72,6 +73,8 @@ function activateAllAccountButtons () {
 	jQuery(".studentComplete").click(studentComplete);
 	
 	jQuery(".doLater").click(showChecklistNoUpdate);
+	
+	jQuery('#batchStudents').submit(createUsers);
 	
 	activateSchoolButtons ();
 	activateTeacherListButtons ();
@@ -484,6 +487,33 @@ function addClass(e) {
 			contentType: false
 		}).done(addClassComplete)
 			.fail(addUserFail);
+		
+	}
+}
+
+
+
+function resetClasses(e) {
+	
+	let url = BioDiv.root + "&view=resetclasses&format=raw";
+	
+	e.preventDefault();
+	
+	let formId = jQuery(this).attr('id');
+	
+	let fd = new FormData(this);
+	
+	let success = true;
+	
+	if ( success ) {
+		
+		jQuery.ajax({
+			type: 'POST',
+			url: url,
+			data: fd,
+			processData: false,
+			contentType: false
+		}).done(resetClassesComplete);
 		
 	}
 }
@@ -940,6 +970,14 @@ function addClassComplete ( data ) {
 	jQuery("#classList").html(data);
 	activateClassListButtons ();
 	jQuery("#addClassModal").modal('hide');
+}
+
+
+function resetClassesComplete ( data ) {
+	
+	jQuery("#classList").html(data);
+	activateClassListButtons ();
+	jQuery("#resetClassesModal").modal('hide');
 }
 
 

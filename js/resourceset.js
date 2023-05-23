@@ -16,6 +16,50 @@ function setShareLevelForSet () {
 }
 
 
+function editSet () {
+	let id = jQuery(this).attr("id");
+	let idbits = id.split("_");
+	let setId = idbits.pop();
+	
+	let url = BioDiv.root + "&view=resourcesetedit&format=raw&id=" + setId;
+	
+	jQuery("#editSetArea").load(url, setEditSave);
+}
+
+
+function setEditSave () {
+	
+	setInputCounters();
+	jQuery('#editSetForm').submit(saveResourceSet);
+	
+}
+
+
+function saveResourceSet ( e ) {
+	
+	e.preventDefault();
+	
+	let fd = new FormData(this);
+	
+	let success = true;
+	
+	if ( success ) {
+		
+		let url = BioDiv.root + "&task=save_resource_set&format=raw";
+	
+		jQuery.ajax({
+			type: 'POST',
+			url: url,
+			data: fd,
+			processData: false,
+			contentType: false
+		}).done(reloadCurrentPage);
+		
+	}
+	
+}
+
+
 function addBadgeToSet () {
 	let id = jQuery(this).attr("id");
 	let idbits = id.split("_");
@@ -79,7 +123,8 @@ jQuery(document).ready(function(){
 	jQuery(".shareSet").click(setShareLevelForSet);
 	jQuery(".addBadgeToSet").click(addBadgeToSet);
 	
-	//jQuery(".setBadge").click(displayBadgeArticle);
+	jQuery(".editSet").click(editSet);
+	
 	jQuery(".setBadge").click(displayReadOnlyBadgeArticle);
 	
 	//jQuery("#errorsModal").modal('show');

@@ -90,11 +90,13 @@ class BioDivViewGenerate extends JViewLegacy
 			
 			$this->speciesToTranslate = $db->loadObjectList("option_id");
 			
-			$headings = array("Key", "en-GB", "Context"); 
+			// $headings = array("Key", "en-GB", "Context"); 
 			
-			foreach ($languages as $id=>$lang) {
-				$headings[] = $lang->transifex_code;
-			}
+			// foreach ($languages as $id=>$lang) {
+				// $headings[] = $lang->transifex_code;
+			// }
+			
+			$headings = getOptionsHeadings();
 			
 			$rows = array();
 			
@@ -143,38 +145,42 @@ class BioDivViewGenerate extends JViewLegacy
 			
 			$this->title = "Non-species Options file for translation";
 			
-			$db = JDatabase::getInstance(dbOptions());
+			// $db = JDatabase::getInstance(dbOptions());
 		
-			$query = $db->getQuery(true);
+			// $query = $db->getQuery(true);
 			
-			$selectStr = "O.option_id, O.option_name, O.struc, O.article_id";
+			// $selectStr = "O.option_id, O.option_name, O.struc, O.article_id";
 			
-			foreach ($languages as $id=>$lang) {
-				$selectStr .= ", ".strtoupper($lang->transifex_code).".value as ".strtolower($lang->transifex_code);
-			}
+			// foreach ($languages as $id=>$lang) {
+				// $selectStr .= ", ".strtoupper($lang->transifex_code).".value as ".strtolower($lang->transifex_code);
+			// }
 				
-			$query->select($selectStr)
-				->from("Options O");
+			// $query->select($selectStr)
+				// ->from("Options O");
 				
-			foreach ($languages as $id=>$lang) {
-				$tableName = strtoupper($lang->transifex_code);
-				$query->leftJoin("OptionData ".$tableName." on O.option_id = ".$tableName.".option_id and ".$tableName.".data_type = " . $db->quote($lang->tag));
-			}
+			// foreach ($languages as $id=>$lang) {
+				// $tableName = strtoupper($lang->transifex_code);
+				// $query->leftJoin("OptionData ".$tableName." on O.option_id = ".$tableName.".option_id and ".$tableName.".data_type = " . $db->quote($lang->tag));
+			// }
 						
-			$query->where("struc not in ( 'mammal', 'bird', 'invertebrate', 'beshelp', 'camera', 'kiosk', 'kiosktutorial', 'logo', 'projectdisplay' )")
-				->order("struc, option_name");
+			// $query->where("struc not in ( 'mammal', 'bird', 'invertebrate', 'beshelp', 'camera', 'kiosk', 'kiosktutorial', 'logo', 'projectdisplay' )")
+				// ->order("struc, option_name");
 
-			$db->setQuery($query);
+			// $db->setQuery($query);
 			
-			error_log("generateTranslateSpeciesData select query created " . $query->dump());
+			// error_log("generateTranslateSpeciesData select query created " . $query->dump());
 			
-			$this->options = $db->loadObjectList("option_id");
+			// $this->options = $db->loadObjectList("option_id");
 			
-			$headings = array("Key", "en", "Context"); 
+			$this->options = getNonSpeciesOptionsForTranslation ();
 			
-			foreach ($languages as $id=>$lang) {
-				$headings[] = $lang->transifex_code;
-			}
+			// $headings = array("Key", "en", "Context"); 
+			
+			// foreach ($languages as $id=>$lang) {
+				// $headings[] = $lang->transifex_code;
+			// }
+			
+			$headings = getOptionsHeadings();
 			
 			$rows = array();
 			

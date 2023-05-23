@@ -365,7 +365,10 @@ function saveResource(e) {
 }
 
 function countInputChars() {
+	
+	let whatIsThis = jQuery(this);
 	let id = jQuery(this).attr("id");
+	
 	let countDivIdStr = "#" + id + "Count";
 	let countDiv = jQuery(countDivIdStr);
 	let countMax = countDiv.data("maxchars");
@@ -373,7 +376,11 @@ function countInputChars() {
 	let numChars = theInput.length;
 	
 	if ( numChars > countMax ) {
-		countDiv.addClass("tooManyChars");
+		//countDiv.addClass("tooManyChars");
+		theInput = theInput.substring(0,countMax);
+		//jQuery(this)[0].val(theInput);
+		jQuery(this).val(theInput);
+		numChars = countMax;
 	}
 	else {
 		countDiv.removeClass("tooManyChars");
@@ -387,6 +394,9 @@ function setInputCounters() {
 	jQuery("#uploadName").on('keyup', countInputChars);
 
 	jQuery("#uploadDescription").on('keyup', countInputChars);
+	
+	jQuery("#uploadName").trigger('keyup');
+	jQuery("#uploadDescription").trigger('keyup');
 
 }
 

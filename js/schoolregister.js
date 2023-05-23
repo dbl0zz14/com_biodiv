@@ -139,6 +139,27 @@ function validateSignupForm ( fd ) {
 		jQuery ('[name=email]').addClass('invalid');
 		
 	}
+	if ( fd.has("schoolName") ) {
+		
+		let actualChars = fd.get("schoolName").length;
+		
+		if ( actualChars > 2 ) {
+			jQuery ('[name=schoolName]').removeClass('invalid');
+		}
+		else {
+			console.log ( "School name too short : " + fd.get("schoolName") );
+			success = false;
+			jQuery ('[name=schoolName]').addClass('invalid');
+			jQuery('#addUserFailMessage').text('School name must be at least 3 characters long');
+		}
+	}
+	else {
+		console.log ( "Form has no schoolName" );
+		success = false;
+		jQuery ('[name=schoolName]').addClass('invalid');
+		
+	}
+	
 	if (!jQuery("#terms").is(':checked')) {
 		success = false;
 		jQuery ('#terms').addClass('invalid');

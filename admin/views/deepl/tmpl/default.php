@@ -15,7 +15,7 @@ printAdminMenu("TRANSLATIONS");
 print '<div id="j-main-container" class="span10 j-toggle-main">';
 
 	
-	print '<h2>Select which articles to download translations for</h2>';
+	print '<h2>Use DeepL to translate en-GB.com_biodiv.ini file</h2>';
 
 	print '<form id="translateIniFile" action="'. BIODIV_ADMIN_ROOT . '&view=generatedeepl" method="post">';
 
@@ -52,10 +52,33 @@ print '<div id="j-main-container" class="span10 j-toggle-main">';
 	print '</form>';
 
 
+  print '<h2>Use DeepL to translate non-species Options file</h2>';
+
+	print '<form id="translateOptionsFile" action="'. BIODIV_ADMIN_ROOT . '&view=generatedeepl" method="post">';
+	
+	print '<input type="hidden" name="opt" value="1"/>';
+
+	print '<p>';
+	print '<label for="trLang">Choose a language (or select All):</label>';
+	print '<select id="trLang" name="trLang">';
+	foreach ( $this->targetLanguages as $targetLanguage ) {
+		print '<option value="'.$targetLanguage->code.'">'.$targetLanguage->name.'</option>';
+	}
+	print '</select><br>';
+	print '</p>';
+		
+		
+	print '<button type="submit" class="btn js-stools-btn-clear" >Translate to selected language</button>';
+	
+
+	print '</form>';
+
+
 print '</div>';
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/admin.js", true, true);
 
 ?>

@@ -17,6 +17,24 @@ print '<div id="j-main-container" class="span10 j-toggle-main">';
 if ( $this->purpose == "gettranslations" ) {
 	
 	print '<h2>Select which articles to download translations for</h2>';
+	
+	print '<form id="searchArticles" class="form-inline" action="'. BIODIV_ADMIN_ROOT . '&view=selectarticle&purpose=gettranslations" method = "POST">';
+	
+	if ( $this->searchStr ) {
+		
+		error_log ( "Got searchStr: " . $this->searchStr );
+		print '    <input type="search" name="search" class="form-control" id="search" value="'.$this->searchStr.'">';
+		
+	
+	}
+	else {
+		print '    <input type="search" name="search" class="form-control" id="search" placeholder="Search articles" >';
+	}
+	
+	//print '<button class="btn btn-default searchResourcesBtn" type="submit" ><span class="glyphicon glyphicon-search" ></span></button>';
+	print '<button class="btn btn-default" type="submit" >Search articles</button>';
+	
+	print '</form>';
 
 	print '<form id="translateArticles" action="'. BIODIV_ADMIN_ROOT . '&view=gettranslations" method="post">';
 
@@ -36,6 +54,27 @@ if ( $this->purpose == "gettranslations" ) {
 else if ( $this->purpose == "sendtranslations" ) {
 	
 	print '<h2>Select which articles to submit for translation</h2>';
+	
+	print "<h3>Hint: If you can't find the article check it has language set to English not All</h3>";
+	
+	$searchPage = BIODIV_ADMIN_ROOT . '&view=selectarticle&purpose=sendtranslations';
+	
+	print '<form id="searchArticles" class="form-inline" action="'. BIODIV_ADMIN_ROOT . '&view=selectarticle&purpose=sendtranslations" method = "POST">';
+	
+	if ( $this->searchStr ) {
+		
+		print '    <input type="search" name="search" class="form-control" id="search" value="'.$this->searchStr.'">';
+	
+	}
+	else {
+		print '    <input type="search" name="search" class="form-control" id="search" placeholder="Search articles" >';
+	}
+	
+	//print '<button class="btn btn-default searchResourcesBtn" type="submit" ><span class="glyphicon glyphicon-search" ></span></button>';
+	print '<button class="btn btn-default" type="submit" >Search articles</button>';
+	
+	
+	print '</form>';
 
 	print '<form id="translateArticles" action="'. BIODIV_ADMIN_ROOT . '&view=sendtranslations" method="post">';
 
@@ -120,6 +159,7 @@ print '</div>';
 
 
 
+JHTML::script("com_biodiv/commonbiodiv.js", true, true);
 JHTML::script("com_biodiv/admin.js", true, true);
 
 ?>

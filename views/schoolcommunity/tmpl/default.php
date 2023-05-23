@@ -37,7 +37,7 @@ else {
 	
 	if ( $this->helpOption > 0 ) {
 		
-		print '<div id="helpButton_badges" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<div id="helpButton_schoolcommunity" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
 		print '<i class="fa fa-info"></i>';
 		print '</div>'; // helpButton
 	}
@@ -368,6 +368,7 @@ JHTML::script("com_biodiv/commondashboard.js", true, true);
 JHTML::script("com_biodiv/resourcelist.js", true, true);
 JHTML::script("com_biodiv/resourceupload.js", true, true);
 JHTML::script("com_biodiv/schoolcommunity.js", true, true);
+JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
 JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
 
 
