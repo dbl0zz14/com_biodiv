@@ -274,6 +274,10 @@ else {
 		
 	if ( $this->schoolUser->role_id != Biodiv\SchoolCommunity::ADMIN_ROLE ) {	
 		
+		$isTeacher = false;
+		if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+			$isTeacher = true;
+		}
 		print '<div class="schoolDashboardClassStatus">';
 		
 		print '<div class="panel actionPanel">';
@@ -294,7 +298,9 @@ else {
 				if ( $classCount > 3 ) {
 					break;
 				}
-				
+				if ( $isTeacher == true ) {
+					print '<a href="bes-badges?class_id='.$classId.'">';
+				}
 				print '<div class="panel">';
 				print '<div class="panel-body">';
 				
@@ -329,6 +335,10 @@ else {
 				
 				print '</div>'; // panel-body
 				print '</div>'; // panel
+				
+				if ( $isTeacher == true ) {
+					print '</a>';
+				}
 				
 				$classCount += 1;
 			}
@@ -846,9 +856,16 @@ if ( $extraClasses ) {
 	print '     <div class="modal-body">';
 	print '<h3 class="panelHeading">'.JText::_("COM_BIODIV_SCHOOLDASHBOARD_BADGE_PROGRESS").'</h3>';
 	print '<div class="row">';
+	$isTeacher = false;
+	if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+		$isTeacher = true;
+	}
 	foreach ( $this->classStatus as $classId=>$classObj ) {
 		
 		print '<div class="col-md-6 col-sm-6 col-xs-6">';
+		if ( $isTeacher == true ) {
+			print '<a href="bes-badges?class_id='.$classId.'">';
+		}
 		print '<div class="panel">';
 		print '<div class="panel-body">';
 		
@@ -883,6 +900,9 @@ if ( $extraClasses ) {
 		
 		print '</div>'; // panel-body
 		print '</div>'; // panel
+		if ( $isTeacher == true ) {
+			print '</a>';
+		}
 		print '</div>'; // col-6
 	}
 	print '</div>'; // row
