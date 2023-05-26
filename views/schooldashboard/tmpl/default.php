@@ -134,7 +134,7 @@ else {
 	// --------------------- Info button
 	
 	if ( $this->helpOption > 0 ) {
-		print '<div id="helpButton_schooladmin" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
+		print '<div id="helpButton_schooldashboard" class="btn btn-default helpButton h4" data-toggle="modal" data-target="#helpModal">';
 		print '<i class="fa fa-info"></i>';
 		print '</div>'; // helpButton
 	}
