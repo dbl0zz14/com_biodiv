@@ -76,6 +76,13 @@ function activateAllAccountButtons () {
 	
 	jQuery('#batchStudents').submit(createUsers);
 	
+	jQuery('#hideTeachers').click(hideTeachersList);
+	jQuery('#showTeachers').click(showTeachersList);
+	jQuery('#hideClasses').click(hideClassesList);
+	jQuery('#showClasses').click(showClassesList);
+	jQuery('#hideStudents').click(hideStudentsList);
+	jQuery('#showStudents').click(showStudentsList);
+	
 	activateSchoolButtons ();
 	activateTeacherListButtons ();
 	activateClassListButtons ();
@@ -129,6 +136,22 @@ function showTeachersSection () {
 }
 
 
+function showTeachersList () {
+	
+	jQuery("#hideTeachers").removeClass("hidden");
+	jQuery("#showTeachers").addClass("hidden");
+	jQuery("#teacherList").removeClass("hidden");
+}
+
+
+function hideTeachersList () {
+	
+	jQuery("#hideTeachers").addClass("hidden");
+	jQuery("#showTeachers").removeClass("hidden");
+	jQuery("#teacherList").addClass("hidden");
+}
+
+
 function showClassesSection () {
 	
 	jQuery(".schoolAdminSection").addClass("hidden");
@@ -136,10 +159,42 @@ function showClassesSection () {
 }
 
 
+function showClassesList () {
+	
+	jQuery("#hideClasses").removeClass("hidden");
+	jQuery("#showClasses").addClass("hidden");
+	jQuery("#classList").removeClass("hidden");
+}
+
+
+function hideClassesList () {
+	
+	jQuery("#hideClasses").addClass("hidden");
+	jQuery("#showClasses").removeClass("hidden");
+	jQuery("#classList").addClass("hidden");
+}
+
+
 function showStudentsSection () {
 	
 	jQuery(".schoolAdminSection").addClass("hidden");
 	jQuery("#studentAccountsPanel").removeClass("hidden");
+}
+
+
+function showStudentsList () {
+	
+	jQuery("#hideStudents").removeClass("hidden");
+	jQuery("#showStudents").addClass("hidden");
+	jQuery("#studentList").removeClass("hidden");
+}
+
+
+function hideStudentsList () {
+	
+	jQuery("#hideStudents").addClass("hidden");
+	jQuery("#showStudents").removeClass("hidden");
+	jQuery("#studentList").addClass("hidden");
 }
 
 
@@ -967,17 +1022,13 @@ function editSchoolComplete ( data ) {
 
 function addClassComplete ( data ) {
 	
-	jQuery("#classList").html(data);
-	activateClassListButtons ();
-	jQuery("#addClassModal").modal('hide');
+	reloadCurrentPage();
 }
 
 
 function resetClassesComplete ( data ) {
 	
-	jQuery("#classList").html(data);
-	activateClassListButtons ();
-	jQuery("#resetClassesModal").modal('hide');
+	reloadCurrentPage();
 }
 
 
@@ -992,9 +1043,7 @@ function editTeacherComplete ( data ) {
 
 function editClassComplete ( data ) {
 	
-	jQuery("#classList").html(data);
-	activateClassListButtons ();
-	jQuery("#editClassModal").modal('hide');
+	reloadCurrentPage();
 	
 }
 

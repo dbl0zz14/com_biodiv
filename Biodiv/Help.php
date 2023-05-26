@@ -23,6 +23,40 @@ class Help {
 	}
 	
 	
+	public static function printChooseClassHelp ( $schoolUser = null ) {
+		
+		if ( !$schoolUser ) {
+			
+			$schoolUser = SchoolCommunity::getSchoolUser();
+		}
+		
+		if ( $schoolUser ) {
+			
+			// ----------------------- help overlay -------------------
+			
+			print '<div class="helpOverlay"></div>';
+	
+	
+			// ----------------------- help welcome
+	
+			print '<div id="badgesHelp_1" class="instructions help_1">';
+			
+			print '<h3>'.\JText::_("COM_BIODIV_CHOOSE_CLASS_PAGE").'</h3>';
+			print '<h3>'.\JText::_("COM_BIODIV_FIRST_CHOOSE").'</h3>';
+			
+			print '<div class="row helpButtons">';
+			print '<div class="col-md-6 col-sm-6 col-xs-6 text-right">';
+			print '<button type="button" class="btn btn-lg btn-primary skipHelp" data-dismiss="modal">'.\JText::_("COM_BIODIV_HELP_OK").'</button>';
+			print '</div>'; // col-6
+			
+			print '</div>'; // row
+			
+			print '</div>';
+			
+		}
+	}
+	
+	
 	public static function printBadgesHelp ( $schoolUser = null, $classId = null ) {
 		
 		if ( !$schoolUser ) {

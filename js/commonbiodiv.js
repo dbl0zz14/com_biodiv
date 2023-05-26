@@ -53,6 +53,8 @@ function usersCreated ( data ) {
 		
 	let link = document.createElement('a');
 	link.innerHTML = 'Download';
+	link.classList.add('btn');
+	link.classList.add('btn-primary');
 	link.download = usersObj.filename;
 					
 	var str = '';
@@ -81,6 +83,8 @@ function usersCreated ( data ) {
 	jQuery("#newUsers").append(link);
 	
 	jQuery("#newUsersMsg").text('Users created, click below to download');
+	
+	jQuery("#newUsersSubmit").hide();
 	
 	
 

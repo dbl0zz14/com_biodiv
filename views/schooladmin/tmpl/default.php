@@ -285,6 +285,10 @@ else {
 	if ( $this->checklist ) {
 		print '<div class="btn btn-info btn-lg vSpaced hSpaced teacherComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_TEACHER_COMPLETE").'</div>';
 	}
+	else {
+		print '<div id="hideTeachers" class="btn btn-info btn-lg vSpaced hSpaced" role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_HIDE_TEACHERS").'</div>';
+		print '<div id="showTeachers" class="btn btn-info btn-lg vSpaced hSpaced hidden" role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_SHOW_TEACHERS").'</div>';
+	}
 	print '</div>'; // col-12
 	print '<div id="teacherList" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 h4">';
 	
@@ -320,7 +324,11 @@ else {
 	print '<div id="addClass" class="btn btn-primary btn-lg vSpaced addClass" role="button" data-toggle="modal" data-target="#addClassModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_CLASS").'</div>';
 	print '<div id="resetClasses" class="btn btn-info btn-lg vSpaced hSpaced" role="button" data-toggle="modal" data-target="#resetClassesModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</div>';
 	if ( $this->checklist ) {
-		print '<div class="btn btn-info btn-lg vSpaced hSpaced classComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS_COMPLETE").'</div>';
+		print '<div class="btn btn-info btn-lg vSpaced classComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS_COMPLETE").'</div>';
+	}
+	else {
+		print '<div id="hideClasses" class="btn btn-info btn-lg vSpaced" role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_HIDE_CLASSES").'</div>';
+		print '<div id="showClasses" class="btn btn-info btn-lg vSpaced hidden" role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_SHOW_CLASSES").'</div>';
 	}
 	print '</div>'; // col-12
 	print '<div id="classList" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 h4">';
@@ -359,7 +367,11 @@ else {
 	print '<div id="addStudent" class="btn btn-primary btn-lg vSpaced addStudent" role="button" data-toggle="modal" data-target="#addSchoolUserModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_STUDENT").'</div>';
 	print '<div id="batch" class="btn btn-info btn-lg vSpaced hSpaced batchAddStudents" role="button" data-toggle="modal" data-target="#batchStudentsModal">'.JText::_("COM_BIODIV_SCHOOLADMIN_BATCH_ADD").'</div>';
 	if ( $this->checklist ) {
-		print '<div class="btn btn-info btn-lg vSpaced hSpaced studentComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_STUDENT_COMPLETE").'</div>';
+		print '<div class="btn btn-info btn-lg vSpaced studentComplete" role="button" data-toggle="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_STUDENT_COMPLETE").'</div>';
+	}
+	else {
+		print '<div id="hideStudents" class="btn btn-info btn-lg vSpaced " role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_HIDE_STUDENTS").'</div>';
+		print '<div id="showStudents" class="btn btn-info btn-lg vSpaced hidden" role="button">'.JText::_("COM_BIODIV_SCHOOLADMIN_SHOW_STUDENTS").'</div>';
 	}
 	print '</div>'; // col-12
 	print '<div id="studentList" class="col-lg-11 col-md-11 col-sm-11 col-xs-12 h4">';
@@ -511,7 +523,7 @@ if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
 	
 	print '<input id="addToSchool" type="hidden" name="addToSchool" value="1"/>';
 	
-	print '<input id="school" type="hidden" name="school" value="1"/>';
+	print '<input id="school" type="hidden" name="school" value="'.$this->schoolUser->school_id.'"/>';
 
 	print '<div class="vSpaced ">';
 	print '<label for="batchClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
@@ -545,7 +557,7 @@ if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
 	print '</div>';
 
 	print '	  <div class="modal-footer">';
-	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button id="newUsersSubmit" type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
 	print '        <button type="button" class="btn btn-info reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
 	print '      </div>';
 	print '</form>';	  	  

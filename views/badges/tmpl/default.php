@@ -26,6 +26,10 @@ else if ( $this->notMyClass ) {
 }
 else if ( $this->chooseClass ) {
 	
+	if ( $this->help ) {
+		Biodiv\Help::printChooseClassHelp( $this->schoolUser );
+	}
+	
 	print '<div class="row">';
 	
 	print '<div class="col-md-12 col-sm-12 col-xs-12">'; 

@@ -25,4 +25,10 @@ jQuery(document).ready(function(){
 		jQuery("#avatarArea").removeClass("hidden");
 		
 	});
+	
+	jQuery(".postCol").dblclick(toggleLike);
+	jQuery(".likeSet").click(likeSet);
+	jQuery(".unlikeSet").click(unlikeSet);
+	jQuery(".deletePost").hide();
+	
 });

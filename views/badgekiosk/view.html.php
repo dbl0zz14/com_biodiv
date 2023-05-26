@@ -36,7 +36,7 @@ class BioDivViewBadgeKiosk extends JViewLegacy
 
 			$this->projectId = $this->schoolUser->project_id;
 			
-			error_log ( "Project id = " . $this->projectId );
+			//error_log ( "Project id = " . $this->projectId );
 			
 			if ( !$this->projectId ) {
 				error_log ( "BadgeKiosk no project id" );
@@ -44,7 +44,7 @@ class BioDivViewBadgeKiosk extends JViewLegacy
 
 			if ( !$this->projectId ) die ("no project id given" );
 			
-			error_log ( "Project id found" );
+			//error_log ( "Project id found" );
 
 			$this->project = projectDetails($this->projectId);
 

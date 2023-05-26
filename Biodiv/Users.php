@@ -35,6 +35,8 @@ class Users {
 		$schoolId = $input->getInt('school', 0);
 		$classId = $input->getInt('batchClassId', 0);
 		
+		error_log ( "classId = " . $classId );
+		
 		if ( $startingNum == 0 ) {
 			
 			$startingNum = 1;

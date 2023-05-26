@@ -281,7 +281,9 @@ print '     <div class="modal-body">';
 print '	    <div id="badgeArticle" ></div>';
 print '      </div>';
 print '	  <div class="modal-footer">';
-print '        <a href="'.$this->badgesLink.'"><button type="button" class="btn btn-primary">'.JText::_("COM_BIODIV_BADGESCHEME_BADGES").'</button></a>';
+if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+	print '        <a href="'.$this->badgesLink.'"><button type="button" class="btn btn-primary">'.JText::_("COM_BIODIV_BADGESCHEME_BADGES").'</button></a>';
+}
 print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_BADGESCHEME_CLOSE").'</button>';
 print '      </div>';	  	  
 print '    </div>';

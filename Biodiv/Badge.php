@@ -758,15 +758,29 @@ class Badge {
 		
 			$db = \JDatabaseDriver::getInstance(dbOptions());
 			
-			$query = $db->getQuery(true)
-				->select("B.*, IFNULL(UB.status, ".self::LOCKED.") as status, M.name as module_name, M.icon, BG.name as gp_name, BG.icon as bg_icon, SB.badge_type, SB.related_json, SB.threshold, SB.system_link, SB.button_text from Badge B")
-				->innerJoin("Module M on M.module_id = B.module_id")
-				->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
-				->leftJoin("SystemBadges SB on B.badge_id = SB.badge_id")
-				->leftJoin($userBadgeTable . " UB on UB.badge_id = B.badge_id and " . $badgeTableWhere)
-				->where("B.role_id = " . $schoolUser->role_id )
-				->where("B.badge_id = " . $badgeId);
-				
+			if ( $schoolUser->role_id == SchoolCommunity::ADMIN_ROLE ) {
+			
+				$query = $db->getQuery(true)
+					->select("B.*, ".self::LOCKED." as status, M.name as module_name, M.icon, BG.name as gp_name, BG.icon as bg_icon, SB.badge_type, SB.related_json, SB.threshold, SB.system_link, SB.button_text from Badge B")
+					->innerJoin("Module M on M.module_id = B.module_id")
+					->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
+					->leftJoin("SystemBadges SB on B.badge_id = SB.badge_id")
+					->where("B.badge_id = " . $badgeId);
+			
+			}
+			else {
+			
+				$query = $db->getQuery(true)
+					->select("B.*, IFNULL(UB.status, ".self::LOCKED.") as status, M.name as module_name, M.icon, BG.name as gp_name, BG.icon as bg_icon, SB.badge_type, SB.related_json, SB.threshold, SB.system_link, SB.button_text from Badge B")
+					->innerJoin("Module M on M.module_id = B.module_id")
+					->innerJoin("BadgeGroup BG on BG.group_id = B.badge_group")
+					->leftJoin("SystemBadges SB on B.badge_id = SB.badge_id")
+					->leftJoin($userBadgeTable . " UB on UB.badge_id = B.badge_id and " . $badgeTableWhere)
+					->where("B.role_id = " . $schoolUser->role_id )
+					->where("B.badge_id = " . $badgeId);
+			
+			}
+			
 			$db->setQuery($query);
 			
 			//error_log("Badge::createFromId  select query created: " . $query->dump());
