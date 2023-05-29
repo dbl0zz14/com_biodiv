@@ -38,7 +38,7 @@ jQuery(document).ready(function(){
 				//		    jQuery.ajax(url);
 				
 				if ( BioDiv.badgeId && BioDiv.classId ) {
-					var url = "bes-upload-complete" + "&upload_id="
+					var url = "bes-upload-complete" + "?upload_id="
 								+ BioDiv.upload_id + "&class_id=" + BioDiv.classId + "&badge=" + BioDiv.badgeId;
 					window.location.replace(url);
 				}
