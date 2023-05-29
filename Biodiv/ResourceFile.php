@@ -160,6 +160,7 @@ class ResourceFile {
 		
 			$query = $db->getQuery(true)
 					->select("RT.* from ResourceType RT")
+					->where("seq>0")
 					->order("RT.seq");
 					
 			$db->setQuery($query);
