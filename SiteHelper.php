@@ -170,7 +170,7 @@ class SiteHelper {
 
 	}
 	
-	public function generateSiteCreationModal( $withUpload = false , $defaultProjectId = 1 ) {
+	public function generateSiteCreationModal( $withUpload = false , $defaultProjectId = 1, $badgeId = null, $classId = null ) {
 		
 		
 		// Set up the meta data needed for the modal
@@ -193,6 +193,9 @@ class SiteHelper {
 		
 		if ( $this->justRecorded ) {
 			print '        <form id="siteForm" action="'. BIODIV_ROOT . '&view=' . $task . '" method="post">';
+		}
+		else if ( $badgeId && $classId ) {
+			print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . ' &badge=' . $badgeId . '&class_id='. $classId . '" method="post">';
 		}
 		else {
 			print '        <form id="siteForm" action="'. BIODIV_ROOT . '&task=' . $task . '" method="post">';

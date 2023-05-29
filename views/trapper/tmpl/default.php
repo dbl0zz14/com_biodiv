@@ -173,7 +173,17 @@ if(count($this->sites) == 0){
 </ >
 <?php
 
-$this->siteHelper->generateSiteCreationModal();
+if ( $this->badge && $this->classId ) {
+	
+	$defaultProjectId = 1;
+	if ( $this->besProjectId ) {
+		$defaultProjectId = $this->besProjectId;
+	}
+	$this->siteHelper->generateSiteCreationModal(false , $defaultProjectId, $this->badge, $this->classId);
+}
+else {
+	$this->siteHelper->generateSiteCreationModal();
+}
 
 
 ?>

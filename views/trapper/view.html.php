@@ -56,6 +56,15 @@ class BioDivViewTrapper extends JViewLegacy
 
 
 		$this->projects = $this->siteHelper->getProjects();
+		
+		// Check for BES user
+		$schoolUser = Biodiv\SchoolCommunity::getSchoolUser();
+		
+		$this->besProjectId = null;
+		if ( $schoolUser ) {
+			$this->besProjectId = $schoolUser->project_id;
+		}
+		
 
 		// Display the view
 		parent::display($tpl);
