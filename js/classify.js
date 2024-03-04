@@ -1,8 +1,18 @@
+
+
+
+async function initMap() {
+  const { Map } = await google.maps.importLibrary("maps");
+
+}
+
+
 jQuery(document).ready(function(){
 	
 	const maxClassifications = BioDiv.maxclass;
 	
 	const eggsId = BioDiv.eggsId;
+	const nestId = BioDiv.nestId;
 	
 	const numSpeciesPerPage = 36;
 	
@@ -184,6 +194,20 @@ jQuery(document).ready(function(){
 			firstParent = firstInput.parents('.species_classify').first();
 			firstParent.hide();
 		}
+		if ( species_id == nestId ) {
+			
+			let firstInput = jQuery("input[name='gender']").first();
+			let firstParent = firstInput.parents('.species_classify').first();
+			firstParent.hide();
+			
+			firstInput = jQuery("input[name='age']").first();
+			firstParent = firstInput.parents('.species_classify').first();
+			firstParent.hide();
+			
+			firstInput = jQuery("input[name='number']").first();
+			firstParent = firstInput.parents('.species_classify').first();
+			firstParent.hide();
+		}
 		
 		var url = BioDiv.root + "&view=ajax&format=raw&option_id=" + species_id;
 		jQuery('#species_helplet').load(url);
@@ -354,6 +378,28 @@ jQuery(document).ready(function(){
 		
 	});
 	
+	jQuery('#report_media').click(function (){
+		
+		jQuery('#report_media_modal').modal('show');
+		
+	});
+	
+	jQuery('#report_media_save').click(function (){
+		
+		formData = jQuery('#reportMediaForm').serialize();
+		
+		url = BioDiv.root + "&task=add_report_media&format=raw";
+		
+		// And send the report
+		jQuery.post(url, formData);
+		//jQuery('#reportMediaDone').load(url, formData);
+		
+		// And disable the challenge button
+		jQuery('#report_media').attr("disabled", true);
+		
+	});
+	
+	
 
 	// Add any remove click functions on refresh.
 	removeClicks();
@@ -365,6 +411,7 @@ jQuery(document).ready(function(){
 	jQuery('#species-indicators li').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Control list of species', 'placement': 'top'});
 	jQuery('#favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to remove favourite status', 'placement': 'bottom'});
 	jQuery('#not-favourite').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to make this one of your favourites', 'placement': 'bottom'});
+	jQuery('#report_media').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Click to report this sequence or video', 'placement': 'bottom'});
 	jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
 	jQuery('#fullscreen-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Full screen', 'placement': 'top'});
 	jQuery('#fullscreen-exit-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Exit full screen', 'placement': 'top'});

@@ -90,16 +90,11 @@ class BioDivViewClassify extends JViewLegacy
 	  }
 	  
 	  $this->projectPage = null;
-	  error_log ("About to check project page for " . $this->project_id );
 	  if ( $this->project_id ) {
-		  error_log ("Checking for project page");
 		  $projectPages = getSingleProjectOptions ( $this->project_id, "projectpage");
-		  $errMsg = print_r ( $projectPages, true );
-		  error_log ("Got project pages: " . $errMsg);
 		  
 		  if ( count($projectPages) > 0 ) {
 			  $this->projectPage = $projectPages[0]["option_name"];
-			  error_log ("projectPage set to " . $this->projectPage );
 		  }
 	  }
 	  
@@ -201,6 +196,7 @@ class BioDivViewClassify extends JViewLegacy
 		$this->classifyInputs = getClassifyInputs();
 		
 		$this->eggsId = codes_getCode('Eggs', 'species');
+		$this->nestId = codes_getCode('Nest', 'species');
 	  
 	  }
 

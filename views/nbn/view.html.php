@@ -248,7 +248,7 @@ class BioDivViewNbn extends JViewLegacy
 							'N.project_name, '.
 							'"MammalWeb records", '.
 							'"MammalWeb", '.
-							'"CC-BY-NC", '.
+							'IF(N.taken < "20240101", "CC-BY-NC", "CC-BY"), '.
 							'CONCAT("MammalWeb & user id ", N.site_owner), '.
 							'N.sci_name, '.
 							'N.nbn_code, '.

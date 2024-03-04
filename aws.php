@@ -118,6 +118,7 @@ function post_s3_upload_actions ( $photo_id, $filename ) {
 		print ("<br>Couldn't delete file: " . $filename);
 		throw $e;
 	}
+	
 }
 
 function post_s3_upload_actions_orig ( $of_id, $filename ) {
@@ -137,6 +138,30 @@ function post_s3_upload_actions_orig ( $of_id, $filename ) {
 		print ("<br>Couldn't delete file: " . $filename);
 		throw $e;
 	}
+}
+
+function post_s3_upload_fail ( $photo_id, $filename ) {
+	// update the s3_status to 2 for this photo_id
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	$fields = new stdClass();
+	$fields->photo_id = $photo_id;
+	$fields->s3_status = 2;
+	$db->updateObject('Photo', $fields, 'photo_id');
+
+	
+}
+
+function post_s3_upload_fail_orig ( $of_id, $filename ) {
+	// update the s3_status to 2 for this of_id
+	$db = JDatabase::getInstance(dbOptions());	
+	
+	$fields = new stdClass();
+	$fields->of_id = $of_id;
+	$fields->s3_status = 2;
+	$db->updateObject('OriginalFiles', $fields, 'of_id');
+
+	
 }
 
 function post_s3_upload_actions_resource ( $resource_id, $filename, $key ) {

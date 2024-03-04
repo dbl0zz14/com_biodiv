@@ -24,6 +24,9 @@ include_once "BiodivFile.php";
 include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
 include_once "BiodivRecaptcha.php";
+include_once "BiodivConservationAI.php";
+include_once "BiodivAnalysis.php";
+include_once "BiodivOctopus.php";
 include_once "KioskSpecies.php";
 include_once "Biodiv/BeginnerQuiz.php";
 include_once "Biodiv/ResourceSet.php";
@@ -601,6 +604,27 @@ function canClassify ($struc, $fields) {
 			// If it's a public or protected project can view it.  If not must have access.
 			// Check this project against "myProjects".
 			$projects = mySpottingProjects();
+			
+			if ( in_array($fields->project_id, array_keys($projects)) ) return true;
+			else return false;
+			break;
+		default:
+			return false;
+	}
+}
+
+function canUpload ($struc, $fields) {
+	switch($struc){
+		case 'project':
+			$person_id = userID();
+			
+			if (!$person_id ) {
+				return false;
+			}
+			
+			// If it's a public or protected project can view it.  If not must have access.
+			// Check this project against "myProjects".
+			$projects = myTrappingProjects();
 			
 			if ( in_array($fields->project_id, array_keys($projects)) ) return true;
 			else return false;
@@ -4366,7 +4390,7 @@ function getThisAndAllSubs ( $projectId ) {
 }
 */
 
-function getSubProjectsById($project_id, $exclude_private = false){
+function getSubProjectsById($project_id, $include_private = false){
   
   // first select all project/parent pairs into memory
   $db = JDatabase::getInstance(dbOptions());
@@ -4374,7 +4398,7 @@ function getSubProjectsById($project_id, $exclude_private = false){
   $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
 		->where("parent_project_id is not NULL");
   // exclude private projects
-  if ( $exclude_private == false ) {
+  if ( $include_private == false ) {
 	  $query->where("access_level < 3");
   }
   $db->setQuery($query);
@@ -4395,6 +4419,43 @@ function getSubProjectsById($project_id, $exclude_private = false){
   
   //print "<br/>Got " . count($subprojects) . " sub projects.<br/>They are:<br>";
   //print implode(",", $subprojects);
+  
+  return $subprojects;
+  
+}
+
+function getLeafProjectsById($project_id, $include_private = false){
+  
+  // first select all project/parent pairs into memory
+  $db = JDatabase::getInstance(dbOptions());
+  $query = $db->getQuery(true);
+  $query->select("project_id, parent_project_id, project_prettyname")->from("Project")
+		->where("parent_project_id is not NULL");
+		
+  // exclude private projects
+  if ( $include_private == false ) {
+	  $query->where("access_level < 3");
+  }
+  $db->setQuery($query);
+  $allpairs = $db->loadAssocList();
+  
+  // Need to get the proj id and name of the top level project
+  $query = $db->getQuery(true);
+  $query->select("project_id AS proj_id, project_prettyname AS proj_prettyname")->from("Project");
+  $query->where("project_id = '" . $project_id . "'");
+  $db->setQuery($query);
+  $subprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
+  
+  // add to project list by working through $allpairs to find the children, repeatedly
+  addSubProjects( $subprojects, $allpairs );
+  
+  // remove any that is a parent project
+  foreach ( $allpairs as $pair ) {
+	  $aParent = $pair['parent_project_id'];
+	  if ( array_key_exists($aParent, $subprojects) ) {
+		  unset($subprojects[$aParent]);
+	  }
+  }
   
   return $subprojects;
   
@@ -4706,7 +4767,7 @@ function nextSequence( $project_id = null){
   //print "<br>nextSequence, got priority_array: <br>" ;
   //print_r ( $priority_array );
   
-  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered", "Repeat");
+  $all_priorities = array("Single", "Multiple", "Single to multiple", "Site time ordered", "Repeat", "Single to repeat");
   
   // which priorities do we have projects for?
   $distinct_priorities = array_intersect ( $all_priorities, $priority_array );
@@ -4853,18 +4914,33 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		$db->setQuery($q1, 0, 1); // LIMIT 1
 		*/
 		
-		$q1->select("count(*)")
-			->from("Photo P")
-			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
-			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
-			->where("P.status = 1")
-			->where("A.photo_id IS NULL")
-			->where("P.contains_human =0" . $own_string )
-			->where("P.sequence_id > 0")
-			->where("P.sequence_num = 1" )
-			->where("P.photo_id >= PSM.start_photo_id")
-			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+		//$q1->select("count(*)")
+			//->from("Photo P")
+			//->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+			//->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+			//->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			//->where("P.status = 1")
+			//->where("A.photo_id IS NULL")
+			//->where("P.contains_human =0" . $own_string )
+			//->where("P.sequence_id > 0")
+			//->where("P.sequence_num = 1" )
+			//->where("P.photo_id >= PSM.start_photo_id")
+			//->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+		
+		$q1->select("count(P.photo_id)")
+                        ->from("Photo P")
+                        ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+                        ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+                        //->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+                        ->where("P.status = 1")
+                        //->where("A.photo_id IS NULL")
+                        ->where("P.contains_human =0" . $own_string )
+                        //->where("P.sequence_id > 0")
+                        ->where("P.sequence_num = 1" )
+                        ->where("P.photo_id >= PSM.start_photo_id")
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+			->where("P.photo_id not in (select photo_id from Animal where person_id = " . (int)userID() . ")");
+
 		
 		$db->setQuery($q1); 
 		$num_rows = $db->loadResult();
@@ -4881,14 +4957,15 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 			->from("Photo P")
 			->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
 			->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-			->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
+			//->leftJoin("Animal A ON P.photo_id = A.photo_id AND A.person_id = " . (int)userID())
 			->where("P.status = 1")
-			->where("A.photo_id IS NULL")
+			//->where("A.photo_id IS NULL")
 			->where("P.contains_human =0" . $own_string )
-			->where("P.sequence_id > 0")
+			//->where("P.sequence_id > 0")
 			->where("P.sequence_num = 1" )
 			->where("P.photo_id >= PSM.start_photo_id")
-			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+			->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+			->where("P.photo_id not in (select photo_id from Animal where person_id = " . (int)userID() . ")");
 			
 		$db->setQuery($q2, $row_num, 1); // LIMIT 1 sarting at the n = $row_num
 		
@@ -4940,19 +5017,36 @@ function chooseSingle ( $project_ids, $classify_own ) {
 	
 	$db->setQuery($q1, 0, 1); // LIMIT 1
 	*/
+	
+	// $q1->select("count(*)")
+        // ->from("Photo P")
+        // ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
+        // ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
+        // ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        // ->where("P.status = 1")
+                // ->where("A.photo_id IS NULL")
+        // ->where("P.contains_human =0" . $own_string )
+            // ->where("P.sequence_id > 0")
+                // ->where("P.sequence_num = 1" )
+                // ->where("P.photo_id >= PSM.start_photo_id")
+                // ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)");
 
-	$q1->select("count(*)")
+
+
+	$q1->select("count(P.photo_id)")
         ->from("Photo P")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
         ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        //->leftJoin("Animal A ON P.photo_id = A.photo_id" )
         ->where("P.status = 1")
-		->where("A.photo_id IS NULL")
+		//->where("A.photo_id IS NULL")
         ->where("P.contains_human =0" . $own_string )
-	    ->where("P.sequence_id > 0")
+	    //->where("P.sequence_id > 0")
 		->where("P.sequence_num = 1" )
 		->where("P.photo_id >= PSM.start_photo_id")
-		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)");
+		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+		->where("P.photo_id not in (select photo_id from Animal)");
+		//->where("P.photo_id not in (select photo_id from Animal where person_id = " . (int)userID() . ")");
 		
 	$db->setQuery($q1); 
 	$num_rows = $db->loadResult();
@@ -4969,14 +5063,15 @@ function chooseSingle ( $project_ids, $classify_own ) {
         ->from("Photo P")
         ->innerJoin("Project PROJ ON PROJ.project_id in (".$project_id_str.")")
         ->innerJoin("ProjectSiteMap PSM ON PSM.site_id = P.site_id AND PSM.project_id = PROJ.project_id")
-        ->leftJoin("Animal A ON P.photo_id = A.photo_id" )
+        //->leftJoin("Animal A ON P.photo_id = A.photo_id" )
         ->where("P.status = 1")
-		->where("A.photo_id IS NULL")
+		//->where("A.photo_id IS NULL")
         ->where("P.contains_human =0" . $own_string )
-	    ->where("P.sequence_id > 0")
+	    //->where("P.sequence_id > 0")
 		->where("P.sequence_num = 1" )
 		->where("P.photo_id >= PSM.start_photo_id")
-		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)");
+		->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+	->where("P.photo_id not in (select photo_id from Animal)");
 	
 	$db->setQuery($q2, $row_num, 1); // LIMIT 1 sarting at the n = $row_num
 	
@@ -5199,7 +5294,8 @@ function getSequenceDetails($photo_id) {
     $query = $db->getQuery(true);
     $query->select("photo_id, site_id, dirname, filename, sequence_id, sequence_num, prev_photo, next_photo, person_id from Photo P")
 		->where("P.sequence_id = " . $sequenceId )
-		->order("P.sequence_num");
+		->order("P.sequence_num")
+		->setLimit("20");
     $db->setQuery($query);
 	
     $sequenceDetails = $db->loadAssocList();
@@ -5291,6 +5387,12 @@ function sequencePhotos($upload_id){
 	$isAudio = isAudio($photo_id);
 	$isVideo = isVideo($photo_id);
 	
+	// Images are not available for human classification until screened by AI, but video is not screened.
+	$newPhotoStatus = 0;
+	if ( $isVideo or $isAudio ) {
+		$newPhotoStatus = 1;
+	}
+	
 	if($prev_dateTime !== null){
       $diff = $dateTime->diff($prev_dateTime);
       print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
@@ -5331,6 +5433,7 @@ function sequencePhotos($upload_id){
 	    $fields->prev_photo = $prev_photo_id;
 	    $fields->sequence_num = $seq_num;
 	    $fields->photo_id = $photo_id;
+		//$fields->status = $newPhotoStatus; 
 	    print "updating ";
 	    print_r($fields);
 	    codes_updateObject($fields, 'photo');
@@ -5350,6 +5453,11 @@ function sequencePhotos($upload_id){
       else {  // end current sequence
 	    // at this point we want to check whether the previous photo was sequenced.  If no, then it is a single photo, not 
 		// part of a burst.  So we want to give it a sequence_id but no prev or next photo.
+		
+		// Check what file type the previous photo was as need to set status so that isn't screened by AI
+		$prevIsAudio = isAudio($prev_photo_id);
+		$prevIsVideo = isVideo($prev_photo_id);
+	
 		print "<br/><br/>Photos are not close so now on next sequence<br/>";
 		$seq_num = 1; // as we're just starting a new sequence??
 	    // Previous one was a loner if it was first in a sequence and this is not close enough
@@ -5372,6 +5480,11 @@ function sequencePhotos($upload_id){
 	      $fields->sequence_id = $sequence_id;
 	      $fields->sequence_num = 1;
 	      $fields->photo_id = $prev_photo_id;
+		  
+		  if ( $prevIsVideo or $prevIsAudio ) {
+			  $fields->status = 1;
+		  }
+		  
 	      print "updating ";
 	      print_r($fields);
 	      codes_updateObject($fields, 'photo');
@@ -5396,6 +5509,11 @@ function sequencePhotos($upload_id){
 	        $fields->sequence_id = $sequence_id;
 	        $fields->sequence_num = 1;
 	        $fields->photo_id = $photo_id;
+			
+			if ( $isVideo or $isAudio ) {
+				$fields->status = 1;
+			}
+		  
 	        print "updating ";
 	        print_r($fields);
 	        codes_updateObject($fields, 'photo'); 
@@ -5422,13 +5540,21 @@ function sequencePhotos($upload_id){
 	      $seq_num = 1; // as we're just starting a new sequence
 	      //print "<br/>end of adding sole photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
 		  
+		  $prevIsAudio = isAudio($prev_photo_id);
+		  $prevIsVideo = isVideo($prev_photo_id);
+		
 		  canEdit( $prev_photo_id, 'photo', 1);
           //canEdit( $photo_id, 'photo' , 1);		
 		  $fields = new StdClass();
 	      $fields->sequence_id = $sequence_id;
 	      $fields->sequence_num = 1;
 	      $fields->photo_id = $prev_photo_id;
-	      print "updating photo ";
+		  
+		  if ( $prevIsVideo or $prevIsAudio ) {
+		    $fields->status = 1;
+		  }
+		  
+		  print "updating photo ";
 	      print_r($fields);
 	      codes_updateObject($fields, 'photo');
 		  //print "<br/>end of updating sole photo seq_num = $seq_num, prev_seq_num = $prev_seq_num<br/>";
@@ -5438,15 +5564,15 @@ function sequencePhotos($upload_id){
   }
   
   // This is the catch all for the ones that have not been sequenced.  
-  $query = $db->getQuery(true);
-  $fields = array('sequence_id = -1','uploaded=uploaded');
-  $conditions = array('upload_id = '.(int)$upload_id, 'sequence_id = 0');
-  $query->update("Photo")
-    ->set($fields)
-    ->where($conditions);
+  // $query = $db->getQuery(true);
+  // $fields = array('sequence_id = -1','uploaded=uploaded');
+  // $conditions = array('upload_id = '.(int)$upload_id, 'sequence_id = 0');
+  // $query->update("Photo")
+    // ->set($fields)
+    // ->where($conditions);
   
-  $db->setQuery($query);
-  $db->execute();
+  // $db->setQuery($query);
+  // $db->execute();
   
 }
 
@@ -7268,67 +7394,92 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 		  $problem = true;
 		}
 		else {
-
-			// Create a BiodivFile object
-			$biodivFile = new BiodivFile ( $tmpName, $clientName, $treatAsAudio );
-
-			$taken = $biodivFile->takenDate();
-			$exif = $biodivFile->exif();
-			$is_audio = $biodivFile->isAudio();
-
-			//error_log ( "Values from BiodivFile: ");
-			//error_log ( "taken = " . $taken );
-			//error_log ( "is_audio = " . $is_audio );
-
-			if ( $taken == null ) {
-				addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
+			
+			$db = JDatabase::getInstance(dbOptions());
+			$query = $db->getQuery(true)
+				->select("count(*)")->from("Photo P")
+				->where("P.site_id = " . $site_id)
+				->where("P.filename = " . $db->quote($newName) );
+			$db->setQuery($query);
+			$numExisting = $db->loadResult();
+			
+			if ( $numExisting > 0 ) {
+				
+				addMsg("warning", "File already uploaded for this site: $clientName");
 				$problem = true;
 			}
 			else {
 
-				$exists = JFile::exists($tmpName);
-				$success=	JFile::upload($tmpName, $newFullName);
-				if(!$success){
-					addMsg("error","File upload unsuccessful for $clientName");
+				// Create a BiodivFile object
+				$biodivFile = new BiodivFile ( $tmpName, $clientName, $treatAsAudio );
+
+				$taken = $biodivFile->takenDate();
+				$exif = $biodivFile->exif();
+				$is_audio = $biodivFile->isAudio();
+
+				//error_log ( "Values from BiodivFile: ");
+				//error_log ( "taken = " . $taken );
+				//error_log ( "is_audio = " . $is_audio );
+
+				if ( $taken == null ) {
+					addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
 					$problem = true;
-				}	
+				}
 				else {
 
-					$struc = 'photo';
-
-					$photoFields = new stdClass();
-					$photoFields->filename = $newName;
-					$photoFields->upload_filename = $clientName;
-					$photoFields->dirname = $dirName;
-					$photoFields->site_id = $site_id;
-					$photoFields->upload_id = $upload_id;
-					$photoFields->person_id = userID();
-					$photoFields->taken = $taken;
-					$photoFields->size = $fileSize;
-					$photoFields->exif = $exif;
-
-					// If we have file splitting for audio, then write to different table.
-					$splitAudio = getSetting("split_audio") == "yes";
-
-					//error_log ( "split_audio setting = " . $splitAudio );
-					//error_log ( "is_audio = " . $is_audio );
-					if ( $is_audio && $splitAudio ) {
-						$struc = 'origfile';
-					}
-
-					// For all avi files need to convert to MP4
-					if ( $ext == 'avi' ) {
-						$struc = 'origfile';
-					}
-
-					//error_log ( "Inserting object for struc " . $struc );
-					if(codes_insertObject($photoFields, $struc)){
-					  addMsg('success', "Uploaded $clientName");
-					}
-					else {
-						// Remove files if the database insert failed
-						JFile::delete($newFullName);
+					$exists = JFile::exists($tmpName);
+					$success=	JFile::upload($tmpName, $newFullName);
+					if(!$success){
+						addMsg("error","File upload unsuccessful for $clientName");
 						$problem = true;
+					}	
+					else {
+						
+						
+
+						$struc = 'photo';
+
+						$photoFields = new stdClass();
+						$photoFields->filename = $newName;
+						$photoFields->upload_filename = $clientName;
+						$photoFields->dirname = $dirName;
+						$photoFields->site_id = $site_id;
+						$photoFields->upload_id = $upload_id;
+						$photoFields->person_id = userID();
+						$photoFields->taken = $taken;
+						$photoFields->size = $fileSize;
+						$photoFields->exif = $exif;
+
+						// If we have file splitting for audio, then write to different table.
+						$splitAudio = getSetting("split_audio") == "yes";
+
+						//error_log ( "split_audio setting = " . $splitAudio );
+						//error_log ( "is_audio = " . $is_audio );
+						if ( $is_audio && $splitAudio ) {
+							$struc = 'origfile';
+						}
+
+						// For all avi files need to convert to MP4
+						if ( $ext == 'avi' ) {
+							$struc = 'origfile';
+						}
+
+						//error_log ( "Inserting object for struc " . $struc );
+						$newId = codes_insertObject($photoFields, $struc);
+						if($newId){
+							
+							addMsg('success', "Uploaded $clientName");
+		
+							// Add the file to the Conservation AI queue
+							if ( $struc == 'photo' ) {
+								addToAIQueue('CAI', $newId);
+							}
+						}
+						else {
+							// Remove files if the database insert failed
+							JFile::delete($newFullName);
+							$problem = true;
+						}
 					}
 				}
 			}
@@ -7386,6 +7537,8 @@ function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
 	
 	if($photoId){
 		error_log("Success writing split file " . $newFile . ", photo_id = " . $photoId );
+		
+		addToAIQueue('CAI', $photoId);
 	}
 	else {
 		error_log("Failed writing split file " . $newFile );
@@ -7911,6 +8064,59 @@ function calculateTestScore ( $topicId, $seqenceId, $userSpecies ) {
 				"userSpecies"=>$userSpecies, 
 				"expertPrimarySpecies"=>$correctPrimaryIds, 
 				"expertSecondarySpecies"=>$correctSecondaryIds );
+	
+}
+
+function addToAIQueue($aiType, $photoId, $priority = 5) {
+	
+	if ( $aiType == 'CAI' && is_numeric($photoId) ) {
+		
+		$requireCAI = getSetting("conservation_ai") == "yes";
+		
+		if ( $requireCAI ) {
+			
+			$db = JDatabase::getInstance(dbOptions());
+
+			$aiFields = new StdClass();
+			$aiFields->photo_id = $photoId;
+			$aiFields->ai_type = 'CAI';
+			$aiFields->priority = $priority;
+			$success = $db->insertObject("AIQueue", $aiFields);
+			if(!$success){
+				error_log ( "AIQueue insert failed" );
+			}
+			
+		}
+	}
+	
+}
+
+
+function addUploadToAIQueue($aiType, $uploadId, $priority = 5) {
+	
+	if (  (strCmp($aiType, "CAI") == 0) && is_numeric($uploadId) ) {
+		
+		$requireCAI = getSetting("conservation_ai") == "yes";
+		
+		if ( $requireCAI ) {
+			
+			$db = JDatabase::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true);
+			$query->select("photo_id")->from("Photo P")
+				->where("upload_id = " . $uploadId )
+				->where("status not in (4,5,7)")
+				->where("photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($aiType).") ");
+			$db->setQuery($query);
+			$photoIds = $db->loadColumn();
+			
+			foreach ( $photoIds as $photoId ) {
+				
+				addToAIQueue($aiType, $photoId, $priority);
+				
+			}
+		}
+	}
 	
 }
 	

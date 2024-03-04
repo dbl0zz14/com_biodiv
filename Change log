@@ -1,3 +1,21 @@
+# 1/3/24 - Version 3.8.0
+* Consolidation of various patches
+* Remove comments from BiodivAuth
+* Add (AI) classify and rule of thumb to BiodivHelper
+* Restrict reports to valid Photo table status (1 or 2)
+* Set s3_status to 2 when S3 upload fails
+* Add new uploads to AIQueue
+* Add report button so users can report inappropriate media
+* Fix a google maps issue
+* Set NBN extract license dependent on taken date
+* Add links to EmailOctopus
+* Add CamTrapDP format extract view and database config
+
+# 23/5/23 - Version 3.7.3
+* Conservation AI release (patch)
+* Queue and send requests to Conservation AI
+* Process received responses for unclassified, calibration poles and humans
+
 # 23/5/23 - Version 3.7.2
 * BES phase 3, final changes
 * BES phase 3, email user on sigup reject

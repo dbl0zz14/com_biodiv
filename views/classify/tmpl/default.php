@@ -20,6 +20,7 @@ if ( $this->photo_id ) {
   $document->addScriptDeclaration("BioDiv.east = ".$this->location->getEast().";");
   
   $document->addScriptDeclaration("BioDiv.eggsId = ".$this->eggsId.";");
+  $document->addScriptDeclaration("BioDiv.nestId = ".$this->nestId.";");
 }
 
 if ( $this->projectPage ) {
@@ -184,7 +185,7 @@ print '</div> <!-- /.photoCarousel -->';
 </div> <!-- /.row -->
 
 <div class='row'>
-<div id='classify_tags' class='col-md-10 pull-left'>
+<div id='classify_tags' class='col-md-9 pull-left'>
 
 <?php  
 
@@ -215,13 +216,22 @@ if ( $animals ) {
     $nonFavDisp = 'block';
   }
 
+
+print "<div class='pull-right col-md-3'> ";
+print "<div>";
+print "  <button  id='report_media' type='button' class='btn btn-warning pull-right' > ";
+print "  <span class='fa fa-flag-o fa-2x'></span></button>";
+print "</div>";
+print "<div id='like_image_container' > ";
+print "  <button  id='favourite' type='button' class='btn btn-warning pull-right'  ";
+print "  style='display:".$favDisp."'><span class='fa fa-thumbs-up fa-2x'></span></button> ";
+print "  <button id='not-favourite' type='button' class='btn btn-warning pull-right' ";
+print "  style='display:".$nonFavDisp."'><span class='fa fa-thumbs-o-up fa-2x'></span></button> ";
+print "</div>"; // like_image_container
+print "</div> <!-- /.col-md-2 --> ";
+
 ?>
-<div id='like_image_container' class='pull-right col-md-2'>
-  <button  id='favourite' type='button' class='btn btn-warning pull-right' 
-  <?php print "style='display:$favDisp'";?>><span class='fa fa-thumbs-up fa-2x'></span></button>
-  <button id='not-favourite' type='button' class='btn btn-warning pull-right'
-  <?php print "style='display:$nonFavDisp'";?>><span class='fa fa-thumbs-o-up fa-2x'></span></button>
-</div> <!-- /.col-md-6 -->
+
 
 </div> <!-- /.row -->
 </div> <!-- /.col-md-12 -->
@@ -343,6 +353,42 @@ print "</div>";
   </div>
 </div>
 
+
+<div id="report_media_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog "  style='width: 60%;'>
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> <?php print JText::_("COM_BIODIV_CLASSIFY_REPORT_MEDIA"); ?> </h4>
+      </div>
+      <div class="modal-body">
+		
+		<h5> <?php print JText::_("COM_BIODIV_CLASSIFY_REPORT_MEDIA_EXPLAIN"); ?> </h5>
+		
+		<form id='reportMediaForm' role='form'>
+		
+		<input id='currSequenceId' type='hidden' name='sequence_id' value='<?php print $this->sequence_id; ?>'/>
+		
+		<div class="form-group">
+		<label for="report_media_notes"><?php print JText::_("COM_BIODIV_CLASSIFY_REPORT_MEDIA_NOTES"); ?></label>
+		<textarea class="form-control" id="report_media_notes" name="report_media_notes" rows="2" maxlength='200' ></textarea>
+		</div>
+		
+      </div>
+	  <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal"><?php print JText::_("COM_BIODIV_CLASSIFY_CANCEL"); ?></button>
+		<button type='button' class='btn btn-success' data-dismiss="modal" id='report_media_save'><?php print JText::_("COM_BIODIV_CLASSIFY_SUBMIT")?></button>
+	    </form>
+      </div>
+	  	  
+    </div>
+
+  </div>
+</div>
+
+
 <div class="modal fade" id="classify_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
@@ -426,12 +472,13 @@ foreach($this->classifyInputs as $formInput){
 $mapOptions = mapOptions();
 $key = $mapOptions['key'];
 
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
 //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/classify.js", true, true);
+JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key . "&callback=initMap");
+
 ?>
 
 

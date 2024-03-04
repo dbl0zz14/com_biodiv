@@ -59,10 +59,10 @@ class BioDivViewProjecthome extends JViewLegacy
 	$this->displayOptions = array_column($displayOptionArray, 'option_name');
 	
 	if ( $this->includePrivate ) {
-		$this->subProjects = getSubProjectsById($this->project_id, false);
+		$this->subProjects = getSubProjectsById($this->project_id, true);
 	}
 	else {
-		$this->subProjects = getSubProjectsById($this->project_id, true);
+		$this->subProjects = getSubProjectsById($this->project_id, false);
 	}
 	
 	// Remove this project from the sub projects list...

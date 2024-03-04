@@ -845,6 +845,56 @@ class BioDivController extends JControllerLegacy
     parent::display();
   }
   
+
+  function add_report_media(){
+	
+	error_log ( "add_report_media called" );
+	
+    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+	$input = $app->input;
+	
+	$sequenceId = $input->getInt('sequence_id', 0);
+	$notes = $input->getString('report_media_notes', 0);
+		
+	error_log ( "add_report_media got sequence_id = " . $sequenceId );
+	error_log ( "add_report_media got notes = " . $notes );
+	
+	$fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		
+		error_log ( "add_report_media person_id found" );
+		
+		$db = JDatabase::getInstance(dbOptions());
+				
+		$fields->sequence_id = $sequenceId;
+		$fields->notes = $notes;
+		
+		$success = $db->insertObject("ReportedMedia", $fields);
+		
+		error_log ( "add_report_media ReportedMedia row inserted" );		
+		
+		if(!$success){
+			error_log ( "ReportedMedia insert failed" );
+		}
+
+		$updateFields = new stdClass();
+		$updateFields->status = 13;
+		$updateFields->sequence_id = $sequenceId;
+		
+		$success = $db->updateObject("Photo", $updateFields, 'sequence_id');
+		
+		if(!$success){
+			error_log ( "Photo status update failed" );
+		}		
+    }
+		
+  }
+  
+
   function kiosk_timeout_v1() {
 	
 	$app = JFactory::getApplication();

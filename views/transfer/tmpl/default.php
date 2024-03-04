@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 print '<h1>Transferring ' . count($this->photos) . ' files from Photo table to S3 bucket ' . get_mammalweb_bucket() . '</h1>';
 
 if ( !$this->photos ) {
-	print "<h2>No photo list - perhaps you don't have permission for this or have not logged in</h2>";
+	print "<h2>No photo list - perhaps all have been transferred, you don't have permission for this or have not logged in</h2>";
 }
 else {
 	foreach ( $this->photos as $photo_id=>$photo_details ) {
@@ -28,7 +28,8 @@ else {
 			print ( "<br>Photo " . $photo_id . " post transfer actions complete (s3_status update plus file removal)" );
 		}
 		catch(Exception $e) {
-			print ( "br>" . $e->getMessage() );
+			print ( "<br>" . $e->getMessage() );
+			post_s3_upload_fail ( $photo_id, $file );
 		}
 	}
 }
@@ -37,7 +38,7 @@ print '<h1>Transfer complete</h1>';
 print '<h1>Transferring ' . count($this->originalFiles) . ' files from OriginalFiles table to S3 bucket ' . get_mammalweb_bucket() . '</h1>';
 
 if ( !$this->originalFiles ) {
-	print "<h2>No original files list - perhaps you don't have permission for this or have not logged in</h2>";
+	print "<h2>No original files list - perhaps all have been transferred, you don't have permission for this or have not logged in</h2>";
 }
 else {
 	foreach ( $this->originalFiles as $of_id=>$of_details ) {
@@ -53,7 +54,9 @@ else {
 			print ( "<br>Original file " . $of_id . " post transfer actions complete (s3_status update plus file removal)" );
 		}
 		catch(Exception $e) {
-			print ( "br>" . $e->getMessage() );
+			print ( "<br>" . $e->getMessage() );
+			post_s3_upload_fail_orig ( $of_id, $file );
+			
 		}
 	}
 }

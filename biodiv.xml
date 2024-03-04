@@ -9,7 +9,7 @@
   <copyright></copyright>
   <license></license>
   <!--  The version string is recorded in the components table -->
-  <version>3.7.2</version>
+  <version>3.8.0</version>
   <!-- The description is optional and defaults to the name -->
   <description>Upload and classify images, video and audio from camera traps or other recording devices</description>
  
@@ -46,6 +46,9 @@
 	<filename>KioskSpecies.php</filename>
 	<filename>BiodivTransifex.php</filename>
 	<filename>BiodivRecaptcha.php</filename>
+	<filename>BiodivConservationAI.php</filename>
+	<filename>BiodivOctopus.php</filename>
+	<filename>BiodivAnalysis.php</filename>
 	<folder>views</folder>
 	<folder>Biodiv</folder>
 	<folder>libraries</folder>
