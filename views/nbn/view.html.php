@@ -145,8 +145,8 @@ class BioDivViewNbn extends JViewLegacy
 						'V.num_votes/V.num_users, '.
 						'CONCAT(V.num_votes, " of ", V.num_users, ", confidence = ", V.num_votes/V.num_users), '.
 						'CASE
-							WHEN V.num_users=1 THEN "Unconfirmed, not reviewed"
-							WHEN V.num_users>1 and V.num_votes/V.num_users>0.5 THEN "Accepted, considered correct"
+							WHEN V.num_users=1 THEN "Unconfirmed - not reviewed"
+							WHEN V.num_users>1 and V.num_votes/V.num_users>0.5 THEN "Accepted - considered correct"
 							ELSE "Rejected, low confidence"
 						END AS status, '.
 						'CASE
@@ -259,8 +259,8 @@ class BioDivViewNbn extends JViewLegacy
 							'N.id_by, '.
 							'40, '.
 							'"WGS84", '.
-							'N.lat, '.
-							'N.lon, '.
+							'ROUND(N.lat,3), '.
+							'ROUND(N.lon,3), '.
 							'N.site_id, '.
 							'CONCAT("MammalWeb site number ", N.site_id), '.
 							'"MachineObservation", '.
