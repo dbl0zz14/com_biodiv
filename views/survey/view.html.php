@@ -34,8 +34,6 @@ class BioDivViewSurvey extends JViewLegacy
 	$this->surveyId = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.survey', 'survey', 0);
 		
-	error_log ( "survey id = " . $this->surveyId );
-	
 	$this->haveConsent = BiodivSurvey::haveConsent ( $person_id, $this->surveyId );
 	
 	if ( $this->haveConsent ) {
@@ -43,9 +41,6 @@ class BioDivViewSurvey extends JViewLegacy
 		$survey = new BiodivSurvey ( $this->surveyId );
 		
 		$this->sections = $survey->getSections();
-		
-		$err_str = print_r ( $this->sections, true );
-		error_log ( $err_str );
 		
 		$this->questions = $survey->getQuestions();
 	}

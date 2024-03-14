@@ -87,7 +87,17 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	
 	$this->access_level = $this->project['access_level'];
+	
+	// Check whether there's a survey or pop up needed on the project page
+	$this->generateSurvey = false;
+	if ( getSetting("survey") === "yes" ) {
 		
+		$surveyOpts = getSingleProjectOptions($this->project_id, 'projectsurvey');
+		
+		if ( count($surveyOpts) > 0 ) {
+			$this->generateSurvey = true;
+		}
+	}
 
     // Display the view
     parent::display($tpl);

@@ -72,6 +72,8 @@ class BiodivReport {
 		
 		$this->pageLength = BiodivReport::PAGE_LENGTH;
 		
+		$this->userIsAdmin = false;
+		
 		if ( $reportId == null ) {
 			
 			//error_log ("New report, creating Report row");
@@ -80,6 +82,13 @@ class BiodivReport {
 			$dateStr = date("Ymd_His",$t);
 			
 			if ( $this->projectId ) {
+				
+				$myAdminProjects = myAdminProjects();
+				
+				if ( array_key_exists($this->projectId, $myAdminProjects) ) {
+					$this->userIsAdmin = true;
+				}
+				
 				$projectDetails = codes_getDetails ( $this->projectId, 'project' );
 			
 				// Replace _s for clarity of filename
@@ -194,6 +203,9 @@ class BiodivReport {
 				case "BADGECOMPLETE":
 					$this->generateLevelActivityData ();
 					break;
+				case "NHMPSUBSCRIBE":
+					$this->generateNHMPSubscribeData ();
+					break;	
 				default:
 					error_log ("No report type found for " . $this->reportTypeName );
 			}
@@ -2489,6 +2501,51 @@ private function generateUserSequenceData () {
 
 	}
 		
+	
+	// Get resources uploaded
+	private function generateNHMPSubscribeData () {
+		
+		// Delete any existing data 
+		$this->removePreviousRows();
+		
+		if ( $this->userIsAdmin ) {
+		
+			$options = dbOptions();
+			$db = JDatabaseDriver::getInstance($options);
+			
+			$options = dbOptions();
+			$userDb = $options['userdb'];
+			$prefix = $options['userdbprefix'];
+			
+			$db = JDatabase::getInstance(dbOptions());
+			
+			$query1 = null;
+			
+			$query1 = $db->getQuery(true)
+				->select( "" . $this->reportId . " as report_id, CONCAT_WS(',', DATE(UC.timestamp), U.name, U.email) as report_csv")
+				->from("UserConsent UC")
+				->innerJoin($userDb . "." . $prefix ."users U on UC.person_id = U.id")
+				->where("consent_given = 1")
+				->order("UC.timestamp DESC");
+			
+			error_log("query1 created: " . $query1->dump() );
+			
+			$queryInsert = $db->getQuery(true)
+				->insert('ReportRows')
+				->columns($db->qn(array('report_id','row_csv')))
+				->values($query1);
+			
+			//error_log("queryInsert created: " . $queryInsert->dump());
+			
+			$db->setQuery($queryInsert);
+			
+			//error_log("About to execute");
+
+			$db->execute();
+		}
+
+	}
+	
 	
 	// // Standalone report creation utility function
 	// public static function createReportFile ( $folder, $filename, $headings, $rows ) {

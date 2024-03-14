@@ -133,98 +133,11 @@ if ( $isCameraWebsite ) {
 
 <?php
 
-// New version using class
-if ( $this->survey != null ) {
-	print '<div id="survey_modal" class="modal fade" role="dialog">';
-	print '  <div class="modal-dialog" style="width:95%;">';
-
-	print '    <!-- Modal content-->';
-	print '    <div class="modal-content">';
-	print '      <div class="modal-header">';
-	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	//print '        <h4 class="modal-title">'.$this->surveyHook.'</h4>';
-	print '      </div>';
-	print '      <div class="modal-body">';
-	
-	print '      <div class="panel-group">';
-	
-	print '      <div class="panel panel-warning">';
-	print '          <div class="panel-body">';
-	print $this->surveyIntro;
-	print '          </div>';
-	print '      </div>'; // panel
-	
-	print '      <div class="panel panel-warning">';
-	print '          <div class="panel-heading">';
-  	print '              <div class="row">';
-    print '      	         <div class="col-md-10">'.JText::_("COM_BIODIV_STATUS_PARTI_INFO").'</div>';
-    print '      	         <div id="show_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_SHOW_PARTIC").'"><i class="fa fa-angle-down fa-lg"></i></div>';
-    print '      	         <div id="hide_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_HIDE_PARTIC").'"><i class="fa fa-angle-up fa-lg"></i></div>';
-	print '              </div>';
-	print '          </div>';
-	
-	print '          <div id="partic_info" class="panel-body">';
-	print $this->participantInfo;
-	print '          </div>';
-	print '      </div>'; //panel
-	
-	print '      <div class="panel panel-warning">';
-	print '          <div class="panel-heading">';
-  	print            $this->consentHeading;
-	print '          </div>';
-	
-	print '          <div class="panel-body">';
-	
-	if ( $this->requireSurveyConsent ) {
-		print $this->consentInstructions;
-	}
-	else {
-		print '<p>'.JText::_("COM_BIODIV_STATUS_ALREADY_CONSENTED").'</p>';
-	}
-	print $this->consentText;
-	
-	print '          <form id="take_survey" action = "' . BIODIV_ROOT . '" method = "GET">';
-	
-	if ( $this->requireSurveyConsent ) {
-		
-		print '          <div id="require_consent">';
-		print '          <h4 id ="consent_reminder" class="text-danger">' . JText::_("COM_BIODIV_STATUS_INDICATE_CONSENT") . '</h4>';
-			
-		print '          <div class="checkbox">';
-		print '          <label><input id="consent_checkbox" type="checkbox" name="consent" value="1">'.JText::_("COM_BIODIV_STATUS_CONSENT_TEXT") . '</label>';
-		print '          </div>';
-		print '          </div>';
-	}
-  
-    print '          </div>';
-	print '      </div>'; // panel
-	
-	print '      </div>'; // panel-group
-	
-	print '      </div>'; // modal body
-	print '      	<div class="modal-footer">';
-	print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
-	print '              <input type="hidden" name="task" value="take_survey"/>';
-    print '              <input type="hidden" name="survey" value="'.$this->surveyId.'"/>';
-	
-	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button  class="btn btn-warning btn-block" type="submit">'.JText::_("COM_BIODIV_STATUS_CONTRIBUTE").'</button></div>';
-	
-	print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" >'.JText::_("COM_BIODIV_STATUS_MAYBE_LATER").'</button></div>';
-	
-	print '          </form>';
-	print '          </div>';
-
-	
-	
-	print '    </div>';
-
-	print '  </div>';
-	print '</div>';
-}
-
-
+BiodivSurvey::generateSurveyModal();
 
 
 JHTML::script("com_biodiv/status.js", true, true);
+JHTML::script("com_biodiv/triggersurvey.js", true, true);
+
 ?>
 

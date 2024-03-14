@@ -23,6 +23,9 @@ if ( $this->photo_id ) {
   $document->addScriptDeclaration("BioDiv.nestId = ".$this->nestId.";");
 }
 
+$document->addScriptDeclaration("BioDiv.classifyProject = ".$this->project_id.";");
+
+
 if ( $this->projectPage ) {
 	print '<div class="col-md-12"><a href="'.$this->projectPage.'" class="btn btn-primary">'.JText::_("COM_BIODIV_CLASSIFY_PROJECT_PAGE").'</a></div>';
 }
@@ -477,6 +480,7 @@ JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
 JHTML::script("com_biodiv/classify.js", true, true);
+JHTML::script("com_biodiv/userchoice.js", true, true);
 JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key . "&callback=initMap");
 
 ?>

@@ -848,25 +848,18 @@ class BioDivController extends JControllerLegacy
 
   function add_report_media(){
 	
-	error_log ( "add_report_media called" );
-	
-    //    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+	//    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
     $app = JFactory::getApplication();
 	$input = $app->input;
 	
 	$sequenceId = $input->getInt('sequence_id', 0);
 	$notes = $input->getString('report_media_notes', 0);
 		
-	error_log ( "add_report_media got sequence_id = " . $sequenceId );
-	error_log ( "add_report_media got notes = " . $notes );
-	
 	$fields = new stdClass();
     $fields->person_id = userID();
 	
 	// Only do the work if user is logged in
 	if ( $fields->person_id ) {
-		
-		error_log ( "add_report_media person_id found" );
 		
 		$db = JDatabase::getInstance(dbOptions());
 				
@@ -874,8 +867,6 @@ class BioDivController extends JControllerLegacy
 		$fields->notes = $notes;
 		
 		$success = $db->insertObject("ReportedMedia", $fields);
-		
-		error_log ( "add_report_media ReportedMedia row inserted" );		
 		
 		if(!$success){
 			error_log ( "ReportedMedia insert failed" );
@@ -891,6 +882,13 @@ class BioDivController extends JControllerLegacy
 			error_log ( "Photo status update failed" );
 		}		
     }
+		
+  }
+  
+  
+  function add_user_choice(){
+	
+	addUserChoice();
 		
   }
   
@@ -1513,84 +1511,32 @@ class BioDivController extends JControllerLegacy
   
   
 
-  function sequence_photos(){
-    $app = JFactory::getApplication();
-    if($upload_id = $app->getUserStateFromRequest("com_biodiv.upload_id", "upload_id", 0)){
-      sequencePhotos($upload_id);
-      print "Sequenced photos for $upload_id";
-    }
-  }
-  
-  
-  function no_survey () {
-	  
-	//error_log ( "no_survey called" );
-	
-	// Get all the form data and write to db
-	
-	$person_id = userID();
-	
-	// Only do the work if user is logged in
-	if ( $person_id ) {
+	function sequence_photos(){
 		$app = JFactory::getApplication();
-		$input = $app->input;
-		
-		$survey_id = $input->get("survey", 0, 'int');
-		//error_log ( "survey id: " . $survey_id );
-		
-		// Dissent added for all levels
-		$db = JDatabase::getInstance(dbOptions());
-		
-		// Add snapshot of the number of classifications at the time of consent
-		$query = $db->getQuery(true);
-		$query->select("count(distinct photo_id)")
-			->from( "Animal" )
-			->where( "person_id=".$person_id )
-			->where( "species != 97" );
-		$db->setQuery($query);
-		$numAnimals = $db->loadResult();
-	
-		$fields = new stdClass();
-		$fields->survey_id = $survey_id;
-		$fields->person_id = $person_id;
-		$fields->consent_given = 0;
-		$fields->num_animals = $numAnimals;
-		
-		$success = $db->insertObject("UserConsent", $fields);
-		
-		if(!$success){
-			$err_str = print_r ( $fields, true );
-			error_log ( "UserConsent insert failed: " . $err_str );
+		if($upload_id = $app->getUserStateFromRequest("com_biodiv.upload_id", "upload_id", 0)){
+			sequencePhotos($upload_id);
+			print "Sequenced photos for $upload_id";
 		}
-    }
-	
-  }
+	}
   
   
-  function take_survey () {
+	function no_survey () {
 	  
-	//error_log ( "take_survey called" );
-	
-	// Get all the form data and write to db
-	
-	$person_id = userID();
-	
-	// Only do the work if user is logged in
-	if ( $person_id ) {
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		//error_log ( "no_survey called" );
 		
-		$survey_id = $input->get("survey", 0, 'int');
-		//error_log ( "survey id: " . $survey_id );
+		// Get all the form data and write to db
 		
-		// Consent only added for top level surveys
-		$isFollowUp = BiodivSurvey::isFollowUp($survey_id);
+		$person_id = userID();
 		
-		if ( !$isFollowUp ) {
-		
-			$consent_given = $input->get("consent", 0, 'int');
-			//error_log ( "consent_given: " . $consent_given );
-		
+		// Only do the work if user is logged in
+		if ( $person_id ) {
+			$app = JFactory::getApplication();
+			$input = $app->input;
+			
+			$survey_id = $input->get("survey", 0, 'int');
+			//error_log ( "survey id: " . $survey_id );
+			
+			// Dissent added for all levels
 			$db = JDatabase::getInstance(dbOptions());
 			
 			// Add snapshot of the number of classifications at the time of consent
@@ -1602,11 +1548,10 @@ class BioDivController extends JControllerLegacy
 			$db->setQuery($query);
 			$numAnimals = $db->loadResult();
 		
-			
 			$fields = new stdClass();
 			$fields->survey_id = $survey_id;
 			$fields->person_id = $person_id;
-			$fields->consent_given = $consent_given;
+			$fields->consent_given = 0;
 			$fields->num_animals = $numAnimals;
 			
 			$success = $db->insertObject("UserConsent", $fields);
@@ -1616,108 +1561,109 @@ class BioDivController extends JControllerLegacy
 				error_log ( "UserConsent insert failed: " . $err_str );
 			}
 		}
-    }
-	
-	$this->input->set('view', 'survey');
-  
-    parent::display();
-  }
+	}
   
   
-  function add_response() {
+	function take_survey () {
+	
+		BiodivSurvey::addSurveyConsent();
+		
+		$this->input->set('view', 'survey');
+	  
+		parent::display();
+	}
+  
+  
+	function survey_consent_only () {
+	  
+		BiodivSurvey::addSurveyConsent();
+		
+	}
+  
+  
+	function add_response() {
 	
 	
-	//error_log ( "add_response called" );
-	
-	// Get all the form data and write to db
-	
-	$person_id = userID();
-	
-	// Only do the work if user is logged in
-	if ( $person_id ) {
+		$person_id = userID();
 		
-		$app = JFactory::getApplication();
-		$input = $app->input;
-		
-		$survey_id = $input->get("survey", 0, 'int');
-		//error_log ( "survey id: " . $survey_id );
-		
-		$db = JDatabase::getInstance(dbOptions());
-		
-		// Has the user already responded to this survey? - check
-		$query = $db->getQuery(true);
-		$query->select("count(distinct ur_id)")
-			->from( "UserResponse" )
-			->where( "person_id = " . $person_id )
-			->where( "survey_id = " . $survey_id );
-		$db->setQuery($query);
-		$numSurveyResponses = $db->loadResult();
-		
-		if ( $numSurveyResponses == 0 ) {
-		
+		// Only do the work if user is logged in
+		if ( $person_id ) {
+			
+			$app = JFactory::getApplication();
+			$input = $app->input;
+			
+			$survey_id = $input->get("survey", 0, 'int');
+			
+			$db = JDatabase::getInstance(dbOptions());
+			
+			// Has the user already responded to this survey? - check
+			$query = $db->getQuery(true);
+			$query->select("count(distinct ur_id)")
+				->from( "UserResponse" )
+				->where( "person_id = " . $person_id )
+				->where( "survey_id = " . $survey_id );
+			$db->setQuery($query);
+			$numSurveyResponses = $db->loadResult();
+			
+			if ( $numSurveyResponses == 0 ) {
+			
 
-			// Get the response types and option translations to refer to
-			$responseTypes = BiodivSurvey::getResponseTypes($survey_id);
-			$responseTrns = BiodivSurvey::getResponseTranslations();
-			
-			//$err_str = print_r ( $responseTypes, true );
-			//error_log ( "Response types: " . $err_str );
-			
-			// get the array of responses
-			$sqArr = $input->get('sq', 'xxx', 'array');
-			
-			//$err_str = print_r ( $sqArr, true );
-			//error_log ( "sq filtered as array: " . $err_str );
-			
-			
-			foreach ( $sqArr as $sq_id => $response ) {
+				// Get the response types and option translations to refer to
+				$responseTypes = BiodivSurvey::getResponseTypes($survey_id);
+				$responseTrns = BiodivSurvey::getResponseTranslations();
 				
-				$fields = new stdClass();
-				$fields->survey_id = $survey_id;
-				$fields->person_id = $person_id;
-				$fields->sq_id = $sq_id;
-				
-				$responseType = $responseTypes[$sq_id];
-				
-				if ( $responseType == BiodivSurvey::TEXT ) {
-					$fields->response_text = $sqArr[$sq_id];
-				}
-				else if ( $responseType == BiodivSurvey::OPTION ) {
-					$resp_id = $sqArr[$sq_id];
-					$fields->response_id = $resp_id;
-					$fields->response_text = $responseTrns[$resp_id];
-				}
-				else if ( $responseType == BiodivSurvey::SCALE10 ) {
-					$fields->response_num = $sqArr[$sq_id];
-					$fields->response_text = strval($sqArr[$sq_id]); 
-				}			
-				else if ( $responseType == BiodivSurvey::NUMBER ) {
-					$fields->response_num = $sqArr[$sq_id];
-					$fields->response_text = strval($sqArr[$sq_id]);
-				}
-				else if ( $responseType == BiodivSurvey::SCALE10NA ) {
-					$fields->response_num = $sqArr[$sq_id];
-					$fields->response_text = strval($sqArr[$sq_id]); 
-				}			
+				// get the array of responses
+				$sqArr = $input->get('sq', 'xxx', 'array');
 				
 				
-				$success = $db->insertObject("UserResponse", $fields);
-			
-				if(!$success){
-					$err_str = print_r ( $fields, true );
-					error_log ( "UserResponse insert failed: " . $err_str );
+				foreach ( $sqArr as $sq_id => $response ) {
+					
+					$fields = new stdClass();
+					$fields->survey_id = $survey_id;
+					$fields->person_id = $person_id;
+					$fields->sq_id = $sq_id;
+					
+					$responseType = $responseTypes[$sq_id];
+					
+					if ( $responseType == BiodivSurvey::TEXT ) {
+						$fields->response_text = $sqArr[$sq_id];
+					}
+					else if ( $responseType == BiodivSurvey::OPTION ) {
+						$resp_id = $sqArr[$sq_id];
+						$fields->response_id = $resp_id;
+						$fields->response_text = $responseTrns[$resp_id];
+					}
+					else if ( $responseType == BiodivSurvey::SCALE10 ) {
+						$fields->response_num = $sqArr[$sq_id];
+						$fields->response_text = strval($sqArr[$sq_id]); 
+					}			
+					else if ( $responseType == BiodivSurvey::NUMBER ) {
+						$fields->response_num = $sqArr[$sq_id];
+						$fields->response_text = strval($sqArr[$sq_id]);
+					}
+					else if ( $responseType == BiodivSurvey::SCALE10NA ) {
+						$fields->response_num = $sqArr[$sq_id];
+						$fields->response_text = strval($sqArr[$sq_id]); 
+					}			
+					
+					
+					$success = $db->insertObject("UserResponse", $fields);
+				
+					if(!$success){
+						$err_str = print_r ( $fields, true );
+						error_log ( "UserResponse insert failed: " . $err_str );
+					}
+					
 				}
 				
 			}
-			
 		}
+		
+		$this->input->set('view', 'surveydebrief');
+	  
+		parent::display();
+	
 	}
-	
-	$this->input->set('view', 'surveydebrief');
-  
-    parent::display();
-	
-  }
   
   function pair_ecologist () {
 	  

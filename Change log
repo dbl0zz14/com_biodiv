@@ -10,6 +10,8 @@
 * Set NBN extract license dependent on taken date
 * Add links to EmailOctopus
 * Add CamTrapDP format extract view and database config
+* Add user consent only survey
+* Add survey trigger from project page
 
 # 23/5/23 - Version 3.7.3
 * Conservation AI release (patch)

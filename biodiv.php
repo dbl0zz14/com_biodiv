@@ -8119,6 +8119,36 @@ function addUploadToAIQueue($aiType, $uploadId, $priority = 5) {
 	}
 	
 }
+
+
+function addUserChoice () {
+	
+	//    JRequest::checkToken() or die( JText::_( 'Invalid Token' ) );
+    $app = JFactory::getApplication();
+	$input = $app->input;
+	
+	$choice = $input->getString('choice', 0);
+	$value = $input->getInt('value', 0);
+		
+	$fields = new stdClass();
+    $fields->person_id = userID();
+	
+	// Only do the work if user is logged in
+	if ( $fields->person_id ) {
+		
+		$db = JDatabase::getInstance(dbOptions());
+				
+		$fields->choice = $choice;
+		$fields->value = $value;
+		
+		$success = $db->insertObject("UserChoice", $fields);
+		
+		if(!$success){
+			error_log ( "UserChoice insert failed" );
+		}	
+    }
+}
+
 	
 // Get an instance of the controller prefixed by BioDiv
 $controller = JControllerLegacy::getInstance('BioDiv');

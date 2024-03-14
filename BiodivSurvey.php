@@ -53,20 +53,37 @@ class BiodivSurvey {
 		$this->sections = null;
 		$this->questions = null;
 		$this->responseOptions = null;
+		
+		$this->consentOnly = false;
 	
+		$db = JDatabase::getInstance(dbOptions());
+		
+		// Check whether this is "consent only" pop up
+		$query = $db->getQuery(true);
+		$query->select("count(*)")
+			->from( "SurveyQuestions" )
+			->where( "survey_id = " . $surveyId ) ;
+		$db->setQuery($query);
+		$numQuestions = $db->loadResult();
+		
+		if ( $numQuestions == 0 ) {
+			$this->consentOnly = true;
+		}
+		
 		// Set language
 		$langObject = JFactory::getLanguage();
 		$this->languageTag = $langObject->getTag();
+		
 	}
 	
 	// Check whether a survey should be triggered for the given person and view. If yes, return the survey id.
-	public static function triggerSurvey ( $personId, $view ) {
+	private static function triggerSurvey ( $personId, $view ) {
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
 		// Get all the surveys for this view
 		$query = $db->getQuery(true);
-		$query->select("survey_id, number, type")
+		$query->select("survey_id, number, type, timing_data")
 			->from( "SurveyTiming" )
 			->where( "view=".$db->quote($view) )
 			->where( "number > -1" )
@@ -133,8 +150,6 @@ class BiodivSurvey {
 			
 			$currSurveyId = $survey['survey_id'];
 			
-			error_log ( "Checking survey id " . $currSurveyId );
-			
 			$topLevelSurvey = BiodivSurvey::topLevelSurvey($currSurveyId);
 			$isTopLevelSurvey = $currSurveyId == $topLevelSurvey;
 			
@@ -153,8 +168,6 @@ class BiodivSurvey {
 					// If type is CLASSIFICATION, compare with how many classifications the user has made.
 					else if ( $survey['type'] == 'CLASSIFICATION' ) {
 						
-						error_log ( "Type is CLASSIFICATION" );
-			
 						if ( $numAnimals >= $survey['number'] ) {
 							
 							// If this isn't the top level survey, ensure the user has done the number of classifications between original consent and now.
@@ -172,9 +185,6 @@ class BiodivSurvey {
 					// If type is DAY get the original survey and see whether we are beyond that number of days.
 					else if ( $survey['type'] == 'DAY' ) {
 						
-						error_log ( "Type is DAY" );
-			
-						
 						$today = date_create("now");
 						$firstDate = date_create($firstClassDate);
 						
@@ -182,8 +192,6 @@ class BiodivSurvey {
 						$interval = date_diff($today, $firstDate);
 					   
 						$diffDays =  $interval->format( '%a' );
-						
-						error_log ( "diff days = " . $diffDays );
 						
 						if ( $numAnimals > 0 && $diffDays >= $survey['number'] ) {
 							// If this isn't the top level survey, ensure the same number of days has passed since consent was given.
@@ -193,21 +201,14 @@ class BiodivSurvey {
 								return $survey['survey_id'];
 							}
 							else {
-								error_log ( "Checking days since consent was given" );
 								$consentDate = date_create($consentSurveys[$topLevelSurvey]['timestamp']);
 								$consentInterval = date_diff($today, $consentDate);
 								$consentDiffDays = $consentInterval->format( '%a' );
 						
-								error_log ( "consent diff days = " . $consentDiffDays );
-								
-								error_log ( "Checking days since last survey" );
 								$mostRecentSurveyDate = date_create($latestSurveyDate);
 								$surveyInterval = date_diff($today, $mostRecentSurveyDate);
 								$surveyDiffDays = $surveyInterval->format( '%a' );
 						
-								error_log ( "survey diff days = " . $surveyDiffDays );
-								
-								error_log ( "Checking days since last refusal" );
 								if ( $latestRefuseDate != null ) {
 									$mostRecentRefuseDate = date_create($latestRefuseDate);
 									$refuseInterval = date_diff($today, $mostRecentRefuseDate);
@@ -218,15 +219,39 @@ class BiodivSurvey {
 									$refuseDiffDays = 999;
 								}
 						
-								error_log ( "refuse diff days = " . $refuseDiffDays );
-								
 								if ( $consentDiffDays >= $survey['number'] && $surveyDiffDays > 0 && $refuseDiffDays > 0 ) {
 									return $survey['survey_id'];
 								}
 							}
 						}
-						
 					}	
+					else if ( $survey['type'] == 'NHMPSUBSCRIBE' ) {
+						
+						if ( !in_array($currSurveyId, $consentIds) ) {
+							
+							// How much classifying has been done for this project
+							$projectId = $survey['timing_data'];
+							$projectList = getSubProjectsById( $projectId );
+							$projectStr = implode(",", array_keys($projectList));
+							
+							$query = $db->getQuery(true);
+							
+							$query->select("count(*)")
+								->from( "UserChoice UC" )
+								->where ( "UC.value in (" . $projectStr . ")" )
+								->where( "UC.person_id = ".$personId );
+								
+							$db->setQuery($query);
+							
+							$numProjectClassns = $db->loadResult();
+							
+							if ( $numProjectClassns >= $survey['number'] ) {
+								
+								return $currSurveyId;
+								
+							}				
+						}							
+					}
 				}
 			}
 		}
@@ -255,8 +280,6 @@ class BiodivSurvey {
 				$topSurveyId = $prevSurveyId;
 			}
 		}
-		
-		error_log ( "Top level survey id: " . $topSurveyId );
 		
 		return $topSurveyId;
 	}
@@ -367,6 +390,13 @@ class BiodivSurvey {
 		return $this->surveyDetails['follow_up_to'] == null;
 	}
 	
+	
+	public function consentOnly() {
+		
+		return $this->consentOnly;
+	}
+	
+	
 	public function getSections () {
 		if ( $this->sections == null ) {
 			
@@ -409,8 +439,6 @@ class BiodivSurvey {
 		if ( $this->responseOptions == null ) {
 			
 			$responseTrns = BiodivSurvey::getResponseTranslations();
-			//$err_str = print_r ( $responseTrns, true );
-			//error_log ( "Response translations: " . $err_str );
 			
 			$db = JDatabase::getInstance(dbOptions());
 			
@@ -432,9 +460,6 @@ class BiodivSurvey {
 				$response_id = $option['response_id'];
 				$this->responseOptions[$sq_id][$response_id] = $responseTrns[$response_id] ;
 			}
-			
-			$err_str = print_r ( $this->responseOptions, true );
-			error_log ( "Response options: " . $err_str );
 			
 		}
 		return $this->responseOptions;
@@ -498,13 +523,205 @@ class BiodivSurvey {
 				
 			}
 			
-			$err_str = print_r ( $this->questions, true );
-			error_log ( "Survey questions by section:" . $err_str );
-			
 		}
 		
 		return $this->questions;
 	}
+	
+	public static function generateSurveyModal () {
+	
+		$personId = userID();
+		
+		$survey = null;
+		if ( $personId && getSetting("survey") === "yes" ) {
+			
+			$surveyId = self::triggerSurvey($personId, 'status');
+			
+			if ( $surveyId ) {
+				
+				$survey = new BiodivSurvey ( $surveyId );
+				
+				$surveyHook =  $survey->getHook();
+				$surveyIntro =  $survey->getIntroText();
+				$participantInfo =  $survey->getParticipantInfo();
+				$consentHeading =  $survey->getConsentHeading();
+				$consentInstructions =  $survey->getConsentInstructions();
+				$consentText =  $survey->getConsentText();
+				
+				$requireSurveyConsent =  $survey->requireConsent();
+				
+				$consentOnly = $survey->consentOnly();
+				
+				
+			}
+			
+			if ( $survey != null ) {
+				print '<div id="survey_modal" class="modal fade" role="dialog">';
+				print '  <div class="modal-dialog" style="width:95%;">';
+
+				print '    <!-- Modal content-->';
+				print '    <div class="modal-content">';
+				print '      <div class="modal-header">';
+				print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+				print '        <div>'.$surveyIntro.'</div>';
+				
+				print '      </div>';
+				print '      <div class="modal-body">';
+				
+				print '      <div class="panel-group">';
+				
+				if ( $participantInfo ) {
+					print '      <div class="panel panel-warning">';
+					print '          <div class="panel-heading">';
+					print '              <div class="row">';
+					print '      	         <div class="col-md-10">'.JText::_("COM_BIODIV_STATUS_PARTI_INFO").'</div>';
+					print '      	         <div id="show_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_SHOW_PARTIC").'"><i class="fa fa-angle-down fa-lg"></i></div>';
+					print '      	         <div id="hide_partic_info" class="col-md-2 text-right" data-toggle="tooltip" title="'.JText::_("COM_BIODIV_STATUS_HIDE_PARTIC").'"><i class="fa fa-angle-up fa-lg"></i></div>';
+					print '              </div>';
+					print '          </div>';
+					
+					print '          <div id="partic_info" class="panel-body">';
+					print $participantInfo;
+					print '          </div>';
+					print '      </div>'; //panel
+				}
+				
+				print '      <div class="panel panel-warning">';
+				print '          <div class="panel-heading">';
+				print            $consentHeading;
+				print '          </div>';
+				
+				print '          <div class="panel-body">';
+				
+				if ( $requireSurveyConsent ) {
+					print $consentInstructions;
+				}
+				else {
+					print '<p>'.JText::_("COM_BIODIV_STATUS_ALREADY_CONSENTED").'</p>';
+				}
+				print $consentText;
+				
+				if ( $consentOnly ) {
+					
+					if ( $requireSurveyConsent ) {
+						
+						print '          <div id="require_consent">';
+						print '          <h4 id ="consent_reminder" class="text-danger">' . JText::_("COM_BIODIV_STATUS_INDICATE_CONSENT") . '</h4>';
+						print '          <h4 id ="refuse_reminder" class="text-danger">' . JText::_("COM_BIODIV_STATUS_DONT_INDICATE_CONSENT") . '</h4>';	
+						print '          <div class="checkbox">';
+						print '          <label><input id="consent_checkbox" type="checkbox" name="consent" value="1">'.JText::_("COM_BIODIV_STATUS_CONSENT_TEXT") . '</label>';
+						print '          </div>';
+						print '          </div>';
+					}
+				  
+					print '          </div>';
+					print '      </div>'; // panel
+					
+					print '      </div>'; // panel-group
+					
+					print '      </div>'; // modal body
+					print '      	<div class="modal-footer">';
+					
+					print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button id="agree_consent" class="btn btn-success btn-block" data-survey-id="'.$surveyId.'" >'.JText::_("COM_BIODIV_STATUS_AGREE_CONSENT").'</button></div>';
+					
+					print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button id="refuse_consent" class="btn btn-block" data-survey-id="'.$surveyId.'" >'.JText::_("COM_BIODIV_STATUS_REFUSE_CONSENT").'</button></div>';
+					
+					print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-block classify-modal-button" data-dismiss="modal" >'.JText::_("COM_BIODIV_STATUS_MAYBE_LATER").'</button></div>';
+					
+				}
+				else {
+					print '          <form id="take_survey" action = "' . BIODIV_ROOT . '" method = "GET">';
+					
+					if ( $requireSurveyConsent ) {
+						
+						print '          <div id="require_consent">';
+						print '          <h4 id ="consent_reminder" class="text-danger">' . JText::_("COM_BIODIV_STATUS_INDICATE_CONSENT") . '</h4>';
+							
+						print '          <div class="checkbox">';
+						print '          <label><input id="consent_checkbox" type="checkbox" name="consent" value="1">'.JText::_("COM_BIODIV_STATUS_CONSENT_TEXT") . '</label>';
+						print '          </div>';
+						print '          </div>';
+					}
+				  
+					print '          </div>';
+					print '      </div>'; // panel
+					
+					print '      </div>'; // panel-group
+					
+					print '      </div>'; // modal body
+					print '      	<div class="modal-footer">';
+					
+					print '              <input type="hidden" name="option" value="'.BIODIV_COMPONENT.'"/>';
+					print '              <input type="hidden" name="task" value="take_survey"/>';
+					print '              <input type="hidden" name="survey" value="'.$surveyId.'"/>';
+					
+					print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button  class="btn btn-warning btn-block" type="submit">'.JText::_("COM_BIODIV_STATUS_CONTRIBUTE").'</button></div>';
+					
+					print '              <div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;"><button type="button" class="btn btn-danger btn-block classify-modal-button" data-dismiss="modal" >'.JText::_("COM_BIODIV_STATUS_MAYBE_LATER").'</button></div>';
+					
+					print '          </form>';
+				}
+				print '          </div>';
+
+				
+				
+				print '    </div>';
+
+				print '  </div>';
+				print '</div>';
+			}
+		}
+	}
+	
+	
+	public static function addSurveyConsent () {
+		
+		$person_id = userID();
+	
+		// Only do the work if user is logged in
+		if ( $person_id ) {
+			$app = JFactory::getApplication();
+			$input = $app->input;
+			
+			$survey_id = $input->get("survey", 0, 'int');
+			
+			// Consent only added for top level surveys
+			$isFollowUp = BiodivSurvey::isFollowUp($survey_id);
+			
+			if ( !$isFollowUp ) {
+			
+				$consent_given = $input->get("consent", 0, 'int');
+				
+				$db = JDatabase::getInstance(dbOptions());
+				
+				// Add snapshot of the number of classifications at the time of consent
+				$query = $db->getQuery(true);
+				$query->select("count(distinct photo_id)")
+					->from( "Animal" )
+					->where( "person_id=".$person_id )
+					->where( "species != 97" );
+				$db->setQuery($query);
+				$numAnimals = $db->loadResult();
+			
+				
+				$fields = new stdClass();
+				$fields->survey_id = $survey_id;
+				$fields->person_id = $person_id;
+				$fields->consent_given = $consent_given;
+				$fields->num_animals = $numAnimals;
+				
+				$success = $db->insertObject("UserConsent", $fields);
+				
+				if(!$success){
+					$err_str = print_r ( $fields, true );
+					error_log ( "UserConsent insert failed: " . $err_str );
+				}
+			}
+		}
+	}
 }
+
+
+
 
 ?>

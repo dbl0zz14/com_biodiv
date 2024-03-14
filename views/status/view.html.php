@@ -46,29 +46,6 @@ class BioDivViewStatus extends JViewLegacy
 	$this->projects = mySpottingProjects( true );
 	$this->mylikes = getLikes(1);
 	
-	// Do we want to pop up surveys?
-	$this->survey = null;
-	if ( getSetting("survey") === "yes" ) {
-		
-		$this->surveyId = BiodivSurvey::triggerSurvey($person_id, 'status');
-		
-		if ( $this->surveyId ) {
-			$this->survey = new BiodivSurvey ( $this->surveyId );
-			
-			$this->surveyHook =  $this->survey->getHook();
-			$this->surveyIntro =  $this->survey->getIntroText();
-			$this->participantInfo =  $this->survey->getParticipantInfo();
-			$this->consentHeading =  $this->survey->getConsentHeading();
-			$this->consentInstructions =  $this->survey->getConsentInstructions();
-			$this->consentText =  $this->survey->getConsentText();
-			
-			// NB Need to sort this for follow up questionnaires
-			$this->requireSurveyConsent =  $this->survey->requireConsent();
-		}
-		
-		
-	}
-	
 		
     // Display the view
     parent::display($tpl);

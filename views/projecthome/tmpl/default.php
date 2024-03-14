@@ -145,7 +145,11 @@ defined('_JEXEC') or die;
 		}
 	}
 	
-
+	
+	if ( $this->generateSurvey ) {
+		
+		BiodivSurvey::generateSurveyModal();
+	}
 
 ?>
 
@@ -157,6 +161,7 @@ JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 //JHTML::script("com_biodiv/bootbox.js", true, true);
 JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
 JHTML::script("com_biodiv/project.js", true, true);
+JHTML::script("com_biodiv/triggersurvey.js", true, true);
 ?>
 
 
