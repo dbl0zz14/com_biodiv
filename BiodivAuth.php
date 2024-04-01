@@ -8,17 +8,11 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-require_once 'libraries/vendor/firebase/php-jwt/src/BeforeValidException.php';
-require_once 'libraries/vendor/firebase/php-jwt/src/ExpiredException.php';
-require_once 'libraries/vendor/firebase/php-jwt/src/SignatureInvalidException.php';
-require_once 'libraries/vendor/firebase/php-jwt/src/JWT.php';
-require_once 'libraries/vendor/phpseclib/phpseclib/phpseclib/Crypt/RSA.php';
-require_once 'libraries/vendor/phpseclib/phpseclib/phpseclib/Math/BigInteger.php';
-require_once 'libraries/vendor/phpseclib/phpseclib/phpseclib/Crypt/Hash.php';
+require_once __DIR__ . '/libraries/vendor/autoload.php';
 
-//include 'vendor/autoload.php';
 
 use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
 use phpseclib\Crypt\RSA;
 use phpseclib\Math\BigInteger;
@@ -34,16 +28,12 @@ class BiodivAuth {
 		
 		$token =  getallheaders ();
 		
-		$tk_str = print_r($token, true);
-		error_log("Headers: " . $tk_str);
-		
 		if ( !array_key_exists("Authorization", $token) ) {
 			error_log("No Authorization header");
 			return false;
 		}
 		
 		$auth_header = $token["Authorization"];
-		//error_log("Auth header: " . $auth_header);
 		
 		// Split up the string...
 		$auth_array = explode(' ', $auth_header);
@@ -53,20 +43,13 @@ class BiodivAuth {
 		// Get the first part of the jwt, the header, decode it and get the kid
 		$jwtArray = explode('.', $jwt);
 		$jwtHeader = JWT::urlsafeB64Decode($jwtArray[0]);
-		//error_log ( "JWT header: " . $jwtHeader );
-
+		
 		$decodedHeader = json_decode($jwtHeader);
-		$errStr = print_r ( $decodedHeader, true );
-		//error_log ( "JWT decoded header: " . $errStr );
-
+		
 		$kid = $decodedHeader->kid;
-		//error_log ( "JWT kid: " . $kid );
 		
 		// Pick up some environment options:
 		$apiOpts = apiOptions();
-		
-		//$errStr = print_r($apiOpts, true);
-		//error_log ("API options from local.php: " . $errStr );
 		
 		$region = $apiOpts['region'];
 		$userPoolId = $apiOpts['userpool'];
@@ -102,9 +85,8 @@ class BiodivAuth {
 			
         }
 		
-		//error_log ("kid: " . $kid );
-		
-		$decoded = JWT::decode($jwt, $key, array('RS256'));
+		$decoded = JWT::decode($jwt, new Key($key, 'RS256'));
+
 		
 		// Check aud
 		
@@ -140,9 +122,9 @@ class BiodivAuth {
 		$jwt = JWT::encode($payload, $key);
 		$decoded = JWT::decode($jwt, $key, array('HS256'));
 		
-		print($jwt);
+		// print($jwt);
 
-		print_r($decoded);
+		// print_r($decoded);
 
 		/*
 		 NOTE: This will now be an object instead of an associative array. To get

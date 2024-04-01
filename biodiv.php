@@ -62,9 +62,13 @@ JHTML::script("com_biodiv/biodiv.js", true, true);
 
 
 include "codes.php";
-require_once('libraries/getid3/getid3/getid3.php');
+//require_once('libraries/getid3/getid3/getid3.php');
 
-include "aws.php";
+include "BiodivAWS.php";
+
+
+use Joomla\CMS\Factory;
+
 
 
 function db(){
@@ -90,7 +94,7 @@ function userID(){
 }
 
 function userTimezone() {
-  $user = JFactory::getUser();
+  $user = Factory::getUser();
   if($user->guest){
     return null;
   }
@@ -98,6 +102,19 @@ function userTimezone() {
     return $user->getTimezone();
   }
 }
+
+
+function userTimezoneCode() {
+  $user = Factory::getUser();
+  if($user->guest){
+    return null;
+  }
+  else{
+	$tzStr = $user->getParam('timezone', 'UTC');
+	return $tzStr;
+  }
+}
+
 
 
 $dbOptions = dbOptions();
@@ -496,11 +513,10 @@ function canEdit($id, $struc, $allow = 0){
   if($struc == "sequence"){
   	    return true;
   }
-  
   if($allow){
    $allows[$struc][$id] = 1;
   }
-  if($allows[$struc][$id]){
+  if( isset($allows[$struc][$id]) && $allows[$struc][$id] ){
     return true;
   }
   
@@ -1952,8 +1968,32 @@ function calculateStats ( $project_id = null, $end_date = null ) {
 		$q3 = $db->getQuery(true)
              ->select('count(distinct a.sequence_id)')
              ->from('(' . $query->union($query2) . ') a');
+			 
+		// $query = $db->getQuery(true);
+		// $query->select("distinct sequence_id from Photo P")
+			// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			// ->where("(P.photo_id in (select photo_id from Animal where species != 97 and timestamp < " . $dateToUse . 
+				// ") OR (P.contains_human = 1) OR (P.status in (9,10)) )" )
+			// ->where("PSM.project_id = " . $proj_id )
+			// ->where("P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id"  );
+		// //$db->setQuery($query);
+		
+		// $query2 = $db->getQuery(true);
+		// $query2->select("distinct sequence_id from Photo P")
+			// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			// ->where("(P.photo_id in (select photo_id from Animal where species != 97 and timestamp < " . $dateToUse . 
+				// ") OR (P.contains_human = 1) OR (P.status in (9,10)) )" )
+			// ->where("PSM.project_id = " . $proj_id )
+			// ->where("P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL"  );
+		// //$db->setQuery($query2);
+		
+		// $q3 = $db->getQuery(true)
+             // ->select('count(distinct a.sequence_id)')
+             // ->from('(' . $query->union($query2) . ') a');
 		
 		$db->setQuery($q3);
+		
+		//error_log ( "calculateStats, num classifications query: " . $query->dump() );
 
 		$numClassified = $db->loadResult();
 		
@@ -2056,6 +2096,14 @@ function calculateStatsTotals ( $end_date = null ) {
 	$query->where("P.sequence_id > 0");
 	$query->where("A.timestamp < " . $dateToUse );
 	$db->setQuery($query);
+	
+	// $query = $db->getQuery(true);
+	// $query->select("distinct sequence_id from Photo P")
+		// ->where("P.sequence_id > 0")
+		// ->where("(P.photo_id in (select photo_id from Animal where species != 97 and timestamp < " . $dateToUse . 
+			// ") OR (P.contains_human = 1) OR (P.status in (9,10)) )" );
+	// $db->setQuery($query);
+		
 	$numClassified = $db->loadResult();
 	
 	// Now update or insert - this would all be better with a stored procedure
@@ -6445,7 +6493,7 @@ function getClassifyInputs () {
 	
 	$sure = "<label for ='classify_sure'>" . JText::_("COM_BIODIV_CLASSIFY_SURE") . "</label>\n";
 	// See what happens if we don;t specify what to check - want it to default to first option
-	$sure .= codes_getRadioButtons("sure", "suretran", null);
+	$sure .= codes_getRadioButtons("sure", "suretran");
 	$classifyInputs[] = $sure;
 	
 	$notes = "<label for ='classify_notes'>" . JText::_("COM_BIODIV_CLASSIFY_NOTES") . "</label>\n";

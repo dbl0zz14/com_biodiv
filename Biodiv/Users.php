@@ -35,8 +35,6 @@ class Users {
 		$schoolId = $input->getInt('school', 0);
 		$classId = $input->getInt('batchClassId', 0);
 		
-		error_log ( "classId = " . $classId );
-		
 		if ( $startingNum == 0 ) {
 			
 			$startingNum = 1;
@@ -64,6 +62,11 @@ class Users {
 				}
 				$startingNum = $maxNum + 1;
 			}
+		}
+		
+		$whereHear = 'Batch user creation';
+		if ( $projectId ) {
+			$whereHear .= ', ' . codes_getName( $projectId, 'project' );
 		}
 		
 		$newUsers = array();
@@ -135,16 +138,15 @@ class Users {
 					$newUsers["errors"][] = array("error"=>"User num ".$i." already exists - cannot create - use starting number for additional users");
 				}
 				else {
-				
+					
 					$profileMW = array( 
 						'tos'=>$tandCsChecked,
-						'wherehear'=>$project,	
+						'wherehear'=>$whereHear,	
 						'subscribe'=>0
 						);
 					
 					// Add to Registered group
 					$groups = array("2"=>"2");
-					
 					
 					$data = array(
 					'name'=>$username,
@@ -158,9 +160,10 @@ class Users {
 					);
 					
 					$user = new \JUser;
+					//$user = new \Joomla\CMS\User\User;
 					
 					$userCreated = false;
-
+					
 					try{
 						if (!$user->bind($data)){
 							error_log("User bind returned false");
@@ -173,8 +176,6 @@ class Users {
 							
 						}
 						if ( !$user->getError() ) {
-							
-							error_log("User saved");
 							
 							$userCreated = true;
 						}

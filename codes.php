@@ -151,6 +151,10 @@ function codes_getFriendlyName($thiscode, $type) {
 
 
 function codes_getName($thiscode, $type){
+	
+	if ( !$thiscode ) {
+		return ( '' );
+	}
 	static $names;
 	if(!isset($names[$type][$thiscode])){
 		$typeMeta = codes_getMeta($type);
@@ -174,7 +178,8 @@ function codes_getName($thiscode, $type){
 		}
 		if(strpos($name,",")===false){
 			$details = codes_getDetails($thiscode, $type);
-			return ($names[$type][$thiscode] = $details[$name]);
+			$newName = isset($details[$name]) ? $details[$name] : '';
+			return ($names[$type][$thiscode] = $newName);
 		}
 
 		// the name may be split over more than one field
@@ -241,7 +246,7 @@ function codes_getDetails($thiscode, $type, $features=null){
 	// and DB cache as provided by the cache library
 	$cachemeta=1;
 
-	if($features['clearcache']){
+	if($features && array_key_exists('clearcache', $features) ){
 		//html_warning("Clearing cache for $type");
 		unset($details[$type]);
 		$cachemeta=0;
@@ -500,8 +505,11 @@ function codes_getOptions($thiscode, $type, $features=array()){
 function codes_getCheckboxes($input_name, $type, $features=array()){
 	$width = (isset($features['width']) ? $features['width'] : 50);
 
-	$thiscode=$features['thiscode'];
-
+	$thiscode = null;
+	if ( $features && array_key_exists('thiscode', $features) ) {
+		$thiscode=$features['thiscode'];
+	}
+	
 	$options = "";
 
 	foreach(codes_getList($type,$features) as $listitem){
@@ -526,7 +534,10 @@ function codes_getCheckboxes($input_name, $type, $features=array()){
 function codes_getRadiobuttons($input_name, $type, $features=array()){
 	$width = (isset($features['width']) ? $features['width'] : 50);
 
-	$thiscode=$features[$input_name];
+	$thiscode = null;
+	if ( $features && array_key_exists($input_name, $features) ) {
+		$thiscode=$features[$input_name];
+	}
 	
 	$options = "";
 	

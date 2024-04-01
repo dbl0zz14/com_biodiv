@@ -12,7 +12,8 @@
 defined('_JEXEC') or die;
 
 
-require_once('libraries/aws/aws-autoloader.php');
+require_once __DIR__ . '/libraries/vendor/autoload.php';
+
 
 use Aws\S3\S3Client;  
 use Aws\Exception\AwsException;

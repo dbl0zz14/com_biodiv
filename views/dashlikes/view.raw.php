@@ -59,10 +59,20 @@ class BioDivViewDashLikes extends JViewLegacy
 			$start = ($this->page) * $this->numPerPage;	
 		}			
 				
-		$this->userTimezone = userTimezone();
+		// $this->userTimezone = userTimezone();
+		
+		// $errMsg = print_r ( $this->userTimezone, true );
+		// error_log ( "Timezone: " . $errMsg );
+		
+		// error_log ( "Timezone field: " . $this->userTimezone->timezone );
+		
+		$this->userTimezoneCode = userTimezoneCode();
+		
+		// $tzStr = $user->getParam('timezone', 'UTC');
+		// error_log ( "Timezone using getParam: " . $tzStr );
 		
 		//Makes sure the timezone is available
-		get_object_vars($this->userTimezone);
+		//get_object_vars($this->userTimezone);
 		
 		$this->languageTag = langTag();
 		
@@ -183,7 +193,7 @@ class BioDivViewDashLikes extends JViewLegacy
 		if ( $this->languageTag == 'en-GB' ) {
 			
 			$query = $db->getQuery(true);
-			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezone->timezone."') as like_time, GROUP_CONCAT(DISTINCT O.option_name ORDER BY  O.option_name SEPARATOR ', ') as species" )
+			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezoneCode."') as like_time, GROUP_CONCAT(DISTINCT O.option_name ORDER BY  O.option_name SEPARATOR ', ') as species" )
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
 				->innerJoin("Site S on S.site_id = P.site_id")
@@ -219,7 +229,7 @@ class BioDivViewDashLikes extends JViewLegacy
 		}
 		else {
 			$query = $db->getQuery(true);
-			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezone->timezone."') as like_time, GROUP_CONCAT(DISTINCT OD.value ORDER BY  OD.value SEPARATOR ', ') as species" )
+			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezoneCode."') as like_time, GROUP_CONCAT(DISTINCT OD.value ORDER BY  OD.value SEPARATOR ', ') as species" )
 				->from("Animal A")
 				->innerJoin("Photo P on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
 				->innerJoin("Site S on S.site_id = P.site_id")

@@ -772,7 +772,6 @@ class SchoolCommunity {
 			return $badgeGroupTargets[$targetGroup];
 		}
 		else {
-			error_log ( "No possible awards found" );
 			return null;
 		}
 			
@@ -1661,7 +1660,6 @@ class SchoolCommunity {
 	
 	private static function getStudentAccountsByClass ( $schoolUser ) {
 		
-		error_log ( "getStudentAccountsByClass called" );
 		if ( !$schoolUser ) {
 			$schoolUser = self::getSchoolUser ();
 		}
@@ -1689,8 +1687,6 @@ class SchoolCommunity {
 			
 			$db->setQuery($query);
 			
-			error_log("getStudentAccountsByClass select classes query created: " . $query->dump());
-			
 			$schoolClasses = $db->loadObjectList();
 			
 			$students["no_class"] = array();
@@ -1709,8 +1705,6 @@ class SchoolCommunity {
 				
 			
 			$db->setQuery($query);
-			
-			error_log("getStudentAccountsByClass select students query created: " . $query->dump());
 			
 			$allStudents = $db->loadObjectList();
 			
@@ -2718,8 +2712,6 @@ class SchoolCommunity {
 							
 						}
 						if ( !$user->getError() ) {
-							error_log("User saved");
-							
 							$userCreated = true;
 						}
 						
@@ -3406,8 +3398,6 @@ class SchoolCommunity {
 	
 	public static function createSchool ( $schoolUser, $signupId ) {
 		
-		error_log ( "createSchool called" );
-		
 		if ( !$schoolUser ) {
 			$schoolUser = self::getSchoolUser();
 		}
@@ -3477,13 +3467,9 @@ class SchoolCommunity {
 			$existingSchoolId = 0;
 			$newSchoolName = $newSchoolSignup->school_name;
 			
-			error_log ( "createSchool creating project" );
-			
 			$projectAndSchool = createProject( $projectName, $prettyName, $projectDescription, $accessLevel, $parentProject,
 						$imageDir, $imageFile, $articleId, $listingLevel, $priority, $displayOptions,
 						$speciesLists, $projectAdmins, $isSchoolProject, $existingSchoolId, $newSchoolName );
-			
-			error_log ( "createSchool project created" );
 			
 			$newSchoolId = $projectAndSchool->schoolFields->school_id;
 			$newProjectId = $projectAndSchool->projectFields->project_id;
@@ -3538,9 +3524,6 @@ class SchoolCommunity {
 				return $existingKiosks[0];
 			}
 			
-			$errMsg = print_r ( $kioskSettingsObj, true );
-			error_log ("kiosk settings = " . $errMsg );
-			
 			if (property_exists($kioskSettingsObj, 'kiosk')) {
 				$kioskName = $kioskSettingsObj->kiosk;
 			}
@@ -3576,9 +3559,6 @@ class SchoolCommunity {
 		
 			$tutorialProjectOptions = array($tutorial);
 			$kioskProjectOptions = array_merge_recursive($tutorialProjectOptions, $topics, $speciesLists);
-			
-			$errMsg = print_r ( $kioskProjectOptions, true );
-			error_log ("kiosk project options = " . $errMsg );
 			
 			
 			$projectOptionFields = new \StdClass();
@@ -3618,8 +3598,6 @@ class SchoolCommunity {
 				}
 			}
 			
-			error_log ( "createSchoolKiosk returning kioskoptionId: " . $kioskOptionId );
-		
 			return $kioskOptionId;
 		}
 		return null;
@@ -3640,8 +3618,6 @@ class SchoolCommunity {
 			
 		
 		$db->setQuery($query);
-		
-		error_log("Set id select query created: " . $query->dump());
 		
 		$setup = $db->loadObject();
 		
@@ -3700,8 +3676,6 @@ class SchoolCommunity {
 
 			$query->update('School')->set($fields)->where($conditions);
 			
-			error_log("updateSchoolSetupComplete select query created: " . $query->dump());
-			
 			$db->setQuery($query);
 			$result = $db->execute();
 		}
@@ -3737,12 +3711,11 @@ class SchoolCommunity {
 			
 			$db->setQuery($query);
 			
-			error_log("countProjectUnclassified select query created: " . $query->dump());
+			//error_log("countProjectUnclassified select query created: " . $query->dump());
 			
 			$numUnclassified = $db->loadResult();
 		}
 		
-		error_log ( "Got " . $numUnclassified . " unclassified sequences" );
 		return $numUnclassified;
 	}
 	
@@ -4192,8 +4165,6 @@ class SchoolCommunity {
 		
 		$db->setQuery($query);
 		
-		error_log("Task getTotalUserPoints select query created: " . $query->dump());
-		
 		$userStatus = $db->loadObject();
 		
 		return $userStatus;
@@ -4308,7 +4279,7 @@ class SchoolCommunity {
 			
 			$db->setQuery($query);
 			
-			error_log("getClassStatus select query created: " . $query->dump());
+			//error_log("getClassStatus select query created: " . $query->dump());
 			
 			$classStatus = $db->loadObjectList("class_id");
 			
@@ -4349,8 +4320,6 @@ class SchoolCommunity {
 			
 			$db->setQuery($query);
 			
-			error_log("getSchoolStatus select query created: " . $query->dump());
-			
 			$schoolStatus = $db->loadObject();
 			
 			
@@ -4361,8 +4330,6 @@ class SchoolCommunity {
 				->where("SB.status = " . Badge::COLLECTED);
 			
 			$db->setQuery($query);
-			
-			error_log("getSchoolStatus select query created: " . $query->dump());
 			
 			$numStudentBadges = $db->loadResult();
 			

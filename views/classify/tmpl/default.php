@@ -40,6 +40,7 @@ if(!$this->photo_id){
  }
  
  $document->addScriptDeclaration("BioDiv.maxclass = ".$this->maxClassifications.";");
+ $document->addScriptDeclaration("BioDiv.loadingMsg = '".JText::_("COM_BIODIV_CLASSIFY_LOADING")."';");
 	
 
 ?>
@@ -84,7 +85,7 @@ else {
   // }
   print "<button type='button' class='btn btn-primary' id='invert_image'>".$this->invertimage."</button>";
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
-  print "<button type='button' class='btn btn-success' id='control_nextseq'>".$this->nextseq."</button>";
+  print "<button type='button' class='btn btn-success loader' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
         </div> <!-- /.btn-group -->
      </div> <!-- /.col-md-6 -->
