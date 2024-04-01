@@ -27,7 +27,6 @@
   in this section are copied from /site/ in the package -->
   <files>
     <filename>index.html</filename>
-	<filename>aws.php</filename>
 	<filename>biodiv.php</filename>
 	<filename>codes.php</filename>
 	<filename>controller.php</filename>
@@ -38,6 +37,7 @@
 	<filename>SpeciesCarousel.php</filename>
 	<filename>BiodivHelper.php</filename>
 	<filename>BiodivAuth.php</filename>
+	<filename>BiodivAWS.php</filename>
 	<filename>SiteHelper.php</filename>
 	<filename>BiodivFFMpeg.php</filename>
 	<filename>BiodivFile.php</filename>
