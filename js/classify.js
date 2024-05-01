@@ -1,12 +1,6 @@
 
 
 
-async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
-
-}
-
-
 jQuery(document).ready(function(){
 	
 	const maxClassifications = BioDiv.maxclass;
@@ -50,52 +44,6 @@ jQuery(document).ready(function(){
 		}
 	}
 	
-	drawMap = function (){
-		
-		jQuery('#no_map').hide();
-		
-		try{
-			
-			let south = parseFloat(BioDiv.south);
-			let west = parseFloat(BioDiv.west);
-			let north = parseFloat(BioDiv.north);
-			let east = parseFloat(BioDiv.east);
-			
-			let sw = new google.maps.LatLng(south, west);
-			let ne = new google.maps.LatLng(north, east);
-			
-			let posBounds = new google.maps.LatLngBounds (sw, ne);
-		
-			let mapOptions = {
-				zoom: 8,
-				center: sw,
-				mapTypeId: google.maps.MapTypeId.TERRAIN
-			}
-			
-			var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-			
-			let rectOptions = {
-				bounds: posBounds,
-				fillColor: "#00ba8a",
-				fillOpacity: 0.5,
-				strokeWeight: 1,
-				//strokeColour: "red",
-				//strokeOpacity: 0.5,
-				map: map,
-				draggable:false
-			}
-			
-			var rect = new google.maps.Rectangle(
-				rectOptions
-			);
-			
-		}
-		catch(err){
-			console.log("No location given");
-			jQuery('#no_map').show();
-		}
-		
-	};
 	
 	addClassificationByForm = function () {
 		// Check still logged in
@@ -108,8 +56,6 @@ jQuery(document).ready(function(){
 		
 		// Check max classifications not yet reached
 		let numClass = jQuery(".remove_animal").length;
-		
-		console.log("Current num classifications: " + numClass );
 		
 		if ( numClass == maxClassifications ) {
 			console.log("Error: reached max classifications - " + maxClassifications);
@@ -144,8 +90,6 @@ jQuery(document).ready(function(){
 		
 		// Check max classifications not yet reached
 		let numClass = jQuery(".remove_animal").length;
-		
-		console.log("Current num classifications: " + numClass );
 		
 		if ( numClass == maxClassifications ) {
 			console.log("Error: reached max classifications - " + maxClassifications);
@@ -237,13 +181,6 @@ jQuery(document).ready(function(){
 		idbits = id.split("_");
 		species_id = idbits.pop();
 		addClassificationById(species_id);
-		
-	});
-	
-	jQuery('#control_map').click(function (){
-		console.log("Display location");
-		jQuery('#map_modal').modal('show');
-		drawMap();
 		
 	});
 	

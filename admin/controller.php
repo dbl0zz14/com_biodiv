@@ -383,32 +383,4 @@ class BioDivController extends JControllerLegacy
 		parent::display();
 	}
 	
-	
-	
-	// function deletefiles() {
-		
-		// error_log ( "deletefiles called" );
-		
-		// $filePath = JPATH_SITE."/biodivimages/reports/school";
-		
-		// $files = glob($filePath . '/*.csv');
-
-		// //Loop through the file list.
-		// foreach($files as $file){
-			// //Make sure that this is a file and not a directory.
-			// if(is_file($file)){
-				// error_log ( "Removing " . $file );
-				// //Use the unlink function to delete the file.
-				// unlink($file);
-			// }
-		// }
-		
-		// $this->input->set('deleted', '1');
-		// $this->input->set('view', 'biodivs');
-
-		// parent::display();
-		
-	// }
-  
-  
 }

@@ -774,24 +774,18 @@ print '</div>';
 
 
 
-JHTML::script("com_biodiv/commonbiodiv.js", true, true);
-JHTML::script("com_biodiv/commondashboard.js", true, true);
-JHTML::script("com_biodiv/resourcelist.js", true, true);
-JHTML::script("com_biodiv/resourceupload.js", true, true);
-JHTML::script("com_biodiv/badges.js", true, true);
-
+JHtml::_('script', 'com_biodiv/commonbiodiv.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/commondashboard.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/resourcelist.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/resourceupload.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/badges.js', array('version' => 'auto', 'relative' => true), array());
 if ( $this->help ) {
-	JHTML::script("com_biodiv/help.js", true, true);
+	JHtml::_('script', 'com_biodiv/help.js', array('version' => 'auto', 'relative' => true), array());
 }
-JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
-JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js", true, true);
-JHTML::script("https://unpkg.com/pdf-lib", true, true);
-//JHTML::script("https://unpkg.com/pdf-lib@1.4.0/dist/pdf-lib.min.js", array('cross_origin' => ''));
+JHtml::_('script', 'jquery-upload-file/jquery.uploadfile.min.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js', array(), array());
+JHtml::_('script', 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js', array(), array());
 
-//JHTML::script("https://unpkg.com/leaflet@1.7.1/dist/leaflet.js", array('integrity' => 'sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==', 'cross_origin' => ''));
-
-
-//JHTML::script("https://unpkg.com/downloadjs@1.4.7", true, true);
 
 ?>
 

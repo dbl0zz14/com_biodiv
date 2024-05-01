@@ -388,146 +388,53 @@ else {
 	
 	print '</div>'; // displayArea
 	
-	//print '</div>'; // col-10 or 12
-	//print '</div>'; // row
-	
-	
-
-}
-
-
-print '<div id="helpModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '      <div class="modal-header text-right">';
-print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '	    <div id="helpArticle" ></div>';
-print '      </div>';
-print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
-print '      </div>';
-	  	  
-print '    </div>';
-
-print '  </div>';
-print '</div>';
 
 
 
-// -------------------------------------- add school user 
+	print '<div id="helpModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
 
-print '<div id="addSchoolUserModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="addSchoolUserForm">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_USER").'</h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<input id="suRoleId" type="hidden" name="suRoleId" value="0"/>';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header text-right">';
+	print '        <div type="button" role="button" class="closeButton h3" data-dismiss="modal">&times;</div>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '	    <div id="helpArticle" ></div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
+	print '      </div>';
+			  
+	print '    </div>';
 
-print '<div class="vSpaced">';
-print '<label for="suName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="suName"  name="suName">';
-print '</div>';
-
-print '<div class="vSpaced hiddenTeacher">';
-print '<label for="suClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
-print '<select id = "suClassId" name = "suClassId" class = "form-control">';
-print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';			
-foreach( $this->classes as $nextClass ){
-	print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
-}
-print '</select>';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="suUsername"> '.JText::_("COM_BIODIV_SCHOOLADMIN_USERNAME").'</label>';
-print '<input type="text" id="suUsername"  name="suUsername">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="suEmail"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL").'</label>';
-print '<p class = "hiddenTeacher">'.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL_BLANK").'</p>';
-print '<input type="email" id="suEmail"  name="suEmail">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="suEmail2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL2").'</label>';
-print '<input type="email" id="suEmail2"  name="suEmail2">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="suPassword"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
-print '<input type="password" id="suPassword"  name="suPassword">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="suPassword2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD2").'</label>';
-print '<input type="password" id="suPassword2"  name="suPassword2">';
-print '</div>';
-
-print '<div id="addUserFailMessage" class="vSpaced"></div>';
-
-print '</div>';
-
-print '	  <div class="modal-footer">';
-print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
+	print '  </div>';
+	print '</div>';
 
 
 
-// -------------------------------------- batch create users 
+	// -------------------------------------- add school user 
 
-if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
-	print '<div id="batchStudentsModal" class="modal fade" role="dialog">';
+	print '<div id="addSchoolUserModal" class="modal fade" role="dialog">';
 	print '  <div class="modal-dialog"  >';
 	print '    <!-- Modal content-->';
 	print '    <div class="modal-content">';
-	print '    <form id="batchStudents">';
+	print '    <form id="addSchoolUserForm">';
 	print '      <div class="modal-header">';
 	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_BATCH_USERS").'</h4>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_USER").'</h4>';
 	print '      </div>';
 	print '     <div class="modal-body">';
+	print '<input id="suRoleId" type="hidden" name="suRoleId" value="0"/>';
 
-	echo JHtml::_( 'form.token' );
+	print '<div class="vSpaced">';
+	print '<label for="suName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="suName"  name="suName">';
+	print '</div>';
 
-	$schoolNameArray = explode(' ', $this->schoolUser->school);
-	$schoolInitials = "";
-	foreach ( $schoolNameArray as $word ) {
-		$schoolInitials .= $word[0];
-	}
-	error_log ( "schoolInitials = " . $schoolInitials );
-
-	print '<input id="tandCsChecked" type="hidden" name="tandCsChecked" value="1"/>';
-	
-	print '<input id="fileStem" type="hidden" name="fileStem" value="batchstudents"/>';
-
-	print '<input id="emailDomain" type="hidden" name="emailDomain" value="'.$schoolInitials.$this->schoolUser->school_id.$this->domainDefault.'"/>';
-	
-	print '<input id="userGroup" type="hidden" name="userGroup" value="'.$this->studentGroup.'"/>';
-	
-	print '<input id="project" type="hidden" name="project" value="'.$this->schoolUser->project_id.'"/>';
-	
-	print '<input id="addToSchool" type="hidden" name="addToSchool" value="1"/>';
-	
-	print '<input id="school" type="hidden" name="school" value="'.$this->schoolUser->school_id.'"/>';
-
-	print '<div class="vSpaced ">';
-	print '<label for="batchClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
-	print '<select id = "batchClassId" name = "batchClassId" class = "form-control">';
+	print '<div class="vSpaced hiddenTeacher">';
+	print '<label for="suClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
+	print '<select id = "suClassId" name = "suClassId" class = "form-control">';
 	print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';			
 	foreach( $this->classes as $nextClass ){
 		print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
@@ -536,272 +443,362 @@ if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
 	print '</div>';
 
 	print '<div class="vSpaced">';
-	print '<label for="userStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_USER_STEM").'</label>';
-	print '  <input type="text" id="userStem" name="userStem">';
+	print '<label for="suUsername"> '.JText::_("COM_BIODIV_SCHOOLADMIN_USERNAME").'</label>';
+	print '<input type="text" id="suUsername"  name="suUsername">';
 	print '</div>';
 
 	print '<div class="vSpaced">';
-	print '<label for="passwordStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_PWD_STEM").'</label>';
-	print '  <input type="text" id="passwordStem" name="passwordStem">';
+	print '<label for="suEmail"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL").'</label>';
+	print '<p class = "hiddenTeacher">'.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL_BLANK").'</p>';
+	print '<input type="email" id="suEmail"  name="suEmail">';
 	print '</div>';
 
 	print '<div class="vSpaced">';
-	print '<label for="numUsers">'.JText::_("COM_BIODIV_SCHOOLADMIN_NUM_USERS").'</label>';
-	print '  <input type="number" id="numUsers" name="numUsers" min="1" max="30">';
+	print '<label for="suEmail2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_EMAIL2").'</label>';
+	print '<input type="email" id="suEmail2"  name="suEmail2">';
 	print '</div>';
 
-	print '<div id="newUsersMsg" class="vSpaced"></div>';
+	print '<div class="vSpaced">';
+	print '<label for="suPassword"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
+	print '<input type="password" id="suPassword"  name="suPassword">';
+	print '</div>';
 
-	print '<div id="newUsers" class="vSpaced"></div>';
+	print '<div class="vSpaced">';
+	print '<label for="suPassword2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD2").'</label>';
+	print '<input type="password" id="suPassword2"  name="suPassword2">';
+	print '</div>';
+
+	print '<div id="addUserFailMessage" class="vSpaced"></div>';
 
 	print '</div>';
 
 	print '	  <div class="modal-footer">';
-	print '        <button id="newUsersSubmit" type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-	print '        <button type="button" class="btn btn-info reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
 	print '      </div>';
 	print '</form>';	  	  
 	print '    </div>'; // modalContent
 	print '  </div>';
 	print '</div>';
+
+
+
+	// -------------------------------------- batch create users 
+
+	if ( $this->schoolUser->role_id == Biodiv\SchoolCommunity::TEACHER_ROLE ) {
+		print '<div id="batchStudentsModal" class="modal fade" role="dialog">';
+		print '  <div class="modal-dialog"  >';
+		print '    <!-- Modal content-->';
+		print '    <div class="modal-content">';
+		print '    <form id="batchStudents">';
+		print '      <div class="modal-header">';
+		print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+		print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_BATCH_USERS").'</h4>';
+		print '      </div>';
+		print '     <div class="modal-body">';
+
+		echo JHtml::_( 'form.token' );
+
+		$schoolNameArray = explode(' ', $this->schoolUser->school);
+		$schoolInitials = "";
+		foreach ( $schoolNameArray as $word ) {
+			$schoolInitials .= $word[0];
+		}
+		error_log ( "schoolInitials = " . $schoolInitials );
+
+		print '<input id="tandCsChecked" type="hidden" name="tandCsChecked" value="1"/>';
+		
+		print '<input id="fileStem" type="hidden" name="fileStem" value="batchstudents"/>';
+
+		print '<input id="emailDomain" type="hidden" name="emailDomain" value="'.$schoolInitials.$this->schoolUser->school_id.$this->domainDefault.'"/>';
+		
+		print '<input id="userGroup" type="hidden" name="userGroup" value="'.$this->studentGroup.'"/>';
+		
+		print '<input id="project" type="hidden" name="project" value="'.$this->schoolUser->project_id.'"/>';
+		
+		print '<input id="addToSchool" type="hidden" name="addToSchool" value="1"/>';
+		
+		print '<input id="school" type="hidden" name="school" value="'.$this->schoolUser->school_id.'"/>';
+
+		print '<div class="vSpaced ">';
+		print '<label for="batchClassId"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
+		print '<select id = "batchClassId" name = "batchClassId" class = "form-control">';
+		print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';			
+		foreach( $this->classes as $nextClass ){
+			print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
+		}
+		print '</select>';
+		print '</div>';
+
+		print '<div class="vSpaced">';
+		print '<label for="userStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_USER_STEM").'</label>';
+		print '  <input type="text" id="userStem" name="userStem">';
+		print '</div>';
+
+		print '<div class="vSpaced">';
+		print '<label for="passwordStem">'.JText::_("COM_BIODIV_SCHOOLADMIN_PWD_STEM").'</label>';
+		print '  <input type="text" id="passwordStem" name="passwordStem">';
+		print '</div>';
+
+		print '<div class="vSpaced">';
+		print '<label for="numUsers">'.JText::_("COM_BIODIV_SCHOOLADMIN_NUM_USERS").'</label>';
+		print '  <input type="number" id="numUsers" name="numUsers" min="1" max="30">';
+		print '</div>';
+
+		print '<div id="newUsersMsg" class="vSpaced"></div>';
+
+		print '<div id="newUsers" class="vSpaced"></div>';
+
+		print '</div>';
+
+		print '	  <div class="modal-footer">';
+		print '        <button id="newUsersSubmit" type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+		print '        <button type="button" class="btn btn-info reloadPage" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CLOSE").'</button>';
+		print '      </div>';
+		print '</form>';	  	  
+		print '    </div>'; // modalContent
+		print '  </div>';
+		print '</div>';
+	}
+
+
+
+	print '<div id="addClassModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="addClassForm" >';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_CLASS").'</h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '<input id="roleId" type="hidden" name="roleId" value="0"/>';
+	print '<div class="vSpaced">';
+	print '<label for="className"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="className"  name="className">';
+	print '</div>';
+	print '<div class="vSpaced">';
+	print '<label for="classAvatar">'.JText::_("COM_BIODIV_SCHOOLADMIN_AVATAR").'</label>';
+	print '<select name="classAvatar" id="classAvatar">';
+	foreach ($this->avatars as $avatar) {
+		print ' <option value="'.$avatar->avatar_id.'">'.$avatar->name.'</option>';
+	}
+	print '</select>';
+	print '</div>';
+	print '<div id="addClassFailMessage" class="vSpaced"></div>';
+	print '</div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
+
+
+	print '<div id="resetClassesModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="resetClassesForm" >';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+
+	print '<div class="vSpaced">';
+	print '<h3>'.JText::_("COM_BIODIV_SCHOOLADMIN_SURE_RESET").'</h3>';
+	print '        <button type="submit" class="btn btn-primary btn-lg vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET_CONFIRM").'</button>';
+	print '</div>';
+	print '</div>';
+	print '	  <div class="modal-footer">';
+
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
+
+
+	print '<div id="editSchoolModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_SCHOOL").' <span id="titleSchoolName"></span></h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '<form id="editSchoolForm" action="'. BIODIV_ROOT . '&task=edit_school" method="post">';
+	print '<input id="schoolId" type="hidden" name="schoolId" value="'.$this->schoolUser->school_id.'"/>';
+	print '<div class="h3 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_SCHOOL_NAME").'</div>';
+	print '<div class="form-group">';
+	print '<label for="schoolName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="schoolName"  name="schoolName" class="form-control" value="'.$this->schoolUser->school.'">';
+	print '</div>';
+	print '<div id="editSchoolFailMessage" class="vSpaced"></div>';
+	print '<button type="submit" class="btn btn-info btn-lg " >'.JText::_("COM_BIODIV_SCHOOLADMIN_UPDATE_SCHOOL").'</button>';
+	print '</form>';	  	  
+	print '<hr/>';
+
+	print '<div class="h3 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_LOGO").'</div>';
+
+	print '<button id="uploadSchoolLogo" href="#uploadFilesSection" type="button" class="btn btn-primary btn-lg vSpaced" data-toggle="collapse">'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_LOGO").'</button>';
+		
+	print '<div id="uploadFilesSection" class="collapse" >';
+	print '<div class="h4 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_HERE").'</div>';
+	print '<div id="logoErrorMessage" class="vSpaced"></div>';
+	print '<div id="uploadFiles vSpaced">';
+	print '<button id="resourceuploader" >'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_HERE").'</button>';
+	print '<div id="fileuploadspinner"  style="display:none"><i class="fa fa-spinner fa-spin fa-4x"></i></div>';
+	print '</div>';
+	print '</div>';
+		
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
+
+
+	print '<div id="editTeacherModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="editTeacherForm" action="'. BIODIV_ROOT . '&task=edit_teacher" method="post">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_TEACHER").' <span id="teacherUsername"></span></h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '<input id="teacherId" type="hidden" name="teacherId" value="0"/>';
+	print '<div class="vSpaced">';
+	print '<label for="teacherName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="teacherName"  name="teacherName">';
+	print '</div>';
+	// print '<div class="vSpaced">';
+	// print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
+	// print '<input type="password" id="password"  name="password">';
+	// print '</div>';
+	print '<div class="vSpaced">';
+	print '<div><label for="teacherActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
+	print '<input type="checkbox" id="teacherActive" name="teacherActive" value="1">';
+	print '</div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
+
+
+
+	print '<div id="editClassModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="editClassForm" action="'. BIODIV_ROOT . '&task=edit_class" method="post">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_CLASS").' <span id="titleClassName"></span></h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '<input id="classId" type="hidden" name="classId" value="0"/>';
+	print '<div class="vSpaced">';
+	print '<label for="editClassName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="editClassName"  name="editClassName">';
+	print '</div>';
+	print '<div class="vSpaced">';
+	print '<label for="editClassAvatar">'.JText::_("COM_BIODIV_SCHOOLADMIN_AVATAR").'</label>';
+	print '<select name="editClassAvatar" id="editClassAvatar">';
+	foreach ($this->avatars as $avatar) {
+		print ' <option value="'.$avatar->avatar_id.'">'.$avatar->name.'</option>';
+	}
+	print '</select>';
+	print '</div>';
+	print '<div class="vSpaced">';
+	print '<div><label for="classActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
+	print '<input type="checkbox" id="classActive" name="classActive" value="1">';
+	print '</div>';
+	print '      </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
+
+
+
+	print '<div id="editStudentModal" class="modal fade" role="dialog">';
+	print '  <div class="modal-dialog"  >';
+	print '    <!-- Modal content-->';
+	print '    <div class="modal-content">';
+	print '    <form id="editStudentForm" action="'. BIODIV_ROOT . '&task=edit_student" method="post">';
+	print '      <div class="modal-header">';
+	print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
+	print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_STUDENT").' <span id="studentUsername"></span></h4>';
+	print '      </div>';
+	print '     <div class="modal-body">';
+	print '<input id="studentId" type="hidden" name="studentId" value="0"/>';
+
+	print '<div class="vSpaced">';
+	print '<label for="studentName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
+	print '<input type="text" id="studentName"  name="studentName">';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="studentClass"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
+	print '<select id = "studentClass" name = "studentClass" class = "form-control">';
+	print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';					
+	foreach( $this->classes as $nextClass ){
+		print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
+	}
+	print '</select>';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
+	print '<input type="password" id="password"  name="password">';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<label for="password2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CONFIRM_PWD").'</label>';
+	print '<input type="password" id="password2"  name="password2">';
+	print '</div>';
+
+	print '<div class="vSpaced">';
+	print '<div><label for="studentActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
+	print '<input type="checkbox" id="studentActive" name="studentActive" value="1">';
+	print '</div>';
+
+	print '   </div>';
+	print '	  <div class="modal-footer">';
+	print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
+	print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
+	print '      </div>';
+	print '</form>';	  	  
+	print '    </div>'; // modalContent
+	print '  </div>';
+	print '</div>';
+
 }
-
-
-
-print '<div id="addClassModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="addClassForm" >';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_CLASS").'</h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<input id="roleId" type="hidden" name="roleId" value="0"/>';
-print '<div class="vSpaced">';
-print '<label for="className"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="className"  name="className">';
-print '</div>';
-print '<div class="vSpaced">';
-print '<label for="classAvatar">'.JText::_("COM_BIODIV_SCHOOLADMIN_AVATAR").'</label>';
-print '<select name="classAvatar" id="classAvatar">';
-foreach ($this->avatars as $avatar) {
-	print ' <option value="'.$avatar->avatar_id.'">'.$avatar->name.'</option>';
-}
-print '</select>';
-print '</div>';
-print '<div id="addClassFailMessage" class="vSpaced"></div>';
-print '</div>';
-print '	  <div class="modal-footer">';
-print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
-
-
-
-print '<div id="resetClassesModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="resetClassesForm" >';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET").'</h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-
-print '<div class="vSpaced">';
-print '<h3>'.JText::_("COM_BIODIV_SCHOOLADMIN_SURE_RESET").'</h3>';
-print '        <button type="submit" class="btn btn-primary btn-lg vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_RESET_CONFIRM").'</button>';
-print '</div>';
-print '</div>';
-print '	  <div class="modal-footer">';
-
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
-
-
-
-print '<div id="editSchoolModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_SCHOOL").' <span id="titleSchoolName"></span></h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<form id="editSchoolForm" action="'. BIODIV_ROOT . '&task=edit_school" method="post">';
-print '<input id="schoolId" type="hidden" name="schoolId" value="'.$this->schoolUser->school_id.'"/>';
-print '<div class="h3 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_SCHOOL_NAME").'</div>';
-print '<div class="form-group">';
-print '<label for="schoolName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="schoolName"  name="schoolName" class="form-control" value="'.$this->schoolUser->school.'">';
-print '</div>';
-print '<div id="editSchoolFailMessage" class="vSpaced"></div>';
-print '<button type="submit" class="btn btn-info btn-lg " >'.JText::_("COM_BIODIV_SCHOOLADMIN_UPDATE_SCHOOL").'</button>';
-print '</form>';	  	  
-print '<hr/>';
-
-print '<div class="h3 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_ADD_LOGO").'</div>';
-
-print '<button id="uploadSchoolLogo" href="#uploadFilesSection" type="button" class="btn btn-primary btn-lg vSpaced" data-toggle="collapse">'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_LOGO").'</button>';
-	
-print '<div id="uploadFilesSection" class="collapse" >';
-print '<div class="h4 vSpaced">'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_HERE").'</div>';
-print '<div id="logoErrorMessage" class="vSpaced"></div>';
-print '<div id="uploadFiles vSpaced">';
-print '<button id="resourceuploader" >'.JText::_("COM_BIODIV_SCHOOLADMIN_UPLOAD_HERE").'</button>';
-print '<div id="fileuploadspinner"  style="display:none"><i class="fa fa-spinner fa-spin fa-4x"></i></div>';
-print '</div>';
-print '</div>';
-	
-print '      </div>';
-print '	  <div class="modal-footer">';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
-
-
-
-print '<div id="editTeacherModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="editTeacherForm" action="'. BIODIV_ROOT . '&task=edit_teacher" method="post">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_TEACHER").' <span id="teacherUsername"></span></h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<input id="teacherId" type="hidden" name="teacherId" value="0"/>';
-print '<div class="vSpaced">';
-print '<label for="teacherName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="teacherName"  name="teacherName">';
-print '</div>';
-// print '<div class="vSpaced">';
-// print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
-// print '<input type="password" id="password"  name="password">';
-// print '</div>';
-print '<div class="vSpaced">';
-print '<div><label for="teacherActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
-print '<input type="checkbox" id="teacherActive" name="teacherActive" value="1">';
-print '</div>';
-print '      </div>';
-print '	  <div class="modal-footer">';
-print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
-
-
-
-
-print '<div id="editClassModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="editClassForm" action="'. BIODIV_ROOT . '&task=edit_class" method="post">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_CLASS").' <span id="titleClassName"></span></h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<input id="classId" type="hidden" name="classId" value="0"/>';
-print '<div class="vSpaced">';
-print '<label for="editClassName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="editClassName"  name="editClassName">';
-print '</div>';
-print '<div class="vSpaced">';
-print '<label for="editClassAvatar">'.JText::_("COM_BIODIV_SCHOOLADMIN_AVATAR").'</label>';
-print '<select name="editClassAvatar" id="editClassAvatar">';
-foreach ($this->avatars as $avatar) {
-	print ' <option value="'.$avatar->avatar_id.'">'.$avatar->name.'</option>';
-}
-print '</select>';
-print '</div>';
-print '<div class="vSpaced">';
-print '<div><label for="classActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
-print '<input type="checkbox" id="classActive" name="classActive" value="1">';
-print '</div>';
-print '      </div>';
-print '	  <div class="modal-footer">';
-print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
-
-
-
-
-print '<div id="editStudentModal" class="modal fade" role="dialog">';
-print '  <div class="modal-dialog"  >';
-print '    <!-- Modal content-->';
-print '    <div class="modal-content">';
-print '    <form id="editStudentForm" action="'. BIODIV_ROOT . '&task=edit_student" method="post">';
-print '      <div class="modal-header">';
-print '        <button type="button" class="close" data-dismiss="modal">&times;</button>';
-print '        <h4 class="modal-title">'.JText::_("COM_BIODIV_SCHOOLADMIN_EDIT_STUDENT").' <span id="studentUsername"></span></h4>';
-print '      </div>';
-print '     <div class="modal-body">';
-print '<input id="studentId" type="hidden" name="studentId" value="0"/>';
-
-print '<div class="vSpaced">';
-print '<label for="studentName"> '.JText::_("COM_BIODIV_SCHOOLADMIN_NAME").'</label>';
-print '<input type="text" id="studentName"  name="studentName">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="studentClass"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CLASS").'</label>';
-print '<select id = "studentClass" name = "studentClass" class = "form-control">';
-print '<option value="0">'.JText::_("COM_BIODIV_SCHOOLADMIN_NO_CLASS").'</option>';					
-foreach( $this->classes as $nextClass ){
-	print '<option value="'.$nextClass->class_id.'">'.$nextClass->name.'</option>';
-}
-print '</select>';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="password"> '.JText::_("COM_BIODIV_SCHOOLADMIN_PASSWORD").'</label>';
-print '<input type="password" id="password"  name="password">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<label for="password2"> '.JText::_("COM_BIODIV_SCHOOLADMIN_CONFIRM_PWD").'</label>';
-print '<input type="password" id="password2"  name="password2">';
-print '</div>';
-
-print '<div class="vSpaced">';
-print '<div><label for="studentActive"> '.JText::_("COM_BIODIV_SCHOOLADMIN_INCLUDE_POINTS").'</label></div>';
-print '<input type="checkbox" id="studentActive" name="studentActive" value="1">';
-print '</div>';
-
-print '   </div>';
-print '	  <div class="modal-footer">';
-print '        <button type="submit" class="btn btn-primary">'.JText::_("COM_BIODIV_SCHOOLADMIN_SAVE").'</button>';
-print '        <button type="button" class="btn btn-info" data-dismiss="modal">'.JText::_("COM_BIODIV_SCHOOLADMIN_CANCEL").'</button>';
-print '      </div>';
-print '</form>';	  	  
-print '    </div>'; // modalContent
-print '  </div>';
-print '</div>';
 
 
 JHTML::script("com_biodiv/commonbiodiv.js", true, true);

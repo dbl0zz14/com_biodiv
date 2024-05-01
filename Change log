@@ -1,3 +1,9 @@
+ 1/5/24 - Version 3.8.2
+* Change to single email for teacher sign-up to BES
+* Fix issue with apostrophe in project name
+* Refactored map functionality
+* Handle null species lists in kiosk
+
 # 1/4/24 - Version 3.8.1
 * Add loading message to Next Sequence button
 * PHP 8.0 updates

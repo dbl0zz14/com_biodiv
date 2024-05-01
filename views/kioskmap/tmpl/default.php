@@ -57,7 +57,7 @@ else {
 //print '  <div class="col-md-12">';
 print '  <div class="row">';
 print '  <div class="col-md-8 col-md-offset-2 h2 text-center map_header">'.JText::_("COM_BIODIV_KIOSKMAP_MAP_HEADING").'</div>';   
-print ' <div>'; // row
+print ' </div>'; // row
 //print ' <div>'; // col-12
 //print ' <div>'; // col-12
 
@@ -134,10 +134,10 @@ print '<div class="row">';
 print '<div class="col-xs-12 col-sm-12 col-md-8">';
 
 //print '<div id="discovermap" style="width:100%; height:70vh;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
-print '<div id="discovermap" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
+print '<div id="discovermap" style="width:100%; height:500px;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>';
 
 
-print '<h5 class="">'.JText::_("COM_BIODIV_KIOSKMAP_DATA_WARN").'</h5>';
+print '<div class="h5">'.JText::_("COM_BIODIV_KIOSKMAP_DATA_WARN").'</div>';
 print '</div>'; // col-8
 
 

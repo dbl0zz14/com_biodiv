@@ -2471,7 +2471,7 @@ class SchoolCommunity {
 			'username'=>$usernameF,
 			'password'=>$passwordF,
 			'email'=>$emailF,
-			'sendEmail'=>1,
+			'sendEmail'=>0,
 			'block'=>1,
 			'profileMW'=>$profileMW,
 			'groups'=>$groups,
@@ -3490,13 +3490,44 @@ class SchoolCommunity {
 			}
 			if ( $kiosk ) {
 				
+				$newUser = \JFactory::getUser ( $newSchoolSignup->person_id );
+				$activationCode = $newUser->activation;
+				
 				$subject = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_SUBJECT");
-				$msg = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_MESSAGE") . ' <a href="'.\JURI::root().'/bes-school-admin">'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_LINK_TEXT").'</a>';
+				$msg = \JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_MESSAGE") . ' <a href="'.\JURI::root().'/bes-school-activate?id='.$signupId.'&activation='.$activationCode.'">'.\JText::_("COM_BIODIV_SCHOOLCOMMUNITY_READY_LINK_TEXT").'</a>';
 				
 				self::notifyUser ( $newSchoolSignup->person_id, $subject, $msg );
 				
 			}
 		}
+	}
+	
+	
+	public static function activateNewSignUp ( $signupId, $activationCode ) {
+		
+		$options = dbOptions();
+		$userDb = $options['userdb'];
+		$prefix = $options['userdbprefix'];
+		
+		$db = \JDatabaseDriver::getInstance(dbOptions());
+			
+		$query = $db->getQuery(true)
+			->select("U.activation")
+			->from($userDb . "." . $prefix ."users U")
+			->innerJoin("SchoolSignup S on S.person_id = U.id")
+			->where("S.signup_id = " . $signupId);
+				
+		$db->setQuery($query);
+		
+		$activation = $db->loadResult();
+		
+		$activated = false;
+		if ( strcmp ( $activation, $activationCode ) == 0 ) {
+			$activated = \JUserHelper::activateUser ( $activationCode );
+		}
+		
+		return $activated;
+			
 	}
 	
 	

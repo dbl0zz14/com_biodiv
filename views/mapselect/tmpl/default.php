@@ -30,13 +30,19 @@ defined('_JEXEC') or die;
 </div>
 </form>
 <?php
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=AIzaSyAEq1lqv5U0cu2NObRiHnSlbkkynsiRcHY");
-// For dev    JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
-JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/dms.js", true, true);
-JHTML::script("com_biodiv/mapselect.js", true, true);
+
+$mapOptions = mapOptions();
+$key = $mapOptions['key'];
+
+
+JHtml::_('script', 'com_biodiv/mapinit.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/mapupdate.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/mapselect.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'https://maps.googleapis.com/maps/api/js?key='.$key.'&loading=async&callback=initMap', array(), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/vector3d.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/latlon-ellipsoidal.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/osgridref.js', array('version' => 'auto', 'relative' => true), array());
+
 
 ?>
 

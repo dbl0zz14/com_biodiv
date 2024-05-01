@@ -56,9 +56,9 @@ var BioDiv = {};
 BioDiv.root = "'. BIODIV_ROOT . '";');
 
 JHtml::_('bootstrap.framework');
-JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", array(), true);
-JHTML::script("bootstrap3-editable/bootstrap-editable.js", true, true);
-JHTML::script("com_biodiv/biodiv.js", true, true);
+//JHTML::stylesheet("bootstrap3-editable/bootstrap-editable.css", array(), true);
+//JHTML::script("bootstrap3-editable/bootstrap-editable.js", true, true);
+//JHTML::script("com_biodiv/biodiv.js", true, true);
 
 
 include "codes.php";
@@ -7710,12 +7710,9 @@ function getBirdClassificationButton ( $id, $animalArray ) {
 }
 
 function getSiteDataStrucs ( $projectIds ) {
-	//print "getSiteDataStrucs called\n";
-	//print_r ( $projectIds );
 	$db = JDatabase::getInstance(dbOptions());
 		
 	$project_ids = implode(',', $projectIds);
-	//print "project_ids = " . $project_ids;
 	$query = $db->getQuery(true);
 	$query->select("DISTINCT PO.project_id, O.option_id, O.option_name as struc")
 		->from("ProjectOptions PO")
@@ -7723,7 +7720,6 @@ function getSiteDataStrucs ( $projectIds ) {
 		->where("PO.project_id in (" . $project_ids . ")");
 	$db->setQuery($query);
 	$sitedatastrucs = $db->loadAssocList();
-	//print_r($sitedatastrucs);
 	return $sitedatastrucs;
 }
 

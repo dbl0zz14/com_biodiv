@@ -33,7 +33,7 @@ class BioDivViewSchoolAdmin extends JViewLegacy
 	else {
 		$this->personId = (int)userID();
 	}
-		
+	
 	if ( $this->schoolUser and ($this->schoolUser->role_id != Biodiv\SchoolCommunity::STUDENT_ROLE) ) {
 		
 		$this->helpOption = codes_getCode ( "schooladmin", "beshelp" );

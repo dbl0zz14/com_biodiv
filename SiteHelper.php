@@ -19,7 +19,13 @@ class SiteHelper {
 	{
 		$this->isCamera = $isCamera;
 		$this->justRecorded = false;
-		$this->userprojects = myTrappingProjects();
+		
+		$trappingProjects = myTrappingProjects();
+		$this->userprojects = array();
+		foreach ( $trappingProjects as $id=>$projectString ) {
+			$this->userprojects[$id] = str_replace('\'', '&#39', $projectString);
+		}
+		
 		$this->projectsitedata = getSiteDataStrucs(array_keys($this->userprojects));
 		
 		$this->setFieldsArray($isCamera);
@@ -34,6 +40,7 @@ class SiteHelper {
 		$query->where("person_id = " . (int)userID());
 
 		$db->setQuery($query);
+		
 		$this->sites = $db->loadAssocList("site_id");
 		
 	}

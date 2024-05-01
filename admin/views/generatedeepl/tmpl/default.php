@@ -19,7 +19,14 @@ print '<h2>'.$this->title.'</h2>';
 
 print '<h4>Once downloaded, upload to Transifex as a translation manually</h4>';
 
-print '<a href="'.$this->reportURL.'" download><button type="button" class="btn js-stools-btn-clear" title="Download report" >Download here</button></a>';
+if ( $this->reportURL ) {
+
+	print '<a href="'.$this->reportURL.'" download><button type="button" class="btn js-stools-btn-clear" title="Download report" >Download here</button></a>';
+}
+else {
+	
+	print '<h4>Sorry, an error has occurred: '.$this->errorMessage.'</h4>';
+}
 
 
 print '</div>';

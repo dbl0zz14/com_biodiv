@@ -30,8 +30,6 @@ class BioDivViewGenerateDeepL extends JViewLegacy
 		$this->language = $input->getString('trLang', 0);
 		$this->options = $input->getInt('opt', 0);
 		
-		error_log ( "Got language: " . $this->language );
-		
 		if ( $this->options ) {
 			$this->title = "Download translated non-species options file";
 		}
@@ -42,6 +40,9 @@ class BioDivViewGenerateDeepL extends JViewLegacy
 		$translateOpts = translateOptions();
 		$authKey = $translateOpts['deepl']; 
 		$this->translator = new \DeepL\Translator($authKey);
+		
+		$this->reportURL = null;
+		$this->errorMessage = "Unknown error";
 		
 		if ( $this->options ) {
 			
@@ -80,6 +81,8 @@ class BioDivViewGenerateDeepL extends JViewLegacy
 				
 				$languages = getSupportedLanguages();
 				
+				$trLang = null;
+				
 				// Find the Transifex lang code
 				$trCode = "no_lang";
 				foreach ( $languages as $lang ) {
@@ -88,43 +91,48 @@ class BioDivViewGenerateDeepL extends JViewLegacy
 					}
 				}
 				
-				$optionProp = strtolower($trLang);
-				
-				$i = 0;
-				foreach ( $this->optionsRows as $optionRow ) {
-					$translation = $translatedStrings[$i];
-					$optionRow->$optionProp = $translation->text;
-					$i++;
-				}
-				
-				// $optionsStr = print_r ( $this->optionsRows, true );
-				// error_log ( 'Options plus translations: ' . $optionsStr );
-				
-				
-				$headings = getOptionsHeadings();
-				
-				$rows = array();
-				foreach ( $this->optionsRows as $optionId=>$option ) {
-				
-					$optionsArray = array($optionId, 
-										str_replace(array("\r\n", "\n\r", "\r", "\n"), ' ', str_replace(',', '-', $option->option_name)),
-										$option->struc );
-										
-										
-					foreach ($languages as $id=>$lang) {
-						$col = strtolower($lang->transifex_code);
-						$prop = str_replace(array("\r\n", "\n\r", "\r", "\n"), ' ', str_replace(',', '-', $option->$col));
-						$optionsArray[] = $prop;
+				if ( $trLang ) {
+					$optionProp = strtolower($trLang);
+					
+					$i = 0;
+					foreach ( $this->optionsRows as $optionRow ) {
+						$translation = $translatedStrings[$i];
+						$optionRow->$optionProp = $translation->text;
+						$i++;
 					}
-										
-					array_push($rows, $optionsArray);
+					
+					// $optionsStr = print_r ( $this->optionsRows, true );
+					// error_log ( 'Options plus translations: ' . $optionsStr );
+					
+					
+					$headings = getOptionsHeadings();
+					
+					$rows = array();
+					foreach ( $this->optionsRows as $optionId=>$option ) {
+					
+						$optionsArray = array($optionId, 
+											str_replace(array("\r\n", "\n\r", "\r", "\n"), ' ', str_replace(',', '-', $option->option_name)),
+											$option->struc );
+											
+											
+						foreach ($languages as $id=>$lang) {
+							$col = strtolower($lang->transifex_code);
+							$prop = str_replace(array("\r\n", "\n\r", "\r", "\n"), ' ', str_replace(',', '-', $option->$col));
+							$optionsArray[] = $prop;
+						}
+											
+						array_push($rows, $optionsArray);
+					}
+					
+					$this->reportURL = createReportFile ( "OptionsForTranslation", $headings, $rows );
 				}
-				
-				$this->reportURL = createReportFile ( "OptionsForTranslation", $headings, $rows );
+				else {
+					$this->errorMessage = "Error: " .$this->language. " language is not supported by MammalWeb";
+				}
 			
 			}
 			else {
-				echo "Error: Num translated strings not equal to option strings";
+				$this->errorMessage = "Error: Num translated strings not equal to option strings";
 			}
 		}
 		else {

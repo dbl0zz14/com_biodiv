@@ -29,7 +29,7 @@ class BioDivViewBatchUsers extends JViewLegacy
 		//error_log ("BatchUsers view calling batchCreateUsers");
 		
 		$this->newUsers = Biodiv\Users::batchCreateUsers();
-		
+			
 		// Display the template
 		parent::display($tpl);
 	}

@@ -137,38 +137,41 @@ else {
 		print '<div id="mammal_buttons" class="species_buttons species_group col-md-12" style="display:none">';
 
 		// *********************  CHANGE THIS TO ONLY PRINT FIRST 20 TO ALLOW FOR ERRORS IN LISTS
-		$i = 0;
-		foreach ( $this->commonMammals as $species ) {
+		if ( $this->commonMammals ) {
 			
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."' style='object-fit: cover'>";
+			$i = 0;
+			foreach ( $this->commonMammals as $species ) {
+				
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."' style='object-fit: cover'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow = ( ($i+1)%4 == 0 );
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3">';
+				if ( $isLongSpeciesName ) {
+					//print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					//print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow = ( ($i+1)%4 == 0 );
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3">';
-			if ( $isLongSpeciesName ) {
-				//print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				//print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
 		}
 		
 		if ( $this->allMammals ) {
@@ -191,39 +194,40 @@ else {
 		// Scroll up
 		print '<div class="row"><button id="scroll_up_mammals" class="btn btn-lg btn-block scroll_btn"><span class="fa fa-2x fa-chevron-up"></span></button></div>';
 		
-		$i = 0;
-		$numSpecies = count($this->allMammals);
-		
-		foreach ( $this->allMammals as $species ) {
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."'>";
+		if ( $this->allMammals ) {
+			
+			$i = 0;
+			$numSpecies = count($this->allMammals);
+			
+			foreach ( $this->allMammals as $species ) {
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3 all_mammals_species">';
+				if ( $isLongSpeciesName ) {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;	
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3 all_mammals_species">';
-			if ( $isLongSpeciesName ) {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
-			
-			
 		}
 		
 		// Scroll down
@@ -249,36 +253,39 @@ else {
 
 		print '<div id="bird_buttons" class="species_buttons species_group col-md-12" style="display:none">';
 
-		$i = 0;
-		foreach ( $this->commonBirds as $species ) {
+		if ( $this->commonBirds ) {
 			
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."'>";
+			$i = 0;
+			foreach ( $this->commonBirds as $species ) {
+				
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow = ( ($i+1)%4 == 0 );
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3">';
+				if ( $isLongSpeciesName ) {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow = ( ($i+1)%4 == 0 );
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3">';
-			if ( $isLongSpeciesName ) {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
 		}
 
 		if ( $this->allBirds ) {
@@ -303,39 +310,40 @@ else {
 		// Scroll up
 		print '<div class="row"><button id="scroll_up_birds" class="btn btn-lg btn-block scroll_btn"><span class="fa fa-2x fa-chevron-up"></span></button></div>';
 		
-		$i = 0;
-		$numSpecies = count($this->allBirds);
-		
-		foreach ( $this->allBirds as $species ) {
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."'>";
+		if ( $this->allBirds ) {
+			
+			$i = 0;
+			$numSpecies = count($this->allBirds);
+			
+			foreach ( $this->allBirds as $species ) {
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3 all_birds_species">';
+				if ( $isLongSpeciesName ) {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3 all_birds_species">';
-			if ( $isLongSpeciesName ) {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
-			
-			
 		}
 		
 		// Scroll down
@@ -359,40 +367,43 @@ else {
 		
 		
 		// --------------------- Invert panel --------------------------
-
+		
 		print '<div id="invert_buttons" class="species_buttons species_group col-md-12" style="display:none">';
 
-		$i = 0;
-		$numCommon = count($this->commonInverts);
-		foreach ( $this->commonInverts as $species ) {
-			
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."'>";
+		if ( $this->commonInverts ) {
+
+			$i = 0;
+			$numCommon = count($this->commonInverts);
+			foreach ( $this->commonInverts as $species ) {
+				
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow = ( (($i+1)%4 == 0) or (($i+1) == $numCommon ) );
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3">';
+				if ( $isLongSpeciesName ) {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow = ( (($i+1)%4 == 0) or (($i+1) == $numCommon ) );
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3">';
-			if ( $isLongSpeciesName ) {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
 		}
 
 		if ( $this->allInverts ) {
@@ -417,39 +428,41 @@ else {
 		// Scroll up
 		print '<div class="row"><button id="scroll_up_inverts" class="btn btn-lg btn-block scroll_btn"><span class="fa fa-2x fa-chevron-up"></span></button></div>';
 		
-		$i = 0;
-		$numSpecies = count($this->allBirds);
-		
-		foreach ( $this->allInverts as $species ) {
-			$image = codes_getName($species['id'],'png');
-			$imageText = "";
-			if ( $image ) {
-				$imageURL = JURI::root().$image;
-				$imageText = "<img width='100%' src='".$imageURL."'>";
+		if ( $this->allInverts ) {
+			$i = 0;
+			$numSpecies = count($this->allInverts);
+			
+			foreach ( $this->allInverts as $species ) {
+				$image = codes_getName($species['id'],'png');
+				$imageText = "";
+				if ( $image ) {
+					$imageURL = JURI::root().$image;
+					$imageText = "<img width='100%' src='".$imageURL."'>";
+				}
+				
+				$isLongSpeciesName = false;
+				if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
+				
+				$newRow = ( $i%4 == 0 );
+				$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
+				
+				if ( $newRow ) print '<div class="row">';
+							
+				print '<div class="col-md-3 col-sm-3 col-xs-3 all_birds_species">';
+				if ( $isLongSpeciesName ) {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
+				}
+				else {
+					print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
+				}
+				print '</div>';
+				
+				if ( $endOfRow ) print '</div>';
+							
+				$i++;
+				
+				
 			}
-			
-			$isLongSpeciesName = false;
-			if ( strlen($species['name']) > 13 ) $isLongSpeciesName = true;
-			
-			$newRow = ( $i%4 == 0 );
-			$endOfRow =  ( ($i+1)%4 == 0 ) || ( $i+1 == $numSpecies ) ;
-			
-			if ( $newRow ) print '<div class="row">';
-						
-			print '<div class="col-md-3 col-sm-3 col-xs-3 all_birds_species">';
-			if ( $isLongSpeciesName ) {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name long_species_name">'.$species['name'].'</div></button>';
-			}
-			else {
-				print '	<button id="species_select_'.$species['id'].'" class="btn btn-lg btn-block btn-wrap-text btn-success species_select species_button full-img-btn">'.$imageText.'<div class="species_name">'.$species['name'].'</div></button>';
-			}
-			print '</div>';
-			
-			if ( $endOfRow ) print '</div>';
-						
-			$i++;
-			
-			
 		}
 		
 		// Scroll down

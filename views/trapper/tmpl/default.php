@@ -142,7 +142,7 @@ if(count($this->sites) == 0){
      print "<td>" . $this->siteCount[$site_id] . "</td>\n";
 	 
 	 // Projects additions
-	 $userProjects = addCSlashes(json_encode($this->userprojects),"'");
+	 $userProjects = json_encode($this->userprojects);
 	 $siteProjects = json_encode($this->projects[$site_id]);
      $editLink = "<a href='#'";
 	 $editLink .= " data-url='" . BIODIV_ROOT . "&task=ajax_update_site_projects&format=raw'";
@@ -191,15 +191,30 @@ else {
 $mapOptions = mapOptions();
 $key = $mapOptions['key'];
 
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
-JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
-JHTML::script("com_biodiv/geodesy-master/dms.js", true, true);
-JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-JHTML::script("com_biodiv/trapper.js", true, true);
-JHTML::script("com_biodiv/mapselect.js", true, true);
+
+JHtml::_('script', 'com_biodiv/mapinit.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/mapupdate.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'https://maps.googleapis.com/maps/api/js?key='.$key.'&loading=async&callback=initMap', array(), array());
+JHtml::_('stylesheet', 'bootstrap3-editable/bootstrap-editable.css', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'bootstrap3-editable/bootstrap-editable.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/vector3d.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/latlon-ellipsoidal.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/geodesy-master/osgridref.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/trapper.js', array('version' => 'auto', 'relative' => true), array());
+
+
+
+// JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
+// //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+
+
+// JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
+// JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
+// JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
+// JHTML::script("com_biodiv/geodesy-master/dms.js", true, true);
+// JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
+// JHTML::script("com_biodiv/trapper.js", true, true);
+// JHTML::script("com_biodiv/mapselect.js", true, true);
 ?>
 
 

@@ -30,7 +30,7 @@ class Users {
 		$numUsers = $input->getInt('numUsers', 0);
 		$userGroup = $input->getInt('userGroup', 0);
 		$startingNum = $input->getInt('startingNum', 0);
-		$project = $input->getInt('project', 0);
+		$projectId = $input->getInt('project', 0);
 		$addToSchool = $input->getInt('addToSchool', 0);
 		$schoolId = $input->getInt('school', 0);
 		$classId = $input->getInt('batchClassId', 0);
@@ -198,7 +198,7 @@ class Users {
 						// Link to school project
 						$fields = new \StdClass();
 						$fields->person_id = $user->id;
-						$fields->project_id = $project;
+						$fields->project_id = $projectId;
 						$fields->role_id = 2;
 						
 						$success = $db->insertObject("ProjectUserMap", $fields);

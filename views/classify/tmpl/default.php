@@ -8,6 +8,8 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
+use Joomla\CMS\HTML\HTMLHelper;
+
 $document = JFactory::getDocument();
 //$document->addScriptDeclaration("BioDiv.next_photo = ".$this->photoDetails['next_photo'].";");
 if ( $this->photo_id ) {
@@ -473,16 +475,27 @@ foreach($this->classifyInputs as $formInput){
 </div>
 
 <?php
+
 $mapOptions = mapOptions();
 $key = $mapOptions['key'];
 
-//JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
-JHTML::script("com_biodiv/bootbox.js", true, true);
-JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-JHTML::script("com_biodiv/commonclassify.js", true, true);
-JHTML::script("com_biodiv/classify.js", true, true);
-JHTML::script("com_biodiv/userchoice.js", true, true);
-JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key . "&callback=initMap");
+// //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
+// JHTML::script("com_biodiv/bootbox.js", true, true);
+// JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
+// JHTML::script("com_biodiv/commonclassify.js", true, true);
+// JHTML::script("com_biodiv/classify.js", true, true);
+// JHTML::script("com_biodiv/userchoice.js", true, true);
+// JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key . "&callback=initMap");
+
+JHtml::_('script', 'com_biodiv/commonclassify.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/classify.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/userchoice.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/mapinit.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/mapdraw.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'https://maps.googleapis.com/maps/api/js?key='.$key.'&loading=async&callback=initMap', array(), array());
+
+
+
 
 ?>
 

@@ -34,6 +34,23 @@ BioDiv.root = "'. BIODIV_ADMIN_ROOT . '";');
 JHtml::_('jquery.framework');
 
 
+function db(){
+  static $db;
+  $options = dbOptions();
+  if(!$db){
+    $db = new mysqli($options['host'],
+		     $options['user'],
+		     $options['password'],
+		     $options['database']);
+  }
+  return $db;
+}
+
+
+$dbOptions = dbOptions();
+codes_parameters_addTable("StructureMeta", $dbOptions['database']);
+
+
 
 function printAdminMenu($currentPage) {
 	

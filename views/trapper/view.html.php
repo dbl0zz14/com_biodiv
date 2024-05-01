@@ -40,15 +40,14 @@ class BioDivViewTrapper extends JViewLegacy
 		$this->help = $this->siteHelper->getHelpArray();
 
 		$this->sites = $this->siteHelper->getSites();
-
-
+		
 		$this->siteCount = $this->siteHelper->getSitePhotoCount();
 
 		// Projects additions.
 		$this->projecthelp = "All projects which this site and this user are members of.";
 
 		$this->userprojects = $this->siteHelper->getUserProjects();
-
+		
 		// For each user project get any additional data required
 		$this->projectsitedata = $this->siteHelper->getProjectSiteData();
 

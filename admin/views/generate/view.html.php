@@ -106,25 +106,27 @@ class BioDivViewGenerate extends JViewLegacy
 
 				$jarticle->load($species->article_id); 
 			
+				$scientificName = "Scientific name not available";
+				
 				$introtext = $jarticle->introtext;
 				
-				$dom = new DomDocument();
-				@ $dom->loadHTML(mb_convert_encoding($introtext, 'HTML-ENTITIES', 'UTF-8'));
-				
-				$scientificName = "Scientific name not available";
+				if ( $introtext ) {
+					$dom = new DomDocument();
+					@ $dom->loadHTML(mb_convert_encoding($introtext, 'HTML-ENTITIES', 'UTF-8'));
 								
-				$ps = $dom->getElementsByTagName('p');
-				foreach( $ps as $p ) {
-					
-					$text = $p->textContent;
-					
-					$sciName = "Scientific name: ";
-					
-					if ( stripos ( $text, $sciName ) !== false ) {
+					$ps = $dom->getElementsByTagName('p');
+					foreach( $ps as $p ) {
 						
-						$scientificName = substr( $text, strlen($sciName) );
+						$text = $p->textContent;
+						
+						$sciName = "Scientific name: ";
+						
+						if ( stripos ( $text, $sciName ) !== false ) {
+							
+							$scientificName = substr( $text, strlen($sciName) );
+						}
 					}
-				}
+				}	
 				
 				$speciesArray = array($optionId, 
 									$species->option_name, 
