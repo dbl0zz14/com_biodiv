@@ -186,11 +186,11 @@ jQuery(document).ready(function(){
 	
 
 	// editing enable
-	//jQuery('.biodiv_edit_enable').click(function (){
-		// //		jQuery('.biodiv_editable').editable('disable');
-		// var id = jQuery(this).attr('id');
-		// jQuery('.' + id).editable('toggleDisabled');
-	    //});
+	jQuery('.biodiv_edit_enable').click(function (){
+		//		jQuery('.biodiv_editable').editable('disable');
+		var id = jQuery(this).attr('id');
+		jQuery('.' + id).editable('toggleDisabled');
+	    });
 
 	jQuery('[data-toggle="tooltip"]').tooltip({'delay': {'show': 1000, 'hide': 10}});
 	
