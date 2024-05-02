@@ -5,6 +5,8 @@ async function drawMap (){
 	
 	try{
 		
+		const { Map } = await google.maps.importLibrary("maps");
+		
 		let south = parseFloat(BioDiv.south);
 		let west = parseFloat(BioDiv.west);
 		let north = parseFloat(BioDiv.north);

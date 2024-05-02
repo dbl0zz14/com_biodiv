@@ -190,11 +190,14 @@ else {
 <?php
 $mapOptions = mapOptions();
 $key = $mapOptions['key'];
+print '<script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "'.$key.'",
+    v: "weekly",
+  });
+</script>';
 
-
-JHtml::_('script', 'com_biodiv/mapinit.js', array('version' => 'auto', 'relative' => true), array());
 JHtml::_('script', 'com_biodiv/mapupdate.js', array('version' => 'auto', 'relative' => true), array());
-JHtml::_('script', 'https://maps.googleapis.com/maps/api/js?key='.$key.'&loading=async&callback=initMap', array(), array());
 JHtml::_('stylesheet', 'bootstrap3-editable/bootstrap-editable.css', array('version' => 'auto', 'relative' => true), array());
 JHtml::_('script', 'bootstrap3-editable/bootstrap-editable.js', array('version' => 'auto', 'relative' => true), array());
 JHtml::_('script', 'com_biodiv/geodesy-master/vector3d.js', array('version' => 'auto', 'relative' => true), array());
@@ -202,19 +205,6 @@ JHtml::_('script', 'com_biodiv/geodesy-master/latlon-ellipsoidal.js', array('ver
 JHtml::_('script', 'com_biodiv/geodesy-master/osgridref.js', array('version' => 'auto', 'relative' => true), array());
 JHtml::_('script', 'com_biodiv/trapper.js', array('version' => 'auto', 'relative' => true), array());
 
-
-
-// JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
-// //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
-
-
-// JHTML::script("com_biodiv/geodesy-master/vector3d.js", true, true);
-// JHTML::script("com_biodiv/geodesy-master/latlon-ellipsoidal.js", true, true);
-// JHTML::script("com_biodiv/geodesy-master/osgridref.js", true, true);
-// JHTML::script("com_biodiv/geodesy-master/dms.js", true, true);
-// JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
-// JHTML::script("com_biodiv/trapper.js", true, true);
-// JHTML::script("com_biodiv/mapselect.js", true, true);
 ?>
 
 

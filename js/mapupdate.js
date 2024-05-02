@@ -1,6 +1,9 @@
 
 async function updateMap ( newLatLng ) {
 	
+	const { Map } = await google.maps.importLibrary("maps");
+	const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+	
 	if ( newLatLng == null ) {
 		
 		var grid_ref;
