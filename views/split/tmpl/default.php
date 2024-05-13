@@ -15,6 +15,7 @@ $ff = new BiodivFFMpeg();
 
 $err_msg = print_r ( $this->files, true );
 error_log ( "Files to split: " . $err_msg );
+error_log ( "Files to split: " . $err_msg, 3, '/var/log/httpd/naturesaudio/error_log' );
 
 foreach ( $this->files as $bigFile ) {
 	
@@ -27,21 +28,30 @@ foreach ( $this->files as $bigFile ) {
 	$fullfilename = $bigFile['dirname'] . "/" . $bigFile['filename'];
 	
 	print "<h3>Full filename: " . $fullfilename . "</h3>";
-	error_log ( "Full filename:  " . $fullfilename );
-	error_log ( "calling getDuration with file " . $fullfilename );
 	$duration = $ff->getDuration($fullfilename);
-	print "<h3>Duration: " . $duration . "</h3>";
 	
-	$oneFile = $this->fileLength;
+	$oneFile = (int)$this->fileLength;
 	$twoFiles = $oneFile * 2;
 	$problem = false;
 	
 	// Horrendous repetition in here - should take out as a function...
 	
 	// If file less than 30 secs, leave complete and copy details to upload table.  Add a 1 second tolerance
-	if ( $duration < $oneFile + 1 ) {
-		print "<h4>Just one file</h4>";
+	$singleFile = false;
+	if ( $duration == null ) {
 		
+		print "<h4>Duration not available, just one file</h4>";
+		$singleFile = true;
+		
+	}
+	else if ( $duration < $oneFile + 1 ) {
+		
+		print "<h4>Just one file</h4>";
+		$singleFile = true;
+		
+	}
+	if ( $singleFile ) {	
+	
 		if ( $this->sonograms ) {
 			$filestem = JFile::stripExt($fullfilename);
 			

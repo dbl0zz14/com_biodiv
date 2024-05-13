@@ -35,6 +35,10 @@ class BiodivFFMpeg {
 			$success = false;
 		}
 		
+		if ( is_string ( $duration ) && str_contains($duration, 'N/A') ) {
+			$success = false;
+		}
+		
 		return $success ? $duration : null;
 	}
 	
@@ -167,7 +171,11 @@ class BiodivFFMpeg {
 		if ( $success ) {
 			
 			// Get the audio duration:
-			$dur = round($this->getDuration($infile), 2);
+			$dur = 0;
+			$d = $this->getDuration($infile);
+			if ( $d ) {
+				$dur = round((float)$d, 2);
+			}
 						
 			// Check the redline file exists
 			if ( file_exists ( $this->redlineFile ) ) {

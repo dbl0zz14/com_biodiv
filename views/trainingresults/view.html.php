@@ -176,37 +176,18 @@ class BioDivViewTrainingResults extends JViewLegacy
 				
 				$userIds = array_unique (array_map ( function($x) { return $x->id; } , $useranimals ) );
 				  
-				error_log("userIds:");
-				$str = print_r($userIds, true);
-				error_log($str);
-				
 				// Compare the sets of species.
 				$userCorrectPrimary = array_intersect ( $userIds, $correctPrimaryIds );
-				
-				error_log("userCorrectPrimary:");
-				$str = print_r($userCorrectPrimary, true);
-				error_log($str);
 				
 				$numCorrectPrimary = count($userCorrectPrimary);
 				
 				$userSecondary = array_diff ( $userIds, $userCorrectPrimary );
 				
-				error_log("userSecondary:");
-				$str = print_r($userSecondary, true);
-				error_log($str);
-				
 				$userCorrectSecondary = array_intersect ( $correctSecondaryIds, $userSecondary );
 				$numCorrectSecondary = count($userCorrectSecondary);
 				
-				error_log("userCorrectSecondary:");
-				$str = print_r($userCorrectSecondary, true);
-				error_log($str);
 				
 				$userRemaining = array_diff ( $userSecondary, $userCorrectSecondary );
-				
-				error_log("userRemaining:");
-				$str = print_r($userRemaining, true);
-				error_log($str);
 				
 				$numWrong = count($userRemaining);
 				
@@ -220,13 +201,11 @@ class BioDivViewTrainingResults extends JViewLegacy
 				
 				$this->wrong[] = $numWrong;
 				
-				error_log("Num wrong for " . $seq->getId() . " is " . $numWrong);
 				
 				$marks = $numCorrectPrimary + $numCorrectSecondary;
 				$this->marks[] = $marks;
 				$this->correctPrimary[] = $numCorrectPrimary;
 				
-				error_log("Marks for " . $seq->getId() . " is " . $marks);
 				
 				$numUserAnimals = count($useranimals);
 				
