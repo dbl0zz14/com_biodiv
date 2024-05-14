@@ -72,8 +72,8 @@ class BioDivViewUpload extends JViewLegacy
 		$this->end_date = "";
 		
 		$this->previous_upload_id = null;
-		$this->previous_deployment_date = null;
-		$this->previous_collection_date = null;
+		$this->previous_deployment_date = new JDate();
+		$this->previous_collection_date = new JDate();
 		$this->previous_upload_date = null;
 
 		$db = JDatabase::getInstance(dbOptions());
