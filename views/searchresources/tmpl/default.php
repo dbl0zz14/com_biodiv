@@ -671,20 +671,17 @@ print '  </div>'; // modal dialog
 print '</div>'; // filterModal
 
 
-
-JHTML::script("com_biodiv/commonbiodiv.js", true, true);
-JHTML::script("com_biodiv/commondashboard.js", true, true);
-JHTML::script("com_biodiv/resourcelist.js", true, true);
-JHTML::script("com_biodiv/resourceupload.js", true, true);
-JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
-//JHTML::script("com_biodiv/pdfjs/pdf.worker.js", true, true);
-//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.228/pdf.min.js", false, true);
-
-
-JHTML::script("com_biodiv/searchresources.js", true, true);
-JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
+JHtml::_('script', 'com_biodiv/commonbiodiv.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/commondashboard.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/resourceupload.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/resourcelist.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/pdfjs/pdf.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'jquery-upload-file/jquery.uploadfile.min.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/pdfjs/pdf.worker.js', array('version' => 'auto', 'relative' => true), array());
+JHtml::_('script', 'com_biodiv/searchresources.js', array('version' => 'auto', 'relative' => true), array());
 if ( $this->help ) {
-	JHTML::script("com_biodiv/help.js", true, true);
+	JHtml::_('script', 'com_biodiv/help.js', array('version' => 'auto', 'relative' => true), array());
 }
+
 
 ?>

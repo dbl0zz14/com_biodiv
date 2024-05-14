@@ -3,6 +3,7 @@
 * Fix issue with apostrophe in project name
 * Refactored map functionality
 * Handle null species lists in kiosk
+* NaturesAudio PHP 8 updates
 
 # 1/4/24 - Version 3.8.1
 * Add loading message to Next Sequence button
