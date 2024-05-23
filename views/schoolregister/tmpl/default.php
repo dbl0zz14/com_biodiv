@@ -126,9 +126,9 @@ print '</div>'; // displayArea
 
 print JHtml::_('form.token');
 
-JHTML::script("com_biodiv/schoolregister.js", true, true);
-JHTML::script("https://www.google.com/recaptcha/api.js", true, true);
+JHtml::_('script', 'com_biodiv/schoolregister.js', array('version' => 'auto', 'relative' => true), array());
 
+JHtml::_('script', 'https://www.google.com/recaptcha/api.js', array(), array());
 
 
 
