@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 
 
-	print "<h1>AI processing complete</h1>";
+	print "<h1>" . $this->aiType . " AI processing complete</h1>";
 	
 
 

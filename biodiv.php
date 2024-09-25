@@ -25,6 +25,7 @@ include_once "BiodivSurvey.php";
 include_once "BiodivReport.php";
 include_once "BiodivRecaptcha.php";
 include_once "BiodivConservationAI.php";
+include_once "BiodivMegadetector.php";
 include_once "BiodivAnalysis.php";
 include_once "BiodivOctopus.php";
 include_once "KioskSpecies.php";
@@ -172,7 +173,7 @@ function codes_insertObject($fields, $struc){
 				$success = $db->insertObject($table, $exifFields);
 				if($success){
 					//print "Insert succeeded";
-					error_log("Insert succeeded, id = " . $id );
+					//error_log("Insert succeeded, id = " . $id );
 				}
 				else{
 					//print "Insert failed";
@@ -4535,6 +4536,8 @@ and parent_project_id in (
   $query->where("O.struc = 'priority'");
   $query->where("P.access_level < 3");
   $query->where("P.parent_project_id is null" );
+  $query->where("P.project_id not in (380,183,381)" );
+
   //$query->order("P.listing_level, P.project_prettyname" );
   //$db->setQuery($query);
   
@@ -4546,6 +4549,8 @@ and parent_project_id in (
   $query2->where("O.struc = 'priority'");
   $query2->where("P.access_level < 3");
   $query2->where("P.parent_project_id in (select project_id from Project where parent_project_id is null and access_level > 2)" );
+  $query2->where("P.project_id not in (380,183,381)" );
+
   $db->setQuery($query);
   
   $q3 = $db->getQuery(true)
@@ -4561,6 +4566,21 @@ and parent_project_id in (
   //print_r($listedprojects);
   
   return $listedprojects;
+}
+
+function getChildProjectsById($project_id, $include_private = false){
+
+	$db = JDatabase::getInstance(dbOptions());
+	$query = $db->getQuery(true);
+	$query->select("project_id as proj_id, project_prettyname as proj_prettyname")->from("Project")
+		->where("parent_project_id = " . (int)$project_id);
+	// exclude private projects
+	if ( $include_private == false ) {
+	  $query->where("access_level < 3");
+	}
+	$db->setQuery($query);
+	$children = $db->loadAssocList('proj_id', 'proj_prettyname');
+	return $children;
 }
 
 // return two values: number of classifications and total number of sequences uploaded for this project
@@ -7520,7 +7540,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 		
 							// Add the file to the Conservation AI queue
 							if ( $struc == 'photo' ) {
-								addToAIQueue('CAI', $newId);
+								addToAIQueue('MEGA', $newId);
 							}
 						}
 						else {
@@ -7586,7 +7606,7 @@ function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
 	if($photoId){
 		error_log("Success writing split file " . $newFile . ", photo_id = " . $photoId );
 		
-		addToAIQueue('CAI', $photoId);
+		addToAIQueue('MEGA', $photoId);
 	}
 	else {
 		error_log("Failed writing split file " . $newFile );
@@ -8132,6 +8152,25 @@ function addToAIQueue($aiType, $photoId, $priority = 5) {
 			
 		}
 	}
+	else if ( $aiType == 'MEGA' && is_numeric($photoId) ) {
+		
+		$requireMEGA = getSetting("megadetector") == "yes";
+		
+		if ( $requireMEGA ) {
+			
+			$db = JDatabase::getInstance(dbOptions());
+
+			$aiFields = new StdClass();
+			$aiFields->photo_id = $photoId;
+			$aiFields->ai_type = 'MEGA';
+			$aiFields->priority = $priority;
+			$success = $db->insertObject("AIQueue", $aiFields);
+			if(!$success){
+				error_log ( "AIQueue insert failed" );
+			}
+			
+		}
+	}
 	
 }
 
@@ -8143,6 +8182,29 @@ function addUploadToAIQueue($aiType, $uploadId, $priority = 5) {
 		$requireCAI = getSetting("conservation_ai") == "yes";
 		
 		if ( $requireCAI ) {
+			
+			$db = JDatabase::getInstance(dbOptions());
+			
+			$query = $db->getQuery(true);
+			$query->select("photo_id")->from("Photo P")
+				->where("upload_id = " . $uploadId )
+				->where("status not in (4,5,7)")
+				->where("photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($aiType).") ");
+			$db->setQuery($query);
+			$photoIds = $db->loadColumn();
+			
+			foreach ( $photoIds as $photoId ) {
+				
+				addToAIQueue($aiType, $photoId, $priority);
+				
+			}
+		}
+	}
+	else if (  (strCmp($aiType, "MEGA") == 0) && is_numeric($uploadId) ) {
+		
+		$requireMEGA = getSetting("megadetector") == "yes";
+		
+		if ( $requireMEGA ) {
 			
 			$db = JDatabase::getInstance(dbOptions());
 			

@@ -84,7 +84,7 @@ class BiodivConservationAI {
 			
 			$data = new stdClass;
 			$data->uploaddata = $uploadArray;
-			$data->urls = $urlArray;
+			$data->urls = array_values($urlArray);
 			
 			$dataJson = json_encode ( $data );
 			

@@ -24,9 +24,10 @@ class BioDivViewRequestAI extends JViewLegacy
 	const SEND_ERROR		= 4;
 	const FILETYPE_ERROR	= 5;
 	const LONG_SEQUENCE		= 6;
+	const MANUAL_UNQUEUE	= 7;
 	
-	const MAX_NUM = 50;
-	const NUM_REQUESTS = 5;
+	const MAX_NUM = 40;
+	const NUM_REQUESTS = 15;
 	
 	/**
 	 *
@@ -53,9 +54,11 @@ class BioDivViewRequestAI extends JViewLegacy
 			$this->number = self::MAX_NUM;
 		}
 		
+		$this->aiType = $input->getString('ai', 'CAI');
+		
 		$this->photos = array();
 		$this->siteIds = array();
-		
+
 		for ( $i=0; $i < $this->repeat; $i++ ) {
 			
 			if ( canRunScripts() ) {
@@ -66,7 +69,7 @@ class BioDivViewRequestAI extends JViewLegacy
 				$query->select("P.site_id")
 					->from("AIQueue AIQ")
 					->innerJoin("Photo P on P.photo_id = AIQ.photo_id")
-					->where("ai_type = " . $db->quote('CAI') )
+					->where("ai_type = " . $db->quote($this->aiType) )
 					->where("AIQ.status = " . self::TO_SEND)
 					->where("P.s3_status = 1")
 					->where("P.sequence_id > 0")
@@ -85,14 +88,14 @@ class BioDivViewRequestAI extends JViewLegacy
 					$query->select("AIQ.photo_id, P.person_id, P.site_id, P.dirname, P.filename, P.sequence_num")
 						->from("AIQueue AIQ")
 						->innerJoin("Photo P on P.photo_id = AIQ.photo_id")
-						->where("ai_type = " . $db->quote('CAI') )
+						->where("ai_type = " . $db->quote($this->aiType) )
 						->where("AIQ.status = " . self::TO_SEND)
 						->where("P.site_id = " . $siteId )
 						->where("P.s3_status = 1")
 						->where("P.sequence_id > 0")
 						->order("AIQ.priority, AIQ.aiq_id");
 						
-					$db->setQuery($query, 0, self::MAX_NUM); // LIMIT $max_num
+					$db->setQuery($query, 0, $this->number); // LIMIT $this->max_num
 					
 					//error_log("RequestAI select query created: " . $query->dump());
 			
@@ -100,20 +103,20 @@ class BioDivViewRequestAI extends JViewLegacy
 					
 					$theseIds = array_keys($this->photos[$i]);
 					
-					$this->setQueueStatusMultiple ( $theseIds, BioDivViewRequestAI::PROCESSING );
+					$this->setQueueStatusMultiple ( $this->aiType, $theseIds, BioDivViewRequestAI::PROCESSING );
 				
 				}
 				
 			}
 		}
-		
+
 		parent::display($tpl);
 	}
 	
 	
 	
 	
-	protected function setQueueStatusSingle ( $photoId, $status, $msg = null ) {
+	protected function setQueueStatusSingle ( $aiType, $photoId, $status, $msg = null ) {
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
@@ -131,6 +134,7 @@ class BioDivViewRequestAI extends JViewLegacy
 		
 		// Conditions for which records should be updated.
 		$conditions = array(
+			$db->quoteName('ai_type') . ' = ' . $db->quote($aiType),
 			$db->quoteName('photo_id') . ' = ' . $photoId 
 		);
 
@@ -146,7 +150,7 @@ class BioDivViewRequestAI extends JViewLegacy
 	}
 	
 	
-	protected function setQueueStatusMultiple ( $photoIdArray, $status, $msg = null ) {
+	protected function setQueueStatusMultiple ( $aiType, $photoIdArray, $status, $msg = null ) {
 		
 		$result = true;
 		if ( count($photoIdArray) > 0 ) {
@@ -167,7 +171,8 @@ class BioDivViewRequestAI extends JViewLegacy
 			
 			// Conditions for which records should be updated.
 			$conditions = array(
-				$db->quoteName('photo_id') . ' IN (' . $photoStr . ') '
+				$db->quoteName('ai_type') . ' = ' . $db->quote($aiType),
+			$db->quoteName('photo_id') . ' IN (' . $photoStr . ') '
 			);
 
 			$query->update($db->quoteName($table))->set($fields)->where($conditions);
