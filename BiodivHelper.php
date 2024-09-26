@@ -166,7 +166,7 @@ class BiodivHelper {
 
 
 	// Return the expertise details for a single user id as a list of objects
-	function classify( $sequenceId, $photoId, $origin, $model, $originRef, $siteId, $filename, $speciesType, $species, $speciesId, $prob, $xmin = null, $ymin = null, $xmax = null, $ymax = null ) {
+	function classify( $sequenceId, $photoId, $origin, $model, $originRef, $siteId, $filename, $speciesType, $species, $speciesId, $prob = null, $xmin = null, $ymin = null, $xmax = null, $ymax = null ) {
 		
 		try
 		{
