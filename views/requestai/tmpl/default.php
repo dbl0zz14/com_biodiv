@@ -149,7 +149,7 @@ for ( $i=0; $i < $this->repeat; $i++ ) {
 					error_log ( "Error calling BiodivMegaDetector::classify: " . $errMsg );
 					
 					// Check for timeouts and requeue
-					if (($mega->getLastCode() == 0) && (strpos($errMsg, 'timed out') !== false)) {
+					if (($mega->getLastCode() != 200) && (strpos($errMsg, 'timed out') !== false)) {
 						
 						$this->setQueueStatusMultiple ( $this->aiType, $photoIds, BioDivViewRequestAI::TO_SEND, $errMsg );
 					}
