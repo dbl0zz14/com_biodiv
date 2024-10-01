@@ -248,15 +248,24 @@ class BioDivViewProcessAI extends JViewLegacy
 		}
 		else if ( $this->aiType == 'MEGA' ) {
 			
+			
 			// Identify sequences which have been sent through Megadetector and all
 			// images have either no detections or probability < threshold.
 			// These will be unavailable and not sent to CAI so set the status for all Photos in sequence.
-			$nothing = 'Nothing';
-			$nothingId = codes_getCode ( $nothing, 'noanimal' );
+			$nothingId = codes_getCode ( 'Nothing', 'noanimal' );
+			$humanId = codes_getCode ( 'Human', 'content' );
+			$vehicleId = codes_getCode ( 'Car', 'aiclass' );
+			$animalId = codes_getCode ( 'Animal', 'aiclass' );
+			
+			$megadetectorHumanThreshold = 0.01;
+			$megadetectorAnimalThreshold = 0.01;
+			$megadetectorVehicleThreshold = 0.01;
 			
 			$this->megaOptions = megaOptions();
 			if ( $this->megaOptions ) {
-				$megadetectorThreshold = $this->megaOptions['threshold'];
+				$megadetectorHumanThreshold = $this->megaOptions['humanthreshold'];
+				$megadetectorAnimalThreshold = $this->megaOptions['animalthreshold'];
+				$megadetectorVehicleThreshold = $this->megaOptions['vehiclethreshold'];
 			}
 			
 			$db = JDatabase::getInstance(dbOptions());
@@ -304,6 +313,7 @@ class BioDivViewProcessAI extends JViewLegacy
 				
 				$onCAIQueue = 0;
 				$hasCAIProblem = 0;
+				$hasHumanDetected = 0;
 				$hasNothingDetected = array();
 				$hasDetectionBelowThreshold = array();
 				$hasDetectionAboveThreshold = array();
@@ -333,10 +343,17 @@ class BioDivViewProcessAI extends JViewLegacy
 						break;
 					}
 					if ( property_exists($photo, 'species_id') ) {
-						if ( $photo->species_id == $nothingId ) {
+						if ( $photo->species_id == $humanId && $photo->prob > $megadetectorHumanThreshold ) {
+							$hasHumanDetected += 1;
+							break;
+						}
+						else if ( $photo->species_id == $nothingId ) {
 							$hasNothingDetected[$photo->photo_id] = true;
 						}
-						else if ( $photo->prob < $megadetectorThreshold ) {
+						else if ( $photo->species_id == $animalId && $photo->prob < $megadetectorAnimalThreshold ) {
+								$hasDetectionBelowThreshold[$photo->photo_id] = true;
+						}
+						else if ( $photo->species_id == $vehicleId && $photo->prob < $megadetectorVehicleThreshold ) {
 							$hasDetectionBelowThreshold[$photo->photo_id] = true;
 						}
 						else {
@@ -375,6 +392,37 @@ class BioDivViewProcessAI extends JViewLegacy
 				
 				if ( $photosInSequence != $photosProcessed ) {
 					print ( "<br>Incomplete sequence (".$sequenceId."), leave for next run" );
+				}
+				else if ( $hasHumanDetected > 0 ) {
+					
+					print ( "<br>Some photos in sequence " . $sequenceId . " have human detections so flagging before adding to AIQueue" );
+					//error_log ( "Some photos in sequence " . $sequenceId . " have human detections so flagging before adding to AIQueue" );
+					
+					// Update Photo table contains_human column to 1 if not already set.
+					$query = $db->getQuery(true);
+			
+					$fields = array(
+						$db->quoteName('contains_human') . ' = 1' 
+					);
+
+					// Conditions for which records should be updated.
+					$conditions = array(
+						$db->quoteName('sequence_id') . ' = ' . $sequenceId, 
+						$db->quoteName('contains_human') . ' = 0' 
+					);
+
+					$query->update($db->quoteName('Photo'))->set($fields)->where($conditions);
+
+					//error_log("ProcessAI view update human query created: " . $query->dump());	
+
+					$db->setQuery($query);
+
+					$result = $db->execute();
+			
+					// Add to CAI queue
+					foreach ( $uniquePhotoIds as $newId ) {
+						addToAIQueue('CAI', $newId);
+					}
 				}
 				else if ( count($hasDetectionAboveThreshold) > 0 ) {
 					
