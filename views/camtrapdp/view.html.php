@@ -14,6 +14,62 @@ jimport('joomla.application.component.view');
 
 class FlxZipArchive extends ZipArchive 
 {
+	// Max zip file size
+	const ZIP_SIZE_THRESHOLD = 400000000;
+	
+	private $zipFull;
+	private $nextLocation;
+	private $nextName;
+	
+	private $oversizedLocations;
+	
+	public static function createArrayOfZipFiles ( $projectZipFileStem, $location, $name ) {
+		
+		$zips = array();
+		$moreToDo = true;
+		$label = 1;
+		$isContinue = false;
+		$nextL = null;
+		$nextN = null;
+		
+		set_time_limit ( 300 );
+		
+		$allOversizedLocations = null;
+		
+		while ( $moreToDo ) { 
+		
+			$zipFile = $projectZipFileStem . "_" . $label . ".zip";
+			
+			error_log ( "Creating zip file " . $zipFile );
+			
+			$zip = new FlxZipArchive;
+			
+			if ( $zip->open($zipFile, ZipArchive::CREATE ) === TRUE ) {
+				
+				$zip->oversizedLocations = $allOversizedLocations;
+			
+				$zip->startAddDir($location, $name, $isContinue, $nextL, $nextN);
+				$zip->close();
+				
+				$allOversizedLocations = $zip->oversizedLocations;
+				
+				$zips[] = $zipFile;
+				
+				if ( !$zip->zipFull ) {
+					$moreToDo = false;
+				}
+				else {
+					$isContinue = true;
+					$nextL = $zip->nextLocation;
+					$nextN = $zip->nextName;
+				}
+			}
+			
+			$label += 1;
+		}
+		return $zips;
+	}
+	
 	
 	public static function removeDir($dir)
 	{
@@ -32,14 +88,113 @@ class FlxZipArchive extends ZipArchive
 		}
 	}
 	
-	public function startAddDir($location, $name) 
-	{
-		$this->addDirDo($location, $name);
-	} 
-	public function addDir($location, $name) 
-	{
+	// public function startAddDir($location, $name) 
+	// {
+		// $this->addDirDo($location, $name);
+	// } 
+	
+	public function startAddDir ( $location, $name, $isContinuation = false, $continueLocation = null, $continueName = null ) {
+		
+		$name .= '/';
+		$location .= '/';
+		$dir = opendir ($location);
+		$reachedContinue = false;
+		
+		if ( !$this->oversizedLocations ) {
+			$this->oversizedLocations = array();
+		}
+						
+		while ($projectDir = readdir($dir))	{
+			
+			if ($projectDir == '.' || $projectDir == '..') continue;
+			
+			$newLocation = $location.$projectDir;
+			$newName = $name.$projectDir;
+			
+			if ( $isContinuation && in_array($newLocation, $this->oversizedLocations) ) {
+				
+				error_log ( $newLocation . " is over sized so skipping" );
+				continue;
+			}
+		
+						
+			if ( !$isContinuation || $reachedContinue || ($isContinuation && ($continueLocation == $newLocation) && ($continueName == $newName)) ) {
+			
+				$reachedContinue = true;
+				
+				$this->addDir($newLocation, $newName);		
+			
+				if ( $this->zipFull ) {
+					
+					$nameToRemove = $newName . '/';
+					
+					error_log ( "Zip file full, removing current project from zip: " . $nameToRemove );
+					
+					$fileCount = 0;
+					
+					$classifyTypes = array('CAI','HUMAN');
+					$dataFileNames = array('datapackage.json', 'deployments.csv', 'media.csv', 'observations.csv' );
+					foreach ( $classifyTypes as $classifyType ) {
+						foreach ( $dataFileNames as $dataFileName ) {
+							
+							$fileToRemove = $nameToRemove . $classifyType . '/' .$dataFileName;
+							if ( $indexToRemove = $this->locateName ( $fileToRemove ) ) {
+								error_log ( "Located " . $fileToRemove . ", removing from zip" );
+								$this->deleteIndex ( $indexToRemove );	
+							}
+							$fileCount += 1;
+							if ( $fileCount > 8 ) {
+								error_log ( "Reached max file count" );
+								break;
+							}
+						}
+						
+						error_log ( "Removing directory " . $nameToRemove . $classifyType . '/' . " from zip" );
+						$this->deleteName ( $nameToRemove . $classifyType . '/' );
+						
+					}
+					$this->deleteName ( $nameToRemove );
+					
+					// If zip file is now empty, whole project is too big for archive so treat separately.....
+					$anyFiles = false;
+					for ( $i = 0; $i < $this->count(); $i++ ) {
+						if ( strlen($this->getNameIndex($i)) > 0 ) {
+							$anyFiles = true;
+							break;
+						}
+					}
+					if ( !$anyFiles ) {
+						$this->oversizedLocations[] = $newLocation;
+					}
+					
+					$this->nextLocation = $newLocation;
+					$this->nextName = $newName;
+					break;
+				}
+			}
+		}
+	}
+	
+	private function getZipSize () {
+		
+		$totalSize = 0;
+		for ($i = 0; $i < $this->numFiles; $i++) {
+			$stat = $this->statIndex($i);
+			$totalSize += $stat['size'];
+		}
+		return $totalSize;
+	}
+	
+	
+	public function addDir($location, $name) {
+		
 		$this->addEmptyDir($name);
 		$this->addDirDo($location, $name);
+		if ( $this->zipFull ) {
+			
+			return false;
+		}
+		
 	} 
 	private function addDirDo($location, $name) 
 	{
@@ -49,9 +204,24 @@ class FlxZipArchive extends ZipArchive
 		while ($file = readdir($dir))
 		{
 			if ($file == '.' || $file == '..') continue;
+			
 			$do = (filetype( $location . $file) == 'dir') ? 'addDir' : 'addFile';
-			$this->$do($location . $file, $name . $file);
+			
+			if ( $do == 'addFile' ) {
+				
+				$zipSize = $this->getZipSize();
+				$fileSize = filesize($location . $file);
+				if ( $zipSize + $fileSize > self::ZIP_SIZE_THRESHOLD ) {
+					
+					$this->zipFull = true;
+				}
+			}
+			if ( !$this->zipFull ) {
+				$this->$do($location . $file, $name . $file);	
+			}				
+			
 		}
+		
 	} 
 }
 
@@ -82,6 +252,7 @@ class BioDivViewCamtrapDP extends JViewLegacy
 			
 		$this->startDate = $input->getString('start', 0);
 		$this->endDate = $input->getString('end', 0);
+        $this->zipFileTag = $input->getString('tag', '');
 		
 		if ( !$this->startDate ) {
 			
@@ -94,14 +265,20 @@ class BioDivViewCamtrapDP extends JViewLegacy
 			//error_log ( "Using end date " . $this->endDate );
 		}
 		
+		$startDateMinus1 = date('Ymd', strtotime($this->startDate . ' -1 day'));
 		$endDatePlus1 = date('Ymd', strtotime($this->endDate . ' +1 day'));
 		
+		print ( "<br>Using start date " . $this->startDate );
+		print ( "<br>Using end date " . $this->endDate );
+		print ( "<br>Using start date minus 1 " . $startDateMinus1 );
+		print ( "<br>Using end date plus 1 " . $endDatePlus1 );
+
 		$options = awsOptions();
 		$bucketUrl = $options['s3url'];
 		
 		$this->filesToTransfer = array();	  
 	 
-		$db = JDatabase::getInstance(dbOptions());
+		$db = JDatabase::getInstance(readDbOptions());
 		
 		$query = $db->getQuery(true);
 		$query->select("distinct name from CamtrapDP")
@@ -169,78 +346,121 @@ class BioDivViewCamtrapDP extends JViewLegacy
 			// For each subproject
 			foreach ( $leafProjects as $projectId=>$projectPrettyName ) {
 				
+				print ( "<br>CDP id: " . $cdpId . ", Project: " . $projectPrettyName . ", Set type: " . $projectSetType  );
 				// Get project details
 				$projectDetails = codes_getDetails($projectId, 'project');
 				
+				$allSequenceIds = null;
 				$sequenceIds = null;
 				$photoIds = null;
 				$uploadIds = null;
 				
 				$query = $db->getQuery(true);
-				
-				if ( $speciesIds && count($speciesIds) > 0 ) {
-					if ( $projectSetType == "CAI" ) {
-						
-						$query->select("P.photo_id, P.upload_id")
+				$query->select("distinct P.upload_id")
 							->from("Photo P")
-							->innerJoin("Upload U using (upload_id)")
+							//->innerJoin("Upload U using (upload_id)")
 							->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-							->innerJoin("Classify C using (sequence_id)")
-							->where("C.origin = " . $db->quote('CAI'))
 							->where("P.photo_id >= PSM.start_photo_id")
 							->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
 							->where("PSM.project_id = " . $projectId)
-							->where("P.taken > " . $this->startDate)
-							->where("P.taken < " . $endDatePlus1)
-							->where("P.contains_human = 0")
-							->where("C.species_id in ( " . implode(',', $speciesIds) . ")");
-							
-						$query2 = $db->getQuery(true);
-						$query2->select("P.photo_id, P.upload_id")
-							->from("Photo P")
-							->innerJoin("Upload U using (upload_id)")
-							->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-							->innerJoin("Classify C using (sequence_id)")
-							->where("C.origin = " . $db->quote('CAI'))
-							->where("P.photo_id >= PSM.start_photo_id")
-							->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
-							->where("PSM.project_id = " . $projectId)
-							->where("P.taken > " . $this->startDate)
-							->where("P.taken < " . $endDatePlus1)
-							->where("C.species_id = " . $calibrationPoleId);
-						
-						$query->union($query2);
-						$db->setQuery($query);
+							->where("P.taken > " . $startDateMinus1)
+						 	->where("P.taken < " . $endDatePlus1);
 				
-						$photoResults = $db->loadAssocList("photo_id");
-						$photoIds = array_keys($photoResults);
-						$uploadIds = array_unique(array_column($photoResults, "upload_id"));
+				$db->setQuery($query);
+				
+				//error_log ("Get upload ids query: " . $query->dump());
 
-					}
-					else if ( $projectSetType == "HUMAN" ) {
+				$uploadIds = $db->loadColumn();
+
+				
+				// //print ( "<br>Upload ids: " );
+				// //print_r ( $uploadIds );
 						
-						$query->select("distinct P.sequence_id, P.upload_id")
-							->from("Photo P")
-							->innerJoin("Upload U using (upload_id)")
-							->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-							->innerJoin("Animal A using (photo_id)")
-							->where("P.photo_id >= PSM.start_photo_id")
-							->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
-							->where("PSM.project_id = " . $projectId)
-							->where("P.taken > " . $this->startDate)
-							->where("P.taken < " . $endDatePlus1)
-							->where("P.contains_human = 0")
-							->where("A.species in ( " . implode(',', $speciesIds) . ")");
+				
+				// $query = $db->getQuery(true);
+				// $query->select("distinct P.sequence_id")
+							// ->from("Photo P")
+							// //->innerJoin("Upload U using (upload_id)")
+							// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+							// ->where("P.photo_id >= PSM.start_photo_id")
+							// ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+							// ->where("PSM.project_id = " . $projectId)
+							// ->where("P.taken > " . $startDateMinus1)
+						 	// ->where("P.taken < " . $endDatePlus1);
+				
+				// $db->setQuery($query);
+				
+				// error_log ("Get all sequence ids query: " . $query->dump());
+
+				// $allSequenceIds = $db->loadColumn();
+						
+				
+				// $query = $db->getQuery(true);
+				
+				// if ( $speciesIds && count($speciesIds) > 0 ) {
+					// if ( $projectSetType == "CAI" ) {
+						
+						// $query->select("P.photo_id, P.upload_id")
+							// ->from("Photo P")
+							// //->innerJoin("Upload U using (upload_id)")
+							// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+							// ->innerJoin("Classify C using (sequence_id)")
+							// ->where("C.origin = " . $db->quote('CAI'))
+							// ->where("C.sequence_id in ( " .implode(',', $allSequenceIds). " )")
+							// //->where("P.photo_id >= PSM.start_photo_id")
+							// //->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+							// //->where("PSM.project_id = " . $projectId)
+							// //->where("P.taken > " . $startDateMinus1)
+						 	// //->where("P.taken < " . $endDatePlus1)
+							// //->where("P.contains_human = 0")
+							// ->where("C.species_id in ( " . implode(',', $speciesIds) . ")");
 							
-						$db->setQuery($query);
+						// $query2 = $db->getQuery(true);
+						// $query2->select("P.photo_id, P.upload_id")
+							// ->from("Photo P")
+							// //->innerJoin("Upload U using (upload_id)")
+							// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+							// ->innerJoin("Classify C using (sequence_id)")
+							// ->where("C.origin = " . $db->quote('CAI'))
+							// ->where("P.photo_id >= PSM.start_photo_id")
+							// ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+							// ->where("PSM.project_id = " . $projectId)
+							// ->where("P.taken > " . $startDateMinus1)
+							// ->where("P.taken < " . $endDatePlus1)
+							// ->where("C.species_id = " . $calibrationPoleId);
+						
+						// $query->union($query2);
+						// $db->setQuery($query);
 				
-						//error_log("CamtrapDP sequenceIds select query created: " . $query->dump());
+						// $photoResults = $db->loadAssocList("photo_id");
+						// $photoIds = array_keys($photoResults);
+						// //$uploadIds = array_unique(array_column($photoResults, "upload_id"));
+
+					// }
+					// else if ( $projectSetType == "HUMAN" ) {
+						
+						// $query->select("distinct P.sequence_id, P.upload_id")
+							// ->from("Photo P")
+							// //->innerJoin("Upload U using (upload_id)")
+							// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+							// ->innerJoin("Animal A using (photo_id)")
+							// ->where("P.photo_id >= PSM.start_photo_id")
+							// ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+							// ->where("PSM.project_id = " . $projectId)
+							// ->where("P.taken > " . $startDateMinus1)
+							// ->where("P.taken < " . $endDatePlus1)
+							// //->where("P.contains_human = 0")
+							// ->where("A.species in ( " . implode(',', $speciesIds) . ")");
+							
+						// $db->setQuery($query);
 				
-						$sequenceResults = $db->loadAssocList("sequence_id");
-						$sequenceIds = array_keys($sequenceResults);
-						$uploadIds = array_unique(array_column($sequenceResults, "upload_id"));
-					}
-				}
+						// //error_log("CamtrapDP sequenceIds select query created: " . $query->dump());
+				
+						// $sequenceResults = $db->loadAssocList("sequence_id");
+						// $sequenceIds = array_keys($sequenceResults);
+						// //$uploadIds = array_unique(array_column($sequenceResults, "upload_id"));
+					// }
+				// }
 				
 				if ( $uploadIds ) {
 					// Get the bounding box for the project sites
@@ -294,6 +514,14 @@ class BioDivViewCamtrapDP extends JViewLegacy
 					// Rename once finished writing to file
 					if (!file_exists($filePath)) {
 						mkdir($filePath, 0755, true);
+					}
+					
+					if ( file_exists($tmpMetaFile) ) {
+						
+						// We are recovering from a stalled process so remove file to start again.
+						if (!unlink($tmpMetaFile)) { 
+							error_log ("$tmpMetaFile cannot be deleted due to an error"); 
+						} 
 					}
 					
 					$tmpMeta = fopen ( $tmpMetaFile, 'w');
@@ -398,6 +626,7 @@ class BioDivViewCamtrapDP extends JViewLegacy
 					fputs ( $tmpMeta, "  \"taxonomic\": [\n" );
 					
 					$speciesCount = count($speciesList);
+					$speciesNumber = 1;
 					foreach ( $speciesList as $speciesId=>$species ) {
 						
 						fputs ( $tmpMeta, "    {\n" );	
@@ -406,8 +635,14 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						fputs ( $tmpMeta, "      \"taxonRank\": \"species\",\n" );
 						fputs ( $tmpMeta, "      \"vernacularNames\": {\n" );
 						fputs ( $tmpMeta, "        \"eng\":\"".$species->eng_name."\"\n" );
-						fputs ( $tmpMeta, "      }\n" );	
-						fputs ( $tmpMeta, "    }\n" );	
+						fputs ( $tmpMeta, "      }\n" );
+						if ( $speciesNumber == $speciesCount ) {
+							fputs ( $tmpMeta, "    }\n" );
+						}
+						else {
+							fputs ( $tmpMeta, "    },\n" );
+						}	
+						$speciesNumber++;
 					
 					}
 					
@@ -442,6 +677,14 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						mkdir($filePath, 0755, true);
 					}
 					
+					if ( file_exists($tmpCsvFile) ) {
+						
+						// We are recovering from a stalled process so remove file to start again.
+						if (!unlink($tmpCsvFile)) { 
+							error_log ("$tmpCsvFile cannot be deleted due to an error"); 
+						} 
+					}
+					
 					$tmpCsv = fopen ( $tmpCsvFile, 'w');
 					
 					// First put the headings
@@ -474,7 +717,7 @@ class BioDivViewCamtrapDP extends JViewLegacy
 					$numPerQuery = 1000;
 					
 					
-					for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
+					for ( $i=0; $i < $totalRows ; $i+=$numPerQuery ) {
 						
 						$query = $db->getQuery(true);
 						
@@ -501,7 +744,7 @@ class BioDivViewCamtrapDP extends JViewLegacy
 									'IFNULL(O2.option_name,"") as habitat, '. // habitat
 									'"" as deploymentGroups, '.
 									'"" as deplymentTags, '.
-									'"" as deploymentComments ')
+									'S.notes as deploymentComments ')
 							->from("Upload U")
 							->innerJoin("Site S using (site_id)")
 							->leftJoin("Options O on O.option_id = S.camera_id")
@@ -546,6 +789,14 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						mkdir($filePath, 0755, true);
 					}
 					
+					if ( file_exists($tmpCsvFile) ) {
+						
+						// We are recovering from a stalled process so remove file to start again.
+						if (!unlink($tmpCsvFile)) { 
+							error_log ("$tmpCsvFile cannot be deleted due to an error"); 
+						} 
+					}
+					
 					$tmpCsv = fopen ( $tmpCsvFile, 'w');
 					
 					// First put the headings
@@ -557,68 +808,58 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						fputcsv($tmpCsv, $headings);
 					}
 					
-					if ( $photoIds ) {
-						$totalRows = count($photoIds);
-					}
-					else if ( $sequenceIds ) {
+					// if ( $photoIds ) {
+						// $totalRows = count($photoIds);
+					// }
+					// if ( $allSequenceIds ) {
 				
+						// $query = $db->getQuery(true);
+						
+						// $query->select('count(*)')
+							// ->from("Photo P")
+							// //->where("P.contains_human = 0")
+							// ->where("sequence_id in ( " . implode(',', $allSequenceIds) . ")");
+			
+							
+						// $db->setQuery($query);
+					
+						// //error_log("CamtrapDP media count query created: " . $query->dump());
+					
+						// $totalRows = $db->loadResult();
+					// }
+					// else {
+				
+						// $totalRows = 0;
+					// }
+					
+					foreach ( $uploadIds as $uploadId ) {
+						
 						$query = $db->getQuery(true);
 						
 						$query->select('count(*)')
 							->from("Photo P")
-							->where("P.contains_human = 0")
-							->where("sequence_id in ( " . implode(',', $sequenceIds) . ")");
+							->where("P.upload_id = " . $uploadId )
+							->where("P.taken > " . $startDateMinus1)
+							->where("P.taken < " . $endDatePlus1);
 			
 							
 						$db->setQuery($query);
-					
-						//error_log("CamtrapDP media count query created: " . $query->dump());
-					
+						
 						$totalRows = $db->loadResult();
-					}
-					else {
-				
-						$totalRows = 0;
-					}
-					
-					$numPerQuery = 1000;
-					
-					for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
 						
-						$query = $db->getQuery(true);
+						$numPerQuery = 1000;
 						
-						if ( $projectSetType == "CAI" ) {			
-							$query->select('P.photo_id, '.
-										'P.upload_id, '.
-										'"'.$captureMethod.'", '.
-										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS date_formatted, ' .
-										'CONCAT("'.$bucketUrl.'/person_", P.person_id, "/site_", P.site_id, "/"), '.
-										'"true" as filePublic, '.
-										'P.filename, '.
-										'(
-											CASE
-											WHEN substring_index(P.filename,\'.\',-1)=\'jpg\' THEN \'image/jpg\'
-											WHEN substring_index(P.filename,\'.\',-1)=\'jpeg\' THEN \'image/jpeg\'
-											WHEN substring_index(P.filename,\'.\',-1)=\'mp4\' THEN \'video/mp4\'
-											WHEN substring_index(P.filename,\'.\',-1)=\'mp3\' THEN \'audio/mp3\'
-											ELSE \'video/avi\'
-											END ) AS filetype, '.
-										'"" as exifData, '.
-										'"" as favorite, '.
-										'CONCAT(\'sequence_id = \', P.sequence_id) as mediaComments ')
-								->from("Photo P")
-								->innerJoin("Upload U using (upload_id)")
-								->where("P.photo_id in (".implode(',', $photoIds).")")
-								->where("P.contains_human = 0");
-						}
-						else if ( $projectSetType == "HUMAN" ) {			
+						for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
+							
+							$query = $db->getQuery(true);
+							
 							$query->select('P.photo_id, '.  
 										'P.upload_id, '.
 										'"'.$captureMethod.'", '.
 										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS date_formatted, ' .
-										'CONCAT("'.$bucketUrl.'/person_", P.person_id, "/site_", P.site_id, "/"), '.
+										'CONCAT("'.$bucketUrl.'/person_", P.person_id, "/site_", P.site_id, "/", P.filename), '.
 										'"true" as filePublic, '.
-										'P.filename, '.
+										'P.upload_filename, '.
 										'(
 											CASE
 											WHEN substring_index(P.filename,\'.\',-1)=\'jpg\' THEN \'image/jpg\'
@@ -632,20 +873,21 @@ class BioDivViewCamtrapDP extends JViewLegacy
 										'CONCAT(\'sequence_id = \', P.sequence_id) as mediaComments ')
 								->from("Photo P")
 								->innerJoin("Upload U using (upload_id)")
-								->where("P.sequence_id in (".implode(',', $sequenceIds).")")
-								->where("P.contains_human = 0");
-						}
+								->where("P.upload_id = " . $uploadId )
+								->where("P.taken > " . $startDateMinus1)
+								->where("P.taken < " . $endDatePlus1);
+														
+							$db->setQuery($query, $i, $numPerQuery);
 							
+							//error_log("Media select query created: " . $query->dump());
 							
-						$db->setQuery($query, $i, $numPerQuery);
+							$mediaRows = $db->loadAssocList();
 						
-						//error_log("Media select query created: " . $query->dump());
+							// Then each row
+							foreach ( $mediaRows as $row ) {
+								fputcsv($tmpCsv, $row);
+							}
 						
-						$mediaRows = $db->loadAssocList();
-					
-						// Then each row
-						foreach ( $mediaRows as $row ) {
-							fputcsv($tmpCsv, $row);
 						}
 					
 					}
@@ -675,6 +917,13 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						mkdir($filePath, 0755, true);
 					}
 					
+					if ( file_exists($tmpCsvFile) ) {
+						
+						// We are recovering from a stalled process so remove file to start again.
+						if (!unlink($tmpCsvFile)) { 
+							error_log ("$tmpCsvFile cannot be deleted due to an error"); 
+						} 
+					}
 					$tmpCsv = fopen ( $tmpCsvFile, 'w');
 					
 					// First put the headings
@@ -686,209 +935,293 @@ class BioDivViewCamtrapDP extends JViewLegacy
 						fputcsv($tmpCsv, $headings);
 					}
 					
-					$query = $db->getQuery(true);
+					foreach ( $speciesList as $speciesId=>$species ) {
+						
+						$speciesEngName = $species->eng_name;
+						$speciesSciName = $species->sci_name;
 					
-					if ( $projectSetType == 'CAI' ) {
+						if ( $projectSetType == 'CAI' ) {
+							
+							foreach ( $uploadIds as $uploadId ) {
 						
-						$totalRows = 0;
-						
-						if ( $photoIds and count($photoIds) > 0 ) {
-							$query->select('count(*)')
-								->from("Classify C")
-								->innerJoin("Photo P using (photo_id)")
-								->where("C.origin = " . $db->quote('CAI'))
-								->where("P.photo_id in (".implode(',', $photoIds).")")
-								->where("P.contains_human = 0");
-							
-							$db->setQuery($query);
-							
-							//error_log("CAI observation count query created: " . $query->dump());
-							
-							$totalRows = $db->loadResult();
-						}
-						
-						$numPerQuery = 1000;
-						
-						for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
-							
-							$query = $db->getQuery(true);
-							
-										
-							$query->select('C.classify_id, '.
-										'P.upload_id, '.
-										'P.photo_id, '.
-										'P.sequence_id, '.
-										
-										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS start_formatted, '.
-										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS end_formatted, '.
-										'"media", '.
-										'(
-											CASE
-												WHEN C.species_id = '.$humanId.' THEN \'human\'
-												WHEN C.species_id = '.$vehicleId.' THEN \'vehicle\'
-												WHEN C.species_id = '.$nothingId.' THEN \'blank\'
-												WHEN C.species_id = '.$dontKnowId.' THEN \'unknown\'
-												WHEN C.species_id = '.$unclassifiedId.' THEN \'unclassified\'
-												WHEN C.species_id = '.$calibrationPoleId.' THEN \'unclassified\' 
-												ELSE \'animal\'
-											END ) AS obsType, '. // animal, human, vehicle, blank, unknown, unclassified calibration pole set to unclassified for completeness
-										'"" as cameraSetupType, '.
-										'OD.value, '. // scientific name
-										'"1", '.
-										'"" AS lifeStage, '.
-										'"" AS sex, '.
-										'"" as behavior, '. // behavior
-										'"" as individualID, '. // individualID
-										'"" as individualPositionRadius, '. // individualPositionRadius
-										'"" as individualPositionAngle, '. // individualPositionAngle
-										'"" as individualSpeed, '. // individualSpeed
-										'ROUND(C.xmin, 6) as bboxX, '. //bboxX
-										'ROUND(C.ymin, 6) as bboxY, '. //bboxY
-										'ROUND(C.xmax - C.xmin, 6) as bboxWidth, '. //bboxWidth
-										'ROUND(C.ymax - C.ymin, 6) as bboxHeight, '. //bboxHeight
-										'"machine", '. // classificationMethod
-										'CONCAT(C.origin, \' \', C.model), '. // classifiedBy
-										'DATE_FORMAT( C.timestamp ,\'%Y-%m-%dT%TZ\') as ts_formatted, '.
-										'C.prob as classificationProbability, '. //classificationProbability
-										'"" as observationTags, '. //observationTags
-										'"" as observationComments' ) //observationComments
-										
-								->from("Classify C")
-								->innerJoin("OptionData OD on C.species_id = OD.option_id and OD.data_type = " . $db->quote('SCI'))
-								->innerJoin("Photo P on C.photo_id = P.photo_id")
-								->innerJoin("Upload U on P.upload_id = U.upload_id")
-								->innerJoin("Photo P1 on P.sequence_id = P1.sequence_id")
-								->leftJoin("Photo P2 on P1.sequence_id = P2.sequence_id and P1.sequence_num < P2.sequence_num")
-								->where("P.photo_id in (".implode(',', $photoIds).")")
-								->where("P.contains_human = 0")
-								->where("P2.sequence_id is NULL");
+								$query = $db->getQuery(true);
 								
+								$query->select('count(*)')
+									->from("Classify C")
+									->innerJoin("Photo P using (photo_id)")
+									->where("C.origin = " . $db->quote('CAI'))
+									->where("C.species_id = " . $speciesId)
+									->where("P.upload_id = " . $uploadId )
+									->where("P.taken > " . $startDateMinus1)
+									->where("P.taken < " . $endDatePlus1);
+									
+								$db->setQuery($query);
 								
-							$db->setQuery($query, $i, $numPerQuery);
+								$totalRows = $db->loadResult();
 							
-							//error_log("CAI observations select query created: " . $query->dump());
 							
-							$obsRows = $db->loadAssocList();
+							
+							
+							// $query = $db->getQuery(true);
+							
+							// $query->select("P.photo_id, P.upload_id")
+							// ->from("Photo P")
+							// //->innerJoin("Upload U using (upload_id)")
+							// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+							// ->innerJoin("Classify C using (sequence_id)")
+							// ->where("C.origin = " . $db->quote('CAI'))
+							// ->where("P.photo_id >= PSM.start_photo_id")
+							// ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+							// ->where("PSM.project_id = " . $projectId)
+							// ->where("P.taken > " . $startDateMinus1)
+						 	// ->where("P.taken < " . $endDatePlus1)
+							// ->where("C.species_id = " . $speciesId);
+							
+							// $db->setQuery($query);
+				
+							// $speciesPhotoResults = $db->loadAssocList("photo_id");
+							// $speciesPhotoIds = array_keys($speciesPhotoResults);
 						
-							// Then each row
-							foreach ( $obsRows as $row ) {
-								fputcsv($tmpCsv, $row);
+						
+							// $query = $db->getQuery(true);
+						
+							// $totalRows = 0;
+							
+							// if ( $speciesPhotoIds and count($speciesPhotoIds) > 0 ) {
+								// $query->select('count(*)')
+									// ->from("Classify C")
+									// ->innerJoin("Photo P using (photo_id)")
+									// ->where("C.origin = " . $db->quote('CAI'))
+									// ->where("P.photo_id in (".implode(',', $speciesPhotoIds).")");
+								
+								// $db->setQuery($query);
+								
+								// //error_log("CAI observation count query created: " . $query->dump());
+								
+								// $totalRows = $db->loadResult();
+							// }
+								
+								$numPerQuery = 1000;
+								
+								for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
+									
+									$query = $db->getQuery(true);
+									
+												
+									$query->select('C.classify_id, '.
+												'P.upload_id, '.
+												'P.photo_id, '.
+												'P.sequence_id, '.
+												
+												'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS start_formatted, '.
+												'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS end_formatted, '.
+												'"media", '.
+												'(
+													CASE
+														WHEN C.species_id = '.$humanId.' THEN \'human\'
+														WHEN C.species_id = '.$vehicleId.' THEN \'vehicle\'
+														WHEN C.species_id = '.$nothingId.' THEN \'blank\'
+														WHEN C.species_id = '.$dontKnowId.' THEN \'unknown\'
+														WHEN C.species_id = '.$unclassifiedId.' THEN \'unclassified\'
+														WHEN C.species_id = '.$calibrationPoleId.' THEN \'unclassified\' 
+														ELSE \'animal\'
+													END ) AS obsType, '. // animal, human, vehicle, blank, unknown, unclassified calibration pole set to unclassified for completeness
+												'"" as cameraSetupType, '.
+												$db->quote($speciesSciName).', '. // scientific name
+												'"1", '.
+												'"" AS lifeStage, '.
+												'"" AS sex, '.
+												'"" as behavior, '. // behavior
+												'"" as individualID, '. // individualID
+												'"" as individualPositionRadius, '. // individualPositionRadius
+												'"" as individualPositionAngle, '. // individualPositionAngle
+												'"" as individualSpeed, '. // individualSpeed
+												'ROUND(C.xmin, 6) as bboxX, '. //bboxX
+												'ROUND(C.ymin, 6) as bboxY, '. //bboxY
+												'ROUND(C.xmax - C.xmin, 6) as bboxWidth, '. //bboxWidth
+												'ROUND(C.ymax - C.ymin, 6) as bboxHeight, '. //bboxHeight
+												'"machine", '. // classificationMethod
+												'CONCAT(C.origin, \' \', C.model), '. // classifiedBy
+												'DATE_FORMAT( C.timestamp ,\'%Y-%m-%dT%TZ\') as ts_formatted, '.
+												'C.prob as classificationProbability, '. //classificationProbability
+												'"" as observationTags, '. //observationTags
+												'"" as observationComments' ) //observationComments
+												
+										->from("Classify C")
+										->innerJoin("Photo P on C.photo_id = P.photo_id")
+										->innerJoin("Upload U on P.upload_id = U.upload_id")
+										->innerJoin("Photo P1 on P.sequence_id = P1.sequence_id")
+										->where("C.origin = " . $db->quote('CAI'))
+										->where("C.species_id = " . $speciesId)
+										->where("P.upload_id = " . $uploadId )
+										->where("P.taken > " . $startDateMinus1)
+										->where("P.taken < " . $endDatePlus1)
+										->where("P1.photo_id in (select end_photo_id from PhotoSequence)");
+										
+										
+									$db->setQuery($query, $i, $numPerQuery);
+									
+									//error_log("CAI observations select query created: " . $query->dump());
+									
+									$obsRows = $db->loadAssocList();
+								
+									// Then each row
+									foreach ( $obsRows as $row ) {
+										fputcsv($tmpCsv, $row);
+									}
+								}
 							}
-						
 						}
-					}
-					else if ( $projectSetType == 'HUMAN' ) {
+						else if ( $projectSetType == 'HUMAN' ) {
+							
+							foreach ( $uploadIds as $uploadId ) {
 						
-						$totalRows = 0;
-						
-						if ( $sequenceIds && count($sequenceIds) > 0 ) {
-							
-							$query->select('count(*)')
-								->from("Animal A")
-								->innerJoin("Photo P using (photo_id)")
-								->where("P.sequence_id in (".implode(',', $sequenceIds).")")
-								->where("P.contains_human = 0");
-							
-							$db->setQuery($query);
-							
-							//error_log("Human observation count query created: " . $query->dump());
-							
-							$totalRows = $db->loadResult();
-						}
-						
-						$numPerQuery = 1000;
-						
-						for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
-							
-							$query = $db->getQuery(true);
-							
-										
-							$query->select('A.animal_id, '.
-										'P.upload_id, '.
-										'"" as mediaID, '.
-										'P.sequence_id, '.
-										
-										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS start_formatted, '.
-										'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS end_formatted, '.
-										'"event", '.
-										'(
-											CASE
-												WHEN A.species = '.$humanId.' THEN \'human\'
-												WHEN A.species = '.$vehicleId.' THEN \'vehicle\'
-												WHEN A.species = '.$nothingId.' THEN \'blank\'
-												WHEN A.species = '.$dontKnowId.' THEN \'unknown\'
-												ELSE \'animal\'
-											END ) AS obsType, '. // animal, human, vehicle, blank, unknown, unclassified (not relevant for our human classifications)
-										'"" as cameraSetupType, '.
-										'OD.value, '. // scientific name
-										'A.number, '.
-										'(
-											CASE
-												WHEN A.age = '.$adultId.' THEN \'adult\'
-												WHEN A.age = '.$juvenileId.' THEN \'juvenile\'
-												ELSE \'\'
-											END ) AS lifeStage, '.
-										'(
-											CASE
-												WHEN A.gender = '.$femaleId.' THEN \'female\'
-												WHEN A.gender = '.$maleId.' THEN \'male\'
-												ELSE \'\'
-											END ) AS sex, '.
-										'"" as behavior, '. // behavior
-										'"" as individualID, '. // individualID
-										'"" as individualPositionRadius, '. // individualPositionRadius
-										'"" as individualPositionAngle, '. // individualPositionAngle
-										'"" as individualSpeed, '. // individualSpeed
-										'"" as bboxX, '. //bboxX
-										'"" as bboxY, '. //bboxY
-										'"" as bboxWidth, '. //bboxWidth
-										'"" as bboxHeight, '. //bboxHeight
-										'"human", '. // classificationMethod
-										'A.person_id, '. // classifiedBy
-										'DATE_FORMAT( A.timestamp ,\'%Y-%m-%dT%TZ\') as ts_formatted, '.
-										'"" as classificationProbability, '. //classificationProbability
-										'"" as observationTags, '. //observationTags
-										'A.notes' ) //observationComments
-										
-								->from("Animal A")
-								->innerJoin("OptionData OD on A.species = OD.option_id and OD.data_type = " . $db->quote('SCI'))
-								->innerJoin("Photo P on A.photo_id = P.photo_id")
-								->innerJoin("Upload U on P.upload_id = U.upload_id")
-								->innerJoin("Photo P1 on P.sequence_id = P1.sequence_id")
-								->leftJoin("Photo P2 on P1.sequence_id = P2.sequence_id and P1.sequence_num < P2.sequence_num")
-								->where("P.sequence_id in (".implode(',', $sequenceIds).")")
-								->where("P.contains_human = 0")
-								->where("P2.sequence_id is NULL");
+								$query = $db->getQuery(true);
 								
+								$query->select('count(*)')
+									->from("Animal A")
+									->innerJoin("Photo P using (photo_id)")
+									->where("A.species = " . $db->quote($speciesId))
+									->where("P.upload_id = " . $uploadId )
+									->where("P.taken > " . $startDateMinus1)
+									->where("P.taken < " . $endDatePlus1);
+									
+								$db->setQuery($query);
 								
-							$db->setQuery($query, $i, $numPerQuery);
+								$totalRows = $db->loadResult();
 							
-							//error_log("Human observations select query created: " . $query->dump());
 							
-							$obsRows = $db->loadAssocList();
+							// $query = $db->getQuery(true);
+							
+							// $query->select("distinct P.sequence_id, P.upload_id")
+								// ->from("Photo P")
+								// //->innerJoin("Upload U using (upload_id)")
+								// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+								// ->innerJoin("Animal A using (photo_id)")
+								// ->where("P.photo_id >= PSM.start_photo_id")
+								// ->where("(P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is null)")
+								// ->where("PSM.project_id = " . $projectId)
+								// ->where("P.taken > " . $startDateMinus1)
+								// ->where("P.taken < " . $endDatePlus1)
+								// //->where("P.contains_human = 0")
+								// ->where("A.species = " . $speciesId);
+								
+							// $db->setQuery($query);
+					
+							// //error_log("CamtrapDP sequenceIds select query created: " . $query->dump());
+					
+							// $speciesSequenceResults = $db->loadAssocList("sequence_id");
+							// $speciesSequenceIds = array_keys($speciesSequenceResults);
+							
+							// $query = $db->getQuery(true);
 						
-							// Then each row
-							foreach ( $obsRows as $row ) {
-								fputcsv($tmpCsv, $row);
+							// $totalRows = 0;
+							
+							// if ( $speciesSequenceIds && count($speciesSequenceIds) > 0 ) {
+								
+								// $query->select('count(*)')
+									// ->from("Animal A")
+									// ->innerJoin("Photo P using (photo_id)")
+									// ->where("P.sequence_id in (".implode(',', $speciesSequenceIds).")");
+									// //->where("P.contains_human = 0");
+								
+								// $db->setQuery($query);
+								
+								// //error_log("Human observation count query created: " . $query->dump());
+								
+								// $totalRows = $db->loadResult();
+							// }
+							
+								$numPerQuery = 1000;
+								
+								for ( $i=0; $i < $totalRows; $i+=$numPerQuery ) {
+									
+									$query = $db->getQuery(true);
+									
+												
+									$query->select('A.animal_id, '.
+												'P.upload_id, '.
+												'"" as mediaID, '.
+												'P.sequence_id, '.
+												
+												'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS start_formatted, '.
+												'IF(U.utc_offset < 0, CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T-\'), lpad(FLOOR(-U.utc_offset/60),2,\'0\'), \':\', lpad(-U.utc_offset%60,2,\'0\') ), CONCAT(DATE_FORMAT( P1.taken ,\'%Y-%m-%dT%T+\'), lpad(FLOOR(U.utc_offset/60),2,\'0\'), \':\', lpad(U.utc_offset%60,2,\'0\') )) AS end_formatted, '.
+												'"event", '.
+												'(
+													CASE
+														WHEN A.species = '.$humanId.' THEN \'human\'
+														WHEN A.species = '.$vehicleId.' THEN \'vehicle\'
+														WHEN A.species = '.$nothingId.' THEN \'blank\'
+														WHEN A.species = '.$dontKnowId.' THEN \'unknown\'
+														ELSE \'animal\'
+													END ) AS obsType, '. // animal, human, vehicle, blank, unknown, unclassified (not relevant for our human classifications)
+												'"" as cameraSetupType, '.
+												$db->quote($speciesSciName).', '. // scientific name
+												'A.number, '.
+												'(
+													CASE
+														WHEN A.age = '.$adultId.' THEN \'adult\'
+														WHEN A.age = '.$juvenileId.' THEN \'juvenile\'
+														ELSE \'\'
+													END ) AS lifeStage, '.
+												'(
+													CASE
+														WHEN A.gender = '.$femaleId.' THEN \'female\'
+														WHEN A.gender = '.$maleId.' THEN \'male\'
+														ELSE \'\'
+													END ) AS sex, '.
+												'"" as behavior, '. // behavior
+												'"" as individualID, '. // individualID
+												'"" as individualPositionRadius, '. // individualPositionRadius
+												'"" as individualPositionAngle, '. // individualPositionAngle
+												'"" as individualSpeed, '. // individualSpeed
+												'"" as bboxX, '. //bboxX
+												'"" as bboxY, '. //bboxY
+												'"" as bboxWidth, '. //bboxWidth
+												'"" as bboxHeight, '. //bboxHeight
+												'"human", '. // classificationMethod
+												'A.person_id, '. // classifiedBy
+												'DATE_FORMAT( A.timestamp ,\'%Y-%m-%dT%TZ\') as ts_formatted, '.
+												'"" as classificationProbability, '. //classificationProbability
+												'"" as observationTags, '. //observationTags
+												'A.notes' ) //observationComments
+												
+										->from("Animal A")
+										->innerJoin("Photo P on A.photo_id = P.photo_id")
+										->innerJoin("Upload U on P.upload_id = U.upload_id")
+										->innerJoin("Photo P1 on P.sequence_id = P1.sequence_id")
+										->leftJoin("Photo P2 on P1.sequence_id = P2.sequence_id and P1.sequence_num < P2.sequence_num")
+										//->where("P.sequence_id in (".implode(',', $speciesSequenceIds).")")
+										->where("A.species = " . $db->quote($speciesId))
+										->where("P.upload_id = " . $uploadId )
+										->where("P.taken > " . $startDateMinus1)
+										->where("P.taken < " . $endDatePlus1)
+										->where("P2.sequence_id is NULL");
+										
+										
+									$db->setQuery($query, $i, $numPerQuery);
+									
+									//error_log("Human observations select query created: " . $query->dump());
+									
+									$obsRows = $db->loadAssocList();
+								
+									// Then each row
+									foreach ( $obsRows as $row ) {
+										fputcsv($tmpCsv, $row);
+									}
+								}
 							}
-						
 						}
-						
 					}
 				
-					
 					fclose($tmpCsv);
 					
 					rename ( $tmpCsvFile, $newCsvFile );
 					
-					//$this->filesToTransfer[] = $newCsvFile;
-					
 				}
 				
 			}
-			
-			
-						
+									
 		}
 		
 		foreach ( $topLevelNames as $topLevelName ) {
@@ -900,22 +1233,46 @@ class BioDivViewCamtrapDP extends JViewLegacy
 			$projectDateName = $topLevelName . '_' . $this->startDate . '_' . $this->endDate;
 			$projectDateFolder = $projectFolder . $projectDateName . '/';
 			$projectZipPath = $reportRoot."/".$projectDateFolder;
-			$projectZipFile = $reportRoot."/".$projectFolder.$projectDateName.".zip";
+			if ( $this->zipFileTag ) {
+				$projectZipFile = $reportRoot."/".$projectFolder.$projectDateName."_".$this->zipFileTag.".zip";
+			}
+			else {
+				$projectZipFile = $reportRoot."/".$projectFolder.$projectDateName.".zip";
+			}
+			if ( $this->zipFileTag ) {
+				$projectZipFileStem = $reportRoot."/".$projectFolder.$projectDateName."_".$this->zipFileTag;
+			}
+			else {
+				$projectZipFileStem = $reportRoot."/".$projectFolder.$projectDateName;
+			}
 			
+			// // To overcome ZipArchive stalling.
+			// try {
+				// exec ( "zip " . $projectZipFile . " " . $projectDateName );
+				
+				// $this->filesToTransfer[$topLevelName] = $projectZipFile;
+			// }
+			// catch (Exception $e) {
+				// error_log ( "Problem zipping CamtrapDP extract: " . $e->getMessage() );
+			// }
 			
 			// Create new zip class 
-			$zip = new FlxZipArchive; 
+			//$zip = new FlxZipArchive; 
 
-			if($zip -> open($projectZipFile, ZipArchive::CREATE ) === TRUE) { 
+			//if($zip -> open($projectZipFile, ZipArchive::CREATE ) === TRUE) { 
+			$zipArray = FlxZipArchive::createArrayOfZipFiles ( $projectZipFileStem, $projectZipPath, $projectDateName );
+			if ( $zipArray ) {
 				
-				//error_log ( "Zip archive created: " . $projectZipFile );
+				$this->filesToTransfer[$topLevelName] = $zipArray;
+				
+				// //error_log ( "Zip archive created: " . $projectZipFile );
 			
-				$zip->startAddDir($projectZipPath, $projectDateName);
-				$zip->close();
+				// $zip->startAddDir($projectZipPath, $projectDateName);
+				// $zip->close();
 				
-				//error_log ( "Zip closed: " . $projectZipFile );
+				// //error_log ( "Zip closed: " . $projectZipFile );
 				
-				$this->filesToTransfer[$topLevelName] = $projectZipFile;
+				// $this->filesToTransfer[$topLevelName] = $projectZipFile;
 			} 
 			
 		}

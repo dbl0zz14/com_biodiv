@@ -28,14 +28,19 @@ class BioDivViewSequence extends JViewLegacy
         {
 	  $app = JFactory::getApplication();
 
+	  $this->canRun = setRunning ( 'sequence', 1 );
 
-	  $db = JDatabase::getInstance(dbOptions());
-	  $query = $db->getQuery(true);
-	  $query->select("distinct(upload_id)")
-	    ->from($db->quoteName("Photo"))
-	    ->where("sequence_id = 0");
-	  $db->setQuery($query);
-	  $this->uploadDetails = $db->loadAssocList();
+
+	  if ( $this->canRun ) {
+	  	$db = JDatabase::getInstance(dbOptions());
+	  	$query = $db->getQuery(true);
+	  	$query->select("distinct(upload_id)")
+	    	->from($db->quoteName("Photo"))
+	    	->where("sequence_id = 0");
+	  	$db->setQuery($query);
+	  	$this->uploadDetails = $db->loadAssocList();
+
+	  }
 
 	  // Display the view
 

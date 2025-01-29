@@ -300,27 +300,6 @@ jQuery(document).ready(function(){
 	
 	});
 	
-	jQuery('#invert_image').click(function() {
-		
-		let originalImage = jQuery("#photoCarouselInner > .item > img");
-		let currFilter = originalImage.css("filter");
-		if ( currFilter == "invert(1)" ) {
-			originalImage.css("filter","");
-		}
-		else {
-			originalImage.css("filter","invert(1)");
-		}
-		
-		let originalVideo = jQuery("video");
-		let currVidFilter = originalVideo.css("filter");
-		if ( currVidFilter == "invert(1)" ) {
-			originalVideo.css("filter","");
-		}
-		else {
-			originalVideo.css("filter","invert(1)");
-		}
-		
-	});
 	
 	jQuery('#report_media').click(function (){
 		
@@ -359,6 +338,7 @@ jQuery(document).ready(function(){
 	jQuery('.species-tab').tooltip({'delay': {'show': 1000, 'hide': 10}, 'title': 'Filter list of species', 'placement': 'top'});
 	jQuery('#fullscreen-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Full screen', 'placement': 'top'});
 	jQuery('#fullscreen-exit-button').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Exit full screen', 'placement': 'top'});
+	jQuery('#fullscreen-invert-image').tooltip({'delay': {'show':1000, 'hide': 10}, 'title': 'Invert image colours', 'placement': 'top'});
 	
 	
 	

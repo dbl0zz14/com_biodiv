@@ -9,6 +9,11 @@ defined('_JEXEC') or die;
  
 // import Joomla view library
 jimport('joomla.application.component.view');
+
+use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Router\Route;
+
+
  
 /**
 * HTML View class for the BioDiv Component
@@ -26,29 +31,20 @@ class BioDivViewClassify extends JViewLegacy
 
     public function display($tpl = null) 
     {
-	  //error_log("BioDivViewClassify.display() called");
-	  
-      // Assign data to the view
-	  //($person_id = (int)userID()) or die("No person_id");
 	  $app = JFactory::getApplication();
+	  
 	  $this->photo_id =
 	    (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
 		
-	  //error_log("BioDivViewClassify.display got photo_id from request, = " . $this->photo_id);
-	  
 	  $this->self = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
 	  
 	  $this->classify_project = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_project', 'classify_project', 0);
 		
-	  //echo "BioDivViewClassify, this->classify_project = ", $this->classify_project;
-	  
 	  $this->classify_only_project = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_only_project', 'classify_only_project', 0);
 		
-	  //echo "BioDivViewClassify, this->classify_only_project = ", $this->classify_only_project;
-	  
 	  (int)$this->project_id = 
 	    $app->getUserStateFromRequest('com_biodiv.project_id', 'project_id', 0);
 		
@@ -62,16 +58,26 @@ class BioDivViewClassify extends JViewLegacy
 	  // Check the user has access as this view can be loaded from project pages as well as Spotter status page
 	  
 	  if ( !userID() ) {
+		  
 		$app = JFactory::getApplication();
 		
-		$message = JText::_("COM_BIODIV_CLASSIFY_LOG_CLASS");  //"Please log in before classifying.";
-		$url = "".BIODIV_ROOT."&view=classify";
-		if ( $this->classify_only_project ) $url .= "&classify_only_project=" . $this->classify_only_project;
-		if ( $this->project_id ) $url .= "&project_id=" . $this->project_id;
-		if ( $this->self ) $url .= "&classify_self=" . $this->self;
-		$url = urlencode(base64_encode($url));
-		$url = JRoute::_('index.php?option=com_users&view=login&return=' . $url );
+		$currentUri = Uri::getInstance();
+		
+		$loginParam = $app->input->getString('login', 0);
+		
+		$defaultLoginPage = 'index.php?option=com_users&view=login';
+		
+		if ( $loginParam ) {			
+			// assume any passed in login page has specific routing
+			$url = JRoute::_($loginParam);			
+		}
+		else {
+			$url = JRoute::_($defaultLoginPage.'&return='.base64_encode($currentUri));
+		}
+		
+		$message = JText::_("COM_BIODIV_CLASSIFY_LOG_CLASS");
 		$app->redirect($url, $message);
+		
 	  }
 
 	  
@@ -190,6 +196,7 @@ class BioDivViewClassify extends JViewLegacy
 		}
 	  
 		$this->invertimage = JText::_("COM_BIODIV_CLASSIFY_INVERT_IMAGE") . " <span class='fa fa-adjust'/>";
+		$this->sequenceinfo = " <span class='fa fa-info'/>";
 		$this->showmap = JText::_("COM_BIODIV_CLASSIFY_SHOW_MAP") . " <span class='fa fa-map-marker'/>";
 		$this->nextseq = JText::_("COM_BIODIV_CLASSIFY_NEXT_SEQ") . " <span class='fa fa-arrow-circle-right'/>";
 

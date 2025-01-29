@@ -98,6 +98,10 @@ else {
 	
 	print '<div class="list-group btn-group-vertical btn-block" role="group" aria-label="Likes Buttons">';
 	
+	print '<button id="all_my_likes" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
+	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_ALL_MY_LIKES").'</h5>';
+	print '</button>';
+	
 	print '<button id="my_likes" type="button" class="list-group-item btn btn-block" style="white-space: normal;">';	
 	print '<h5>'.JText::_("COM_BIODIV_USERDASHBOARD_MY_LIKES").'</h5>';
 	print '</button>';
@@ -137,7 +141,6 @@ else {
 		
 		$tooltipText = "";
 		if ( array_key_exists ( $reportType, $this->reportText ) ) {
-			error_log ("Tooltip text = " . $this->reportText[$reportType] );
 			$tooltipText = ' data-toggle="tooltip" title="' . preg_replace( '/[\W]/', ' ', $this->reportText[$reportType]) . '"';
 		}
 		print '<button type="button" class="list-group-item btn btn-block report-btn" ' . $tooltipText . ' data-report-type="'.$reportType.'" style="white-space: normal;">';

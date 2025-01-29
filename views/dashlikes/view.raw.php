@@ -45,6 +45,8 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		$this->likedByOthers = $input->get('other', 0, 'INT');
 		
+		$this->allMy = $input->get('all', 0, 'INT');
+		
 		$this->sortBy = $input->get('sort', 'liked', 'string');
 		
 		$this->page = $input->get('page', 0, 'INT');
@@ -76,7 +78,10 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		$this->languageTag = langTag();
 		
-		
+		$ownString = "";
+		if ( !$this->allMy ) {
+			$ownString = " and P.person_id = " . $this->personId;
+		}
 		
 		$db = JDatabase::getInstance(dbOptions());
 		
@@ -107,12 +112,13 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		// Filter by site
 		$query = $db->getQuery(true);
+		
 		$query->select("distinct S.site_name, S.site_id" )
-			->from("Site S")
-			->innerJoin("Photo P on P.site_id = S.site_id and P.person_id = " . $this->personId)
-			->innerJoin("Animal A on A.photo_id = P.photo_id")
-			->where($likeText)
-			->order("S.site_name");
+				->from("Site S")
+				->innerJoin("Photo P on P.site_id = S.site_id" . $ownString)
+				->innerJoin("Animal A on A.photo_id = P.photo_id")
+				->where($likeText)
+				->order("S.site_name");
 			
 		$db->setQuery($query);
 		
@@ -122,11 +128,12 @@ class BioDivViewDashLikes extends JViewLegacy
 		
 		// Filter by year taken
 		$query = $db->getQuery(true);
+		
 		$query->select("distinct YEAR(P.taken) as year_taken" )
-			->from("Photo P")
-			->innerJoin("Animal A on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
-			->where($likeText)
-			->order("year_taken");
+				->from("Photo P")
+				->innerJoin("Animal A on A.photo_id = P.photo_id" . $ownString)
+				->where($likeText)
+				->order("year_taken");
 			
 		$db->setQuery($query);
 		
@@ -195,7 +202,7 @@ class BioDivViewDashLikes extends JViewLegacy
 			$query = $db->getQuery(true);
 			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezoneCode."') as like_time, GROUP_CONCAT(DISTINCT O.option_name ORDER BY  O.option_name SEPARATOR ', ') as species" )
 				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
+				->innerJoin("Photo P on A.photo_id = P.photo_id" . $ownString)
 				->innerJoin("Site S on S.site_id = P.site_id")
 				->innerJoin("Animal A2 on A2.photo_id = A.photo_id")
 				->innerJoin("Options O on O.option_id = A2.species")
@@ -231,7 +238,7 @@ class BioDivViewDashLikes extends JViewLegacy
 			$query = $db->getQuery(true);
 			$query->select("S.site_name, P.sequence_id, P.upload_filename, P.taken, CONVERT_TZ(A.timestamp,'UTC','".$this->userTimezoneCode."') as like_time, GROUP_CONCAT(DISTINCT OD.value ORDER BY  OD.value SEPARATOR ', ') as species" )
 				->from("Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
+				->innerJoin("Photo P on A.photo_id = P.photo_id" . $ownString)
 				->innerJoin("Site S on S.site_id = P.site_id")
 				->innerJoin("Animal A2 on A2.photo_id = A.photo_id")
 				->innerJoin("OptionData OD on OD.option_id = A2.species and OD.data_type = '" . $this->languageTag . "'" )
@@ -273,7 +280,7 @@ class BioDivViewDashLikes extends JViewLegacy
 		$query = $db->getQuery(true);
 		$query->select("count(distinct A.photo_id)")
 			->from("Animal A")
-			->innerJoin("Photo P on A.photo_id = P.photo_id and P.person_id = " . $this->personId)
+			->innerJoin("Photo P on A.photo_id = P.photo_id" . $ownString)
 			->innerJoin("Site S on S.site_id = P.site_id")
 			->innerJoin("Animal A2 on A2.photo_id = A.photo_id")
 			->innerJoin("Options O on O.option_id = A2.species")

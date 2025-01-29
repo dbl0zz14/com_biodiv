@@ -1,3 +1,17 @@
+ 29/1/25 - Version 3.8.3
+* Bring together various patches:
+* Correctly update PhotoSequence.in_use flag when processing images
+* Add info button with sequence id and start photo id when spotting
+* Add invert button when in full screen mode
+* Add all my likes report
+* Redirect spotting queries to read replica
+* Rewrite camtrapdp extract to avoid memory/performance issues plus include all media/deployments in the time period
+* Changes to support in-page classify/quiz/register
+* Automatic processing of CAI timeouts
+* Integrate Megadetector into pipeline
+* Option to suppress grandchildren in project display
+* Change sequencing order to oldest first
+
  1/5/24 - Version 3.8.2
 * Change to single email for teacher sign-up to BES
 * Fix issue with apostrophe in project name

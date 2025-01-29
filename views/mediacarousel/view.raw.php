@@ -40,6 +40,9 @@ class BioDivViewMediaCarousel extends JViewLegacy
 	$this->sequence_id = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.sequence_id', 'sequence_id', 0);
 	
+	$this->invertButton = 
+	    $app->input->getBool('invert');
+	
 	// Create the classes used to generate the carousel html code
 	$this->mediaCarousel = new MediaCarousel();
 	

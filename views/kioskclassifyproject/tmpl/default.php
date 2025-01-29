@@ -34,7 +34,7 @@ else {
 		print '<div class="col-md-12">';
 		print '<div class="col-md-12">';
 
-		$this->mediaCarousel->generateMediaCarousel($this->sequence);
+		$this->mediaCarousel->generateMediaCarousel($this->sequence, false);
 		
 		print '</div>'; // col-12
 		print '</div>'; // col-12

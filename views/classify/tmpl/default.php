@@ -86,6 +86,7 @@ else {
     // makeControlButton($control_id, $control);  
   // }
   print "<button type='button' class='btn btn-primary' id='invert_image'>".$this->invertimage."</button>";
+  print "<button type='button' class='btn btn-primary' id='sequence_info' data-toggle='modal' data-target='#info_modal'>".$this->sequenceinfo."</button>";
   print "<button type='button' class='btn btn-primary' id='control_map'>".$this->showmap."</button>";
   print "<button type='button' class='btn btn-success loader' id='control_nextseq'>".$this->nextseq."</button>";
 ?>
@@ -115,7 +116,6 @@ $mediaCarousel->generateMediaCarousel($sequence_id, etc);
 if ( $this->isVideo === true ) {
 	$photoUrl = photoURL($this->photoDetails["photo_id"]);
 	$ext = strtolower(JFile::getExt($photoUrl));
-	error_log("Classify View: ext = " . $ext );
 	
 print '<div id="videoContainer" data-photo-id="'.$this->photo_id.'"><video id="classify-video" oncontextmenu="return false;" controls controlsList="nodownload" ><source src="'.$photoUrl.'" type="video/'.$ext.'">' . JText::_("COM_BIODIV_CLASSIFY_NO_VID") . '</video></div>';
 	
@@ -141,6 +141,7 @@ print '<div id="photoCarousel" class="carousel slide carousel-fade contain" data
   print '</ol>';
 
   print '<button  id="fullscreen-button" type="button" class="right" ><span class="fa fa-expand fa-2x"></span></button>';
+  print '<button id="fullscreen-invert-image" type="button" class="right"><span class="fa fa-adjust fa-3x"></span></button>';
   print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-3x"></span></button>';
   
   print '<!-- Wrapper for slides -->';
@@ -286,6 +287,7 @@ foreach ( $this->projectFilters as $filterId=>$filter ) {
 
 	print "</div> <!-- /carousel-species carousel--> \n";
 	print "  </div>";
+	
 	$extra = "";
 }
 
@@ -310,6 +312,52 @@ print "</div>";
       <div class="modal-body">
 	    <div id="no_map"><h5> <?php print JText::_("COM_BIODIV_CLASSIFY_NO_MAP"); ?> </h5></div>
         <div id="map_canvas" style="width:100%;height:500px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="info_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> 
+		<?php 
+		if ( $this->isVideo === true ) {
+			print JText::_("COM_BIODIV_CLASSIFY_VIDEO_INFO"); 
+		}
+		else if ( $this->isAudio === true ) {
+			
+			print JText::_("COM_BIODIV_CLASSIFY_AUDIO_INFO"); 
+		}
+		else {
+			print JText::_("COM_BIODIV_CLASSIFY_SEQUENCE_INFO"); 
+		}
+		?> 
+		</h4>
+      </div>
+      <div class="modal-body">
+        <?php
+		if ( $this->isVideo === true ) {
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_SEQUENCE_ID") . ": " . $this->sequence_id . "</p>"; 
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_VIDEO_ID") . ": " . $this->photo_id . "</p>"; 
+		}
+		else if ( $this->isAudio === true ) {
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_SEQUENCE_ID") . ": " . $this->sequence_id . "</p>"; 
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_AUDIO_ID") . ": " . $this->photo_id . "</p>"; 
+		}
+		else {
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_SEQUENCE_ID") . ": " . $this->sequence_id . "</p>"; 
+			print "<p>" . JText::_("COM_BIODIV_CLASSIFY_PHOTO_ID") . ": " . $this->photo_id . "</p>"; 
+		}
+		?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

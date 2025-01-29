@@ -54,8 +54,6 @@ class BiodivAnalysis {
 	
 	public function testAnalysis () {
 		
-		error_log ( "BiodivAnalysis::testAnalysis called" );
-
 		if ( !$this->analysisOptions ) {
 			return false;
 		}
@@ -216,8 +214,6 @@ class BiodivAnalysis {
 	
 	public function ruleOfThumb ( $aiType, $aiVersion, $sequenceId, $humanSpecies, $aiSpecies ) {
 		
-		error_log ( "BiodivAnalysis::ruleOfThumb called" );
-
 		if ( !$this->analysisOptions ) {
 			return false;
 		}
@@ -250,8 +246,6 @@ class BiodivAnalysis {
 			
 			$dataJson = json_encode ( $data );
 			
-			error_log ( "About to post with data: " . $dataJson );
-			
 			print ( "About to post with data: " . $dataJson );
 			$this->lastError = null;
 			$this->lastMessage = null;
@@ -279,8 +273,6 @@ class BiodivAnalysis {
 			$response = curl_exec($curl);
 			$err = curl_error($curl);
 			$this->lastCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-			
-			error_log ( "response = " . $response );
 			
 			$responseDecoded = json_decode($response);
 			

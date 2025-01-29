@@ -16,13 +16,28 @@ jQuery(document).ready(function(){
 	
 	// ------------------------   The likes report stuff - maybe move to separate file..
 	
-	displayLikes = function ( pageNum, isOthersLikes = false ) {
+	displayLikes = function ( pageNum, isOthersLikes = false, allMyLikes = false ) {
 		
-		let url = BioDiv.root + "&view=dashlikes&format=raw&page=" + pageNum;
+		let likesView = "dashlikes";
+		// if ( allMyLikes ) {
+			// likesView = "dashspotterlikes";
+		// }
+		let url = BioDiv.root + "&view=" + likesView + "&format=raw&page=" + pageNum;
 		
-		if ( isOthersLikes ) {
+		
+		if ( allMyLikes ) {
+			url += "&all=1";
+		}
+		else if ( isOthersLikes ) {
 			url += "&other=" + 1;
 		}
+		
+		let site = jQuery('#site_select').val();
+		if ( site ) {
+			url += "&site=" + site;
+		}
+			
+		
 		
 		let numPerPage = jQuery('#num_select').val();
 		if ( numPerPage ) {
@@ -34,11 +49,6 @@ jQuery(document).ready(function(){
 			url += "&sort=" + sortBy;
 		}
 			
-		let site = jQuery('#site_select').val();
-		if ( site ) {
-			url += "&site=" + site;
-		}	
-		
 		let year = jQuery('#year_select').val();
 		if ( year ) {
 			url += "&year=" + year;
@@ -49,7 +59,10 @@ jQuery(document).ready(function(){
 			url += "&species=" + species;
 		}
 		
-		if ( isOthersLikes ) {
+		if ( allMyLikes ) {
+			jQuery('#report_display').load(url, updateAllMyLikesControls);
+		}
+		else if ( isOthersLikes ) {
 			jQuery('#report_display').load(url, updateOthersLikesControls);
 		}
 		else {
@@ -57,6 +70,14 @@ jQuery(document).ready(function(){
 		}
 		
 	};
+	
+	updateAllMyLikesControls = function () {
+		
+		addLikesEvents( false, true );
+		addPlayMedia();
+		updateLikesPagination( false, true );
+		
+	}
 	
 	updateLikesControls = function () {
 		
@@ -74,11 +95,11 @@ jQuery(document).ready(function(){
 		
 	}
 	
-	addLikesEvents = function ( isOthersLikes = false ) {
+	addLikesEvents = function ( isOthersLikes = false, allMyLikes = false ) {
 		
 		jQuery('.likes_select').change(function (){
 		
-			displayLikes(0, isOthersLikes);
+			displayLikes(0, isOthersLikes, allMyLikes);
 		
 		});
 		
@@ -86,7 +107,7 @@ jQuery(document).ready(function(){
 	}
 	
 	
-	updateLikesPagination = function ( isOthersLikes = false ) {
+	updateLikesPagination = function ( isOthersLikes = false, allMyLikes = false ) {
 		
 		jQuery('.pagination li').click(function (){
 			let pageText = null;
@@ -109,7 +130,7 @@ jQuery(document).ready(function(){
 				pageText = jQuery(this).text();
 				page = parseInt(pageText) -1;
 			}
-			displayLikes( page, isOthersLikes );
+			displayLikes( page, isOthersLikes, allMyLikes );
 	
 		});
 		
@@ -623,6 +644,14 @@ jQuery(document).ready(function(){
 	});
 	
 	
+	jQuery('#all_my_likes').click(function (){
+		
+		clearReport();
+		displayLikes(0, false, true);
+		
+	});
+	
+		
 	jQuery('#my_likes').click(function (){
 		
 		clearReport();

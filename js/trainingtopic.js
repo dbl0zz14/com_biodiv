@@ -48,6 +48,7 @@ jQuery(document).ready(function(){
 				if ( currentSequence == sequences.length - 1 ) {
 					jQuery('#control_nextseq').hide();
 					jQuery('#control_finish').show();
+					jQuery('#control_finish_inpage').show();
 				}
 			}
 		});
@@ -56,6 +57,7 @@ jQuery(document).ready(function(){
 			if ( currentSequence == sequences.length - 1 ) {
 				jQuery('#control_nextseq').hide();
 				jQuery('#control_finish').show();
+				jQuery('#control_finish_inpage').show();
 			}
 		});
 		jQuery('#classify-audio').bind('ended', function (e) {
@@ -63,56 +65,57 @@ jQuery(document).ready(function(){
 			if ( currentSequence == sequences.length - 1 ) {
 				jQuery('#control_nextseq').hide();
 				jQuery('#control_finish').show();
+				jQuery('#control_finish_inpage').show();
 			}
 		});
 	};
 	
-	addFullScreenFnly = function () {
-		jQuery('#fullscreen-button').click(function (){
-			var photos = document.getElementById('photoCarousel');
-			if("requestFullscreen" in photos) 
-			{
-				photos.requestFullscreen();
-			} 
-			else if ("webkitRequestFullscreen" in photos) 
-			{
-				photos.webkitRequestFullscreen();
-			} 
-			else if ("mozRequestFullScreen" in photos) 
-			{
-				photos.mozRequestFullScreen();
-			} 
-			else if ("msRequestFullscreen" in photos) 
-			{
-				photos.msRequestFullscreen();
-			}
+	// addFullScreenFnly = function () {
+		// jQuery('#fullscreen-button').click(function (){
+			// var photos = document.getElementById('photoCarousel');
+			// if("requestFullscreen" in photos) 
+			// {
+				// photos.requestFullscreen();
+			// } 
+			// else if ("webkitRequestFullscreen" in photos) 
+			// {
+				// photos.webkitRequestFullscreen();
+			// } 
+			// else if ("mozRequestFullScreen" in photos) 
+			// {
+				// photos.mozRequestFullScreen();
+			// } 
+			// else if ("msRequestFullscreen" in photos) 
+			// {
+				// photos.msRequestFullscreen();
+			// }
 					
-		});
+		// });
 		
-		jQuery('#fullscreen-exit-button').click(function (){
+		// jQuery('#fullscreen-exit-button').click(function (){
 			
-			if(document.exitFullscreen) 
-			{
-				document.exitFullscreen();
-			} 
-			else if (document.webkitExitFullscreen) 
-			{
-				document.webkitExitFullscreen();
-			} 
-			else if (document.mozCancelFullScreen) 
-			{
-				document.mozCancelFullScreen();
-			} 
-			else if (document.msExitFullscreen) 
-			{
-				document.msExitFullscreen();
-			}
-			else {
-				console.log("No exit found");
+			// if(document.exitFullscreen) 
+			// {
+				// document.exitFullscreen();
+			// } 
+			// else if (document.webkitExitFullscreen) 
+			// {
+				// document.webkitExitFullscreen();
+			// } 
+			// else if (document.mozCancelFullScreen) 
+			// {
+				// document.mozCancelFullScreen();
+			// } 
+			// else if (document.msExitFullscreen) 
+			// {
+				// document.msExitFullscreen();
+			// }
+			// else {
+				// console.log("No exit found");
 				
-			}		
-		});
-	}
+			// }		
+		// });
+	// }
 		
 		
 	updateProgressBar = function () {
@@ -234,52 +237,52 @@ jQuery(document).ready(function(){
 		jQuery('#classifications').empty();
 	}
 
-	drawMap = function (){
+	// drawMap = function (){
 		
-		jQuery('#no_map').hide();
+		// jQuery('#no_map').hide();
 		
-		try{
+		// try{
 			
-			let south = parseFloat(jQuery('#mediaLocation').attr('data-south'));
-			let west = parseFloat(jQuery('#mediaLocation').attr('data-west'));
-			let north = parseFloat(jQuery('#mediaLocation').attr('data-north'));
-			let east = parseFloat(jQuery('#mediaLocation').attr('data-east'));
+			// let south = parseFloat(jQuery('#mediaLocation').attr('data-south'));
+			// let west = parseFloat(jQuery('#mediaLocation').attr('data-west'));
+			// let north = parseFloat(jQuery('#mediaLocation').attr('data-north'));
+			// let east = parseFloat(jQuery('#mediaLocation').attr('data-east'));
 			
-			let sw = new google.maps.LatLng(south, west);
-			let ne = new google.maps.LatLng(north, east);
+			// let sw = new google.maps.LatLng(south, west);
+			// let ne = new google.maps.LatLng(north, east);
 			
-			let posBounds = new google.maps.LatLngBounds (sw, ne);
+			// let posBounds = new google.maps.LatLngBounds (sw, ne);
 		
-			let mapOptions = {
-				zoom: 8,
-				center: sw,
-				mapTypeId: google.maps.MapTypeId.TERRAIN
-			}
+			// let mapOptions = {
+				// zoom: 8,
+				// center: sw,
+				// mapTypeId: google.maps.MapTypeId.TERRAIN
+			// }
 			
-			var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+			// var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 			
-			let rectOptions = {
-				bounds: posBounds,
-				fillColor: "#00ba8a",
-				fillOpacity: 0.5,
-				strokeWeight: 1,
-				//strokeColour: "red",
-				//strokeOpacity: 0.5,
-				map: map,
-				draggable:false
-			}
+			// let rectOptions = {
+				// bounds: posBounds,
+				// fillColor: "#00ba8a",
+				// fillOpacity: 0.5,
+				// strokeWeight: 1,
+				// //strokeColour: "red",
+				// //strokeOpacity: 0.5,
+				// map: map,
+				// draggable:false
+			// }
 			
-			var rect = new google.maps.Rectangle(
-				rectOptions
-			);
+			// var rect = new google.maps.Rectangle(
+				// rectOptions
+			// );
 			
-		}
-		catch(err){
-			console.log(err.msg);
-			jQuery('#no_map').show();
-		}
+		// }
+		// catch(err){
+			// console.log(err.msg);
+			// jQuery('#no_map').show();
+		// }
 		
-	};
+	// };
 	
 	getSpeciesName = function ( id ) {
 		return jQuery('#species_select_' + id).text();
@@ -369,7 +372,7 @@ jQuery(document).ready(function(){
 		currentSequence++;
 		if ( currentSequence < sequences.length ) {
 			let sequence_id = sequences[currentSequence];
-			var url = BioDiv.root + "&view=mediacarousel&format=raw&topic_id=" + topic + "&sequence_id=" + sequence_id;
+			var url = BioDiv.root + "&view=mediacarousel&format=raw&invert=1&topic_id=" + topic + "&sequence_id=" + sequence_id;
 			
 			jQuery.ajax(url, {'success': function(data) {
 				//window.location.reload(true);
@@ -384,11 +387,18 @@ jQuery(document).ready(function(){
 					if ( currentSequence == sequences.length - 1 ) {
 						jQuery('#control_nextseq').hide();
 						jQuery('#control_finish').show();
+						jQuery('#control_finish_inpage').show();
 					}
 				}
 				else {
 					jQuery('#control_nextseq').prop('disabled', true);
 				}
+				if (jQuery("#photoCarousel").length) {
+                    jQuery("#invert_image").show();
+                } else {
+                    jQuery("#invert_image").hide();
+                }
+				jQuery('#fullscreen-invert-image').click(invertImage);
 				addFullScreenFnly();
 				updateProgressBar();
 				setNext();
@@ -406,6 +416,32 @@ jQuery(document).ready(function(){
 		jQuery('#user_animals').val(JSON.stringify(classifications));
 	
 	});
+	
+	jQuery('#control_finish_inpage').click(function ( e ){
+		
+		e.preventDefault();
+		
+		let userAnimals = JSON.stringify(classifications);
+		jQuery('#user_animals').val(JSON.stringify(classifications));
+		
+		// And call the ajax version
+		
+		let formData = jQuery('#control_finish_inpage').serialize();
+		let url = BioDiv.root + "&view=trainingresultsajax&format=raw";
+		jQuery('#t3-content').load(url, formData, quizResultsLoaded);
+		
+	});
+	
+	
+	quizResultsLoaded = function () {
+		
+		// Activate buttons
+		setReloadPage (); 
+		addResultsHandlers ();
+		
+	}
+
+	
 	
 	displaySpeciesPage = function ( start, len ) {
 		

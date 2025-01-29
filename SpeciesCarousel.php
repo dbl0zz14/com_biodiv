@@ -28,8 +28,6 @@ class SpeciesCarousel {
 	
 	public static function getAllSpecies () {
 		
-		error_log ("Static getAllSpecies called");
-		
 		$db = JDatabase::getInstance(dbOptions());
 	
 		$speciesArray = null;
@@ -38,7 +36,6 @@ class SpeciesCarousel {
 		$lang = langTag();
 		if ( $lang == 'en-GB' ) {
 			
-			error_log ( "Language is English so no join to OptionData" );
 			$query = $db->getQuery(true);
 			
 			$query->select("O.option_id as id, O.option_name as name")
@@ -64,8 +61,6 @@ class SpeciesCarousel {
 			$speciesArray = $db->loadRowList();
 			
 		}
-		$err_msg = print_r ( $speciesArray, true );
-		error_log ( $err_msg );
 		
 		return $speciesArray;
 	}
@@ -123,16 +118,11 @@ class SpeciesCarousel {
 		print "		  <div id='classify-species'>";
 
 
-		$err_msg = print_r ( $this->allSpecies, true );
-		error_log ( "generateClassifyModal allSpecies = " . $err_msg );
-		
 		foreach ($this->allSpecies as $stuff) {
 			list($species_id, $species_name) = $stuff;
 			print "<h2 id='species_header_${species_id}' class='species_header'>" . $species_name."</h2>\n";
 		}
 		
-		error_log ( "Done allSpecies" );
-
 		print "<input type='hidden' name='species' id='species_value'/>\n";
 		//print "<input id='currPhotoId' type='hidden' name='photo_id' value='".$this->photo_id."'/>\n";
    

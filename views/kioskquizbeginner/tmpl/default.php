@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 	
 $seq_json = json_encode($this->sequenceIds);
 
-error_log ( "seq_json = " . $seq_json );
+//error_log ( "seq_json = " . $seq_json );
 
 print "<div id='seq_ids' data-seq-ids='".$seq_json."'></div>";
 
@@ -156,9 +156,6 @@ else {
 			$longSpeciesNameClass = '';
 			if ( strlen($speciesName) > 13 ) $longSpeciesNameClass = 'long_species_name';
 			
-			error_log ( "Long species name class = " . $longSpeciesNameClass );
-		
-		
 			$image = codes_getName($speciesId,'kioskimg');
 			$imageText = "";
 			$imageURL = "";

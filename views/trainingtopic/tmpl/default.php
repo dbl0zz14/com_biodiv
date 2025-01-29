@@ -62,20 +62,41 @@ defined('_JEXEC') or die;
 		//$this->mediaCarousel->generateLeftControls();
 		//print "</div> <!-- /.btn-group -->";
 		print "<div class='btn-group pull-right' role='group'>";
+		if ( $this->currentSequence->getMedia() == "photo" ) {
+			$this->mediaCarousel->generateInvertButton( true );
+		}
+		else {
+			$this->mediaCarousel->generateInvertButton( false );
+		}
 		$this->mediaCarousel->generateLocationButton();
 		$this->mediaCarousel->generateNextButton();
 		
 		// Add a hidden Results button which is displayed instead of Next when all sequences have been done.
-		print "	      <form id='control_finish' class='inline' style='display:none' action = '".BIODIV_ROOT."' method = 'POST'>";
-		print "		  <input type='hidden' name='view' value='trainingresults'/>";
-		print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
-		print "		  <input type='hidden' name='topic_id' value='".$this->topic_id."'/>";
-		if ( $this->detail ) print "		  <input type='hidden' name='detail' value='1'/>";
-		print "		  <input type='hidden' name='sequences' value='".$seq_json."'/>";
-		print "		  <input id='user_animals' type='hidden' name='animals' value=''/>";
-		print "		  <button class='btn btn-danger' type='submit' >".
-						  JText::_("COM_BIODIV_TRAINING_RESULTS")." <span class='fa fa-arrow-circle-right'/></button>";
-		print "		  </form>";
+		// Could be in-page for mini sites eg UAE
+		if ( $this->inPageResults ) {
+			print "	      <form id='control_finish_inpage' class='inline' style='display:none' action = '".BIODIV_ROOT."' method = 'POST'>";
+			print "		  <input type='hidden' name='view' value='trainingresultsajax'/>";
+			print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
+			print "		  <input type='hidden' name='topic_id' value='".$this->topic_id."'/>";
+			if ( $this->detail ) print "		  <input type='hidden' name='detail' value='1'/>";
+			print "		  <input type='hidden' name='sequences' value='".$seq_json."'/>";
+			print "		  <input id='user_animals' type='hidden' name='animals' value=''/>";
+			print "		  <button class='btn btn-danger' type='submit' >".
+							  JText::_("COM_BIODIV_TRAINING_RESULTS")." <span class='fa fa-arrow-circle-right'/></button>";
+			print "		  </form>";
+		}
+		else {
+			print "	      <form id='control_finish' class='inline' style='display:none' action = '".BIODIV_ROOT."' method = 'POST'>";
+			print "		  <input type='hidden' name='view' value='trainingresults'/>";
+			print "		  <input type='hidden' name='option' value='".BIODIV_COMPONENT."'/>";
+			print "		  <input type='hidden' name='topic_id' value='".$this->topic_id."'/>";
+			if ( $this->detail ) print "		  <input type='hidden' name='detail' value='1'/>";
+			print "		  <input type='hidden' name='sequences' value='".$seq_json."'/>";
+			print "		  <input id='user_animals' type='hidden' name='animals' value=''/>";
+			print "		  <button class='btn btn-danger' type='submit' >".
+							  JText::_("COM_BIODIV_TRAINING_RESULTS")." <span class='fa fa-arrow-circle-right'/></button>";
+			print "		  </form>";
+		}
 			
 		print "</div>"; // btn group
 		print "</div>"; // col-12
@@ -93,8 +114,6 @@ defined('_JEXEC') or die;
 		print "</div>"; // col-md-9
 		
 		print "<div class='col-md-3'>";
-		
-		error_log ( "About to generate species carousel" );
 		
 		$this->speciesCarousel->generateSpeciesCarousel();
 		print "</div>"; // col-md-3
@@ -136,7 +155,10 @@ JHTML::script("https://maps.googleapis.com/maps/api/js?key=" . $key);
 //JHTML::script("https://maps.googleapis.com/maps/api/js?key="); // For dev
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 JHTML::script("com_biodiv/commonclassify.js", true, true);
+JHTML::script("com_biodiv/trainingfunctions.js", true, true);
 JHTML::script("com_biodiv/trainingtopic.js", true, true);
+
+
 
 ?>
 

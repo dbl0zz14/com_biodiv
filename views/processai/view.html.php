@@ -24,7 +24,10 @@ class BioDivViewProcessAI extends JViewLegacy
 	const STATUS_CALIBRATION_POLE = 10;
 	const STATUS_NOTHING = 14; // Nothing found by Megadetector (or below threshold)
 	
-	const AI_SEND_SUCCESS = 1;
+	const TO_SEND			= 0;
+	const SEND_SUCCESS		= 1;
+	const SEND_ERROR		= 4;
+	
 	
 	
 	/**
@@ -61,9 +64,9 @@ class BioDivViewProcessAI extends JViewLegacy
 
 			$query = $db->getQuery(true);
 			
-			$query->select($db->quoteName(array('P.photo_id', 'P.sequence_id', 'P.site_id', 'P.filename')))
+			$query->select($db->quoteName(array('P.photo_id', 'P.sequence_id', 'P.sequence_num', 'P.site_id', 'P.filename', 'A.aiq_id')))
 				->from($db->quoteName('AIQueue') . ' A')
-				->innerJoin($db->quoteName('Photo') . ' P on P.photo_id = A.photo_id and A.status = ' . self::AI_SEND_SUCCESS)
+				->innerJoin($db->quoteName('Photo') . ' P on P.photo_id = A.photo_id and A.ai_type = '.$db->quote($this->aiType).' and A.status = ' . self::SEND_SUCCESS)
 				->where($db->quoteName('P.sequence_id') . ' NOT IN (select sequence_id from Classify where origin = '.$db->quote($this->aiType).')' );
 				
 			if ( $this->processAll ) {
@@ -99,8 +102,10 @@ class BioDivViewProcessAI extends JViewLegacy
 				
 				$imageId = $photo->photo_id;
 				$sequenceId = $photo->sequence_id;
+				$sequenceNum = $photo->sequence_num;
 				$siteId = $photo->site_id;
 				$filename = $photo->filename;
+				$aiqId = $photo->aiq_id;
 				
 				print "<br>Processing unclassified sequence " . $sequenceId . ", photoId = " . $imageId;
 				
@@ -129,9 +134,17 @@ class BioDivViewProcessAI extends JViewLegacy
 				// These images are now made available as Megadetector used for screening.
 				$query = $db->getQuery(true);
 				
-				$fields = array(
-					$db->quoteName('status') . ' = ' . self::STATUS_AVAILABLE 
-				);
+				if ( $aiqId < 7176072 ) {
+                                        $fields = array(
+                                                $db->quoteName('status') . ' = ' . self::STATUS_UNCLASSIFIED
+                                        );
+                                }
+                                else {
+                                        $fields = array(
+                                                $db->quoteName('status') . ' = ' . self::STATUS_AVAILABLE
+                                        );
+                                }
+
 
 				// Conditions for which records should be updated.
 				$conditions = array(
@@ -148,8 +161,12 @@ class BioDivViewProcessAI extends JViewLegacy
 				if ( !$result ) {
 					error_log ("Process AI error - failed to update status for Photo " . $imageId );
 				}
+
+				if ( $sequenceNum == 1 ) {
+					updateSequenceInUse ( $sequenceId, null, 1, false );	
+				}
 			}
-			
+
 			$query = $db->getQuery(true);
 			
 			$query->select('max(classify_id)')
@@ -223,7 +240,22 @@ class BioDivViewProcessAI extends JViewLegacy
 				
 			print "<h2>Updating images which have passed screening </h2>";
 			
-			// Update Photo table status = 1.
+			// Update Photo table status = 1 and PhotoSequence table in_use = 1.
+			
+			$query = $db->getQuery(true);
+			
+			$query->select('distinct sequence_id')
+				->from($db->quoteName('Photo') )
+				->where('status = ' . self::STATUS_UNAVAILABLE)
+				->where('contains_human = 0')
+				->where('sequence_id IN (select sequence_id from Classify where origin = '.$db->quote($this->aiType).
+								' and classify_id <= ' . $maxClassifyId . ')');
+				
+			$db->setQuery($query);
+
+			$sequenceIds = $db->loadColumn();
+			
+			
 			$query = $db->getQuery(true);
 			
 			$fields = array(
@@ -243,8 +275,67 @@ class BioDivViewProcessAI extends JViewLegacy
 			$db->setQuery($query);
 
 			$result = $db->execute();
+			
+			foreach ( $sequenceIds as $seqId ) {
 				
+				updateSequenceInUse ( $seqId, null, 1, false );	
+			}
 				
+			// Update status of queue where request failed (usually timed out) but classifications received.  
+
+			print "<h2>Updating queue status where request timed out but classifications received</h2>";
+
+			$query = $db->getQuery(true);
+			
+			$fields = array(
+				$db->quoteName('status') . ' = ' . self::SEND_SUCCESS ,
+				$db->quoteName('timestamp') . ' = NOW()'
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('photo_id') . ' IN (select photo_id from Classify where origin = '.$db->quote($this->aiType).
+								' and species_id != ' . $noClassId . ')', 
+				$db->quoteName('status') . ' = ' . self::SEND_ERROR,
+				$db->quoteName('ai_type') . ' = ' . $db->quote($this->aiType),
+				$db->quoteName('timestamp') . ' < SUBTIME(NOW(), "6:0:0")' 
+			);
+
+			$query->update($db->quoteName('AIQueue'))->set($fields)->where($conditions);
+			
+			$db->setQuery($query);
+
+			$result = $db->execute();
+			
+			
+			
+			// Requeue timed out requests where no classification received.  Limit numbers so don't flood system.
+
+			print "<h2>Re-queueing images where request timed out and no classifications received</h2>";
+
+			$query = $db->getQuery(true);
+			
+			$fields = array(
+				$db->quoteName('status') . ' = ' . self::TO_SEND ,
+				$db->quoteName('msg') . ' = ' . $db->quote('Requeued'),
+				$db->quoteName('timestamp') . ' = NOW()'
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('photo_id') . ' NOT IN (select photo_id from Classify where origin = '.$db->quote($this->aiType). ')', 
+				$db->quoteName('status') . ' = ' . self::SEND_ERROR,
+				$db->quoteName('ai_type') . ' = ' . $db->quote($this->aiType),
+				$db->quoteName('msg') . ' like "%timed out%"' ,
+				$db->quoteName('timestamp') . ' < SUBTIME(NOW(), "6:0:0")'
+			);
+
+			$query->update($db->quoteName('AIQueue'))->set($fields)->where($conditions)->limit(20);
+			
+			$db->setQuery($query);
+
+			$result = $db->execute();
+			
 		}
 		else if ( $this->aiType == 'MEGA' ) {
 			
@@ -301,7 +392,7 @@ class BioDivViewProcessAI extends JViewLegacy
 												'aiq_id', 'cai_status', 'species_id', 'prob' )))
 					->from($db->quoteName('Photo') . ' P')
 					->leftJoin($db->quoteName('AIQueue') . ' AIQ on P.photo_id = AIQ.photo_id and AIQ.ai_type = '. $db->quote('CAI'))
-					->leftJoin($db->quoteName('Classify') . ' C on P.photo_id = C.photo_id and C.origin = '. $db->quote('MEGA'))
+					->innerJoin($db->quoteName('Classify') . ' C on P.photo_id = C.photo_id and C.origin = '. $db->quote('MEGA'))
 					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId );
 				
 				$db->setQuery($query);
@@ -371,7 +462,7 @@ class BioDivViewProcessAI extends JViewLegacy
 					->from($db->quoteName('Photo') . ' P')
 					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId );
 				
-				$db->setQuery($query);
+				$db->setQuery($query, 0, 20);
 
 				//error_log("ProcessAI view MEGA: select sequence photo ids query created: " . $query->dump());	
 			
@@ -379,21 +470,18 @@ class BioDivViewProcessAI extends JViewLegacy
 				
 				
 				//error_log ( "Got hasNothingDetected " . print_r ( $hasNothingDetected, true ) );
-				//print ( "<br>Got hasNothingDetected " . print_r ( $hasNothingDetected, true ) );
+				print ( "<br>Got hasNothingDetected " . print_r ( $hasNothingDetected, true ) );
 				//error_log ( "Got hasDetectionBelowThreshold " . print_r ( $hasDetectionBelowThreshold, true ) );
-				//print ( "<br>Got hasDetectionBelowThreshold " . print_r ( $hasDetectionBelowThreshold, true ) );
+				print ( "<br>Got hasDetectionBelowThreshold " . print_r ( $hasDetectionBelowThreshold, true ) );
 				//error_log ( "Got hasDetectionAboveThreshold " . print_r ( $hasDetectionAboveThreshold, true ) );
-				//print ( "<br>Got hasDetectionAboveThreshold " . print_r ( $hasDetectionAboveThreshold, true ) );
+				print ( "<br>Got hasDetectionAboveThreshold " . print_r ( $hasDetectionAboveThreshold, true ) );
 				
 				$photosInSequence = count($sequencePhotoIds);
 				$photosProcessed = count($uniquePhotoIds);
-				//print ( "<br>Sequence has " . $photosInSequence . " photos" );
-				//print ( "<br>Processed " . $photosProcessed . " photos" );
+				print ( "<br>Sequence has " . $photosInSequence . " photos" );
+				print ( "<br>Processed " . $photosProcessed . " photos" );
 				
-				if ( $photosInSequence != $photosProcessed ) {
-					print ( "<br>Incomplete sequence (".$sequenceId."), leave for next run" );
-				}
-				else if ( $hasHumanDetected > 0 ) {
+				if ( $hasHumanDetected > 0 ) {
 					
 					print ( "<br>Some photos in sequence " . $sequenceId . " have human detections so flagging before adding to AIQueue" );
 					//error_log ( "Some photos in sequence " . $sequenceId . " have human detections so flagging before adding to AIQueue" );
@@ -420,9 +508,13 @@ class BioDivViewProcessAI extends JViewLegacy
 					$result = $db->execute();
 			
 					// Add to CAI queue
-					foreach ( $uniquePhotoIds as $newId ) {
+					foreach ( $sequencePhotoIds as $newId ) {
 						addToAIQueue('CAI', $newId);
 					}
+				}
+				else if ( $photosInSequence != $photosProcessed ) {
+				//else if ( $photosInSequence > $photosProcessed ) {
+					print ( "<br>Incomplete sequence (".$sequenceId."), leave for next run" );
 				}
 				else if ( count($hasDetectionAboveThreshold) > 0 ) {
 					

@@ -1,10 +1,32 @@
+
+function invertImage () {
+		let originalImage = jQuery("#photoCarouselInner > .item > img");
+		let currFilter = originalImage.css("filter");
+		if ( currFilter == "invert(1)" ) {
+			originalImage.css("filter","");
+		}
+		else {
+			originalImage.css("filter","invert(1)");
+		}
+		
+		let originalVideo = jQuery("video");
+		let currVidFilter = originalVideo.css("filter");
+		if ( currVidFilter == "invert(1)" ) {
+			originalVideo.css("filter","");
+		}
+		else {
+			originalVideo.css("filter","invert(1)");
+		}
+	}
+
+
 jQuery(document).ready(function(){
 	
 	checkRadioDefault = function ( name ) {
 		jQuery("input[name='"+name+"']:first").prop('checked', true);
 	}
-
-
+	
+	
 	BioDiv.likeActions = function (){
 	    jQuery('#not-favourite').click(function(){
 		jQuery('#not-favourite').hide();
@@ -130,6 +152,10 @@ jQuery(document).ready(function(){
 		jQuery('#photo-carousel-control-right').focus();         
 		},100);
     });
+	
+	
+	jQuery('#invert_image').click(invertImage);
+	jQuery('#fullscreen-invert-image').click(invertImage);
 
 
 	jQuery('#not-favourite').click(function(){
@@ -193,8 +219,10 @@ jQuery(document).ready(function(){
 	if ( !haveFullscreen ) {
 		jQuery('#fullscreen-button').hide();
 		jQuery('#fullscreen-exit-button').hide();
+		jQuery('#fullscreen-invert-image').hide();
 	}
-
+	
+	
 	// to test IE: jQuery('#fullscreen-exit-button').hide();
 	// For sequences of more than 1 photo or for videos disable NextSequence until the user has viewed all.
 	if ( document.getElementById('sub-photo-1') ) {

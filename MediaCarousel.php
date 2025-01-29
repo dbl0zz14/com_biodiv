@@ -23,6 +23,15 @@ class MediaCarousel {
 		}
 	}
 	
+	function generateInvertButton ( $show ) {
+		$invertImage = " <span class='fa fa-adjust'/>";
+		$displayText = "";
+		if ( !$show ) {
+			$displayText = "style='display: none;'";
+		}
+		print "<button type='button' class='btn btn-primary' id='invert_image' ".$displayText.">".$invertImage."</button>";
+	}
+
 	function generateLocationButton () {
 		$showmap = JText::_("COM_BIODIV_CLASSIFY_SHOW_MAP") . " <span class='fa fa-map-marker'/>";
 		print "<button type='button' class='btn btn-primary' id='control_map'>".$showmap."</button>";
@@ -39,7 +48,7 @@ class MediaCarousel {
 		}
 	}
 	
-	function generateMediaCarousel($sequence) {
+	function generateMediaCarousel($sequence, $addInvertButton = true) {
 		
 		$sequenceId = $sequence->getId();
 		$photoUrls = $sequence->getMediaFiles();
@@ -82,6 +91,9 @@ class MediaCarousel {
 			print '</ol>';
 
 			print '<button  id="fullscreen-button" type="button" class="right" ><span class="fa fa-expand fa-2x"></span></button>';
+			if ( $addInvertButton ) {
+				print '<button id="fullscreen-invert-image" type="button" class="right"><span class="fa fa-adjust fa-3x"></span></button>';
+			}
 			print '<button  id="fullscreen-exit-button" type="button" class="right" ><span class="fa fa-compress fa-3x"></span></button>';
 			
 			print '<!-- Wrapper for slides -->';

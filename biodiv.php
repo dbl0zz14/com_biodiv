@@ -29,6 +29,7 @@ include_once "BiodivMegadetector.php";
 include_once "BiodivAnalysis.php";
 include_once "BiodivOctopus.php";
 include_once "KioskSpecies.php";
+include_once "TrainingHelper.php";
 include_once "Biodiv/BeginnerQuiz.php";
 include_once "Biodiv/ResourceSet.php";
 include_once "Biodiv/ResourceFile.php";
@@ -1270,7 +1271,7 @@ function getProjectOptions( $project_id, $option_type, $use_exclusions ){
   
   // if we need to exclude some projects then remove them from the project list here
   if ( $use_exclusions ) {
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	$query = $db->getQuery(true);
 	$query->select("DISTINCT P.project_id, P.project_prettyname")->from("Project P");
 	$query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
@@ -1293,7 +1294,7 @@ function getProjectOptions( $project_id, $option_type, $use_exclusions ){
   
 	$id_string = implode(",", array_keys($myprojects));
   
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	$query = $db->getQuery(true);
 	$query->select("DISTINCT P.project_id, P.project_prettyname, O.struc, O.option_name")->from("Project P");
 	$query->innerJoin("ProjectOptions PO on PO.project_id = P.project_id");
@@ -2505,8 +2506,8 @@ function calculateUserTestStatistics ( $end_date = null ) {
 	$userTotals = $db->loadAssocList("person_id");
 	
 	$errMsg = print_r ( $userTotals, true );
-	error_log ( "userTotals: ");
-	error_log ( $errMsg );
+	//error_log ( "userTotals: ");
+	//error_log ( $errMsg );
 
 	foreach ( $userTotals as $userTotal ) {
 		
@@ -2523,7 +2524,7 @@ function calculateUserTestStatistics ( $end_date = null ) {
 			->where("end_date = '" . $prevMonthEnd . "'" );
 		$db->setQuery($query);
 		
-		error_log ( "calculateUserTests, prev month query: " . $query->dump() );
+		//error_log ( "calculateUserTests, prev month query: " . $query->dump() );
 		
 		$prevMonthResults = $db->loadAssocList();
 			
@@ -3974,7 +3975,7 @@ function getProjects ( $access, $reduce=false, $projectId = null ) {
 	if ( $reduce ) {
 	  
 	// Only want the private projects plus the projects that don't have a parent already in the list.
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	
 	/*
 	$query = $db->getQuery(true);
@@ -4017,7 +4018,7 @@ function getAccessProjectsWithSubs ( $access ) {
 	
 	//error_log ( "getProjectsWithSubs called" );
 	
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	$query = $db->getQuery(true);
 	$query->select("project_id, IFNULL(parent_project_id,0) as parent_id, project_prettyname as project_name, access_level")->from("Project P");
 	
@@ -4795,7 +4796,7 @@ function nextSequence( $project_id = null){
   
   //print "<br/>nextSequence called<br/>";
 	
-  $db = JDatabase::getInstance(dbOptions());
+  $db = JDatabase::getInstance(readDbOptions());
   $app = JFactory::getApplication();
   
   // Initialise photo_id and sequence_id to null
@@ -4962,7 +4963,7 @@ function chooseMultiple ( $project_ids, $classify_own ) {
 		//print "<br>chooseMultiple, project_id_str = " . $project_id_str . " <br>";
 	
   
-		$db = JDatabase::getInstance(dbOptions());
+		$db = JDatabase::getInstance(readDbOptions());
 		$q1 = $db->getQuery(true);
 		    /*
 		$q1->select("P.photo_id, P.sequence_id")
@@ -5065,7 +5066,7 @@ function chooseSingle ( $project_ids, $classify_own ) {
 	
 	$project_id_str = implode(',', $project_ids);
   
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	$q1 = $db->getQuery(true);
 	/* order by rand() is inefficient  
 	$q1->select("P.photo_id, P.sequence_id")
@@ -5169,7 +5170,7 @@ function chooseSiteTimeOrdered ( $project_ids, $last_photo_id, $classify_own ) {
 	
 	$project_id_str = implode(',', $project_ids);
   
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	
 	// If given a photo id, check for the next sequence in time order on that site.  If site is finished, start a new site.
 	if ( $last_photo_id ) {
@@ -5245,7 +5246,7 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 		//print "<br>chooseRepeat, project_id_str = " . $project_id_str . " <br>";
 	
   
-		$db = JDatabase::getInstance(dbOptions());
+		$db = JDatabase::getInstance(readDbOptions());
 		$q1 = $db->getQuery(true);
 		$q2 = $db->getQuery(true);
         /*    
@@ -5312,7 +5313,7 @@ function chooseRepeat ( $project_ids, $classify_own ) {
 
 
 function getPriorityWeightings () {
-	$db = JDatabase::getInstance(dbOptions());
+	$db = JDatabase::getInstance(readDbOptions());
 	$app = JFactory::getApplication();
 	$query = $db->getQuery(true);
 	
@@ -5357,7 +5358,7 @@ function getSequenceDetails($photo_id) {
     $photoDetails = codes_getDetails($photo_id, 'photo');
     $sequenceId = $photoDetails['sequence_id'];
   
-    $db = JDatabase::getInstance(dbOptions());
+    $db = JDatabase::getInstance(readDbOptions());
 	
     $query = $db->getQuery(true);
     $query->select("photo_id, site_id, dirname, filename, sequence_id, sequence_num, prev_photo, next_photo, person_id from Photo P")
@@ -5423,13 +5424,16 @@ function sequencePhotos($upload_id){
   if(!$upload_id = (int)$upload_id){
     return false;
   }
+  $uploadDetails = codes_getDetails ($upload_id, 'upload');
+  $siteId = $uploadDetails['site_id'];
+  $uploadPerson = $uploadDetails['person_id'];
   $db = JDatabase::getInstance(dbOptions());
   $query = $db->getQuery(true);
   $query->select("photo_id, taken")
     ->from("Photo")
     ->where("upload_id = " . (int)$upload_id)
 	->where("sequence_id = 0")
-    ->order("taken");
+    ->order("taken, upload_filename");
   
   $db->setQuery($query);
   $res = $db->loadAssocList();
@@ -5481,6 +5485,8 @@ function sequencePhotos($upload_id){
 	      $fields = new StdClass();
 	      $fields->start_photo_id = $prev_photo_id;
 	      $fields->upload_id = $upload_id;
+              $fields->site_id = $siteId;
+              $fields->person_id = $uploadPerson;
 		  // Currently know the sequence is of length at least 2.  Set the end and length, these will be updated
 		  // if the sequence has a longer length.
 	      $fields->end_photo_id = $photo_id;
@@ -5537,6 +5543,8 @@ function sequencePhotos($upload_id){
 		  $fields->end_photo_id = $prev_photo_id;
 		  $fields->sequence_length = 1;
 	      $fields->upload_id = $upload_id;
+              $fields->site_id = $siteId;
+              $fields->person_id = $uploadPerson;
 	      $sequence_id = codes_insertObject($fields, 'sequence');
 	      print "new sequence $sequence_id<br/>";
 	      $seq_num = 1; // as we're just starting a new sequence
@@ -5566,6 +5574,8 @@ function sequencePhotos($upload_id){
 	        $fields->end_photo_id = $photo_id;
 		    $fields->sequence_length = 1;
 	        $fields->upload_id = $upload_id;
+                $fields->site_id = $siteId;
+                $fields->person_id = $uploadPerson;
 	        $sequence_id = codes_insertObject($fields, 'sequence');
 	        print "new sequence $sequence_id<br/>";
 	        //$prev_seq_num = 1;
@@ -5603,6 +5613,8 @@ function sequencePhotos($upload_id){
 		  $fields->end_photo_id = $prev_photo_id;
 		  $fields->sequence_length = 1;
 	      $fields->upload_id = $upload_id;
+              $fields->site_id = $siteId;
+              $fields->person_id = $uploadPerson;
 	      $sequence_id = codes_insertObject($fields, 'sequence');
 	      print "new sequence $sequence_id<br/>";
 	      $seq_num = 1; // as we're just starting a new sequence
@@ -8254,6 +8266,117 @@ function addUserChoice () {
 		}	
     }
 }
+
+function updateSequenceInUse ( $sequenceId, $startPhotoId, $inUse, $checkForHuman ) {
+	
+	if ( !$sequenceId ) {
+		if ( $startPhotoId ) {
+			
+			$photoDetails = codes_getDetails ( $startPhotoId, 'photo' );
+			$sequenceId = $photoDetails['sequence_id'];
+		}
+		
+	}
+	if ( !$sequenceId ) {
+		
+		error_log ( "No sequence id in updateSequenceInUse" );
+		
+	}
+	if ( $inUse == 1 && $checkForHuman ) {
+		
+		$db = JDatabase::getInstance(readDbOptions());
+	
+		$query = $db->getQuery(true);
+		$query->select("count(*) from Photo P")
+			->where("P.sequence_id = " . $sequenceId )
+			->where("P.contains_human = 1");
+		$db->setQuery($query);
+		
+		$numHumans = $db->loadResult();
+		
+		if ( $numHumans == 0 ) {
+			
+			$fields = new StdClass ();
+			$fields->sequence_id = $sequenceId;
+			$fields->in_use = $inUse;
+			   
+			codes_updateObject($fields, 'sequence');
+		}
+	}
+	else {
+		
+		$fields = new StdClass ();
+		$fields->sequence_id = $sequenceId;
+		$fields->in_use = $inUse;
+		   
+		codes_updateObject($fields, 'sequence');
+	}
+}
+
+
+function setRunning ( $processName, $isRunning ) {
+
+        $db = JDatabase::getInstance(dbOptions());
+        $table = 'Running';
+
+        if ( !$isRunning ) {
+                $query = $db->getQuery(true);
+
+                $fields = array(
+                        $db->quoteName('running') . ' = 0'
+                );
+
+                // Conditions for which records should be updated.
+                $conditions = array(
+                                $db->quoteName('process_name') . ' = ' . $db->quote($processName)
+                );
+
+                $query->update($db->quoteName($table))->set($fields)->where($conditions);
+
+                $db->setQuery($query);
+                $result = $db->execute();
+
+                return true;
+
+        }
+        else {
+                // If already running return false
+
+                $query = $db->getQuery(true);
+                $query->select("running")
+                        ->from("Running")
+                        ->where("process_name = " . $db->quote($processName) );
+                $db->setQuery($query);
+
+                $alreadyRunning = $db->loadResult();
+
+                if ( $alreadyRunning ) {
+                        return false;
+                }
+                else {
+                        $query = $db->getQuery(true);
+
+                        $fields = array(
+                                $db->quoteName('running') . ' = 1'
+                        );
+
+                        // Conditions for which records should be updated.
+                        $conditions = array(
+                                $db->quoteName('process_name') . ' = ' . $db->quote($processName)
+                        );
+
+                        $query->update($db->quoteName($table))->set($fields)->where($conditions);
+
+                        $db->setQuery($query);
+
+                        $result = $db->execute();
+
+                        return true;
+                }
+
+        }
+}
+
 
 	
 // Get an instance of the controller prefixed by BioDiv

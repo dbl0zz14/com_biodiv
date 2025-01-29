@@ -21,7 +21,7 @@ defined('_JEXEC') or die;
 
 //print "http://localhost/rhombus/biodivimages/reports/report.csv";
 
-error_log ( "ReportDownload - returning report URL: " . $this->reportURL );
+//error_log ( "ReportDownload - returning report URL: " . $this->reportURL );
 print $this->reportURL;
 
 // Some test data:

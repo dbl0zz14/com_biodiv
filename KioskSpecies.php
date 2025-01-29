@@ -121,7 +121,7 @@ class KioskSpecies {
 				->where("O.struc = 'kioskfilter'" );
 		}
 		
-		error_log("query to get list ids created: " . $query->dump() );
+		//error_log("query to get list ids created: " . $query->dump() );
 		
 		$db->setQuery($query);
 		$listIds = $db->loadColumn();
@@ -139,7 +139,7 @@ class KioskSpecies {
 				->innerJoin("OptionData OD on SL.list_id = OD.option_id")
 				->order("type, name");
 				
-			error_log("query to get species for lists created: " . $query->dump() );
+			//error_log("query to get species for lists created: " . $query->dump() );
 		
 			$db->setQuery($query);
 			$allSpecies = $db->loadAssocList();

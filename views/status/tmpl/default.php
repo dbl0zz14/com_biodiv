@@ -74,8 +74,12 @@ print JText::_("COM_BIODIV_STATUS_SEL_PROJ");
 ...</option>
     
       <?php
-        foreach($this->projects as $proj_id=>$proj){
-          print "<option value='$proj_id'>$proj</option>";
+		$excludeProjects = array(380,183,381);
+		foreach($this->projects as $proj_id=>$proj){
+			if ( in_array($proj_id , $excludeProjects) ) {
+                continue;
+			}
+			print "<option value='$proj_id'>$proj</option>";
         }
       ?>
     </select>

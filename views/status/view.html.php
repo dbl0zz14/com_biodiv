@@ -10,6 +10,9 @@ defined('_JEXEC') or die;
 // import Joomla view library
 jimport('joomla.application.component.view');
  
+use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Router\Route;
+
 /**
 * HTML View class for the HelloWorld Component
 *
@@ -27,8 +30,32 @@ class BioDivViewStatus extends JViewLegacy
   public function display($tpl = null) 
   {
     $person_id = (int)userID();
-    $person_id or die("No person_id");
+	
+    if ( !$person_id ) {
+		
+		$app = JFactory::getApplication();
+		
+		$currentUri = Uri::getInstance();
+		
+		$loginParam = $app->input->getString('login', 0);
+		
+		$defaultLoginPage = 'index.php?option=com_users&view=login';
+		
+		if ( $loginParam ) {
+			
+			// assume login page has specific routing?
+			$url = JRoute::_($loginParam);
+			
+		}
+		else {
+			$url = JRoute::_($defaultLoginPage.'&return='.base64_encode($currentUri));
+		}
+		
+		$message = JText::_("COM_BIODIV_STATUS_LOGIN_MSG");
+		$app->redirect($url, $message);
 
+    }
+	
     $this->status = getSpotterStatistics();
 	
 	// Set the photo to zero on load and the classify option back to default 0

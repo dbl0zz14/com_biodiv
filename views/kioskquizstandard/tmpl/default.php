@@ -18,7 +18,7 @@ else {
 	
 	$seq_json = json_encode($this->sequenceIds);
 
-	error_log ( "seq_json = " . $seq_json );
+	//error_log ( "seq_json = " . $seq_json );
 
 	print "<div id='seq_ids' data-seq-ids='".$seq_json."'></div>";
 	print "<div id='topic_id' data-topic-id='".$this->topicId."'></div>";

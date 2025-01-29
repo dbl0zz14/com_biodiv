@@ -8,7 +8,7 @@
 // No direct access to this file
 defined('_JEXEC') or die;
 
-$this->mediaCarousel->generateMediaCarousel($this->sequence);
+$this->mediaCarousel->generateMediaCarousel($this->sequence, $this->invertButton);
 
 
 
