@@ -49,6 +49,8 @@
 	<filename>BiodivConservationAI.php</filename>
 	<filename>BiodivOctopus.php</filename>
 	<filename>BiodivAnalysis.php</filename>
+	<filename>BiodivMegadetector.php</filename>
+	<filename>TrainingHelper.php</filename>
 	<folder>views</folder>
 	<folder>Biodiv</folder>
 	<folder>libraries</folder>
