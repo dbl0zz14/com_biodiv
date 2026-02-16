@@ -13,6 +13,7 @@
 	<!-- The description is optional and defaults to the name -->
 	<description>Upload and classify images, video and audio from camera traps or other recording devices</description>
 
+
 	<update> <!-- Runs on update; New since J2.5 -->
 		<schemas>
 		<!--

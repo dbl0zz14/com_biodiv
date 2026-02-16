@@ -3182,7 +3182,7 @@ class Report {
 			
 		$query = $query1->union($query2)->order("date DESC");
 		
-		//error_log("LevelActivity report query created: " . $query->dump() );
+		error_log("LevelActivity report query created: " . $query->dump() );
 		
 		$concatQuery = $db->getQuery(true)
 			//->select( "distinct " . $this->reportId . " as report_id, CONCAT_WS(',', O.option_name, B.name, S.name, R.display_text, U.username, ST.complete_date) as report_csv")
@@ -3229,7 +3229,7 @@ class Report {
 				->where("consent_given = 1")
 				->order("UC.timestamp DESC");
 			
-			//error_log("query1 created: " . $query1->dump() );
+			error_log("query1 created: " . $query1->dump() );
 			
 			$queryInsert = $db->getQuery(true)
 				->insert('ReportRows')
