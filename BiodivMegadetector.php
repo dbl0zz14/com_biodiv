@@ -52,7 +52,7 @@ class BiodivMegaDetector {
 		$this->speciesIds[0] = codes_getCode ( 'Nothing', 'content' );
 		$this->speciesIds[1] = codes_getCode ( 'Animal', 'aiclass' );
 		$this->speciesIds[2] = codes_getCode ( 'Human', 'content' );
-		$this->speciesIds[3] = codes_getCode ( 'Car', 'aiclass' );
+		$this->speciesIds[3] = codes_getCode ( 'Vehicle', 'content' );
 
 		$this->allowedMimeTypes = ['image/jpeg', 'image/png'];
 	}

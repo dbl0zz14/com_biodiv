@@ -978,6 +978,7 @@ class BioDivController extends JControllerLegacy
     $files = JRequest::getVar('myfile', null, 'files', 'array'); 
     if(!isset($files['tmp_name'])){
       addMsg("error", "No file uploaded");
+      error_log ( "No file uploaded - cannot get files from request" );
       $fail = 1;
     }
     $tmpNames = $files['tmp_name'];  // assuming multiple upload
@@ -1225,13 +1226,13 @@ class BioDivController extends JControllerLegacy
 	$app = JFactory::getApplication();
 	$input = $app->input;
     $school_id = $input->getInt("school_id", 0);
-	//error_log ( "Got school id = " . $school_id );
+	error_log ( "Got school id = " . $school_id );
     
 	if ( !Biodiv\SchoolCommunity::canEditSchool($school_id) ) {
 		error_log ("Cannot edit school " . $school_id );
 		die("Cannot edit school " . $school_id);
 	}
-	//error_log ("verify_school_logo - can edit school " . $school_id );
+	error_log ("verify_school_logo - can edit school " . $school_id );
 	
     $guid = JRequest::getString('guid');
     if(!$guid){
@@ -1243,17 +1244,21 @@ class BioDivController extends JControllerLegacy
 	$db = JDatabase::getInstance(dbOptions());
 
     if($done){
-	  $query = $db->getQuery(true);
+	  error_log ( "Removing verify row" );
+      $query = $db->getQuery(true);
       $query->delete($db->quoteName("LogoVerify"));
       $query->where("school_id = " . (int)$school_id . " AND guid = '$guid'");
       $db->setQuery($query);
       $success = $db->execute();
+	  error_log ("Row removed success = " . $success );
     }
     else{
+      error_log ( "Adding verify row" );
       $verify = new stdClass();
       $verify->school_id = $school_id;
       $verify->guid = $guid;
       $success = $db->insertObject("LogoVerify", $verify);
+	  error_log ("Row added success = " . $success );
     }
 	
 	return $success;
@@ -1266,14 +1271,19 @@ class BioDivController extends JControllerLegacy
 	$app = JFactory::getApplication();
 	$input = $app->input;
     $school_id = $input->getInt("school_id", 0);
+	error_log ( "upload_school_logo - got school id = " . $school_id );
 	
 	if ( $school_id and Biodiv\SchoolCommunity::canEditSchool($school_id) ) {
 		
+		error_log ( "upload_school_logo - can edit school " . $school_id );
+	
 		$problem = false;
 	
 		$fail = 0;
 	
 		$files = JRequest::getVar('myfile', null, 'files', 'array'); 
+		
+		error_log ( "upload_school_logo - got myfile var" );
 		
 		if(!isset($files['tmp_name'])){
 		  error_log ( "No file uploaded" );
@@ -1300,7 +1310,7 @@ class BioDivController extends JControllerLegacy
 				$fileSize = $fileSizes[$index];
 				$fileType = $fileTypes[$index];
 				
-				//error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
+				error_log ("Uploading $clientName: tmp name = $tmpName, filesize = $fileSize, fileType = $fileType" );
 				
 				if ( $fileSize > BIODIV_MAX_FILE_SIZE ){
 					error_log ( "Filesize too big" );
@@ -1348,7 +1358,11 @@ class BioDivController extends JControllerLegacy
 							error_log ( "tmpName file does exist, " . $tmpName );
 						}
 						
+						error_log ("About to call JFile::upload, newFullName = " . $newFullName );
+						
 						$success = JFile::upload($tmpName, $newFullName);
+						
+						error_log ("Uploaded file success = " . $success );
 						
 						if(!$success){
 							error_log ( "New file - upload failed... "   );
@@ -1809,6 +1823,7 @@ class BioDivController extends JControllerLegacy
 					// Check whether an existing user
 					$existingUserEmail = $helper->getUser ( $email );
 					if ( $existingUserEmail ) {
+						error_log ( "User found" );
 						
 						$newProjectUser = new stdClass;
 						$newProjectUser->person_id = $existingUserEmail->id;

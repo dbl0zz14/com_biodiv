@@ -75,14 +75,17 @@ class BioDivViewUpload extends JViewLegacy
 		$this->previous_deployment_date = new JDate();
 		$this->previous_collection_date = new JDate();
 		$this->previous_upload_date = null;
+		$this->previousCameraTz = null;
+		$this->previousIsDst = 0;
 
 		$db = JDatabase::getInstance(dbOptions());
 		$query = $db->getQuery(true);
-		$query->select("upload_id, deployment_date, collection_date, timestamp")
+		$query->select("upload_id, deployment_date, collection_date, camera_tz, is_dst, timestamp")
 			->from($db->quoteName("Upload"))
 			->where("site_id = " .(int)$this->site_id)
 			->where("person_id = " .(int)userID())
-			->order("collection_date DESC, upload_id DESC");
+			->order("upload_id DESC");
+			//->order("collection_date DESC, upload_id DESC");
 		$db->setQuery($query, 0, 1); // LIMIT 1
 		$uploadDetails = $db->loadAssoc();
 
@@ -92,7 +95,43 @@ class BioDivViewUpload extends JViewLegacy
 			$this->previous_deployment_date = new Jdate($uploadDetails['deployment_date']);
 			$this->previous_collection_date = new Jdate($uploadDetails['collection_date']);
 			$this->previous_upload_date = new JDate($uploadDetails['timestamp']);
+			$this->previousCameraTz = $uploadDetails['camera_tz'];
+			$this->previousIsDst = $uploadDetails['is_dst'];
 		  
+			$query = $db->getQuery(true);
+                        $query->select("count(*)")
+                                ->from($db->quoteName("Photo"))
+                                ->where("upload_id = " .(int)$this->previous_upload_id);
+                        $db->setQuery($query);
+                        $numUploaded = $db->loadResult();
+
+			$query = $db->getQuery(true);
+			$query->select("count(*)")
+				->from($db->quoteName("OriginalFiles"))
+				->where("upload_id = " .(int)$this->previous_upload_id);
+			$db->setQuery($query);
+			$numOriginal = $db->loadResult();
+
+			$query = $db->getQuery(true);
+			$query->select("count(*)")
+				->from($db->quoteName("OriginalLargeFiles"))
+				->where("upload_id = " .(int)$this->previous_upload_id);
+			$db->setQuery($query);
+			$numLarge = $db->loadResult();
+
+                        $query = $db->getQuery(true);
+                        $query->select("count(*)")
+                                ->from($db->quoteName("UploadError"))
+                                ->where("upload_id = " .(int)$this->previous_upload_id);
+                        $db->setQuery($query);
+                        $numFailed = $db->loadResult();
+
+                        $this->previousNumUploaded = $numUploaded;
+			$this->previousNumOriginal = $numOriginal;
+			$this->previousNumLarge = $numLarge;
+                        $this->previousNumFailed = $numFailed;
+
+
 		}
 
 			// Display the view

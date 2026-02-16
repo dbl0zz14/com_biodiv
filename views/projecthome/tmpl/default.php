@@ -104,7 +104,47 @@ defined('_JEXEC') or die;
 		print '<p class="spacer-1em"></p>';
 	}
 	
-	if ( in_array('SubProjectLarge', $this->displayOptions ) ) {
+	if ( in_array('ChildSubProjects', $this->displayOptions ) ) {
+
+
+                if ( count($this->childProjects) > 0 ) {
+                print '<p>'.JText::_("COM_BIODIV_PROJECT_SUB_PROJ").'</p>';
+                print '<p class="spacer-1em"></p>';
+                }
+
+                $project_num = 0;
+                foreach ( $this->childProjects as $proj_id=>$proj_prettyname ) {
+                        if ( $project_num%4 == 0 ) print '<div class="row">';
+                        print "<div class='col-md-3 project-col' >";
+                        $url = projectImageURL($proj_id);
+
+                        print '<form action = "';
+                        print BIODIV_ROOT;
+                        print '" method = "GET">';
+                        print "<input type='hidden' name='view' value='projecthome'/>";
+                        print "<input type='hidden' name='option' value='";
+                        print BIODIV_COMPONENT;
+                        print "'/>";
+                        print "<input type='hidden' name='project_id' value='".$proj_id."'/>";
+                        print "<button class='image-btn project-btn' type='submit' data-tooltip='".JText::_("COM_BIODIV_PROJECT_TOOLTIP")."'><div class='crop-width'><img class='project-col-image cover scale2' alt = 'project image' src='".$url."' /></div></button>";
+                        print "</form>";
+
+                        print '<div class="subproject-title">';
+                        print '<h3 itemprop="name">';
+                        print $proj_prettyname;
+                        print '</h3>';
+                        print '</div>';
+
+                        print '<p class="spacer-3em"></p>';
+                        print '</div>';
+                        $project_num += 1;
+                        if ( $project_num%4 == 0 ) {
+                                print '</div>';
+
+                        }
+                }
+        }
+	else if ( in_array('SubProjectLarge', $this->displayOptions ) ) {
 		
 	
 		if ( count($this->subProjects) > 0 ) {
@@ -159,7 +199,11 @@ defined('_JEXEC') or die;
 //JHTML::stylesheet("com_biodiv/com_biodiv.css", true, true);
 JHTML::stylesheet("com_biodiv/com_biodiv.css", array(), true);
 //JHTML::script("com_biodiv/bootbox.js", true, true);
-JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js", true, true);
+//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js", true, true);
+//JHTML::script("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.1/Chart.js", true, true);
+//JHTML::script("https://cdn.jsdelivr.net/npm/chart.js", true, true);
+JHTML::script("https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js", true, true);
 JHTML::script("com_biodiv/project.js", true, true);
 JHTML::script("com_biodiv/triggersurvey.js", true, true);
 ?>

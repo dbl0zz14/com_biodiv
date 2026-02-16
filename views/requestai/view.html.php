@@ -26,7 +26,8 @@ class BioDivViewRequestAI extends JViewLegacy
 	const LONG_SEQUENCE		= 6;
 	const MANUAL_UNQUEUE	= 7;
 	
-	const MAX_NUM = 40;
+	//const MAX_NUM = 40;
+	const MAX_NUM = 30;
 	const NUM_REQUESTS = 15;
 	
 	/**
@@ -64,20 +65,28 @@ class BioDivViewRequestAI extends JViewLegacy
 			if ( canRunScripts() ) {
 				
 				// Check the site_id we're using
-				$db = JDatabase::getInstance(dbOptions());
-				$query = $db->getQuery(true);
-				$query->select("P.site_id")
-					->from("AIQueue AIQ")
-					->innerJoin("Photo P on P.photo_id = AIQ.photo_id")
-					->where("ai_type = " . $db->quote($this->aiType) )
-					->where("AIQ.status = " . self::TO_SEND)
-					->where("P.s3_status = 1")
-					->where("P.sequence_id > 0")
-					->order("AIQ.priority, AIQ.aiq_id");
+				// Work through possible priorities to improve performance by avoiding a db sort
+				for ( $priority=1; $priority <= 10; $priority++ ) {
 
-				$db->setQuery($query, 0, 1); 
+					$db = JDatabase::getInstance(dbOptions());
+					$query = $db->getQuery(true);
+					$query->select("P.site_id")
+						->from("AIQueue AIQ")
+						->innerJoin("Photo P on P.photo_id = AIQ.photo_id")
+						->where("ai_type = " . $db->quote($this->aiType) )
+						->where("AIQ.status = " . self::TO_SEND)
+						->where("AIQ.priority = " . $priority)
+						->where("P.s3_status = 1")
+						->where("P.sequence_id > 0");
+
+					$db->setQuery($query, 0, 1); 
+
+					$nextSiteId = $db->loadResult();
+
+					if ( $nextSiteId ) break;
 				
-				$this->siteIds[$i] = $db->loadResult();
+				}
+				$this->siteIds[$i] = $nextSiteId;
 				$siteId = $this->siteIds[$i];
 				
 				if ( $siteId ) {

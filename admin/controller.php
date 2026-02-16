@@ -10,6 +10,10 @@
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
+
 /**
  * General Controller of Biodiv component
  *
@@ -381,6 +385,82 @@ class BioDivController extends JControllerLegacy
 		$this->input->set('view', 'school');
 		
 		parent::display();
+	}
+
+
+	function deletephotos () {
+
+		$app = JFactory::getApplication();
+
+		$input = $app->input;
+
+		$num_deleted = 0;
+
+		$uploadedFile = $input->files->get('file');
+
+		if(!isset($uploadedFile['tmp_name'])){
+      			error_log ("No file uploaded when admin deleting photos");
+    		}
+		else {
+		
+    			$tmpName = $uploadedFile['tmp_name'];  // assuming multiple upload
+    			$clientName = $uploadedFile['name'];  // assuming multiple upload
+    			$fileSize = $uploadedFile['size'];  // assuming multiple upload
+    			$fileType = $uploadedFile['type'];  // assuming multiple upload
+
+			if($fileSize > 8000000){
+				error_log ( "File is bigger than 8000000" );
+        		}
+        		else if(!is_uploaded_file($tmpName)){
+                		error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
+        		}
+			else {
+				// Handle uploaded file
+
+				try {
+					// Allowed file extensions
+    					$allowedExtensions = ['csv'];
+
+    					// Extract file extension
+    					$ext = strtolower(File::getExt($uploadedFile['name']));
+
+    					if (!in_array($ext, $allowedExtensions)) {
+        					throw new RuntimeException('Invalid file type.');
+    					}
+
+					$uploadDir = JPATH_ROOT . '/biodivimages/deletephotos';
+
+					// Create folder if it doesn't exist
+    					if (!Folder::exists($uploadDir)) {
+        					Folder::create($uploadDir);
+    					}
+
+    					// Sanitize filename
+    					$safeFilename = File::makeSafe($uploadedFile['name']);
+
+    					// Full path for the uploaded file
+    					$uploadPath = $uploadDir . '/' . $safeFilename;
+
+					// Move the uploaded file
+    					if (!File::upload($uploadedFile['tmp_name'], $uploadPath)) {
+        					throw new RuntimeException('File upload failed.');
+    					}
+
+					$num_deleted = deletePhotos($uploadPath);
+
+					moveDeletionsFileToS3($uploadPath);
+
+				} catch (Exception $e) {
+    					error_log ( $e->getMessage() );
+				}
+			}
+		}
+
+		$this->input->set('numDeleted', $num_deleted);
+		$this->input->set('view', 'deleted');
+
+                parent::display();
+
 	}
 	
 }

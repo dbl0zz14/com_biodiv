@@ -72,7 +72,7 @@ class BiodivFFMpeg {
 		
 		$success = true;
 		
-		$command = "ffmpeg -i " . $infile . " -metadata creation_time=\"".$createDate."\"  " . $outfile;
+		$command = "ffmpeg -i " . $infile . " -metadata creation_time=\"".$createDate."\" -pix_fmt yuv420p " . $outfile;
 
 		exec($command, $output, $returnVar);
 		

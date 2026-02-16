@@ -46,7 +46,7 @@ class BioDivViewQueueAI extends JViewLegacy
 		
 		if ( !$this->aiType ) {
 			
-			$this->aiType = 'CAI';
+			$this->aiType = 'MEGA';
 			
 		}
 		
@@ -100,7 +100,8 @@ class BioDivViewQueueAI extends JViewLegacy
 						->where("P.s3_status = 1")
 						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ")
 						->where("P.photo_id >= PSM.start_photo_id")
-						->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+						->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+						->where("P.status not in (4,5,7)");
 				}
 				else {
 					
@@ -114,7 +115,8 @@ class BioDivViewQueueAI extends JViewLegacy
 						->where("P.s3_status = 1")
 						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ")
 						->where("P.photo_id >= PSM.start_photo_id")
-						->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)");
+						->where("(PSM.end_photo_id is null or P.photo_id <= PSM.end_photo_id)")
+						->where("P.status not in (4,5,7)");
 				}
 				
 				//error_log("QueueAI view select query created: " . $query->dump());
@@ -138,7 +140,8 @@ class BioDivViewQueueAI extends JViewLegacy
 						->where("P.upload_id = U.upload_id")
 						->where("P.photo_id > " . $this->minPhotoId)
 						->where("P.s3_status = 1")
-						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ");
+						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ")
+						->where("P.status not in (4,5,7)");
 				}
 				else {
 					
@@ -148,7 +151,8 @@ class BioDivViewQueueAI extends JViewLegacy
 						->where("P.upload_id = U.upload_id")
 						->where("P.photo_id > " . $this->minPhotoId)
 						->where("P.s3_status = 1")
-						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ");
+						->where("P.photo_id NOT IN (select photo_id from AIQueue where ai_type = ".$db->quote($this->aiType).") ")
+						->where("P.status not in (4,5,7)");
 				}
 				
 				//error_log("QueueAI view select query created: " . $query->dump());

@@ -294,7 +294,7 @@ class BioDivViewCamtrapDP extends JViewLegacy
 		$topLevelProjects = $db->loadObjectList( "cdp_id");
 		
 		$humanId = codes_getCode ( "Human", "content" );
-		$vehicleId = codes_getCode ( "Car", "aiclass" );
+		$vehicleId = codes_getCode ( "Vehicle", "content" );
 		$nothingId = codes_getCode ( "Nothing", "content" );
 		$dontKnowId = codes_getCode ( "Don\'t Know", "content" );
 		$unclassifiedId = codes_getCode ( "Unclassified", "aiclass" );

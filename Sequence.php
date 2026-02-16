@@ -10,6 +10,26 @@ defined('_JEXEC') or die;
 
 class Sequence {
 	
+	const STATUS_UNAVAILABLE = 0;
+	const STATUS_AVAILABLE = 1;
+	const STATUS_RETIRED = 2;
+	const STATUS_BAD_PLACEMENT = 3;
+	const STATUS_USED_COMPETITION = 4;
+	const STATUS_IMAGE_MISSING = 5;
+	const STATUS_INCORRECT_UPLOAD_DETAILS = 6;
+	const STATUS_TEST_UPLOAD = 7;
+	const STATUS_GERMAN_SLOW_RELEASE = 8;
+	const STATUS_UNCLASSIFIED = 9; // Unclassified by Conservation AI
+	const STATUS_CALIBRATION_POLE = 10;
+	const STATUS_NOT_TO_BE_CLASSIFIED = 11;
+	const STATUS_DUPLICATE = 12;
+	const STATUS_REPORTED = 13;
+	const STATUS_NOTHING = 14; // Nothing found by Megadetector (or below threshold)
+	const STATUS_UNCLASSIFIED_FIX = 15;
+	const STATUS_MISSED_HUMAN = 16;
+	const STATUS_MEGADETECTOR_ISSUE = 17;
+	const STATUS_FULLY_CLASSIFIED = 18;
+
 	protected $id;
 	protected $media;
 	protected $type; 

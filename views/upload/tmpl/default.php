@@ -12,7 +12,7 @@ $action = $this->root . "&view=uploadm";
 
 JHTML::stylesheet("bootstrap-datepicker-master/datepicker3.css", array(), true);
 
-showMessages();
+//showMessages();
 
 
 print "<h1>" . JText::_("COM_BIODIV_UPLOAD_UPLOAD_IM") . " " . $this->site_name . " " . JText::_("COM_BIODIV_UPLOAD_ID") . " " . $this->site_id . "</h1>";
@@ -63,10 +63,21 @@ if ( $this->classId ) {
 		  print "</select>";
 		  
 		  print  "<label for='dst' style='display:block; margin-top: 20px;'>$dst_text</label>\n";
+
+		  if ( $this->previousIsDst ) {
+			print  "<div><input type='radio' id='dst_yes' name ='dst' value='1' checked> " . $dst_yes . "</div>";
+
+			print  "<div><input type='radio' id='dst_no' name ='dst' value='0'> " . $dst_no . "</div>";
+		}
+		else {
+			print  "<div><input type='radio' id='dst_yes' name ='dst' value='1'> " . $dst_yes . "</div>";
+
+			print  "<div><input type='radio' id='dst_no' name ='dst' value='0' checked> " . $dst_no . "</div>";
+		}
 		  
-		  print  "<div><input type='radio' id='dst_yes' name ='dst' value='1'> " . $dst_yes . "</div>";
+		  //print  "<div><input type='radio' id='dst_yes' name ='dst' value='1'> " . $dst_yes . "</div>";
 		  
-		  print  "<div><input type='radio' id='dst_no' name ='dst' value='0' checked> " . $dst_no . "</div>";
+		  //print  "<div><input type='radio' id='dst_no' name ='dst' value='0' checked> " . $dst_no . "</div>";
 		  
 
 	print "    </div> <!-- /.form-group -->";
@@ -205,13 +216,24 @@ if ($this->previous_upload_id){
   print "<h2>" . JText::_("COM_BIODIV_UPLOAD_LAST_UP") . "</h2>\n";
   print "<strong><p  style='margin-top:30px;'>" . JText::_("COM_BIODIV_UPLOAD_LAST_AT") . " ". $this->previous_upload_date . "</p>";
   if($this->isCamera && $this->previous_collection_date){
-    print "<p>" . JText::_("COM_BIODIV_UPLOAD_WITH_DEPL") . " ". $this->previous_deployment_date . "</p>";
+	print "<p>" . JText::_("COM_BIODIV_UPLOAD_WITH_DEPL") . " ". $this->previous_deployment_date . "</p>";
 	print "<p>" . JText::_("COM_BIODIV_UPLOAD_WITH_COLL") . " ". $this->previous_collection_date . "</p>";
+	print "<p>" . JText::_("COM_BIODIV_UPLOAD_NUM_UPLOADED") . " ". $this->previousNumUploaded . "</p>";
+	if ( $this->previousNumLarge > 0 ) {
+		print "<p>" . JText::_("COM_BIODIV_UPLOAD_NUM_LARGE") . " ". $this->previousNumLarge . "</p>";
+	}
+	if ( $this->previousNumOriginal > 0 ) {
+		print "<p>" . JText::_("COM_BIODIV_UPLOAD_NUM_ORIGINAL") . " ". $this->previousNumOriginal . "</p>";
+	}
+	print "<p>" . JText::_("COM_BIODIV_UPLOAD_NUM_FAILS") . " ". $this->previousNumFailed . "</p>";
 	
 	$action_more = $this->root . "&task=upload_more";
 	print "<p  style='margin-top:20px;'><a class='btn btn-success btn-lg' role='button' href='$action_more&upload_id=". $this->previous_upload_id. "'>" . biodiv_label_icons('upload', JText::_("COM_BIODIV_UPLOAD_UP_MORE")) . "</a></p>";
   }
   print "</strong>";
+  print "  <div style='margin-top:20px;'>";
+  print "  <a class='btn btn-primary btn-lg' role='button' href='" . BIODIV_ROOT."&view=uploaderrors&upload_id=". $this->previous_upload_id."'>".biodiv_label_icons('list', JText::_("COM_BIODIV_UPLOAD_LIST_ERRORS"))."</a>";
+  print "  </div>";
  }
 
 
@@ -251,6 +273,7 @@ print "</div>";
 
 
 JHTML::script("com_biodiv/upload.js", true, true);
+JHTML::script("com_biodiv/uploaderrors.js", true, true);
 JHTML::script("bootstrap-datepicker-master/bootstrap-datepicker.js", true, true);
 
 

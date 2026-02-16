@@ -27,6 +27,8 @@ class BioDivViewSequence extends JViewLegacy
         public function display($tpl = null) 
         {
 	  $app = JFactory::getApplication();
+	  //$input = $app->getInput();
+          //$this->sequenceThreshold = $input->getInt("threshold", 10);
 
 	  $this->canRun = setRunning ( 'sequence', 1 );
 

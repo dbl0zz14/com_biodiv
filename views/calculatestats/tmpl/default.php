@@ -16,12 +16,24 @@ if ($this->calcLeagueTable == 1 ) {
 	calculateLeagueTable();
 }
 else if ($this->calcLeagueMonth == 1 and $this->calcMonths > 0) {
-	print "Calculating league table by month history<br>";
-	calculateLeagueTableByMonthHistory ( null, $this->calcMonths );
+	if ( $this->allProjects ) {
+		print "Calculating league table by month history for all projects<br>";
+		calculateLeagueTableByMonthHistory ( null, $this->calcMonths );
+	}
+	else {
+		print "Calculating league table by month history for project " . $this->projectId . "<br>";
+		calculateLeagueTableByMonthHistory ( $this->projectId, $this->calcMonths );
+	}
 }
 else if ($this->calcLeagueMonth == 1 ) {
-	print "Calculating league table by month<br>";
-	calculateLeagueTableByMonth();
+	if ( $this->allProjects ) {
+		print "Calculating league table by month<br>";
+		calculateLeagueTableByMonth(null);
+	}
+	else {
+		print "Calculating league table by month<br>";
+		calculateLeagueTableByMonth($this->projectId);
+	}
 }
 else if ($this->calcAnimals == 1 ) {
 	print "Calculating animal statistics <br>";

@@ -90,6 +90,15 @@ class BiodivFile {
 	function isImage () {
 		return $this->type == self::IMAGE;
 	}
+
+	function toResize () {
+		$resizeNeeded = false;
+		$resolution = getimagesize($this->filename);
+		if ( $resolution[0] > 1024 && $resolution[1] > 768 ) {
+			$resizeNeeded = true;
+		}
+		return $resizeNeeded;
+	}
 	
 	function generateExif () {
 		if ( $this->isImage() ) {
@@ -105,6 +114,13 @@ class BiodivFile {
 			$this->exif = exif_read_data($this->filename);
 			
 			$this->taken = $this->exif['DateTimeOriginal'];
+			if ( $this->taken == null )
+			{
+				$this->setDateFromFilename( true );
+				if ( !$this->taken ) {
+					addMsg("error","File upload unsuccessful for $this->filename. Meta data not found or incorrect filename format.  Should be similar to myfile_YYYYMMDD_HHmmss.jpg or myfileYYYY-MM-DD_HH-mm-ss.jpg");
+				}
+			}
 		}
 		else {
 			$this->exif = $this->getVideoMeta();

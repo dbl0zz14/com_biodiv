@@ -32,10 +32,18 @@ class BioDivViewClassify extends JViewLegacy
     public function display($tpl = null) 
     {
 	  $app = JFactory::getApplication();
+
+	  $input = $app->input;
 	  
-	  $this->photo_id =
-	    (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
-		
+	   $clearPhoto = $input->getInt('clear', 0);
+        if ( $clearPhoto ) {
+                $this->photo_id = 0;
+        }
+        else {
+                $this->photo_id =
+                (int)$app->getUserStateFromRequest('com_biodiv.photo_id', 'photo_id', 0);
+        }
+
 	  $this->self = 
 	    (int)$app->getUserStateFromRequest('com_biodiv.classify_self', 'classify_self', 0);
 	  
@@ -150,7 +158,7 @@ class BioDivViewClassify extends JViewLegacy
 		 $this->isVideo = isVideo($this->photo_id);
 		 $this->isAudio = isAudio($this->photo_id);
 		 
-		 $this->maxClassifications = 6;
+		 $this->maxClassifications = 10;
 		 if ( $this->isAudio ) $this->maxClassifications = 20;
 		 
 		// Get the general location of the site to help spotters

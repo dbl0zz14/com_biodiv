@@ -104,7 +104,9 @@ for ( $i=0; $i < $this->repeat; $i++ ) {
 					// Check for timeouts and requeue
 					if (($cai->getLastCode() == 0) && (strpos($errMsg, 'timed out') !== false)) {
 						
-						$this->setQueueStatusMultiple ( $this->aiType, $photoIds, BioDivViewRequestAI::TO_SEND, $errMsg );
+						//$this->setQueueStatusMultiple ( $this->aiType, $photoIds, BioDivViewRequestAI::TO_SEND, $errMsg );
+						//Avoid requeueing repeatedly - temporarily
+						$this->setQueueStatusMultiple ( $this->aiType, $photoIds, BioDivViewRequestAI::SEND_ERROR, $errMsg );
 					}
 					else {
 					

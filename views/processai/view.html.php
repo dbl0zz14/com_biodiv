@@ -23,6 +23,7 @@ class BioDivViewProcessAI extends JViewLegacy
 	const STATUS_UNCLASSIFIED = 9; // Unclassified by Conservation AI
 	const STATUS_CALIBRATION_POLE = 10;
 	const STATUS_NOTHING = 14; // Nothing found by Megadetector (or below threshold)
+	const STATUS_VEHICLE = 19; // Vehicle found by Megadetector 
 	
 	const TO_SEND			= 0;
 	const SEND_SUCCESS		= 1;
@@ -345,7 +346,7 @@ class BioDivViewProcessAI extends JViewLegacy
 			// These will be unavailable and not sent to CAI so set the status for all Photos in sequence.
 			$nothingId = codes_getCode ( 'Nothing', 'noanimal' );
 			$humanId = codes_getCode ( 'Human', 'content' );
-			$vehicleId = codes_getCode ( 'Car', 'aiclass' );
+			$vehicleId = codes_getCode ( 'Vehicle', 'content' );
 			$animalId = codes_getCode ( 'Animal', 'aiclass' );
 			
 			$megadetectorHumanThreshold = 0.01;
@@ -365,14 +366,14 @@ class BioDivViewProcessAI extends JViewLegacy
 			
 			$query->select('distinct ' . $db->quoteName('C.sequence_id'))
 				->from($db->quoteName('Classify') . ' C')
-				->innerJoin($db->quoteName('Photo') . ' P on P.photo_id = C.photo_id and P.sequence_num = 1 and P.status = 0')
+				->innerJoin($db->quoteName('Photo') . ' P on P.photo_id = C.photo_id and P.sequence_num = 1 and P.status = 0 and P.contains_human = 0')
 				->where($db->quoteName('C.origin') . ' = '.$db->quote('MEGA') )
 				->where($db->quoteName('P.photo_id') . 
 						' NOT IN (select photo_id from AIQueue where ai_type = '.$db->quote('CAI').')' );
 				
 			//error_log("ProcessAI view select sequence ids (post Megadetector) query created: " . $query->dump());	
 			
-			$db->setQuery($query, 0, 40); // Limit to 50 at a time
+			$db->setQuery($query, 0, 250); // Limit to 50 at a time
 
 			$sequences = $db->loadColumn();
 			
@@ -382,7 +383,8 @@ class BioDivViewProcessAI extends JViewLegacy
 			foreach ( $sequences as $sequenceId ) {
 				
 				print ( "<br>Processing sequence " . $sequenceId );
-				
+
+
 				$query = $db->getQuery(true);
 			
 				$query->select($db->quoteName(array('P.photo_id', 'P.status', 'P.contains_human', 
@@ -393,7 +395,8 @@ class BioDivViewProcessAI extends JViewLegacy
 					->from($db->quoteName('Photo') . ' P')
 					->leftJoin($db->quoteName('AIQueue') . ' AIQ on P.photo_id = AIQ.photo_id and AIQ.ai_type = '. $db->quote('CAI'))
 					->innerJoin($db->quoteName('Classify') . ' C on P.photo_id = C.photo_id and C.origin = '. $db->quote('MEGA'))
-					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId );
+					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId )
+					->order("P.sequence_num");
 				
 				$db->setQuery($query);
 
@@ -408,6 +411,8 @@ class BioDivViewProcessAI extends JViewLegacy
 				$hasNothingDetected = array();
 				$hasDetectionBelowThreshold = array();
 				$hasDetectionAboveThreshold = array();
+				$hasVehicleBelowThreshold = array();
+				$hasVehicleAboveThreshold = array();
 				$uniquePhotoIds = array();
 
 				foreach ( $photos as $photo ) {
@@ -430,7 +435,7 @@ class BioDivViewProcessAI extends JViewLegacy
 							error_log ( "Photo " . $photo->photo_id . " has CAI problem in AIQueue" );
 						}
 						
-						// No further processing of this sequence
+						// No further processing of this sequence here - see section after photo by photo checks
 						break;
 					}
 					if ( property_exists($photo, 'species_id') ) {
@@ -445,7 +450,10 @@ class BioDivViewProcessAI extends JViewLegacy
 								$hasDetectionBelowThreshold[$photo->photo_id] = true;
 						}
 						else if ( $photo->species_id == $vehicleId && $photo->prob < $megadetectorVehicleThreshold ) {
-							$hasDetectionBelowThreshold[$photo->photo_id] = true;
+							$hasVehicleBelowThreshold[$photo->photo_id] = true;
+						}
+						else if ( $photo->species_id == $vehicleId && $photo->prob > $megadetectorVehicleThreshold ) {
+							$hasVehicleAboveThreshold[$photo->photo_id] = true;
 						}
 						else {
 							$hasDetectionAboveThreshold[$photo->photo_id] = true;
@@ -453,6 +461,50 @@ class BioDivViewProcessAI extends JViewLegacy
 					}
 				}
 				if ( $onCAIQueue ) {
+					print ( "<br>Got CAI entries so checking for case where only part of sequence was processed");
+					print ( "<br>Delete any CAI entries if unsent so works next time");
+
+					$query = $db->getQuery(true);
+
+					$query->select("count(*)")
+                                        	->from($db->quoteName('Photo') . ' P')
+                                        	->where($db->quoteName('P.photo_id') . ' in ( select photo_id from Photo where sequence_id = ' . $sequenceId  . ')' );
+					$db->setQuery($query);
+					$numInSequence = $db->loadResult();
+
+					$timestamp = time() - (60 * 60);
+					$dateStr = date('Y-m-d H:i:s', $timestamp);
+
+					$query = $db->getQuery(true);
+					$query->select("aiq_id")
+                                        	->from($db->quoteName('AIQueue') . ' AIQC')
+						->where($db->quoteName('AIQC.ai_type') . ' = ' . $db->quote('CAI'))
+						->where($db->quoteName('AIQC.status') . ' IN ( 0, 2)' )
+						->where($db->quoteName('AIQC.timestamp') . ' < ' . $db->quote($dateStr) )
+                                        	->where($db->quoteName('AIQC.photo_id') . ' in ( select photo_id from Photo where sequence_id = ' . $sequenceId  . ')' );
+					error_log("ProcessAI view select cai unsent: " . $query->dump());
+
+					$db->setQuery($query);
+					$caiZeros = $db->loadColumn();
+
+					$numZeros = count($caiZeros);
+					if ( $numZeros > 0 and $numZeros < $numInSequence ) {
+						print ( "<br>Deleting " . count($caiZeros) . " part processed CAI entries from AIQueue"); 
+
+						$query = $db->getQuery(true);
+                        			$query->delete("AIQueue")
+                                			->where($db->quoteName("aiq_id") . " in ( " . implode(',', $caiZeros) . ")" );
+                        			$db->setQuery($query);
+                        			$success = $db->execute();
+
+						if ( !$success ) {
+							print ( "<br>Problem deleting  part processed entries" );
+						}
+					}
+					else {
+						print ( "<br>num zeros >= num photos in sequence so not deleting");
+					}
+
 					continue;
 				}
 				
@@ -460,7 +512,8 @@ class BioDivViewProcessAI extends JViewLegacy
 			
 				$query->select($db->quoteName(array('P.photo_id')))
 					->from($db->quoteName('Photo') . ' P')
-					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId );
+					->where($db->quoteName('P.sequence_id') . ' = ' . $sequenceId )
+					->order("P.sequence_num");
 				
 				$db->setQuery($query, 0, 20);
 
@@ -524,6 +577,64 @@ class BioDivViewProcessAI extends JViewLegacy
 					// Add to CAI queue
 					foreach ( $uniquePhotoIds as $newId ) {
 						addToAIQueue('CAI', $newId);
+
+						// Make available by setting status
+						$query = $db->getQuery(true);
+
+						$fields = array(
+							$db->quoteName('status') . ' = ' . self::STATUS_AVAILABLE
+						);
+
+						// Conditions for which records should be updated.
+						$conditions = array(
+							$db->quoteName('photo_id') . ' = ' . $newId,
+							$db->quoteName('status') . ' = ' . self::STATUS_UNAVAILABLE
+						);
+
+						$query->update($db->quoteName('Photo'))->set($fields)->where($conditions);
+
+						$db->setQuery($query);
+
+						$result = $db->execute();
+
+						if ( !$result ) {
+							error_log ("Process AI error - failed to update status to available for photo " . $newId );
+						}
+					}
+
+
+				}
+				else if ( count($hasVehicleAboveThreshold) > 0 ) {
+
+					print ( "<br>Some photos in sequence " . $sequenceId . " have only vehicle detections so adding to AIQueue" );
+					//error_log ( "Some photos in sequence " . $sequenceId . " have only vehicle detections so adding to AIQueue" );
+
+					// Add to CAI queue
+					foreach ( $uniquePhotoIds as $newId ) {
+						addToAIQueue('CAI', $newId);
+
+						// Make available by setting status
+						$query = $db->getQuery(true);
+
+						$fields = array(
+							$db->quoteName('status') . ' = ' . self::STATUS_VEHICLE
+						);
+
+						// Conditions for which records should be updated.
+						$conditions = array(
+							$db->quoteName('photo_id') . ' = ' . $newId,
+							$db->quoteName('status') . ' = ' . self::STATUS_UNAVAILABLE
+						);
+
+						$query->update($db->quoteName('Photo'))->set($fields)->where($conditions);
+
+						$db->setQuery($query);
+
+						$result = $db->execute();
+
+						if ( !$result ) {
+							error_log ("Process AI error - failed to update status to vehicle for photo " . $newId );
+						}
 					}
 				}
 				else {

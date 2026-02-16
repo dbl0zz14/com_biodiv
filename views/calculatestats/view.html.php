@@ -28,6 +28,7 @@ class BioDivViewCalculatestats extends JViewLegacy
         {
 			$this->calcAll = JRequest::getInt("calc_all");
 			$this->projectId = JRequest::getInt("project_id");
+			$this->allProjects = JRequest::getInt("all_projects", 0);
 			$this->calcMonths = JRequest::getInt("calc_months");
 			$this->calcDate = JRequest::getInt("calc_date");
 			

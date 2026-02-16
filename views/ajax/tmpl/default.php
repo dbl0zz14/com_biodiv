@@ -1,5 +1,5 @@
 <?php 
-if ( !$this->personId ) {
+if ( !$this->person_id ) {
 	print "<div id='no_user_id'></div>";
 }
 if($this->title ){

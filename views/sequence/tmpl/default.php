@@ -22,10 +22,13 @@ else {
 	$lastOne = "None uploaded";
 	if ( sizeof($this->uploadDetails) > 0 ) {
 		$lastOne = $this->uploadDetails[sizeof($this->uploadDetails)-1]['upload_id'];
+		$firstOne = $this->uploadDetails[0]['upload_id'];
 	}
 
 	print "last one $lastOne";
-	sequencePhotos($lastOne);
+	print "<br />first one $firstOne";
+
+	sequencePhotos($firstOne);
 
 	setRunning ( 'sequence', 0 );
 }

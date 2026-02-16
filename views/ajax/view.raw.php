@@ -26,20 +26,46 @@ class BioDivViewAjax extends JViewLegacy
 
 	public function display($tpl = null) 
 	{
-		$this->personId = (int)userID();
-
-		if ( $this->personId ) {
-		
-			$option_id = JRequest::getInt("option_id");
-
-			$article = getArticle ( $option_id );
-
-			$this->title = $article->title;
-
-			$this->introtext = $article->introtext;
-		}
+	  $this->person_id = (int)userID();
 	  
-		parent::display($tpl);
+	  $option_id = JRequest::getInt("option_id");
+	  
+	  $article = getArticle ( $option_id );
+	  
+	  $this->title = $article->title;
+	  
+	  $this->introtext = $article->introtext;
+	  
+	  /*
+	  $article = JTable::getInstance("content");
+	  $option_id = JRequest::getInt("option_id");
+	  $option = codes_getDetails($option_id, "optiontran");
+	  
+	  $associations = JLanguageAssociations::getAssociations('com_content', '#__content', 'com_content.item', $option['article_id']);
+
+	  $langObject = JFactory::getLanguage();
+	  //print ("Tag = " . $langObject->getTag() );
+	  $article_id = $associations[$langObject->getTag()]->id;
+	  
+	  $article->load($article_id); 
+  //	  print_r($article);
+	  
+	  // Default the title and introtext
+	  $this->title = $option['option_name'];
+	  $this->introtext = 0;
+	  
+      if ( $article_id ) {
+		$this->title = $article->title;
+		$this->introtext = $article->introtext;
+	  }
+	  
+	  // Catch all in case the article id is not available
+	  if ( !$this->title ) {
+		$this->title = $option['option_name'];
+	  }
+	  */
+	  
+	  parent::display($tpl);
     }
 }
 

@@ -18,6 +18,7 @@ include_once "codes.php";
 
 include_once "BiodivHelper.php";
 include_once "BiodivReport.php";
+include_once "BiodivAWS.php";
 include_once "BiodivTransifex.php";
 include_once "Biodiv/Users.php";
 
@@ -92,6 +93,14 @@ function printAdminMenu($currentPage) {
 		print '<li>';
 	}
 	print '<a href="index.php?option=com_biodiv&amp;view=newproject">New project</a>';
+	print '</li>';
+	if ( $currentPage == "DELETEPHOTOS" ) {
+		print $activeLi;
+	}
+	else {
+		print '<li>';
+	}
+	print '<a href="index.php?option=com_biodiv&amp;view=deletephotos">Delete photos</a>';
 	print '</li>';
 	if ( $currentPage == "SCHOOL" ) {
 		print $activeLi;
@@ -1039,7 +1048,7 @@ function getAllArticlesForTranslation ( $page, $length, $searchStr = null ) {
 		
 	$db->setQuery($query, $start, $length);
 	
-	error_log("getAllArticlesForTranslation select query created: " . $query->dump());
+	//error_log("getAllArticlesForTranslation select query created: " . $query->dump());
 	
 	$articles = $db->loadObjectList("article_id");
 		
@@ -1144,7 +1153,7 @@ function getNonSpeciesOptionsForTranslation () {
 
 	$db->setQuery($query);
 	
-	error_log("generateTranslateSpeciesData select query created " . $query->dump());
+	//error_log("generateTranslateSpeciesData select query created " . $query->dump());
 	
 	$options = $db->loadObjectList("option_id");
 	
@@ -1276,7 +1285,7 @@ function checkHtml ( $htmlStr ) {
 
 function updateArticle ( $articleId, $lang, $title, $html ) {
 	
-	error_log ( "updateArticle called" );
+	//error_log ( "updateArticle called" );
 	
 	$response = null;
 	$assocId = null;
@@ -1297,10 +1306,10 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 	}
 	
 	$errMsg = print_r ( $allAssociations, true );
-	error_log ( "Got allAssociations: " . $errMsg);
+	//error_log ( "Got allAssociations: " . $errMsg);
 	
 	$errMsg = print_r ( $assocsForKey, true );
-	error_log ( "Created assocsForKey: " . $errMsg);
+	//error_log ( "Created assocsForKey: " . $errMsg);
 	
 	if ( $assoc ) {
 		
@@ -1325,7 +1334,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 		$catId = getAssociatedCategory ( $article->catid, $lang );
 		
 		
-		error_log ( "Got associated category: " . $catId );
+		//error_log ( "Got associated category: " . $catId );
 		
 		$data = array(
 			'catid' => $catId,
@@ -1339,7 +1348,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 			'attribs' => $article->attribs
 		);
 
-		error_log ( "About to bind, html = " . $html );
+		//error_log ( "About to bind, html = " . $html );
 		
 		try {
 			// Bind data
@@ -1348,7 +1357,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 				throw new Exception("Failed to bind article data. Error: " . $table->getError());
 			}
 
-			error_log ( "About to check" );
+			//error_log ( "About to check" );
 			
 			// Check the data.
 			if (!$table->check())
@@ -1356,7 +1365,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 				throw new Exception("Failed to check article data. Error: " . $table->getError());
 			}
 
-			error_log ( "About to store" );
+			//error_log ( "About to store" );
 			
 			// Store the data.
 			if (!$table->store())
@@ -1371,7 +1380,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 			$assocTable = JTable::getInstance('Associations', 'JTable', array());
 			$associationsContext = 'com_content.item';
 			
-			error_log ( "About to handle associations" );
+			//error_log ( "About to handle associations" );
 			
 			// There is no association for this language but is there for teh original article id
 			$db = JFactory::getDBO();
@@ -1382,7 +1391,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 				->where($db->qn('id') . ' = ' . (int) $articleId);
 			$db->setQuery($query);
 			
-			error_log("Associations old_key query created: " . $query->dump());
+			//error_log("Associations old_key query created: " . $query->dump());
 			
 			$old_key = $db->loadResult();
 			
@@ -1405,13 +1414,13 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 
 				$db->setQuery($query);
 				
-				error_log("Associations delete query created: " . $query->dump());
+				//error_log("Associations delete query created: " . $query->dump());
 				
 				$db->execute();
 			}
 			
-			error_log ( "Table language = " . $table->language );
-			error_log ( "Table id = " . $table->id );
+			//error_log ( "Table language = " . $table->language );
+			//error_log ( "Table id = " . $table->id );
 
 			// Adding original and self to the association
 			
@@ -1424,12 +1433,12 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 			if (count($assocsForKey) > 1)
 			{
 				$errMsg = print_r ( $assocsForKey, true );
-				error_log ( "Associatons: " . $errMsg );
+				//error_log ( "Associatons: " . $errMsg );
 				
 				// Adding new association for these items
 				$key   = md5(json_encode($assocsForKey));
 				
-				error_log ( "New key = " . $key );
+				//error_log ( "New key = " . $key );
 				
 				$query = $db->getQuery(true)
 					->insert('#__associations');
@@ -1441,7 +1450,7 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 
 				$db->setQuery($query);
 				
-				error_log("Associations delete query created: " . $query->dump());
+				//error_log("Associations delete query created: " . $query->dump());
 				
 				$db->execute();
 			}
@@ -1463,9 +1472,9 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 		$articleFields->introtext = $html;
 		$success = null;
 		
-		error_log ( "Updating existing article, html = " . $html );
+		//error_log ( "Updating existing article, html = " . $html );
 		$errMsg = print_r ( $articleFields, true );
-		error_log ("Update fields: " . $errMsg );
+		//error_log ("Update fields: " . $errMsg );
 		
 		try {
 			$success = $db->updateObject('#__content', $articleFields, "id");
@@ -1485,6 +1494,70 @@ function updateArticle ( $articleId, $lang, $title, $html ) {
 		
 	}
 	return $response;
+}
+
+
+function deletePhotos ( $uploadedFile ) {
+
+	$success = false;
+	$num_deleted = 0;
+	$deleted_status = 20; 
+
+	// For each photo on the list
+	$photos=file($uploadedFile);
+	foreach($photos as $line)
+	{
+		// Trim any quotes
+		$photoId = str_replace(['"', "'"], '', trim($line));
+
+		if (filter_var($photoId, FILTER_VALIDATE_INT) !== false) {
+
+			// Get photo details
+			$details = codes_getDetails ( $photoId, "photo" );
+	
+			if ( $details ) {
+				// Get the S3 bucket key
+				$photoKey = s3Key ( $details );
+	
+				$db = \JDatabaseDriver::getInstance(dbOptions());
+	
+				// Set the status to DELETED in the Photo table
+				$query = $db->getQuery(true)
+                			->update($db->qn('Photo'))
+					->set($db->qn('status') . ' = ' . $deleted_status)
+					->where($db->qn('photo_id') . ' = ' . $photoId );
+	
+                		$db->setQuery($query);
+	
+                		$db->execute();
+	
+				// Remove the image from the S3 bucket
+				$success = delete_from_s3 ( $photoKey );
+
+				if ( !$success ) {
+					error_log ( "deletePhotos: failed to delete photo_id " . $photoId );
+				}
+				else {
+					$num_deleted += 1;
+				}
+			}
+			else {
+				error_log ( "Found row with non photo_id: " . $photoId );
+			}
+		}
+		else {
+			 error_log ( "Found row with non integer photo_id, could be header: " . $line );
+		}
+
+	}
+
+	return $num_deleted;
+}
+
+
+function  moveDeletionsFileToS3($uploadPath) {
+
+	move_deletions_file_to_s3 ( $uploadPath );
 }
 
 

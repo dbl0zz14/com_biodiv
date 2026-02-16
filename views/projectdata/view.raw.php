@@ -45,7 +45,7 @@ class BioDivViewProjectData extends JViewLegacy
 		else $this->interval = 1;
 		$this->data = projectData ( $this->project_id, $this->months, $this->interval );
 		
-		$this->colormap = getSetting('colormap');
+		$this->colormap = getSetting('progresscolormap');
 		$this->data["colormap"] = json_decode($this->colormap);
 		
 

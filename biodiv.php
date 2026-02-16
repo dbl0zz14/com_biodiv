@@ -30,6 +30,7 @@ include_once "BiodivAnalysis.php";
 include_once "BiodivOctopus.php";
 include_once "KioskSpecies.php";
 include_once "TrainingHelper.php";
+include_once "Analysis.php";
 include_once "Biodiv/BeginnerQuiz.php";
 include_once "Biodiv/ResourceSet.php";
 include_once "Biodiv/ResourceFile.php";
@@ -135,7 +136,7 @@ function codes_insertObject($fields, $struc){
 	$db = JDatabase::getInstance(dbOptions());
   
 	// photo is handled as special case as split over two tables, as is origfile
-	if ( ($struc == "photo") || ($struc == "splitaudio") || ($struc == "origfile") ) {
+	if ( ($struc == "photo") || ($struc == "splitaudio") || ($struc == "origfile") || ($struc == "origlargefile")  ) {
 		// Move and store the exif field as this is in second table
 		$exif = $fields->exif;
 		unset($fields->exif);
@@ -164,6 +165,10 @@ function codes_insertObject($fields, $struc){
 				if ( $struc == "origfile" ) {
 					$table = "OriginalFilesExif" ;
 					$exifFields->of_id = $id;
+				}
+				else if ( $struc == "origlargefile" ) {
+					$table = "OriginalLargeFilesExif" ;
+					$exifFields->olf_id = $id;
 				}
 				else {
 					$table = "PhotoExif";
@@ -491,6 +496,9 @@ function biodiv_label_icons($type, $str, $what=""){
   case "upload":
     return "<i class='fa fa-upload'></i> $str $what";
     break;
+  case "download":
+    return "<i class='fa fa-download'></i> $str $what";
+    break;
   case "nothing":
 	return "$str <span class='fa fa-ban'/>";
 	break;
@@ -575,6 +583,7 @@ function canCreate($struc, $fields){
   case 'classification':
   case 'animal':
   case 'origfile':
+  case 'origlargefile':
   case 'report':
   case 'resourceset':
   case 'resourcefile':
@@ -1221,6 +1230,17 @@ function myAdminProjects () {
 	
 	*/
   
+}
+
+function myAnalysisProjects () {
+
+        $adminProjects = myAdminProjects();
+
+        $trapperProjects = myTrappingProjects();
+
+        $analysisProjects = array_replace($adminProjects, $trapperProjects);
+
+        return $analysisProjects;
 }
 
 // Get all options for a single project by project id or just a particular option type if set
@@ -1888,8 +1908,812 @@ function calculateSiteStatsHistory ( $num_months = null) {
 
 
 // Calculate the number of sequences uploaded and the number of sequences with at least one classification for the project given (and children)
+	// or for all projects.  Store the results in the Statistics table.  Overwrite a row if it already exists.
+	function calculateStats ( $projectId = null, $end_date = null ) {
+
+		$projects = getProjectsWithThreshold ( $projectId );
+
+		$endDatePlus1 = strtotime("first day of next month" );
+		$endDate = date('Ymd', strtotime("last day of this month"));
+		if ( $end_date ) {
+			$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+			$endDate = date('Ymd', strtotime($end_date));
+		}
+
+		$dateToUse = date('Ymd', $endDatePlus1);
+
+		$isHistory = false;
+		if ( $endDate <  date('Ymd') ) {
+			$isHistory = true;
+		}
+
+		// Work through project by project as we don't want to include the children here.
+		foreach ( $projects as $proj_id=>$project) {
+
+			// Get fully classified threshold
+			$threshold = $project['threshold'];
+
+			calculateProjectStats ( $proj_id, $threshold, $endDate, $dateToUse, $isHistory );
+
+		}
+
+	}
+
+
+	function calculateProjectStats ( $proj_id, $threshold, $endDate, $dateToUse, $isHistory ) {
+
+		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
+
+		$db = JDatabase::getInstance(dbOptions());
+
+		$query = $db->getQuery(true);
+		$query->select("distinct sequence_id from Photo P");
+		$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query->where("P.sequence_id > 0");
+		$query->where("P.uploaded < " . $dateToUse );
+		$query->where("PSM.project_id = " . $proj_id );
+		$query->where("P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL"  );
+
+		$query2 = $db->getQuery(true);
+		$query2->select("distinct sequence_id from Photo P");
+		$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query2->where("P.sequence_id > 0");
+		$query2->where("P.uploaded < " . $dateToUse );
+		$query2->where("PSM.project_id = " . $proj_id );
+		$query2->where("P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id"  );
+
+		$db->setQuery($query2);
+
+		$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		$numLoaded = $db->loadResult();
+
+		$query = $db->getQuery(true);
+		$query->select("distinct sequence_id from Photo P");
+		$query->innerJoin("Animal A on P.photo_id = A.photo_id");
+		$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query->where("A.species != 97");
+		$query->where("A.timestamp < " . $dateToUse );
+		$query->where("PSM.project_id = " . $proj_id );
+		$query->where("P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id"  );
+		$db->setQuery($query);
+
+		$query2 = $db->getQuery(true);
+		$query2->select("distinct sequence_id from Photo P");
+		$query2->innerJoin("Animal A on P.photo_id = A.photo_id");
+		$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query2->where("A.species != 97");
+		$query2->where("A.timestamp < " . $dateToUse );
+		$query2->where("PSM.project_id = " . $proj_id );
+		$query2->where("P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL"  );
+		$db->setQuery($query2);
+
+		$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num classifications query: " . $query->dump() );
+
+		$numClassified = $db->loadResult();
+
+		// To calculate how many still queued for the date in question have to look at Classify table
+		// BUT what if we archive...
+		// If isHistory, try for the best we can do using Classify table.  If not, can just use status
+		$numQueued = 0;
+		if ( $isHistory ) {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.photo_id = P.photo_id" )
+				->where("P.sequence_num = 1 and P.uploaded < " . $dateToUse )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Classify where timestamp < " . $dateToUse . ")" );
+
+			$db->setQuery($query);
+			error_log ( "calculateStats, num queued history query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 0")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num queued query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+
+
+		// To calculate how many screened out on the date in question check Classify table?
+		// Screened out is:
+		// - a human flag with no Animal classification
+		// - STATUS_NOTHING => Megadetector signalled Nothing
+		// - STATUS_UNCLASSIFIED and photo_id before Megadetector introduced
+		//
+		$numScreened = 0;
+		$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( $isHistory ) {
+
+			// Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$query2 = $db->getQuery(true);
+			$query2->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$query3 = $db->getQuery(true);
+			$query3->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("P.sequence_num = 1 and P.contains_human = 1 and status = " .  Sequence::STATUS_UNAVAILABLE)
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Animal)");
+
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2->union($query3)) . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened history query: " . $query->dump() );
+
+			$numScreened = $db->loadResult();
+
+		}
+
+		// Count part classified sequences (available and have an animal)
+		$numPartClassified = 0;
+		if ( $isHistory ) {
+
+			$query = $db->getQuery(true);
+
+			if ( $dateToUse < 20250602 ) {
+				$query->select("sequence_id from Photo P")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("P.status in (1, 18)")
+					->where("P.contains_human = 0")
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.sequence_num = 1")
+					->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+			}
+			else {
+				$query->select("sequence_id from Photo P")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("P.status = 1")
+					->where("P.contains_human = 0")
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.sequence_num = 1")
+					->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+
+			}
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+
+
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+		}
+
+
+		// Count unclassified sequences (available and no animal)
+		$numUnclassified = 0;
+		//$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( !$isHistory ) {
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numUnclassified = $db->loadResult();
+		}
+
+
+		// Calculate those classified to project threshold
+		if ( $isHistory ) {
+
+			// This reflects that full classification started to be tracked in June 2025
+			if ( $dateToUse > "20250630" ) {
+
+				$fullyClassified = Project::getFullyClassified ( $proj_id, $threshold, $dateToUse );
+				$numFullyClassified = count($fullyClassified);
+			}
+			else {
+				$numFullyClassified = 0;
+			}
+		}
+		else {
+			$query = $db->getQuery(true);
+
+			$query->select("count(distinct sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 18")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num classified to threshold query: " . $query->dump() );
+
+			$numFullyClassified = $db->loadResult();
+		}
+
+		if ( $isHistory ) {
+			$numUnclassified = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numScreened;
+		}
+		else {
+			$numScreened = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numUnclassified;
+		}
+
+		print ("For project $proj_id, numLoaded = " . $numLoaded . ", numClassified = " . $numClassified .
+				", numQueued = " . $numQueued . ", numScreened = " . $numScreened .
+				", numFullyClassified = " . $numFullyClassified. ", numPartClassified = " . $numPartClassified .
+				", numUnclassified = " . $numUnclassified );
+
+		// Now update or insert - this would all be better with a stored procedure
+		$query = $db->getQuery(true);
+		$query->select("project_id, end_date from Statistics")
+			->where("project_id = " . $proj_id )
+			->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$resultRow = $db->loadRowList();
+
+		if ( count($resultRow) > 0 ) {
+			print "<br>Existing entry for project $proj_id, end_date $endDate - updating<br/>";
+
+			$query = $db->getQuery(true);
+			$query->update("Statistics");
+			$query->set("num_uploaded = " . $numLoaded . ", num_classified = " . $numClassified .
+				", queued = " . $numQueued . ", screened_out = " . $numScreened . ", fully_classified = " . $numFullyClassified .
+				", part_classified = " . $numPartClassified . ", unclassified = " . $numUnclassified );
+			$query->where("project_id = " . $proj_id );
+			$query->where("end_date = '" . $endDate . "'" );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+		else {
+			print "<br>New entry in statistics for project $proj_id, end_date $endDate<br/>";
+
+			$query = $db->getQuery(true);
+			$query->insert("Statistics");
+			$query->columns($db->quoteName(array('project_id', 'end_date', 'num_uploaded', 'num_classified', 'queued',
+							'screened_out', 'fully_classified', 'part_classified', 'unclassified')));
+			$query->values("" . $proj_id . ", '" . $endDate . "', " . $numLoaded . ", " . $numClassified . ", " . $numQueued .
+							", " . $numScreened . ", " . $numFullyClassified . ", " . $numPartClassified .
+							", " . $numUnclassified );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+	}
+
+
+
+
+	function calculateProjectStatsV1 ( $proj_id, $threshold, $endDate, $dateToUse, $isHistory ) {
+
+		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
+
+		$db = JDatabase::getInstance(dbOptions());
+
+		$query = $db->getQuery(true);
+		$query->select("distinct sequence_id from Photo P");
+		$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query->where("P.sequence_id > 0");
+		$query->where("P.uploaded < " . $dateToUse );
+		$query->where("PSM.project_id = " . $proj_id );
+		$query->where("P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL"  );
+
+		$query2 = $db->getQuery(true);
+		$query2->select("distinct sequence_id from Photo P");
+		$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query2->where("P.sequence_id > 0");
+		$query2->where("P.uploaded < " . $dateToUse );
+		$query2->where("PSM.project_id = " . $proj_id );
+		$query2->where("P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id"  );
+
+		$db->setQuery($query2);
+
+		$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		$numLoaded = $db->loadResult();
+
+		$query = $db->getQuery(true);
+		$query->select("distinct sequence_id from Photo P");
+		$query->innerJoin("Animal A on P.photo_id = A.photo_id");
+		$query->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query->where("A.species != 97");
+		$query->where("A.timestamp < " . $dateToUse );
+		$query->where("PSM.project_id = " . $proj_id );
+		$query->where("P.photo_id >= PSM.start_photo_id and P.photo_id <= PSM.end_photo_id"  );
+		$db->setQuery($query);
+
+		$query2 = $db->getQuery(true);
+		$query2->select("distinct sequence_id from Photo P");
+		$query2->innerJoin("Animal A on P.photo_id = A.photo_id");
+		$query2->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id");
+		$query2->where("A.species != 97");
+		$query2->where("A.timestamp < " . $dateToUse );
+		$query2->where("PSM.project_id = " . $proj_id );
+		$query2->where("P.photo_id >= PSM.start_photo_id and PSM.end_photo_id is NULL"  );
+		$db->setQuery($query2);
+
+		$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num classifications query: " . $query->dump() );
+
+		$numClassified = $db->loadResult();
+
+		// To calculate how many still queued for the date in question have to look at Classify table
+		// BUT what if we archive...
+		// If isHistory, try for the best we can do using Classify table.  If not, can just use status
+		$numQueued = 0;
+		if ( $isHistory ) {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.photo_id = P.photo_id" )
+				->where("P.sequence_num = 1 and P.uploaded < " . $dateToUse )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Classify where timestamp < " . $dateToUse . ")" );
+
+			$db->setQuery($query);
+			error_log ( "calculateStats, num queued history query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 0")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num queued query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+
+
+		// To calculate how many screened out on the date in question check Classify table?
+		// Screened out is:
+		// - a human flag with no Animal classification
+		// - STATUS_NOTHING => Megadetector signalled Nothing
+		// - STATUS_UNCLASSIFIED and photo_id before Megadetector introduced
+		//
+		$numScreened = 0;
+		$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( $isHistory ) {
+
+			// Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$query2 = $db->getQuery(true);
+			$query2->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$query3 = $db->getQuery(true);
+			$query3->select("P.sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("P.sequence_num = 1 and P.contains_human = 1 and status = " .  Sequence::STATUS_UNAVAILABLE)
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Animal)");
+
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2->union($query3)) . ') a');
+
+			$db->setQuery($q3);
+
+			error_log ( "calculateStats, num screened history query: " . $query->dump() );
+
+			$numScreened = $db->loadResult();
+
+		}
+		//else {
+			//$query = $db->getQuery(true);
+			//$query->select("sequence_id from Photo P")
+				//->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				//->where("P.status not in (1,18)")
+				//->where("PSM.project_id = " . $proj_id )
+				//->where("P.sequence_num = 1")
+				//->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+//
+			//$query2 = $db->getQuery(true);
+			//$query2->select("sequence_id from Photo P")
+				//->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				//->leftJoin("Animal A on P.photo_id = A.photo_id")
+				//->where("A.photo_id is NULL" )
+				//->where("PSM.project_id = " . $proj_id )
+				//->where("P.status = 0")
+				//->where("P.contains_human = 1")
+				//->where("P.sequence_num = 1")
+				//->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+//
+//
+			//$q3 = $db->getQuery(true)
+			 //->select('count(distinct a.sequence_id)')
+			 //->from('(' . $query->union($query2) . ') a');
+//
+			//$db->setQuery($q3);
+//
+			////error_log ( "calculateStats, num classifications query: " . $query->dump() );
+//
+			//$numScreened = $db->loadResult();
+		//}
+
+
+		// Need to consider any classified sequences which were subsequently screened out
+		$numPartClassified = 0;
+		//$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( $isHistory ) {
+
+						// // Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+			// $query = $db->getQuery(true);
+			// $query->select("P.sequence_id from Photo P")
+				// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				// ->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				// ->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+				// ->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				// ->where("PSM.project_id = " . $proj_id )
+				// ->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				// ->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+			// $query2 = $db->getQuery(true);
+			// $query2->select("P.sequence_id from Photo P")
+				// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				// ->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				// ->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+				// ->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				// ->where("PSM.project_id = " . $proj_id )
+				// ->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				// ->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+
+			// $q3 = $db->getQuery(true)
+			 // ->select('count(distinct a.sequence_id)')
+			 // ->from('(' . $query->union($query2) . ') a');
+
+			// $db->setQuery($q3);
+
+			// //error_log ( "calculateStats, num screened classed history query: " . $query->dump() );
+
+			// $numScreenedClassed = $db->loadResult();
+
+			// May need to calculate part classified....
+			// Definitely part classified if statuses show available and had animal before date
+			// Only current statuses where could have been part classified and available are
+			// fully classified or available
+			// If date is before start of full classification, we will include fully classified,
+			// otherwise not and this will be an underestimate of part classified
+			$query = $db->getQuery(true);
+
+			if ( $dateToUse < 20250602 ) {
+				$query->select("sequence_id from Photo P")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("P.status in (1, 18)")
+					->where("P.contains_human = 0")
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.sequence_num = 1")
+					->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+			}
+			else {
+				$query->select("sequence_id from Photo P")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("P.status = 1")
+					->where("P.contains_human = 0")
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.sequence_num = 1")
+					->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+
+			}
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+
+
+		}
+		else {
+
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+		}
+
+
+		// Count unclassified sequences (available and no animal)
+		$numUnclassified = 0;
+		//$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( $isHistory ) {
+
+			// // Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+			// $query = $db->getQuery(true);
+			// $query->select("P.sequence_id from Photo P")
+				// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				// ->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				// ->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+				// ->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				// ->where("PSM.project_id = " . $proj_id )
+				// ->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				// ->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+			// $query2 = $db->getQuery(true);
+			// $query2->select("P.sequence_id from Photo P")
+				// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				// ->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				// ->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+				// ->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+				// ->where("PSM.project_id = " . $proj_id )
+				// ->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				// ->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+
+			// $q3 = $db->getQuery(true)
+			 // ->select('count(distinct a.sequence_id)')
+			 // ->from('(' . $query->union($query2) . ') a');
+
+			// $db->setQuery($q3);
+
+			// //error_log ( "calculateStats, num screened classed history query: " . $query->dump() );
+
+			// $numScreenedClassed = $db->loadResult();
+
+			// Definitely unclassified if statuses show available and no animal before date
+			// Only current statuses where could have been unclassified and available are
+			// fully classified or available
+			// Except could have been queued - probably need to calculate unclassified
+			// $query = $db->getQuery(true);
+			// $query->select("sequence_id from Photo P")
+				// ->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				// ->where("P.status in (1,18)")
+				// ->where("P.contains_human = 0")
+				// ->where("PSM.project_id = " . $proj_id )
+				// ->where("P.sequence_num = 1")
+				// ->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				// ->where("P.photo_id not in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+
+			// $q3 = $db->getQuery(true)
+			 // ->select('count(distinct a.sequence_id)')
+			 // ->from('(' . $query . ') a');
+
+			// $db->setQuery($q3);
+
+			// //error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			// $numUnclassified = $db->loadResult();
+
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  )
+				->where("P.photo_id not in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numUnclassified = $db->loadResult();
+		}
+
+
+		// Calculate those classified to project threshold
+		if ( $isHistory ) {
+
+			// This reflects that full classification started to be tracked in June 2025
+			if ( $dateToUse > "20250630" ) {
+
+				$fullyClassified = getFullyClassified ( $proj_id, $threshold, $dateToUse );
+				$numFullyClassified = count($fullyClassified);
+			}
+			else {
+				$numFullyClassified = 0;
+			}
+		}
+		else {
+			$query = $db->getQuery(true);
+
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = 18")
+				->where("PSM.project_id = " . $proj_id )
+				->where("P.sequence_num = 1")
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL)"  );
+
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num classified to threshold query: " . $query->dump() );
+
+			$numFullyClassified = $db->loadResult();
+		}
+
+
+		if ( $isHistory ) {
+			$numUnclassified = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numScreened;
+		}
+		else {
+			$numScreened = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numUnclassified;
+		}
+
+
+		print ("For project $proj_id, numLoaded = " . $numLoaded . ", numClassified = " . $numClassified .
+				", numQueued = " . $numQueued . ", numScreened = " . $numScreened .
+				", numFullyClassified = " . $numFullyClassified. ", numPartClassified = " . $numPartClassified .
+				", numUnclassified = " . $numUnclassified );
+
+		// Now update or insert - this would all be better with a stored procedure
+		$query = $db->getQuery(true);
+		$query->select("project_id, end_date from Statistics")
+			->where("project_id = " . $proj_id )
+			->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$resultRow = $db->loadRowList();
+
+		if ( count($resultRow) > 0 ) {
+			print "Existing entry for project $proj_id, end_date $endDate - updating<br/>";
+
+			$query = $db->getQuery(true);
+			$query->update("Statistics");
+			$query->set("num_uploaded = " . $numLoaded . ", num_classified = " . $numClassified .
+				", queued = " . $numQueued . ", screened_out = " . $numScreened . ", fully_classified = " . $numFullyClassified .
+				", part_classified = " . $numPartClassified . ", unclassified = " . $numUnclassified );
+			$query->where("project_id = " . $proj_id );
+			$query->where("end_date = '" . $endDate . "'" );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+		else {
+			print "New entry in statistics for project $proj_id, end_date $endDate<br/>";
+
+			$query = $db->getQuery(true);
+			$query->insert("Statistics");
+			$query->columns($db->quoteName(array('project_id', 'end_date', 'num_uploaded', 'num_classified', 'queued',
+							'screened_out', 'fully_classified', 'part_classified', 'unclassified')));
+			$query->values("" . $proj_id . ", '" . $endDate . "', " . $numLoaded . ", " . $numClassified . ", " . $numQueued .
+							", " . $numScreened . ", " . $numFullyClassified . ", " . $numPartClassified .
+							", " . $numUnclassified );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+	}
+
+
+// Calculate the number of sequences uploaded and the number of sequences with at least one classification for the project given (and children)
 // or for all projects.  Store the results in the Statistics table.  Overwrite a row if it already exists.
-function calculateStats ( $project_id = null, $end_date = null ) {
+function calculateStatsOrig ( $project_id = null, $end_date = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
@@ -2071,10 +2895,537 @@ function calculateStatsHistory ( $project_id = null, $num_months = null) {
 	}
 }
 
+
 function calculateStatsTotals ( $end_date = null ) {
+
+		$db = JDatabase::getInstance(dbOptions());
+
+		$endDatePlus1 = strtotime("first day of next month" );
+		$endDate = date('Ymd', strtotime("last day of this month"));
+		if ( $end_date ) {
+			$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+			$endDate = date('Ymd', strtotime($end_date));
+		}
+
+		$dateToUse = date('Ymd', $endDatePlus1);
+
+		$isHistory = false;
+		if ( $endDate <  date('Ymd') ) {
+			$isHistory = true;
+		}
+
+		$query = $db->getQuery(true);
+		$query->select("count(distinct sequence_id) from Photo");
+		$query->where("sequence_id > 0");
+		$query->where("uploaded < " . $dateToUse );
+		$db->setQuery($query);
+		$numLoaded = $db->loadResult();
+
+		$query = $db->getQuery(true);
+		$query->select("count(distinct sequence_id) from Photo P");
+		$query->innerJoin("Animal A on P.photo_id = A.photo_id");
+		$query->where("A.species != 97");
+		$query->where("P.sequence_id > 0");
+		$query->where("A.timestamp < " . $dateToUse );
+		$db->setQuery($query);
+
+		$numClassified = $db->loadResult();
+
+		$numQueued = 0;
+		if ( $isHistory ) {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->innerJoin("Classify C on C.photo_id = P.photo_id" )
+				->where("P.sequence_num = 1 and P.uploaded < " . $dateToUse )
+				->where("P.photo_id not in (select photo_id from Classify where timestamp < " . $dateToUse . ")" );
+
+			$db->setQuery($query);
+			error_log ( "calculateStats, num queued history query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("count(distinct P.sequence_id) from Photo P")
+				->where("P.status = 0")
+				->where("P.contains_human = 0")
+				->where("P.sequence_num = 1");
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num queued query: " . $query->dump() );
+
+			$numQueued = $db->loadResult();
+		}
+
+		$numScreened = 0;
+		$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+		if ( $isHistory ) {
+
+			// Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id from Photo P")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" );
+
+			$query2 = $db->getQuery(true);
+			$query2->select("P.sequence_id from Photo P")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+				->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" );
+
+			$query3 = $db->getQuery(true);
+			$query3->select("P.sequence_id from Photo P")
+				->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+				->where("P.sequence_num = 1 and P.contains_human = 1 and status = " .  Sequence::STATUS_UNAVAILABLE)
+				->where("P.photo_id not in (select photo_id from Animal)");
+
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query->union($query2->union($query3)) . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened history query: " . $query->dump() );
+
+			$numScreened = $db->loadResult();
+
+		}
+		// else {
+			// $query = $db->getQuery(true);
+			// $query->select("sequence_id from Photo P")
+				// ->where("P.status not in (1,18)")
+				// ->where("P.sequence_num = 1");
+
+			// $query2 = $db->getQuery(true);
+			// $query2->select("sequence_id from Photo P")
+				// ->leftJoin("Animal A on P.photo_id = A.photo_id")
+				// ->where("A.photo_id is NULL" )
+				// ->where("P.status = 0")
+				// ->where("P.contains_human = 1")
+				// ->where("P.sequence_num = 1");
+
+
+			// $q3 = $db->getQuery(true)
+			 // ->select('count(distinct a.sequence_id)')
+			 // ->from('(' . $query->union($query2) . ') a');
+
+			// $db->setQuery($q3);
+
+			// //error_log ( "calculateStats, num classifications query: " . $query->dump() );
+
+			// $numScreened = $db->loadResult();
+		// }
+
+
+		$numPartClassified = 0;
+		if ( $isHistory ) {
+
+			$query = $db->getQuery(true);
+
+			if ( $dateToUse < 20250602 ) {
+				$query->select("sequence_id from Photo P")
+					->where("P.status in (1, 18)")
+					->where("P.contains_human = 0")
+					->where("P.sequence_num = 1")
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+			}
+			else {
+				$query->select("sequence_id from Photo P")
+					->where("P.status = 1")
+					->where("P.contains_human = 0")
+					->where("P.sequence_num = 1")
+					->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < " . $dateToUse . ")");
+
+			}
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+
+
+		}
+		else {
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("P.sequence_num = 1")
+				->where("P.photo_id in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numPartClassified = $db->loadResult();
+		}
+
+
+		// Count unclassified sequences (available and no animal)
+		$numUnclassified = 0;
+		if ( !$isHistory ) {
+
+			$query = $db->getQuery(true);
+			$query->select("sequence_id from Photo P")
+				->where("P.status = 1")
+				->where("P.contains_human = 0")
+				->where("P.sequence_num = 1")
+				->where("P.photo_id not in (select photo_id from Animal where species!=97)");
+
+			$q3 = $db->getQuery(true)
+			 ->select('count(distinct a.sequence_id)')
+			 ->from('(' . $query . ') a');
+
+			$db->setQuery($q3);
+
+			//error_log ( "calculateStats, num screened classed query: " . $query->dump() );
+
+			$numUnclassified = $db->loadResult();
+		}
+
+
+
+		// Calculate those classified to project threshold
+		if ( $isHistory ) {
+
+			// This reflects that full classification started to be tracked in June 2025
+			if ( $dateToUse > "20250630" ) {
+
+				$fullyClassified = Project::getFullyClassified ( $proj_id, $threshold, $dateToUse );
+				$numFullyClassified = count($fullyClassified);
+			}
+			else {
+				$numFullyClassified = 0;
+			}
+		}
+		else {
+			$query = $db->getQuery(true);
+
+			$query->select("count(*) from Photo P")
+				->where("P.status = 18")
+				->where("P.sequence_num = 1");
+
+			$db->setQuery($query);
+
+			//error_log ( "calculateStats, num classified to threshold query: " . $query->dump() );
+
+			$numFullyClassified = $db->loadResult();
+		}
+
+
+		if ( $isHistory ) {
+			$numUnclassified = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numScreened;
+		}
+		else {
+			$numScreened = $numLoaded - $numQueued - $numFullyClassified - $numPartClassified - $numUnclassified;
+		}
+
+		print ("For project totals, numLoaded = " . $numLoaded . ", numClassified = " . $numClassified .
+				", numQueued = " . $numQueued . ", numScreened = " . $numScreened .
+				", numFullyClassified = " . $numFullyClassified. ", numPartClassified = " . $numPartClassified .
+				", numUnclassified = " . $numUnclassified );
+
+
+		// Now update or insert - this would all be better with a stored procedure
+		$query = $db->getQuery(true);
+		$query->select("project_id, end_date from Statistics")
+			->where("project_id = 0" )
+			->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$resultRow = $db->loadRowList();
+
+		if ( count($resultRow) > 0 ) {
+			print "<br>Existing entry for project 0 (ie total) , end_date $endDate - updating<br/>";
+
+			$query = $db->getQuery(true);
+			$query->update("Statistics");
+			$query->set("num_uploaded = " . $numLoaded . ", num_classified = " . $numClassified .
+						", queued = " . $numQueued . ", screened_out = " . $numScreened .
+						", fully_classified = " . $numFullyClassified .
+						", part_classified = " . $numPartClassified .
+						", unclassified = " . $numUnclassified);
+			$query->where("project_id = 0" );
+			$query->where("end_date = '" . $endDate . "'" );
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+		else {
+			print "<br>New entry in statistics for project 0 (ie total) , end_date $endDate<br/>";
+
+			$query = $db->getQuery(true);
+			$query->insert("Statistics");
+			$query->columns($db->quoteName(array('project_id', 'end_date', 'num_uploaded', 'num_classified',
+							'queued', 'screened_out', 'fully_classified', 'part_classified', 'unclassified')));
+			$query->values("0, '" . $endDate . "', " . $numLoaded . ", " . $numClassified . ", " . $numQueued . ", " .
+							$numScreened . ", " . $numFullyClassified . ", " . $numPartClassified .
+							", " . $numUnclassified);
+
+			error_log ( "calculateStatsTotals, new entry sql: " . $query->dump() );
+
+			$db->setQuery($query);
+			$result = $db->execute();
+		}
+
+}
+
+
+function calculateStatsTotalsV1 ( $end_date = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
-	
+
+	$endDatePlus1 = strtotime("first day of next month" );
+	$endDate = date('Ymd', strtotime("last day of this month"));
+	if ( $end_date ) {
+		$endDatePlus1 = strtotime("+1 day", strtotime($end_date));
+		$endDate = date('Ymd', strtotime($end_date));
+	}
+
+	$dateToUse = date('Ymd', $endDatePlus1);
+
+	$isHistory = false;
+	if ( $endDate <  date('Ymd') ) {
+		$isHistory = true;
+	}
+
+	$query = $db->getQuery(true);
+	$query->select("count(distinct sequence_id) from Photo");
+	$query->where("sequence_id > 0");
+	$query->where("uploaded < " . $dateToUse );
+	$db->setQuery($query);
+	$numLoaded = $db->loadResult();
+
+	$query = $db->getQuery(true);
+	$query->select("count(distinct sequence_id) from Photo P");
+	$query->innerJoin("Animal A on P.photo_id = A.photo_id");
+	$query->where("A.species != 97");
+	$query->where("P.sequence_id > 0");
+	$query->where("A.timestamp < " . $dateToUse );
+	$db->setQuery($query);
+
+	$numClassified = $db->loadResult();
+
+	$numQueued = 0;
+	if ( $isHistory ) {
+		$query = $db->getQuery(true);
+		$query->select("count distinct sequence_id from Photo P")
+			->innerJoin("Classify C on C.photo_id = P.photo_id" )
+			->where("P.sequence_num = 1 and P.uploaded < " . $dateToUse )
+			->where("P.photo_id not in (select photo_id from Classify where timestamp < " . $dateToUse . ")" );
+
+		$db->setQuery($query);
+		error_log ( "calculateStats, num queued history query: " . $query->dump() );
+
+		$numQueued = $db->loadResult();
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("count(*) from Photo P")
+				->where("P.status = 0")
+				->where("P.contains_human = 0")
+				->where("P.sequence_num = 1");
+		$db->setQuery($query);
+
+		//error_log ( "calculateStats, num queued query: " . $query->dump() );
+
+		$numQueued = $db->loadResult();
+	}
+
+	$numScreened = 0;
+	$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+	if ( $isHistory ) {
+
+		// Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+		$query = $db->getQuery(true);
+		$query->select("P.sequence_id from Photo P")
+			->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+			->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+			->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" );
+
+		$query2 = $db->getQuery(true);
+		$query2->select("P.sequence_id from Photo P")
+			->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+			->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+			->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" );
+
+		$query3 = $db->getQuery(true);
+		$query3->select("P.sequence_id from Photo P")
+			->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+			->where("P.sequence_num = 1 and P.contains_human = 1 and status = " .  Sequence::STATUS_UNAVAILABLE)
+			->where("P.photo_id not in (select photo_id from Animal)");
+
+
+		$q3 = $db->getQuery(true)
+		 ->select('count(distinct a.sequence_id)')
+		 ->from('(' . $query->union($query2->union($query3)) . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num screened history query: " . $query->dump() );
+
+		$numScreened = $db->loadResult();
+
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("sequence_id from Photo P")
+			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			->where("P.status not in (1,18)")
+			->where("P.sequence_num = 1");
+
+		$query2 = $db->getQuery(true);
+		$query2->select("sequence_id from Photo P")
+			->leftJoin("Animal A on P.photo_id = A.photo_id")
+			->where("A.photo_id is NULL" )
+			->where("P.status = 0")
+			->where("P.contains_human = 1")
+			->where("P.sequence_num = 1");
+
+
+		$q3 = $db->getQuery(true)
+		 ->select('count(distinct a.sequence_id)')
+		 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num classifications query: " . $query->dump() );
+
+		$numScreened = $db->loadResult();
+	}
+
+
+	$numScreenedClassed = 0;
+	$screenedOutStr = "" . Sequence::STATUS_UNCLASSIFIED .", " . Sequence::STATUS_CALIBRATION_POLE . ", " . Sequence::STATUS_NOTHING;
+	if ( $isHistory ) {
+
+		// Rely on current status and check Classify table for date of Megadetector classify or CAI if older
+
+		$query = $db->getQuery(true);
+		$query->select("P.sequence_id from Photo P")
+			->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+			->where("C.origin = " . $db->quote('CAI') . " and C.photo_id = P.photo_id and C.classify_id <= 6176168")
+			->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+			->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+		$query2 = $db->getQuery(true);
+		$query2->select("P.sequence_id from Photo P")
+			->innerJoin("Classify C on C.sequence_id = P.sequence_id and C.timestamp < " . $dateToUse )
+			->where("C.origin = " . $db->quote('MEGA') . " and C.photo_id = P.photo_id and C.classify_id > 6176168")
+			->where("P.sequence_num = 1 and P.status in (" . $screenedOutStr . ")" )
+			->where("P.photo_id in (select photo_id from Animal where species!=97 and timestamp < ". $dateToUse . ")");
+
+
+		$q3 = $db->getQuery(true)
+		 ->select('count(distinct a.sequence_id)')
+		 ->from('(' . $query->union($query2) . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num screened history query: " . $query->dump() );
+
+		$numScreenedClassed = $db->loadResult();
+
+	}
+	else {
+		$query = $db->getQuery(true);
+		$query->select("sequence_id from Photo P")
+			->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+			->where("P.status not in (0,1,18)")
+			->where("P.sequence_num = 1")
+			->where("P.photo_id in (select photo_id from Animal where species!=97)");
+
+		$q3 = $db->getQuery(true)
+		 ->select('count(distinct a.sequence_id)')
+		 ->from('(' . $query . ') a');
+
+		$db->setQuery($q3);
+
+		//error_log ( "calculateStats, num classifications query: " . $query->dump() );
+
+		$numScreenedClassed = $db->loadResult();
+	}
+
+
+
+	// Calculate those classified to project threshold
+	if ( $isHistory ) {
+
+		// This reflects that full classification started to be tracked in June 2025
+		if ( $dateToUse > "20250630" ) {
+
+			$fullyClassified = getFullyClassified ( $proj_id, $threshold, $dateToUse );
+			$numFullyClassified = count($fullyClassified);
+		}
+			else {
+				$numFullyClassified = 0;
+			}
+		}
+		else {
+		$query = $db->getQuery(true);
+
+		$query->select("count(*) from Photo P")
+			->where("P.status = 18")
+			->where("P.sequence_num = 1");
+
+		$db->setQuery($query);
+
+		//error_log ( "calculateStats, num classified to threshold query: " . $query->dump() );
+
+		$numFullyClassified = $db->loadResult();
+	}
+
+
+	// Now update or insert - this would all be better with a stored procedure
+	$query = $db->getQuery(true);
+	$query->select("project_id, end_date from Statistics")
+		->where("project_id = 0" )
+		->where("end_date = '" . $endDate . "'" );
+	$db->setQuery($query);
+	$resultRow = $db->loadRowList();
+
+	if ( count($resultRow) > 0 ) {
+		print "Existing entry for project 0 (ie total) , end_date $endDate - updating<br/>";
+
+		$query = $db->getQuery(true);
+		$query->update("Statistics");
+		$query->set("num_uploaded = " . $numLoaded . ", num_classified = " . $numClassified .
+					", queued = " . $numQueued . ", screened_out = " . $numScreened .
+					", fully_classified = " . $numFullyClassified . 
+					", screened_classed = " . $numScreenedClassed);
+		$query->where("project_id = 0" );
+		$query->where("end_date = '" . $endDate . "'" );
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+	else {
+		print "New entry in statistics for project 0 (ie total) , end_date $endDate<br/>";
+
+		$query = $db->getQuery(true);
+		$query->insert("Statistics");
+		$query->columns($db->quoteName(array('project_id', 'end_date', 'num_uploaded', 'queued',
+				'screened_out', 'num_classified', 'fully_classified', 'screened_classed')));
+		$query->values("0, '" . $endDate . "', " . $numLoaded . ", " . $numQueued . ", " .
+			$numScreened . ", " . $numClassified . ", " . 
+			$numFullyClassified . ", " . $numSCreenedClassed );
+		$db->setQuery($query);
+		$result = $db->execute();
+	}
+
+
+
+
+/*	
 	$endDatePlus1 = strtotime("first day of next month" );
 	$endDate = date('Ymd', strtotime("last day of this month"));
 	if ( $end_date ) {
@@ -2137,6 +3488,7 @@ function calculateStatsTotals ( $end_date = null ) {
 		$db->setQuery($query);
 		$result = $db->execute();
 	}
+ */
 
 }
 
@@ -2220,23 +3572,27 @@ function calculateLeagueTableByMonth ( $project_id = null, $end_date = null ) {
 	
 	$db = JDatabase::getInstance(dbOptions());
 	
-	$projects = null;
+	$projects = array();
+	$project_ids = array();
 	
-	if ( $project_id ) {
+	if ( $project_id > 0 ) {
 		$projects = getSubProjectsById( $project_id );	
+		$project_ids = array_keys($projects);
 	}
 	else {
-		$query = $db->getQuery(true);
-		$query->select("DISTINCT P.project_id, P.project_prettyname from Project P");
-		$db->setQuery($query);
-		$projects = $db->loadAssocList('project_id');
-	}
-	$project_ids = array_keys($projects);
-	
-	if ( $project_id === null ) {
-		// 0 => all projects
+		if ( $project_id === null ) {
+			$query = $db->getQuery(true);
+			$query->select("DISTINCT P.project_id, P.project_prettyname from Project P");
+			$db->setQuery($query);
+			$projects = $db->loadAssocList('project_id');
+			$project_ids = array_keys($projects);
+		}
 		$project_ids[] = 0;
 	}
+	
+
+	error_log ( "CalculateLeagueTableByMonth, projects list: " . print_r ($project_ids, true) );
+	print ( "CalculateLeagueTableByMonth, projects list: " . print_r ($project_ids, true) );
 	
 	// Get users to count for classifications and uploads.
 	$query = $db->getQuery(true);
@@ -2284,96 +3640,88 @@ function calculateLeagueTableByMonth ( $project_id = null, $end_date = null ) {
 		
 		print "project_id = " . $proj_id . ", dateToUse = " . $dateToUse . "<br>";
 		
-		if ( $proj_id == 0 ) {
-			$query = $db->getQuery(true);
-			$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
-				->where("P.sequence_id > 0")
-				->where("P.person_id in (" . $personStr . ")")
-				->where("P.uploaded < " . $dateToUse )
-				->group("P.person_id");
-			
-			
-			$db->setQuery($query);
-			
-			//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
-			
-			$userUploaded = $db->loadAssocList("person_id", "numUploaded");
-			
-			//$errMsg = print_r ( $userUploaded, true );
-			//error_log ( "userUploaded: ");
-			//error_log ( $errMsg );
-		
-			$query = $db->getQuery(true);
-			$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id")
-				->where("P.person_id in (" . $personStr . ")")
-				->where("A.timestamp < " . $dateToUse )
-				->group("A.person_id");
-			
-			
-			$db->setQuery($query);
-			
-			//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
-			
-			$userClassified = $db->loadAssocList("person_id", "numClassified");
-			
-			//$errMsg = print_r ( $userClassified, true );
-			//error_log ( "userClassified: ");
-			//error_log ( $errMsg );
-		}
-		else {
-			$query = $db->getQuery(true);
-			$query->select("P.person_id, count(distinct sequence_id) as numUploaded from Photo P")
-				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-				->where("P.sequence_id > 0")
-				->where("P.person_id in (" . $personStr . ")")
-				->where("P.uploaded < " . $dateToUse )
-				->where("PSM.project_id = " . $proj_id )
-				->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
-				->group("P.person_id");
-			
-			
-			$db->setQuery($query);
-			
-			//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
-			
-			$userUploaded = $db->loadAssocList("person_id", "numUploaded");
-			
-			//$errMsg = print_r ( $userUploaded, true );
-			//error_log ( "userUploaded: ");
-			//error_log ( $errMsg );
-		
-			$query = $db->getQuery(true);
-			$query->select("A.person_id, count(distinct A.photo_id) as numClassified from Animal A")
-				->innerJoin("Photo P on A.photo_id = P.photo_id")
-				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
-				->where("P.person_id in (" . $personStr . ")")
-				->where("A.timestamp < " . $dateToUse )
-				->where("PSM.project_id = " . $proj_id )
-				->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  )
-				->group("A.person_id");
-			
-			
-			$db->setQuery($query);
-			
-			//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
-			
-			$userClassified = $db->loadAssocList("person_id", "numClassified");
-			
-			//$errMsg = print_r ( $userClassified, true );
-			//error_log ( "userClassified: ");
-			//error_log ( $errMsg );
-		}
-		
 		foreach ( $contributers as $personId ) {
+		
+			if ( $proj_id == 0 ) {
+				$query = $db->getQuery(true);
+				$query->select("count(distinct sequence_id) from Photo P")
+					->where("P.sequence_id > 0")
+					->where("P.person_id = " . $personId )
+					->where("P.uploaded < " . $dateToUse );
+				
+				
+				$db->setQuery($query);
+				
+				//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+				
+				$numUp = $db->loadResult();
+				
+				//$errMsg = print_r ( $userUploaded, true );
+				//error_log ( "userUploaded: ");
+				//error_log ( $errMsg );
 			
+				$query = $db->getQuery(true);
+				$query->select("count(distinct A.photo_id) from Animal A")
+					->innerJoin("Photo P on A.photo_id = P.photo_id")
+					->where("A.person_id = " . $personId )
+					->where("A.timestamp < " . $dateToUse );
+				
+				
+				$db->setQuery($query);
+				
+				//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
+				
+				$numCl = $db->loadResult();	
+				
+				//$errMsg = print_r ( $userClassified, true );
+				//error_log ( "userClassified: ");
+				//error_log ( $errMsg );
+			}
+			else {
+			
+				$query = $db->getQuery(true);
+				$query->select("count(distinct sequence_id) from Photo P")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("P.sequence_id > 0")
+					->where("P.person_id = " . $personId )
+					->where("P.uploaded < " . $dateToUse )
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  );
+				
+				
+				$db->setQuery($query);
+				
+				//error_log ( "calculateLeagueTableByMonth, user uploads query: " . $query->dump() );
+				
+				$numUp = $db->loadResult();
+				
+				//$errMsg = print_r ( $userUploaded, true );
+				//error_log ( "userUploaded: ");
+				//error_log ( $errMsg );
+			
+				$query = $db->getQuery(true);
+				$query->select("count(distinct A.photo_id) from Animal A")
+					->innerJoin("Photo P on A.photo_id = P.photo_id")
+					->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+					->where("A.person_id = " . $personId )
+					->where("A.timestamp < " . $dateToUse )
+					->where("PSM.project_id = " . $proj_id )
+					->where("P.photo_id >= PSM.start_photo_id and (PSM.end_photo_id is NULL or P.photo_id <= PSM.end_photo_id)"  );
+				
+				
+				$db->setQuery($query);
+				
+				//error_log ( "calculateLeagueTableByMonth, user animals query: " . $query->dump() );
+				
+				$numCl = $db->loadResult();
+				
+				//$errMsg = print_r ( $userClassified, true );
+				//error_log ( "userClassified: ");
+				//error_log ( $errMsg );
+			}
+				
 			print ( "<br/>Checking project $proj_id, person $personId <br/>" );
-			
-			$numUp = 0;
-			if ( array_key_exists( $personId, $userUploaded ) ) $numUp = $userUploaded[$personId];
-	
-			$numCl = 0;
-			if ( array_key_exists( $personId, $userClassified ) ) $numCl = $userClassified[$personId];
+		
 			
 			// Only insert data if the user has participated in this project
 			if ( $numUp > 0 or $numCl > 0 ) {
@@ -2506,8 +3854,8 @@ function calculateUserTestStatistics ( $end_date = null ) {
 	$userTotals = $db->loadAssocList("person_id");
 	
 	$errMsg = print_r ( $userTotals, true );
-	//error_log ( "userTotals: ");
-	//error_log ( $errMsg );
+	error_log ( "userTotals: ");
+	error_log ( $errMsg );
 
 	foreach ( $userTotals as $userTotal ) {
 		
@@ -2524,7 +3872,7 @@ function calculateUserTestStatistics ( $end_date = null ) {
 			->where("end_date = '" . $prevMonthEnd . "'" );
 		$db->setQuery($query);
 		
-		//error_log ( "calculateUserTests, prev month query: " . $query->dump() );
+		error_log ( "calculateUserTests, prev month query: " . $query->dump() );
 		
 		$prevMonthResults = $db->loadAssocList();
 			
@@ -3191,12 +4539,19 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
   $id_string = implode(",", array_keys($projects));
   
   $uploadedArray = array();
-  $classifiedArray = array();
+  //$classifiedArray = array();
+  $queuedArray = array();
+		$screenedOutArray = array();
+		$partClassifiedArray = array();
+		$fullyClassifiedArray = array();
+		$unclassifiedArray = array();
+
   $db = JDatabase::getInstance(dbOptions());
   
   for ( $j=0; $j<$numIntervals; $j++ ) {
 	$query = $db->getQuery(true);
-	$query->select("sum(num_uploaded), sum(num_classified) from Statistics");
+	//$query->select("sum(num_uploaded), sum(num_classified) from Statistics");
+	$query->select("sum(num_uploaded), sum(queued), sum(screened_out), sum(part_classified), sum(fully_classified), sum(unclassified) from Statistics");
 	$query->where("project_id in (" . $id_string . ")" );
 	$query->where("end_date = " . $datesArray[$j+1] );
 	$db->setQuery($query);
@@ -3204,16 +4559,31 @@ function projectData ( $project_id, $num_months, $interval_in_months = 1, $end_d
 	$row = $db->loadRow();
 	
 	array_push ( $uploadedArray, $row['0'] );
-	array_push ( $classifiedArray, $row['1'] );
+	//array_push ( $classifiedArray, $row['1'] );
+	array_push ( $queuedArray, $row['1'] );
+	array_push ( $screenedOutArray, $row['2'] );
+	array_push ( $partClassifiedArray, $row['3'] );
+	array_push ( $fullyClassifiedArray, $row['4'] );
+	array_push ( $unclassifiedArray, $row['5'] );
   }
 
   
   $projectData = array ( 
 		"labels" => $labelsArray,
 		"uploaded" => $uploadedArray,
-		"classified" => $classifiedArray,
-		"cla_label" => JText::_("COM_BIODIV_PROJECT_CLASSIFIED"),
+		//"classified" => $classifiedArray,
+		"queued" => $queuedArray,
+		"screenedout" => $screenedOutArray,
+		"partclassified" => $partClassifiedArray,
+		"fullyclassified" => $fullyClassifiedArray,
+		"unclassified" => $unclassifiedArray,
+		//"cla_label" => JText::_("COM_BIODIV_PROJECT_CLASSIFIED"),
 		"upl_label" => JText::_("COM_BIODIV_PROJECT_UPLOADED"),
+		"q_label" => JText::_("COM_BIODIV_PROJECT_QUEUED"),
+		"scr_label" => JText::_("COM_BIODIV_PROJECT_SCREENED"),
+		"pcl_label" => JText::_("COM_BIODIV_PROJECT_PART_CLASSIFIED"),
+		"fcl_label" => JText::_("COM_BIODIV_PROJECT_FULLY_CLASSIFIED"),
+		"ucl_label" => JText::_("COM_BIODIV_PROJECT_UNCLASSIFIED"),
 		"title" => $title
 		
 		);
@@ -4451,6 +5821,7 @@ function getSubProjectsById($project_id, $include_private = false){
   if ( $include_private == false ) {
 	  $query->where("access_level < 3");
   }
+  $query->order("listing_level");
   $db->setQuery($query);
   $allpairs = $db->loadAssocList();
   //print "<br/>Got " . count($allpairs) . " project/parent pairs<br/>\n";
@@ -4460,6 +5831,7 @@ function getSubProjectsById($project_id, $include_private = false){
   $query = $db->getQuery(true);
   $query->select("project_id AS proj_id, project_prettyname AS proj_prettyname")->from("Project");
   $query->where("project_id = '" . $project_id . "'");
+  $query->order("listing_level");
   $db->setQuery($query);
   $subprojects = $db->loadAssocList('proj_id', 'proj_prettyname');
   
@@ -4579,14 +5951,53 @@ function getChildProjectsById($project_id, $include_private = false){
 	if ( $include_private == false ) {
 	  $query->where("access_level < 3");
 	}
+	$query->order("listing_level");
 	$db->setQuery($query);
+
 	$children = $db->loadAssocList('proj_id', 'proj_prettyname');
 	return $children;
 }
 
+function projectProgress ( $project_id ) {
+
+		$thisAndSubs = getSubProjectsById ( $project_id );
+
+		$db = JDatabase::getInstance(dbOptions());
+
+		$id_string = implode(",", array_keys($thisAndSubs));
+
+		$endDate = date('Ymd', strtotime("last day of this month"));
+
+		$query = $db->getQuery(true);
+		$query->select("sum(num_uploaded), sum(queued), sum(screened_out),  sum(part_classified), sum(fully_classified) from Statistics");
+		$query->where("project_id in (" . $id_string . ")" );
+		$query->where("end_date = " . $endDate );
+		$db->setQuery($query);
+
+		$row = $db->loadRow();
+
+		$sequences = $row['0'];
+		$queued = $row['1'];
+		$screenedOut = $row['2'];
+		$partClassified = $row['3'];
+		$fullyClassified = $row['4'];
+
+
+		$percentComplete = 0;
+		//if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
+		//if ( $sequences > 0 ) $percentComplete = (int)(($classifications*100.0)/$sequences);
+
+		//return array("numClassifications"=>$classifications, "numSequences"=>$sequences, "percentComplete"=>$percentComplete);
+		return array("queued"=>$queued,
+					"screenedOut"=>$screenedOut,
+					"partClassified"=>$partClassified,
+					"fullyClassified"=>$fullyClassified,
+					"numSequences"=>$sequences);
+	}
+
 // return two values: number of classifications and total number of sequences uploaded for this project
 // and all subprojects...
-function projectProgress ( $project_id ) {
+function projectProgressOrig ( $project_id ) {
 	
 	$thisAndSubs = getSubProjectsById ( $project_id );
 			
@@ -5420,7 +6831,29 @@ function photoSequenceStart($last_photo_id){
 }
 
 
-function sequencePhotos($upload_id){
+function getProjectSequenceThreshold ( $siteId, $photoId ) {
+
+  $db = JDatabase::getInstance(dbOptions());
+
+  $query = $db->getQuery(true)
+                        ->select("min(OD.value)")
+                        ->from("ProjectOptions PO")
+                        ->innerJoin("Options O on PO.option_id = O.option_id and O.struc = ". $db->quote("sequencethreshold"))
+                        ->innerJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = ". $db->quote("seconds"))
+                        ->innerJoin("ProjectSiteMap PSM on PSM.project_id = PO.project_id and PSM.site_id = " . $siteId)
+                        ->where("PSM.start_photo_id < " . $photoId )
+                        ->where("(PSM.end_photo_id is NULL or PSM.end_photo_id > " . $photoId . ")" );
+
+  $db->setQuery($query);
+  $numSeconds = $db->loadResult();
+
+  // NB null if no values
+  return $numSeconds;
+
+}
+
+
+function sequencePhotos($upload_id, $sequenceThreshold = 10){
   if(!$upload_id = (int)$upload_id){
     return false;
   }
@@ -5448,6 +6881,16 @@ function sequencePhotos($upload_id){
   $this_row = 0;
   $num_results = count($res);
 
+  $projectThreshold = null;
+  if ( $num_results > 0 ) {
+     $projectThreshold = getProjectSequenceThreshold ( $siteId, $res[0]["photo_id"] );
+  }
+
+  $threshold = $sequenceThreshold;
+  if ( $projectThreshold !== null ) {
+     $threshold = $projectThreshold;
+  }
+
   foreach($res as $line){
     extract($line);
 	$this_row++;
@@ -5469,7 +6912,7 @@ function sequencePhotos($upload_id){
       $diff = $dateTime->diff($prev_dateTime);
       print "photo_id $photo_id prev_photo_id $prev_photo_id diff ". $diff->s;
       //if((abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
-	  if(!$isAudio && !$isVideo && (abs($diff->s) <10) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
+	  if(!$isAudio && !$isVideo && (abs($diff->s) <$threshold) && ($diff->i==0) && ($diff->h==0) && ($diff->d==0) & ($diff->m==0) & ($diff->y ==0)){ // less than 10 seconds between photos
 	    print "<br/> photos are close<br/>\n";
 		if($sequence_id>0){
 	      print "Existing sequence $sequence_id<br/>";	
@@ -6988,6 +8431,7 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	//error_log("printBirdSpeciesList: nothingId = " . $nothingId );
 	$humanId = codes_getCode("Human",'noanimal');
 	//error_log("printBirdSpeciesList: humanId = " . $humanId );
+        $vehicleId = codes_getCode("Vehicle",'noanimal');
 	
 	$btnClass = 'btn-primary';
 	
@@ -6996,9 +8440,14 @@ function printSpeciesListSearch ( $filterId, $speciesList, $useSeq=false, $dataT
 	print '<div id="species_group_'.$filterId.'_'.$nothingId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	//print "<button type='button' class='btn btn-primary classify_control' id='control_content_$nothingId'>$name</button>";
 	
+$name = codes_getOptionTranslation($vehicleId);
+        //$btnText = "<button type='button' id='control_content_${filterId}_${vehicleId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control nothing $dkOtherClass'  >$name</button>";
+        $btnText = "<button type='button' id='control_content_${filterId}_${vehicleId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control $dkOtherClass'  >$name</button>";
+        print '<div id="species_group_'.$filterId.'_'.$vehicleId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+
 	$name = codes_getOptionTranslation($humanId);			
 	$btnText = "<button type='button' id='control_content_${filterId}_${humanId}' class='btn $btnClass btn-sm btn-wrap-text species-btn classify_control $dkOtherClass'  >$name</button>";
-	print '<div id="species_group_'.$filterId.'_'.$humanId.'" class="col-xs-6 col-sm-6 col-md-6 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
+	print '<div id="species_group_'.$filterId.'_'.$humanId.'" class="col-xs-12 col-sm-12 col-md-12 btn-group alwaysmatch" style="padding-left:0;padding-right:0;">'.$btnText.'</div>';
 	
 	
 	
@@ -7450,13 +8899,17 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 
 	if($fileSize > BIODIV_MAX_FILE_SIZE){
 	  addMsg("error",  "File " . $clientName ." too large: max " . BIODIV_MAX_FILE_SIZE);
+	  writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "File too large: max " . BIODIV_MAX_FILE_SIZE );
 	  $problem = true;
 	} 
 	//	$tmpName = JFile::makeSafe($tmpName);
 	// NB can get this error if PHP max dilsize and upload size are too small:
 	else if(!is_uploaded_file($tmpName)){
 		//error_log ( "Not an uploaded file $tmpName ( $clientName ) - check file size is below PHP limits, or there may be a network problem" );
-		addMsg("error", "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem");
+		$msg = "$clientName could not be uploaded - file may be too large (max filesize is ". BIODIV_MAX_FILE_SIZE . ") or there may be a network problem";
+
+		addMsg("error", $msg);
+		writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, $msg );
 		$problem = true;
 	}
 	else {
@@ -7471,6 +8924,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 
 		if(JFile::exists($newFullName)){
 		  addMsg("warning", "File already uploaded: $clientName");
+		  writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "File already uploaded" );
 		  $problem = true;
 		}
 		else {
@@ -7486,6 +8940,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 			if ( $numExisting > 0 ) {
 				
 				addMsg("warning", "File already uploaded for this site: $clientName");
+				writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "File already uploaded for this site" );
 				$problem = true;
 			}
 			else {
@@ -7496,6 +8951,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 				$taken = $biodivFile->takenDate();
 				$exif = $biodivFile->exif();
 				$is_audio = $biodivFile->isAudio();
+				$toResize = $biodivFile->toResize();
 
 				//error_log ( "Values from BiodivFile: ");
 				//error_log ( "taken = " . $taken );
@@ -7503,6 +8959,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 
 				if ( $taken == null ) {
 					addMsg("error","File upload unsuccessful for $clientName, cannot get timestamp");
+					writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "Cannot get timestamp" );
 					$problem = true;
 				}
 				else {
@@ -7511,6 +8968,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 					$success=	JFile::upload($tmpName, $newFullName);
 					if(!$success){
 						addMsg("error","File upload unsuccessful for $clientName");
+						writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "Moving uploaded file failed" );
 						$problem = true;
 					}	
 					else {
@@ -7544,6 +9002,11 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 							$struc = 'origfile';
 						}
 
+						// Resize large files
+						if ( $toResize ) {
+							$struc = 'origlargefile';
+						}
+
 						//error_log ( "Inserting object for struc " . $struc );
 						$newId = codes_insertObject($photoFields, $struc);
 						if($newId){
@@ -7558,6 +9021,7 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 						else {
 							// Remove files if the database insert failed
 							JFile::delete($newFullName);
+							writeUploadError ( $upload_id, $site_id, $tmpName, $clientName, "Error inserting into database" );
 							$problem = true;
 						}
 					}
@@ -7569,6 +9033,45 @@ function uploadFile ( $upload_id, $site_id, $tmpName, $clientName, $fileSize, $f
 	return $problem == false;
 
 }
+
+
+function writeUploadError ( $uploadId, $siteId, $tmpName, $clientName, $reason ) {
+
+	$db = JDatabase::getInstance(dbOptions());
+
+	$errorFields = new StdClass();
+	$errorFields->upload_id = $uploadId;
+	$errorFields->site_id = $siteId;
+	$errorFields->upload_filename = $clientName;
+	$errorFields->filename = $tmpName;
+	$errorFields->reason = $reason;
+	$success = $db->insertObject("UploadError", $errorFields);
+	if(!$success){
+		error_log ( "UploadError insert failed" );
+	}
+}
+
+
+function getUploadErrors ( $uploadId ) {
+
+	$db = JDatabase::getInstance(dbOptions());
+
+	$query = $db->getQuery(true);
+	$query->select("upload_filename, reason")
+		->from("UploadError UE")
+		->innerJoin("Upload U on U.upload_id = UE.upload_id")
+		->where("UE.upload_id = " .(int)$uploadId)
+		->where("U.person_id = " .(int)userID());
+	$db->setQuery($query);
+	$uploadErrors = $db->loadAssocList();
+
+	//error_log("getUploadErrors select query created: " . $query->dump());
+
+	return $uploadErrors;
+
+}
+
+
 
 // Used to write details of a generated file (eg split or sonogram) to Photo table.
 function writeSplitFile ( $ofId, $newFile, $delay = 0 ) {
@@ -8376,6 +9879,309 @@ function setRunning ( $processName, $isRunning ) {
 
         }
 }
+
+
+	// Note for performance we will only consider available sequences as change of threshold is a rare occurrence
+	function retire ( $projectId ) {
+
+        	$db = JDatabase::getInstance(dbOptions());
+		$projects = getProjectsWithThreshold ();
+
+		$retired = array();
+		if ( !$projectId ) {
+
+			foreach ( $projects as $projId=>$details ) {
+
+				if ( array_key_exists( 'threshold', $details ) ) {
+					$moreRetired = retireProject( $projId, $details['threshold'] );
+					$retired = [...$retired,...$moreRetired];
+				}
+			}
+		}
+		else {
+
+			if ( array_key_exists($projectId, $projects) && array_key_exists('threshold', $projects[$projectId]) ) {
+				$threshold = $projects[$projectId]['threshold'];
+
+				$retired = retireProject( $projectId, $threshold );
+			}
+		}
+		return $retired;
+	}
+
+	// Unretire written as separate function as is a rarely needed function, only used when a threshold is changed
+	function unretire ( $projectId ) {
+
+        	$db = JDatabase::getInstance(dbOptions());
+		$projects = getProjectsWithThreshold ();
+
+		$unretired = array();
+		if ( !$projectId ) {
+
+			foreach ( $projects as $projId=>$details ) {
+
+				if ( array_key_exists( 'threshold', $details ) ) {
+					$moreRetired = unretireProject( $projId, $details['threshold'] );
+					$unretired = [...$unretired,...$moreRetired];
+				}
+			}
+		}
+		else {
+
+			if ( array_key_exists($projectId, $projects) && array_key_exists('threshold', $projects[$projectId]) ) {
+				$threshold = $projects[$projectId]['threshold'];
+
+				$unretired = unretireProject( $projectId, $threshold );
+			}
+		}
+		return $unretired;
+
+	}
+
+	function getFullyClassified ( $projectId, $threshold, $calcDate = null ) {
+
+		$candidates = array();
+		$fullyClassified = array();
+
+        	$db = JDatabase::getInstance(dbOptions());
+
+		if ( $calcDate ) {
+			$numClassifiersStr = "(select photo_id, count( distinct person_id) as num_classifiers from Animal where species != 97 and timestamp < " . $calcDate . " group by photo_id)";
+		}
+		else {
+			$numClassifiersStr = "(select photo_id, count( distinct person_id) as num_classifiers from Animal where species != 97 group by photo_id)";
+		}
+
+		if ( $threshold ) {
+
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id, P.photo_id, P.site_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin($numClassifiersStr . " as AC on AC.photo_id = P.photo_id")
+				->where("P.sequence_num=1")
+				->where("AC.num_classifiers >= " . $threshold)
+				->where("PSM.project_id = " . $projectId )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL )"  );
+
+			if ( !$calcDate ) {
+				$query->where("P.status = 1");
+			}
+
+			$db->setQuery($query);
+
+			error_log ( "Project::getFullyClassified, num classified to threshold query: " . $query->dump() );
+
+			$candidates = $db->loadObjectList();
+		}
+
+		// Need to check whether each sequence is in any other project with a higher threshold or none.
+		// Note that we have to use current thresholds for this as we don;t hold the history of any changes in the db
+		foreach ( $candidates as $candidate ) {
+			$projectRetireList = getProjectRetireThresholds($candidate->site_id, $candidate->photo_id);
+			$canRetire = true;
+			if ( count($projectRetireList) > 1 ) {
+				if ( in_array(0, $projectRetireList) ) {
+					$canRetire = false;
+				}
+				else {
+					$thresholds = array_values($projectRetireList);
+					foreach ( $thresholds as $nextThreshold ) {
+						if ( $nextThreshold > $threshold ) {
+							$canRetire = false;
+							break;
+						}
+					}
+				}
+			}
+			if ( $canRetire ) {
+
+				$fullyClassified[] = $candidate;
+			}
+
+		}
+
+		return $fullyClassified;
+	}
+
+	function retireProject ( $projectId, $threshold ) {
+
+        	$db = JDatabase::getInstance(dbOptions());
+
+		$toRetireArray = getFullyClassified ( $projectId, $threshold );
+		$retired = array();
+
+		foreach ( $toRetireArray as $toRetire ) {
+
+			$fields = array(
+					$db->quoteName('status') . ' = ' . Sequence::STATUS_FULLY_CLASSIFIED
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('sequence_id') . ' = ' . $toRetire->sequence_id,
+				$db->quoteName('status') . ' = ' . Sequence::STATUS_AVAILABLE
+			);
+
+			$query = $db->getQuery(true);
+
+			$query->update($db->quoteName('Photo'))->set($fields)->where($conditions);
+
+			$db->setQuery($query);
+
+			error_log ( "retireProject query: " . $query->dump() );
+
+			$result = $db->execute();
+
+			if ( !$result ) {
+				error_log ("Retire error - failed to update status to fully classified for Sequence " . $candidate->sequence_id );
+			}
+			else {
+				$retired[] = $toRetire;
+			}
+		}
+
+		return $retired;
+
+	}
+
+
+	function unretireProject ( $projectId, $threshold ) {
+
+		$unretireCandidates = array();
+		$unretired = array();
+
+        	$db = JDatabase::getInstance(dbOptions());
+
+		if ( $threshold ) {
+
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id, P.photo_id, P.site_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->innerJoin("(select photo_id, count( distinct person_id) as num_classifiers from Animal where species != 97 group by photo_id) as AC on AC.photo_id = P.photo_id")
+				->where("P.status = " . Sequence::STATUS_FULLY_CLASSIFIED)
+				->where("P.sequence_num=1")
+				->where("AC.num_classifiers < " . $threshold)
+				->where("PSM.project_id = " . $projectId )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL )"  );
+			$db->setQuery($query);
+			$unretireCandidates = $db->loadObjectList();
+		}
+		else if ( $threshold === null ) {
+
+			// Unretire all sequences
+			$query = $db->getQuery(true);
+			$query->select("P.sequence_id, P.photo_id, P.site_id from Photo P")
+				->innerJoin("ProjectSiteMap PSM on PSM.site_id = P.site_id")
+				->where("P.status = " . Sequence::STATUS_FULLY_CLASSIFIED)
+				->where("P.sequence_num=1")
+				->where("AC.num_animals < " . $threshold)
+				->where("PSM.project_id = " . $projectId )
+				->where("P.photo_id >= PSM.start_photo_id and ( P.photo_id <= PSM.end_photo_id or PSM.end_photo_id is NULL )"  );
+			$db->setQuery($query);
+			$unretireCandidates = $db->loadObjectList();
+
+		}
+
+		// Need to check whether each sequence is in any other project with a higher threshold or none.
+		foreach ( $unretireCandidates as $candidate ) {
+
+			// No need to check other projects as only one project needed to unretire
+			$fields = array(
+					$db->quoteName('status') . ' = ' . Sequence::STATUS_AVAILABLE
+			);
+
+			// Conditions for which records should be updated.
+			$conditions = array(
+				$db->quoteName('sequence_id') . ' = ' . $candidate->sequence_id,
+				$db->quoteName('status') . ' = ' . Sequence::STATUS_FULLY_CLASSIFIED
+			);
+
+			$query = $db->getQuery(true);
+
+			$query->update($db->quoteName('Photo'))->set($fields)->where($conditions);
+
+			$db->setQuery($query);
+
+			$result = $db->execute();
+
+			if ( !$result ) {
+				error_log ("Retire error - failed to update status to available for Sequence " . $candidate->sequence_id );
+			}
+			else {
+				$unretired[] = $candidate;
+			}
+		}
+		return $unretired;
+	}
+
+
+	function getProjectsWithThreshold ( $projectId = null ) {
+
+        	$db = JDatabase::getInstance(dbOptions());
+
+		$projects = array();
+
+		if ( $projectId ) {
+
+			$projectAndSubs = getSubProjectsById( $projectId );
+			$query = $db->getQuery(true);
+			$query->select("DISTINCT P.project_id, P.project_prettyname, OD.value as threshold from Project P")
+				->leftJoin("ProjectOptions PO on P.project_id = PO.project_id")
+				->leftJoin("Options O on PO.option_id = O.option_id and O.struc = " . $db->quote('numtoretire'))
+				->leftJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote('threshold'))
+				->where("P.project_id in (" . implode(',', array_keys($projectAndSubs)) . ")" )
+				->order("threshold");
+
+			$db->setQuery($query);
+
+			//error_log ( "Project::getProjectsWithThreshold query: " . $query->dump() );
+
+			$projects = $db->loadAssocList('project_id');
+		}
+		else {
+
+			$query = $db->getQuery(true);
+			$query->select("DISTINCT P.project_id, P.project_prettyname, OD.value as threshold from Project P")
+				->leftJoin("ProjectOptions PO on P.project_id = PO.project_id")
+				->leftJoin("Options O on PO.option_id = O.option_id and O.struc = " . $db->quote('numtoretire'))
+				->leftJoin("OptionData OD on OD.option_id = O.option_id and OD.data_type = " . $db->quote('threshold'))
+				->order("threshold");
+			$db->setQuery($query);
+			$projects = $db->loadAssocList('project_id');
+
+		}
+
+		return $projects;
+	}
+
+	//Photo id included for performance
+	function getProjectRetireThresholds ( $siteId, $photoId ) {
+
+        	$db = JDatabase::getInstance(dbOptions());
+
+		$query = $db->getQuery(true)
+			->select("PO.project_id, MAX(IFNULL(A.value, 0)) as value")
+			->from("ProjectOptions PO")
+			->leftJoin("(select OD.option_id, OD.value from Options O ".
+					"inner join OptionData OD on O.option_id = OD.option_id ".
+					"where O.struc = ".$db->quote('numtoretire')." and OD.data_type = ".$db->quote('threshold').
+					") A on PO.option_id = A.option_id")
+			->innerJoin("ProjectSiteMap PSM on PSM.project_id = PO.project_id and PSM.site_id = " . $siteId)
+			->where("PSM.start_photo_id < " . $photoId )
+			->where("(PSM.end_photo_id is NULL or PSM.end_photo_id > " . $photoId . ")" )
+			->group("PO.project_id");
+
+		$db->setQuery($query);
+
+		//error_log ( "getProjectRetireThresholds query: " . $query->dump() );
+
+		$projectThresholds = $db->loadAssocList("project_id", "value");
+
+		return $projectThresholds;
+
+	}
+
+
 
 
 	

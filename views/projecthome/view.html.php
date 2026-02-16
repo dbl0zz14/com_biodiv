@@ -70,6 +70,7 @@ class BioDivViewProjecthome extends JViewLegacy
 	
 	$this->projectTree = getProjectTree($this->project_id);
 	
+	$this->childProjects = getChildProjectsById ( $this->project_id );
 	
 	$article = JTable::getInstance("content");
 	

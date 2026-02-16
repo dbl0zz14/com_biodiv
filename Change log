@@ -1,3 +1,8 @@
+ 14/2/26 - Version 3.8.4
+* A number of changes including:
+* Add Vehicle as option when classifying
+* Resize image file changes
+
  29/1/25 - Version 3.8.3
 * Bring together various patches:
 * Correctly update PhotoSequence.in_use flag when processing images
