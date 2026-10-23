@@ -1,0 +1,16 @@
+{
+    "require": {
+        "firebase/php-jwt": "^6.10",
+        "phpseclib/phpseclib": "~2.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "james-heinrich/getid3": "^1.9",
+        "deeplcom/deepl-php": "^1.6",
+        "aws/aws-sdk-php": "^3.301",
+        "riverline/multipart-parser": "^2.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

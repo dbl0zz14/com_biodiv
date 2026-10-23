@@ -1,0 +1,66 @@
+<?php
+
+namespace MammalWeb\Component\Biodiv\Site\View\DashSpotter;
+  
+// No direct access to this file
+defined('_JEXEC') or die;
+ 
+use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
+ 
+/**
+ * @package     Joomla.Site
+ * @subpackage  com_biodiv
+ *
+ * @copyright   Copyright (C) 2024 MammalWeb Limited. All rights reserved.
+ * @license     GNU General Public License version 3; see LICENSE
+ */
+
+/**
+ * View for spotter raw data, used eg in user dashboard
+ */
+class RawView extends BaseHtmlView {
+  
+   /**
+   *
+   * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
+   *
+   * @return  void
+   */
+	public function display($tpl = null) {
+
+		$spotterModel = $this->getModel();
+
+		$this->personId = $spotterModel->userID();
+		
+		if ( $this->personId ) {
+			
+			
+			$app = Factory::getApplication();	
+			
+			// Spotter stats, repeat of part of Status view		
+			$this->statRows = $spotterModel->getSpotterStatistics();
+			
+			// Get this users quiz expertise
+			// Get training topics
+			$this->topicIds = $spotterModel->getTrainingTopicIds ();
+			
+			// Get this users scores, avoid Gold standard or non-displayed ones when displaying
+			$this->scores = $spotterModel->userExpertise($this->personId);
+			
+			$scoreTopicIds = array_column($this->scores, 'topic_id');
+			
+			$this->numTopicScores = count(array_intersect($scoreTopicIds, $this->topicIds));
+			
+			$this->numMissingScores = count($this->topicIds) - $this->numTopicScores;
+				
+		}
+				
+		// Display the view
+		parent::display($tpl);
+	}
+}
+
+
+
+?>

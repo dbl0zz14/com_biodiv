@@ -1,0 +1,767 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "com_biodiv",
+	"version": "4.0.0",
+	"description": "Biodiv Component",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "com_biodiv.chart",
+			"description": "Charts.js — renders charts and graphs",
+			"type": "script",
+			"uri": "https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js",
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.jqueryuploadfile",
+			"description": "jquery.uploadfile.js — handles file uploading",
+			"type": "script",
+			"uri": "https://hayageek.github.io/jQuery-Upload-File/4.0.11/jquery.uploadfile.min.js",
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.jqueryuploadfile",
+			"description": "uploadfile.css — styling for file uploading",
+			"type": "style",
+			"uri": "https://hayageek.github.io/jQuery-Upload-File/4.0.11/uploadfile.css",
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.bootstrap-editable",
+			"description": "bootstrap-editable.js — handles editable table",
+			"type": "script",
+			"uri": "bootstrap3-editable/bootstrap-editable.js",
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.bootstrap-editable",
+			"description": "bootstrap-editable.css — styling for editable table",
+			"type": "style",
+			"uri": "bootstrap3-editable/bootstrap-editable.css",
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.leaflet",
+			"description": "leaflet.js — renders maps",
+			"type": "script",
+			"uri": "https://unpkg.com/leaflet@1.6.0/dist/leaflet.js",
+			"attributes": {
+				"defer": true,
+				"integrity": "sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==",
+				"crossorigin": "anonymous"
+			}
+		},
+		{
+			"name": "com_biodiv.leaflet",
+			"description": "leaflet.css — styling for leaflet maps",
+			"type": "style",
+			"uri": "https://unpkg.com/leaflet@1.6.0/dist/leaflet.css",
+			"attributes": {
+				"defer": true,
+				"integrity": "sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==",
+				"crossorigin": "anonymous"
+			}
+		},
+		{
+			"name": "com_biodiv.latlon-ellipsoidal",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/geodesy-master/latlon-ellipsoidal.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.osgridref",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/geodesy-master/osgridref.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.vector3d",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/geodesy-master/vector3d.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.project",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/project.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.upload",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/upload.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.uploadvalidate",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/upload.js",
+			"dependencies": [
+				"core", "form.validate"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.uploaderrors",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/uploaderrors.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.uploadm",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/uploadm.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.status",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/status.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.triggersurvey",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/triggersurvey.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.commonclassify",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/commonclassify.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.classify",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/classify.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.userchoice",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/userchoice.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.mapdraw",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/mapdraw.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.mapupdate",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/mapupdate.js",
+			"dependencies": [
+				"core",
+				"jquery",
+				"com_biodiv.vector3d",
+				"com_biodiv.latlon-ellipsoidal",
+				"com_biodiv.osgridref"
+				
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.trapper",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/trapper.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.commonuserdashboard",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/commonuserdashboard.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.userdashboard",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/userdashboard.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.schoolsdashboard",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/schoolsdashboard.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.mediacarousel",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/mediacarousel.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.report",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/report.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.training",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/training.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.trainingfunctions",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/trainingfunctions.js",
+			"dependencies": [
+				"core",
+				"jquery"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.trainingtopic",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/trainingtopic.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.trainingresults",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/trainingresults.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.discovermap",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/discovermap.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.discover",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/discover.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.commonbiodiv",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/commonbiodiv.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kioskcommon",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kioskcommon.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kiosk",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kiosk.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kioskclassify",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kioskclassify.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kioskquiz",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kioskquiz.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kiosklearn",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kiosklearn.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kiosktutorial",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kiosktutorial.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kioskabout",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kioskabout.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.kioskmap",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/kioskmap.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.projectdashboard",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/projectdashboard.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.survey",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/survey.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.gallery",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/gallery.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.social",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/social.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.admin",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_biodiv/admin.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_biodiv.trapper",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.mapupdate#script",
+				"com_biodiv.trapper#script"
+			]
+		},
+		{
+			"name": "com_biodiv.upload",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.upload#script",
+				"com_biodiv.uploaderrors#script"
+			]
+		},
+		{
+			"name": "com_biodiv.uploadm",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.uploadm#script",
+				"com_biodiv.jqueryuploadfile#script",
+				"com_biodiv.jqueryuploadfile#style"
+			]
+		},
+		{
+			"name": "com_biodiv.uploaderrors",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.uploaderrors#script"
+			]
+		},
+		{
+			"name": "com_biodiv.status",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.status#script",
+				"com_biodiv.triggersurvey#script"
+			]
+		},
+		{
+			"name": "com_biodiv.schoolsstatus",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.status#script"
+			]
+		},
+		{
+			"name": "com_biodiv.classify",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.commonclassify#script",
+				"com_biodiv.classify#script",
+				"com_biodiv.userchoice#script",
+				"com_biodiv.mapdraw#script"
+			]
+		},
+		{
+			"name": "com_biodiv.projects",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.project#script"
+			]
+		},
+		{
+			"name": "com_biodiv.projecthome",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.chart#script",
+				"com_biodiv.project#script",
+				"com_biodiv.triggersurvey#script"
+			]
+		},
+		{
+			"name": "com_biodiv.userdashboard",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.chart#script",
+				"com_biodiv.commonuserdashboard#script",
+				"com_biodiv.userdashboard#script",
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.report#script"
+			]
+		},
+		{
+			"name": "com_biodiv.schoolsdashboard",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.chart#script",
+				"com_biodiv.commonuserdashboard#script",
+				"com_biodiv.schoolsdashboard#script",
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.report#script"
+			]
+		},
+		{
+			"name": "com_biodiv.training",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.training#script"
+			]
+		},
+		{
+			"name": "com_biodiv.trainingtopic",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.commonclassify#script",
+				"com_biodiv.trainingfunctions#script",
+				"com_biodiv.trainingtopic#script"
+			]
+		},
+		{
+			"name": "com_biodiv.trainingresults",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.trainingfunctions#script",
+				"com_biodiv.trainingresults#script"
+			]
+		},
+		{
+			"name": "com_biodiv.discover",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.chart#script",
+				"com_biodiv.leaflet#script",
+				"com_biodiv.leaflet#style",
+				"com_biodiv.discovermap#script",
+				"com_biodiv.discover#script"
+			]
+		},
+		{
+			"name": "com_biodiv.kiosk",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.commonbiodiv#script",
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.kioskcommon#script",
+				"com_biodiv.kiosk#script",
+				"com_biodiv.kioskclassify#script",
+				"com_biodiv.kioskquiz#script",
+				"com_biodiv.kiosklearn#script",
+				"com_biodiv.kiosktutorial#script",
+				"com_biodiv.kioskabout#script",
+				"com_biodiv.chart#script",
+				"com_biodiv.leaflet#script",
+				"com_biodiv.leaflet#style",
+				"com_biodiv.discovermap#script",
+				"com_biodiv.kioskmap#script"
+			]
+		},
+		{
+			"name": "com_biodiv.projectdashboard",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.commonbiodiv#script",
+				"com_biodiv.projectdashboard#script",
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.report#script"
+			]
+		},
+		{
+			"name": "com_biodiv.survey",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.survey#script"
+			]
+		},
+		{
+			"name": "com_biodiv.gallery",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.mediacarousel#script",
+				"com_biodiv.report#script",
+				"com_biodiv.gallery#script"
+			]
+		},
+		{
+			"name": "com_biodiv.galleryitem",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.social#script"
+			]
+		},
+		{
+			"name": "com_biodiv.admin",
+			"type": "preset",
+			"dependencies": [
+				"com_biodiv.commonbiodiv#script",
+				"com_biodiv.admin#script"
+			]
+		}
+		
+	]
+}

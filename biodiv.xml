@@ -1,104 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension type="component" version="3.2.0" method="upgrade">
+<extension type="component" method="upgrade">
  
-  <name>biodiv</name>
-  <!-- The following elements are optional and free of formatting constraints -->
-  <creationDate>January 2015</creationDate>
-  <author>Steven Bradley</author>
-  <authorEmail>s.p.bradley@durham.ac.uk</authorEmail>
-  <copyright></copyright>
-  <license></license>
-  <!--  The version string is recorded in the components table -->
-  <version>3.8.3</version>
-  <!-- The description is optional and defaults to the name -->
-  <description>Upload and classify images, video and audio from camera traps or other recording devices</description>
- 
-  <update> <!-- Runs on update; New since J2.5 -->
-    <schemas>
-<!--
-      <schemapath type="mysql">sql/updates/mysql</schemapath >
--->
-    </schemas>
-  </update>
- 
-  <!-- Site Main File Copy Section -->
-  <!-- Note the folder attribute: This attribute describes the folder
-  to copy FROM in the package to install therefore files copied
-  in this section are copied from /site/ in the package -->
-  <files>
-    <filename>index.html</filename>
-	<filename>biodiv.php</filename>
-	<filename>codes.php</filename>
-	<filename>controller.php</filename>
-	<filename>Project.php</filename>
-	<filename>Location.php</filename>
-	<filename>Sequence.php</filename>
-	<filename>MediaCarousel.php</filename>
-	<filename>SpeciesCarousel.php</filename>
-	<filename>BiodivHelper.php</filename>
-	<filename>BiodivAuth.php</filename>
-	<filename>BiodivAWS.php</filename>
-	<filename>SiteHelper.php</filename>
-	<filename>BiodivFFMpeg.php</filename>
-	<filename>BiodivFile.php</filename>
-	<filename>BiodivSurvey.php</filename>
-	<filename>BiodivReport.php</filename>
-	<filename>KioskSpecies.php</filename>
-	<filename>BiodivTransifex.php</filename>
-	<filename>BiodivRecaptcha.php</filename>
-	<filename>BiodivConservationAI.php</filename>
-	<filename>BiodivOctopus.php</filename>
-	<filename>BiodivAnalysis.php</filename>
-	<filename>BiodivMegadetector.php</filename>
-	<filename>TrainingHelper.php</filename>
-	<folder>views</folder>
-	<folder>Biodiv</folder>
-	<folder>libraries</folder>
-<!--
-    <filename>index.html</filename>
-    <filename>helloworld.php</filename>
--->
+	<name>biodiv</name>
+	<!-- The following elements are optional and free of formatting constraints -->
+	<creationDate>January 2015</creationDate>
+	<author>Steven Bradley</author>
+	<authorEmail>s.p.bradley@durham.ac.uk</authorEmail>
+	<copyright></copyright>
+	<license></license>
+	<!--  The version string is recorded in the components table -->
+	<version>4.0.0</version>
+	<!-- The description is optional and defaults to the name -->
+	<description>Upload and classify images, video and audio from camera traps or other recording devices</description>
 
-  </files>
+	<update> <!-- Runs on update; New since J2.5 -->
+		<schemas>
+		<!--
+		  <schemapath type="mysql">sql/updates/mysql</schemapath >
+		-->
+		</schemas>
+	</update>
+ 
+  <!-- This is the PHP namespace under which the extension's
+    code is organised. It should follow this format:
+    
+    Vendor\Component\ComponentName
+
+    "Vendor" can be your company or your own name
+    
+    The "ComponentName" section MUST match the name used 
+    everywhere else for your component. Whatever the name of 
+    this XML file is, the namespace must match (ignoring CamelCase). 
+    -->
+	<namespace path="src/">MammalWeb\Component\Biodiv</namespace>
+	
+	<files folder="site/">
+		<folder>language</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+		<!-- folder>vendor</folder -->
+	<!--
+		<filename>index.html</filename>
+		<filename>helloworld.php</filename>
+	-->
+
+	</files>
   
-  <languages folder="language">
-	<language tag="en-GB">en-GB/en-GB.com_biodiv.ini</language>
-	<language tag="de-DE">de-DE/de-DE.com_biodiv.ini</language>
-	<language tag="es-ES">es-ES/es-ES.com_biodiv.ini</language>
-	<language tag="hr-HR">hr-HR/hr-HR.com_biodiv.ini</language>
-	<language tag="hu-HU">hu-HU/hu-HU.com_biodiv.ini</language>
-	<language tag="pl-PL">pl-PL/pl-PL.com_biodiv.ini</language>
-  </languages>
+	<languages folder="language">
+		<language tag="en-GB">site/language/en-GB/en-GB.com_biodiv.ini</language>
+		<language tag="de-DE">site/language/de-DE/de-DE.com_biodiv.ini</language>
+		<language tag="es-ES">site/language/es-ES/es-ES.com_biodiv.ini</language>
+		<language tag="hr-HR">site/language/hr-HR/hr-HR.com_biodiv.ini</language>
+		<language tag="hu-HU">site/language/hu-HU/hu-HU.com_biodiv.ini</language>
+		<language tag="pl-PL">site/language/pl-PL/pl-PL.com_biodiv.ini</language>
+	</languages>
 
-  <media destination="com_biodiv" folder="media">
-    <folder>css</folder>
-    <folder>js</folder>
-    <folder>images</folder>
-    <folder>fonts</folder>
-  </media>
+	<media destination="com_biodiv" folder="media">
+		<!-- folder>css</folder -->
+		<folder>js</folder>
+		<filename>joomla.asset.json</filename>
+		<filename>index.html</filename>
+		<!-- folder>images</folder -->
+		<!-- folder>fonts</folder -->
+	</media>
   
-  <administration>
-    <!-- Administration Menu Section -->
-    <menu link='index.php?option=com_biodiv'>MammalWeb</menu>
-    <!-- Administration Main File Copy Section -->
-    <!-- Note the folder attribute: This attribute describes the folder
-    to copy FROM in the package to install therefore files copied
-    in this section are copied from /admin/ in the package -->
-    <files folder="admin">
-      <!-- Admin Main File Copy Section -->
+	<administration>
+		<!-- Administration Menu Section -->
+		<menu link="index.php?option=com_biodiv">MammalWeb
+			<submenu>
+				<menuitem
+					title="COM_BIODIV_MENU_KIOSK"
+					view="kiosk"
+					layout="default"
+				/>
+			</submenu>
+		</menu>
+		
+		<!-- List of files and folders to copy. Note the 'folder' attribute.
+             This is the name of the folder in your component package to copy FROM -->
+        <files folder="admin/">
+            <folder>language</folder>
+			<folder>src</folder>
+            <folder>services</folder>
+            <folder>tmpl</folder>
+        </files>
+		
+		<languages>
+            <!-- language tag="en-GB">admin/language/en-GB/en-GB.com_biodiv.ini</language -->
+			<!-- folder>language</folder -->
+        </languages>
+	</administration>
+	
+	<api>
+		<files folder="api">
+			<folder>src</folder>
+		</files>
+	</api>
 
-      <filename>index.html</filename>
-      <filename>biodiv.php</filename>
-      <filename>controller.php</filename>
-
-	  <!-- views files section -->
-	  <folder>views</folder>
-	  
-      <!-- SQL files section -->
-<!--
-      <folder>sql</folder>
--->
-    </files>
-  </administration>
  
 </extension>

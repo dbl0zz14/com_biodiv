@@ -287,4 +287,15 @@ JHtml::_('script', 'com_biodiv/pdfjs/pdf.js', array('version' => 'auto', 'relati
 JHtml::_('script', 'com_biodiv/pdfjs/pdf.worker.js', array('version' => 'auto', 'relative' => true), array());
 
 
+
+// JHTML::script("com_biodiv/commonbiodiv.js", true, true);
+// JHTML::script("com_biodiv/commondashboard.js", true, true);
+// JHTML::script("com_biodiv/resourceupload.js", true, true);
+// JHTML::script("com_biodiv/resourcelist.js", true, true);
+// JHTML::script("com_biodiv/resourceset.js", true, true);
+// JHTML::script("jquery-upload-file/jquery.uploadfile.min.js", false, true);
+// JHTML::script("com_biodiv/pdfjs/pdf.js", true, true);
+// JHTML::script("com_biodiv/pdfjs/pdf.worker.js", true, true);
+
+
 ?>

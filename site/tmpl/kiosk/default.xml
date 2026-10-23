@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+    <layout title="COM_BIODIV_KIOSK_VIEW_DEFAULT_TITLE">
+        <message>
+            <![CDATA[COM_BIODIV_KIOSK_VIEW_DEFAULT_DESC]]>
+        </message>
+    </layout>
+	<!-- The fields container defines parameters that populate menu item tabs -->
+	<fields name="params">
+		<fieldset name="basic" label="COM_BIODIV_KIOSK_VIEW_OPTIONS">
+			<!-- A custom text parameter example -->
+			<field 
+				name="project_id"
+                type="number"
+                label="COM_BIODIV_FIELD_KIOSK_VIEW_PROJECT_ID_LABEL"
+                description="COM_BIODIV_FIELD_KIOSK_VIEW_PROJECT_ID_DESC"
+                default="1"
+                required="true"
+                min="1"
+                step="1" 
+			/>
+		</fieldset>
+	</fields>
+</metadata>
