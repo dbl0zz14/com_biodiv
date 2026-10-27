@@ -120,7 +120,7 @@ use Joomla\CMS\Language\Text;
 		foreach ( $this->childProjects as $proj_id=>$proj_prettyname ) {
 			if ( $project_num%4 == 0 ) print '<div class="row">';
 			print "<div class='col-md-3 project-col' >";
-			$url = projectImageURL($proj_id);
+			$url = $this->projectModel->projectImageURL($proj_id);
 
 			print '<form action = "';
 			print BIODIV_ROOT;
