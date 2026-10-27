@@ -107,7 +107,7 @@ class HtmlView extends BaseHtmlView {
 				$message = Text::_("COM_BIODIV_CLASSIFY_NO_ACCESS");  //"Sorry you do not have access to classify on this project.";
 				$url = "".BIODIV_ROOT."&view=projecthome";
 				$url .= "&project_id=" . $this->project_id;
-				$app->redirect($url, $message);
+				$app->redirect($url);
 
 			}
 		}

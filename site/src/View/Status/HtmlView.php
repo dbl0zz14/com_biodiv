@@ -10,6 +10,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Language\Text;
 
 
 /**
@@ -59,8 +60,8 @@ class HtmlView extends BaseHtmlView {
 				$url = Route::_($defaultLoginPage.'&return='.base64_encode($currentUri));
 			}
 			
-			$message = Text::_("COM_BIODIV_STATUS_LOGIN_MSG");
-			$app->redirect($url, $message);
+			//$message = Text::_("COM_BIODIV_STATUS_LOGIN_MSG");
+			$app->redirect($url);
 
 		}
 		

@@ -59,8 +59,8 @@ class HtmlView extends BaseHtmlView {
 				$url = Route::_($defaultLoginPage.'&return='.base64_encode($currentUri));
 			}
 			
-			$message = Text::_("COM_BIODIV_MWSSTATUS_LOGIN_MSG");
-			$app->redirect($url, $message);
+			//$message = Text::_("COM_BIODIV_MWSSTATUS_LOGIN_MSG");
+			$app->redirect($url);
 
 		}
 		
