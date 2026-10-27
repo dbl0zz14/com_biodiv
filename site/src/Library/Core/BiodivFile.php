@@ -105,16 +105,6 @@ class BiodivFile {
 		return $resizeNeeded;
 	}
 	
-	function toResize () {
-		
-		$resizeNeeded = false;
-		$resolution = getimagesize($this->filename);
-		if ( $resolution[0] > 1024 && $resolution[1] > 768 ) {
-			$resizeNeeded = true;
-		}
-		return $resizeNeeded;
-	}
-	
 	function generateExif () {
 		if ( $this->isImage() ) {
 			$this->exif = exif_read_data($this->filename);
