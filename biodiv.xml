@@ -62,7 +62,7 @@
 		<filename>joomla.asset.json</filename>
 		<filename>index.html</filename>
 		<!-- folder>images</folder -->
-		<!-- folder>fonts</folder -->
+		<folder>fonts</folder>
 	</media>
   
 	<administration>
