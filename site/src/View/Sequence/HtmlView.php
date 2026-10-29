@@ -33,7 +33,7 @@ class HtmlView extends BaseHtmlView {
 	{
 		$app = Factory::getApplication();
 		$input = $app->getInput();
-		$this->sequenceThreshold = $input->getInt("threshold", 10);:w32api_deftypeZZ
+		$this->sequenceThreshold = $input->getInt("threshold", 10);
 
 		$this->trapperModel = $this->getModel();
 
